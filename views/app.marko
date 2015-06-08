@@ -1,0 +1,207 @@
+<!doctype html>
+<!--
+ PureCSS: http://purecss.io/
+ Font Awesome: http://fortawesome.github.io/Font-Awesome/
+-->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+        <title>Customers</title>
+        <link href="bootstrap.min.css" rel="stylesheet">
+        <link href="bootstrap-theme.min.css" rel="stylesheet">
+
+        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+          <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+        <link rel="stylesheet" href="page.css">
+    </head>
+    <body role="document">
+      <nav class="navbar navbar-default navbar-fixed-top" id="app-navbar">
+        <div class="container">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Invoices</a>
+          </div>
+          <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav" data-bind="foreach: mainViews">
+              <li data-bind="if: \$data.location == 'main', css: { active : \$data.name == \$root.currentView() }">
+                <a href="#" data-bind="click: \$root.selectView">
+                    <span class="glyphicon" data-bind="css: \$data.icon" aria-hidden="true"></span>
+                    <span data-bind="text: \$data.title"></span>
+                </a>
+              </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                    <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                    $data.user.username
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" role="menu" data-bind="foreach: mainViews">
+                  <li data-bind="if: \$data.location == 'userMenu'">
+                    <a href='#' data-bind="click: \$root.selectView">
+                        <span class="glyphicon" data-bind="css: \$data.icon" aria-hidden="true"></span>
+                        <span data-bind="text: \$data.title"></span>
+                    </a>
+                  </li>
+                  <li data-bind="if: \$data.location == 'userMenuNoRoute'">
+                    <a data-bind="attr: {href: \$data.name}">
+                        <span class="glyphicon" data-bind="css: \$data.icon" aria-hidden="true"></span>
+                        <span data-bind="text: \$data.title"></span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>            
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    <div id="layout">
+
+        <div id="main">
+            <include template="./notification.marko"/>
+
+            <div id="app-customer" class="container" data-bind="visible: currentView() == 'customers'">
+                <div class="content">
+                    <form>
+                        <p>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Name</th>
+                                        <th>Address 1</th>
+                                        <th>Address 2</th>
+                                        <th>Phone</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody data-bind="foreach: customerList">
+                                    <tr>
+                                        <td data-bind="text: cid, visible: isValid"></td>
+                                        <td><input type="text" class="form-control" data-bind="value: name, css: {highlighterror: nameError}"></input></td>
+                                        <td><input type="text" class="form-control" data-bind="value: addr1"></input></td>
+                                        <td><input type="text" class="form-control" data-bind="value: addr2"></input></td>
+                                        <td><input type="text" class="form-control" data-bind="value: phone"></input></td>
+                                        <td>
+                                            <a href="#" class="btn btn-danger" data-bind="click: \$parent.deleteCustomer">
+                                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </p>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-success" data-bind="click: newCustomer">
+                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                New customer
+                            </button>
+                            <button href="#" type="button" class="btn btn-default" data-bind="click: doCustomersReport">
+                                <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
+                                Generate report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="app-invoice" class="container" data-bind="visible: currentView() == 'invoices'">
+                <div class="page-header">
+                    <h1>Invoices</h1>
+                </div>
+
+                <div class="content">
+                    <form>
+                        <p>
+                        </p>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-success">
+                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                New invoice
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="app-settings" class="container" data-bind="visible: currentView() == 'settings'">
+                <div class="page-header">
+                    <h1>Settings</h1>
+                </div>
+
+                <div class="content">
+                    <form>
+                        <p>
+                        </p>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-success">
+                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                OK
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="app-debug" class="container" data-bind="visible: currentView() == 'debug'">
+                <div class="page-header">
+                    <h1>Debug and test</h1>
+                </div>
+
+                <div class="content">
+                    <form>
+                        <p>
+                        </p>
+
+                        <div class="btn-group" role="group" aria-label="...">
+                            <button type="button" class="btn btn-default" data-bind="click: spinnerVisible.bind(\$data,true), css: { active: spinnerVisible==true}">
+                                Show spinner
+                            </button>
+                            <button type="button" class="btn btn-default" data-bind="click: spinnerVisible.bind(\$data,false), css: { active: spinnerVisible==false}">
+                                Hide spinner
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    </body>
+    <script src="jquery.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <script src="tooltip.js"></script>
+    <script src="knockout-latest.js"></script>
+    <script src="knockout-bootstrap.min.js"></script>
+    <script src="director.min.js"></script>
+
+    <!-- Input to javascripts below -->
+    <script>
+        var cfg = {
+            showInitialTicker: false
+        };
+        var serverMsg = {
+            error: "$data.msg.error",
+            success: "$data.msg.success",
+            notice: "$data.msg.notice"
+        };
+    </script> 
+    <script src="notification.js"></script>
+    <script src="page.js"></script>
+</html>

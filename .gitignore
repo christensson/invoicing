@@ -1,3 +1,7 @@
+# Application generated data
+*.pdf
+views/*.marko.js
+
 # Logs
 logs
 *.log
