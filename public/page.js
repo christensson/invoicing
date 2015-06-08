@@ -191,7 +191,7 @@ var NavViewModel = function() {
          location: 'userMenu'},
         {name: '/page/debug',
          title: 'Debug',
-         icon: 'glyphicon glyphicon-wrench',
+         icon: 'glyphicon glyphicon-eye-open',
          location: 'userMenu'},
         {name: '/logout',
          title: 'Log out',
