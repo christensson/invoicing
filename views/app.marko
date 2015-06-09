@@ -70,73 +70,174 @@
         </div>
       </nav>
     <div id="layout">
-
         <div id="main">
             <include template="./notification.marko"/>
 
             <div id="app-customer" class="container" data-bind="visible: currentView() == 'customers'">
-                <div class="content">
-                    <form>
-                        <p>
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Id</th>
-                                        <th>Name</th>
-                                        <th>Address 1</th>
-                                        <th>Address 2</th>
-                                        <th>Phone</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody data-bind="foreach: customerList">
-                                    <tr>
-                                        <td data-bind="text: cid, visible: isValid"></td>
-                                        <td><input type="text" class="form-control" data-bind="value: name, css: {highlighterror: nameError}"></input></td>
-                                        <td><input type="text" class="form-control" data-bind="value: addr1"></input></td>
-                                        <td><input type="text" class="form-control" data-bind="value: addr2"></input></td>
-                                        <td><input type="text" class="form-control" data-bind="value: phone"></input></td>
-                                        <td>
-                                            <a href="#" class="btn btn-danger" data-bind="click: \$parent.deleteCustomer">
-                                                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </p>
+                <form>
+                    <p>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Name</th>
+                                    <th>Address 1</th>
+                                    <th>Address 2</th>
+                                    <th>Phone</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: customerList">
+                                <tr>
+                                    <td><p class="form-control-static" data-bind="text: cid, visible: isValid"></p></td>
+                                    <td><input type="text" class="form-control" data-bind="value: name, css: hasErrorCss"></input></td>
+                                    <td><input type="text" class="form-control" data-bind="value: addr1"></input></td>
+                                    <td><input type="text" class="form-control" data-bind="value: addr2"></input></td>
+                                    <td><input type="text" class="form-control" data-bind="value: phone"></input></td>
+                                    <td>
+                                        <a href="#" class="btn btn-danger" data-bind="click: \$parent.deleteCustomer">
+                                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </p>
 
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-success" data-bind="click: newCustomer">
-                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                                New customer
-                            </button>
-                            <button href="#" type="button" class="btn btn-default" data-bind="click: doCustomersReport">
-                                <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
-                                Generate report
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-success" data-bind="click: newCustomer">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                            New customer
+                        </button>
+                        <button href="#" type="button" class="btn btn-default" data-bind="click: doCustomersReport">
+                            <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
+                            Generate report
+                        </button>
+                    </div>
+                </form>
             </div>
 
             <div id="app-invoice" class="container" data-bind="visible: currentView() == 'invoices'">
-                <div class="page-header">
-                    <h1>Invoices</h1>
+                <div class="row">
+                    <div class="col-md-8 panel panel-primary">
+                        <div class="panel-heading">Header</div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <label for="customerId" class="control-label">Customer id</label>
+                                        <input type="number" class="form-control" id="customerId">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <label for="yourReference" class="control-label">Your reference</label>
+                                        <input type="text" class="form-control" id="yourReference">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <label for="date" class="control-label">Date</label>
+                                        <input type="date" class="form-control" id="date">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <label for="ourReference" class="control-label">Our reference</label>
+                                        <input type="text" class="form-control" id="ourReference">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <label for="daysUntilPayment" class="control-label">Days until payment</label>
+                                        <input type="number" class="form-control" id="daysUntilPayment">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <label for="projectId" class="control-label">Project id</label>
+                                        <input type="text" class="form-control" id="projectId">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 panel panel-info">
+                        <div class="panel-heading">Customer details</div>
+                        <div class="panel-body">
+                            <span data-bind="text: customerName"></span><br/>
+                            <span data-bind="text: customerAddr1"></span><br/>
+                            <span data-bind="text: customerAddr2"></span><br/>
+                            <span data-bind="text: customerAddr3"></span><br/>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="content">
-                    <form>
-                        <p>
-                        </p>
+                <p>
+                </p>
 
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-success">
-                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                                New invoice
-                            </button>
-                        </div>
-                    </form>
+                <div class="row">
+                    <div class="col-md-12 panel panel-primary">
+                        <div class="panel-heading">Details (<span data-bind="text: numInvoiceItems"></span>)</div>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Description</th>
+                                    <th>Price</th>
+                                    <th>Count</th>
+                                    <th>VAT</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: invoiceItems">
+                                <tr>
+                                    <td>
+                                        <a href="#" class="btn btn-danger" data-bind="click: \$parent.deleteItem">
+                                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                        </a>
+                                    </td>
+                                    <td><input type="text" class="form-control" data-bind="textInput: description"></input></td>
+                                    <td><input type="number" class="form-control" data-bind="textInput: price"></input></td>
+                                    <td><input type="number" class="form-control" data-bind="textInput: count"></input></td>
+                                    <td><input type="number" class="form-control" data-bind="textInput: vat"></input></td>
+                                    <td><p class="form-control-static" data-bind="text: total"></p></td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <td>
+                                    <a href="#" class="btn btn-success" data-bind="click: newItem">
+                                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                    </a>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <p class="form-control-static">
+                                        Total excluding VAT:<br/>
+                                        <strong>Total including VAT:</strong>
+                                    </p>
+                                </td>
+                                <td>
+                                    <p class="form-control-static">
+                                        <span data-bind="text: totalExclVat"></span><br/>
+                                        <strong><span data-bind="text: totalInclVat"></span></strong>
+                                    </p>
+                                </td>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-success">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                        New invoice
+                    </button>
                 </div>
             </div>
 
@@ -145,7 +246,7 @@
                     <h1>Settings</h1>
                 </div>
 
-                <div class="content">
+                <div>
                     <form>
                         <p>
                         </p>
@@ -165,7 +266,7 @@
                     <h1>Debug and test</h1>
                 </div>
 
-                <div class="content">
+                <div>
                     <form>
                         <p>
                         </p>

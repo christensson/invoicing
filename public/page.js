@@ -1,18 +1,21 @@
 var CustomerViewModel = function(data) {
-    this.isSelected = ko.observable(false);
-    this._id = ko.observable(data._id);
-    this.cid = ko.observable(data.cid);
-    this.uid = ko.observable(data.uid);
-    this.name = ko.observable(data.name);
-    this.addr1 = ko.observable(data.addr1);
-    this.addr2 = ko.observable(data.addr2);
-    this.phone = ko.observable(data.phone);
-    this.isValid = ko.observable(data.isValid);
-    this.nameError = ko.observable(false);
-
     var self = this;
 
-    this.updateServer = function() {
+    self._id = ko.observable(data._id);
+    self.cid = ko.observable(data.cid);
+    self.uid = ko.observable(data.uid);
+    self.name = ko.observable(data.name);
+    self.addr1 = ko.observable(data.addr1);
+    self.addr2 = ko.observable(data.addr2);
+    self.phone = ko.observable(data.phone);
+    self.isValid = ko.observable(data.isValid);
+    self.nameError = ko.observable(false);
+    self.hasErrorCss = ko.pureComputed(function() {
+        //return this.nameError() ? "has-error" : "";
+        return this.nameError() ? "highlighterror" : "";
+    }, self);
+
+    self.updateServer = function() {
         if ((self._id() == undefined) &&
             !self.isValid())
         {
@@ -57,11 +60,11 @@ var CustomerViewModel = function(data) {
         });
     };
 
-    this.name.subscribe(this.updateServer);
-    this.addr1.subscribe(this.updateServer);
-    this.addr2.subscribe(this.updateServer);
-    this.phone.subscribe(this.updateServer);
-    this.isValid.subscribe(this.updateServer);
+    self.name.subscribe(this.updateServer);
+    self.addr1.subscribe(this.updateServer);
+    self.addr2.subscribe(this.updateServer);
+    self.phone.subscribe(this.updateServer);
+    self.isValid.subscribe(this.updateServer);
 };
  
 var CustomerListViewModel = function(currentView) {
@@ -128,16 +131,90 @@ var CustomerListViewModel = function(currentView) {
     }
 };
 
+
+var InvoiceItemViewModel = function(data) {
+    var self = this;
+
+    self.description = ko.observable(data.description);
+    self.price = ko.observable(data.price);
+    self.count = ko.observable(data.count);
+    self.vat = ko.observable(data.vat);
+    self.total = ko.pureComputed(function() {
+        var total = parseFloat(this.count()) * parseFloat(this.price());
+        return total;
+    }, self);
+    self.isValid = ko.observable(data.isValid);
+
+    self.updateServer = function() {
+        if (!self.isValid())
+        {
+            console.log("updateServer: Nothing to do (invalid entry)")
+            return;
+        }
+        console.log("updateServer: Doing nothing yet...")
+    };
+};
+
 var InvoiceListViewModel = function(currentView) {
     var self = this;
 
     self.currentView = currentView;
+    self.customerName = ko.observable("Sven Svensson");
+    self.customerAddr1 = ko.observable("Storgatan 5");
+    self.customerAddr2 = ko.observable("414 62 Göteborg");
+    self.customerAddr3 = ko.observable("Sverige");
+
+    self.invoiceItems = ko.observableArray();
+    self.numInvoiceItems = ko.pureComputed(function() {
+        var sum = 0;
+        for (var i = 0; i < this.invoiceItems().length; i++) {
+            if (this.invoiceItems()[i].isValid()) {
+                sum += 1;
+            }
+        }
+        return sum;
+    }, this);
+
+    self.totalExclVat = ko.pureComputed(function() {
+        var sum = 0;
+        for (var i = 0; i < this.invoiceItems().length; i++) {
+            if (this.invoiceItems()[i].isValid()) {
+                sum += this.invoiceItems()[i].total();
+            }
+        }
+        return sum;
+    }, this);
+    self.totalInclVat = ko.pureComputed(function() {
+        var sum = 0;
+        for (var i = 0; i < this.invoiceItems().length; i++) {
+            if (this.invoiceItems()[i].isValid()) {
+                sum += this.invoiceItems()[i].total() * (1 + parseFloat(this.invoiceItems()[i].vat()));
+            }
+        }
+        return sum;
+    }, this);
 
     self.currentView.subscribe(function(newValue) {
         if (newValue == 'invoices') {
             console.log("page.js - InvoiceListViewModel - activated")
         }
     });
+
+    self.newItem = function() {
+        var data = {
+            description: "",
+            price: 0.0,
+            count: 1.0,
+            vat: 0.25,
+            isValid: true
+        }
+        self.invoiceItems.push(new InvoiceItemViewModel(data));
+    }
+    self.deleteItem = function(item) {
+        console.log("Delete: " + JSON.stringify(item));
+        item.isValid(false);
+        self.invoiceItems.destroy(item);
+    }
 };
 
 var SettingsViewModel = function(currentView) {
