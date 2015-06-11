@@ -55,7 +55,6 @@ app.use(express.static('node_modules/knockout/build/output'));
 app.use(express.static('node_modules/bootstrap/js'));
 app.use(express.static('node_modules/bootstrap/dist/js'));
 app.use(express.static('node_modules/bootstrap/dist/css'));
-app.use(express.static('node_modules/knockout-bootstrap/build'));
 app.use(express.static('node_modules/bootstrap'));
 app.use(express.static('node_modules/director/build'));
 app.use(express.static('node_modules/jquery/dist'));

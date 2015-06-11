@@ -12,7 +12,7 @@
 
         <title>Customers</title>
         <link href="bootstrap.min.css" rel="stylesheet">
-        <link href="bootstrap-theme.min.css" rel="stylesheet">
+        <!-- <link href="bootstrap-theme.min.css" rel="stylesheet"> -->
 
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -70,35 +70,35 @@
         </div>
       </nav>
     <div id="layout">
-        <div id="main">
+        <div id="main" class="container">
             <include template="./notification.marko"/>
 
-            <div id="app-customer" class="container" data-bind="visible: currentView() == 'customers'">
+            <div id="app-customer" data-bind="visible: currentView() == 'customers'">
                 <form>
                     <p>
                         <table class="table table-striped">
                             <thead>
                                 <tr>
+                                    <th></th>
                                     <th>Id</th>
                                     <th>Name</th>
                                     <th>Address 1</th>
                                     <th>Address 2</th>
                                     <th>Phone</th>
-                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody data-bind="foreach: customerList">
                                 <tr>
-                                    <td><p class="form-control-static" data-bind="text: cid, visible: isValid"></p></td>
-                                    <td><input type="text" class="form-control" data-bind="value: name, css: hasErrorCss"></input></td>
-                                    <td><input type="text" class="form-control" data-bind="value: addr1"></input></td>
-                                    <td><input type="text" class="form-control" data-bind="value: addr2"></input></td>
-                                    <td><input type="text" class="form-control" data-bind="value: phone"></input></td>
                                     <td>
                                         <a href="#" class="btn btn-danger" data-bind="click: \$parent.deleteCustomer">
                                             <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                                         </a>
                                     </td>
+                                    <td><p class="form-control-static" data-bind="text: cid, visible: isValid"></p></td>
+                                    <td><input type="text" class="form-control" data-bind="value: name, css: hasErrorCss"></input></td>
+                                    <td><input type="text" class="form-control" data-bind="value: addr1"></input></td>
+                                    <td><input type="text" class="form-control" data-bind="value: addr2"></input></td>
+                                    <td><input type="text" class="form-control" data-bind="value: phone"></input></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -117,22 +117,22 @@
                 </form>
             </div>
 
-            <div id="app-invoice" class="container" data-bind="visible: currentView() == 'invoices'">
+            <div id="app-invoice" data-bind="visible: currentView() == 'invoices'">
                 <div class="row">
-                    <div class="col-md-8 panel panel-primary">
-                        <div class="panel-heading">Header</div>
+                    <div class="col-md-8 panel panel-default">
+                        <div class="panel-heading"><h3 class="panel-title">Header</h3></div>
                         <div class="panel-body">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="customerId" class="control-label">Customer id</label>
-                                        <input type="number" class="form-control" id="customerId">
+                                        <input type="text" class="form-control" id="customerId" data-bind="typeahead: customerList"></input> 
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="yourReference" class="control-label">Your reference</label>
-                                        <input type="text" class="form-control" id="yourReference">
+                                        <input type="text" class="form-control" id="yourReference"></input>
                                     </div>
                                 </div>
                             </div>
@@ -140,13 +140,13 @@
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="date" class="control-label">Date</label>
-                                        <input type="date" class="form-control" id="date">
+                                        <input type="date" class="form-control" id="date"></input>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="ourReference" class="control-label">Our reference</label>
-                                        <input type="text" class="form-control" id="ourReference">
+                                        <input type="text" class="form-control" id="ourReference"></input>
                                     </div>
                                 </div>
                             </div>
@@ -154,25 +154,35 @@
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="daysUntilPayment" class="control-label">Days until payment</label>
-                                        <input type="number" class="form-control" id="daysUntilPayment">
+                                        <input type="number" class="form-control" id="daysUntilPayment"></input>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="projectId" class="control-label">Project id</label>
-                                        <input type="text" class="form-control" id="projectId">
+                                        <input type="text" class="form-control" id="projectId"></input>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4 panel panel-info">
-                        <div class="panel-heading">Customer details</div>
+                    <div class="col-md-4 panel panel-default">
+                        <div class="panel-heading"><h3 class="panel-title">Customer details</h3></div>
                         <div class="panel-body">
-                            <span data-bind="text: customerName"></span><br/>
-                            <span data-bind="text: customerAddr1"></span><br/>
-                            <span data-bind="text: customerAddr2"></span><br/>
-                            <span data-bind="text: customerAddr3"></span><br/>
+                            <form class="form-horizontal">
+                                <div>
+                                    <input type="text" class="form-control input-sm" data-bind="value: customerName"></input>
+                                </div>
+                                <div>
+                                    <input type="text" class="form-control input-sm" data-bind="value: customerAddr1"></input>
+                                </div>
+                                <div>
+                                    <input type="text" class="form-control input-sm" data-bind="value: customerAddr2"></input>
+                                </div>
+                                <div>
+                                    <input type="text" class="form-control input-sm" data-bind="value: customerAddr3"></input>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -181,9 +191,9 @@
                 </p>
 
                 <div class="row">
-                    <div class="col-md-12 panel panel-primary">
-                        <div class="panel-heading">Details (<span data-bind="text: numInvoiceItems"></span>)</div>
-                        <table class="table table-striped">
+                    <div class="col-md-12 panel panel-default">
+                        <div class="panel-heading"><h3 class="panel-title">Details (<span data-bind="text: numInvoiceItems"></span>)</h3></div>
+                        <table class="table table-striped table-condensed">
                             <thead>
                                 <tr>
                                     <th></th>
@@ -241,7 +251,7 @@
                 </div>
             </div>
 
-            <div id="app-settings" class="container" data-bind="visible: currentView() == 'settings'">
+            <div id="app-settings" data-bind="visible: currentView() == 'settings'">
                 <div class="page-header">
                     <h1>Settings</h1>
                 </div>
@@ -261,7 +271,7 @@
                 </div>
             </div>
 
-            <div id="app-debug" class="container" data-bind="visible: currentView() == 'debug'">
+            <div id="app-debug" data-bind="visible: currentView() == 'debug'">
                 <div class="page-header">
                     <h1>Debug and test</h1>
                 </div>
@@ -289,7 +299,8 @@
     <script src="bootstrap.min.js"></script>
     <script src="tooltip.js"></script>
     <script src="knockout-latest.js"></script>
-    <script src="knockout-bootstrap.min.js"></script>
+    <script src="typeahead.jquery.js"></script>
+    <script src="knockout-bootstrap.js"></script>
     <script src="director.min.js"></script>
 
     <!-- Input to javascripts below -->

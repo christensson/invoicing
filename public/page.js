@@ -163,6 +163,8 @@ var InvoiceListViewModel = function(currentView) {
     self.customerAddr1 = ko.observable("Storgatan 5");
     self.customerAddr2 = ko.observable("414 62 Göteborg");
     self.customerAddr3 = ko.observable("Sverige");
+    self.customerList = ko.observableArray();
+    self.customer = ko.observable();
 
     self.invoiceItems = ko.observableArray();
     self.numInvoiceItems = ko.pureComputed(function() {
@@ -197,8 +199,26 @@ var InvoiceListViewModel = function(currentView) {
     self.currentView.subscribe(function(newValue) {
         if (newValue == 'invoices') {
             console.log("page.js - InvoiceListViewModel - activated")
+            self.populate();
         }
     });
+
+
+    self.populate = function() {
+        Notify_showSpinner(true);
+        $.getJSON("/api/customers", function(allData) {
+            var mappedCustomers =
+                $.map(allData, function(item) {
+                    return "" + item.cid + " - " + item.name;
+                });
+            self.customerList(mappedCustomers);
+            Notify_showSpinner(false);
+        }).fail(function() {
+            console.log("page.js - InvoiceListViewModel - populate - failed");
+            Notify_showSpinner(false);
+            Notify_showMsg('error', 'Failed to get customers!');
+        });
+    }
 
     self.newItem = function() {
         var data = {
