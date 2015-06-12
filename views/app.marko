@@ -125,14 +125,15 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="input-group">
-                                        <label for="customerId" class="control-label">Customer id</label>
-                                        <input type="text" class="form-control" id="customerId" data-bind="typeahead: customerList"></input> 
+                                        <label for="customerId" class="control-label">Customer</label>
+                                        <br/> <!-- br needed to put input below on new line for some strange reason... -->
+                                        <input type="text" class="form-control" id="customerId" data-bind="typeahead: customerList, disable: isLocked"></input>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="yourReference" class="control-label">Your reference</label>
-                                        <input type="text" class="form-control" id="yourReference"></input>
+                                        <input type="text" class="form-control" id="yourReference" data-bind="disable: isLocked"></input>
                                     </div>
                                 </div>
                             </div>
@@ -140,13 +141,13 @@
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="date" class="control-label">Date</label>
-                                        <input type="date" class="form-control" id="date"></input>
+                                        <input type="date" class="form-control" id="date" data-bind="disable: isLocked"></input>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="ourReference" class="control-label">Our reference</label>
-                                        <input type="text" class="form-control" id="ourReference"></input>
+                                        <input type="text" class="form-control" id="ourReference" data-bind="disable: isLocked"></input>
                                     </div>
                                 </div>
                             </div>
@@ -154,13 +155,13 @@
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="daysUntilPayment" class="control-label">Days until payment</label>
-                                        <input type="number" class="form-control" id="daysUntilPayment"></input>
+                                        <input type="number" class="form-control" id="daysUntilPayment" data-bind="disable: isLocked"></input>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="projectId" class="control-label">Project id</label>
-                                        <input type="text" class="form-control" id="projectId"></input>
+                                        <input type="text" class="form-control" id="projectId" data-bind="disable: isLocked"></input>
                                     </div>
                                 </div>
                             </div>
@@ -171,16 +172,19 @@
                         <div class="panel-body">
                             <form class="form-horizontal">
                                 <div>
-                                    <input type="text" class="form-control input-sm" data-bind="value: customerName"></input>
+                                    <p class="form-control-static">
+                                        Customer Id:
+                                        <span data-bind="text: customer().cid"></span>
+                                    </p>
                                 </div>
                                 <div>
-                                    <input type="text" class="form-control input-sm" data-bind="value: customerAddr1"></input>
+                                    <input type="text" class="form-control input-sm" data-bind="value: customer().name, disable: isLocked"></input>
                                 </div>
                                 <div>
-                                    <input type="text" class="form-control input-sm" data-bind="value: customerAddr2"></input>
+                                    <input type="text" class="form-control input-sm" data-bind="value: customer().addr1, disable: isLocked"></input>
                                 </div>
                                 <div>
-                                    <input type="text" class="form-control input-sm" data-bind="value: customerAddr3"></input>
+                                    <input type="text" class="form-control input-sm" data-bind="value: customer().addr2, disable: isLocked"></input>
                                 </div>
                             </form>
                         </div>
@@ -207,22 +211,22 @@
                             <tbody data-bind="foreach: invoiceItems">
                                 <tr>
                                     <td>
-                                        <a href="#" class="btn btn-danger" data-bind="click: \$parent.deleteItem">
+                                        <button class="btn btn-danger" data-bind="click: \$parent.deleteItem, disable: \$parent.isLocked">
                                             <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-                                        </a>
+                                        </button>
                                     </td>
-                                    <td><input type="text" class="form-control" data-bind="textInput: description"></input></td>
-                                    <td><input type="number" class="form-control" data-bind="textInput: price"></input></td>
-                                    <td><input type="number" class="form-control" data-bind="textInput: count"></input></td>
-                                    <td><input type="number" class="form-control" data-bind="textInput: vat"></input></td>
+                                    <td><input type="text" class="form-control" data-bind="textInput: description, disable: \$parent.isLocked"></input></td>
+                                    <td><input type="number" class="form-control" data-bind="textInput: price, disable: \$parent.isLocked"></input></td>
+                                    <td><input type="number" class="form-control" data-bind="textInput: count, disable: \$parent.isLocked"></input></td>
+                                    <td><input type="number" class="form-control" data-bind="textInput: vat, disable: \$parent.isLocked"></input></td>
                                     <td><p class="form-control-static" data-bind="text: total"></p></td>
                                 </tr>
                             </tbody>
                             <tfoot>
                                 <td>
-                                    <a href="#" class="btn btn-success" data-bind="click: newItem">
+                                    <button class="btn btn-success" data-bind="click: newItem, disable: isLocked">
                                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                                    </a>
+                                    </button>
                                 </td>
                                 <td></td>
                                 <td></td>
@@ -245,8 +249,18 @@
                 </div>
                 <div class="btn-group">
                     <button type="button" class="btn btn-success">
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                        New invoice
+                        <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+                        Save
+                    </button>
+                    <button type="button" class="btn btn-info" data-bind="click: doToggleLocked">
+                        <span data-bind="if: isLocked">
+                            <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+                            Unlock
+                        </span>
+                        <span data-bind="ifnot: isLocked">
+                            <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+                            Lock
+                        </span>
                     </button>
                 </div>
             </div>

@@ -155,16 +155,30 @@ var InvoiceItemViewModel = function(data) {
     };
 };
 
+var InvoiceCustomerModel = function(data) {
+    var self = this;
+    self.data = data;
+    self.toString = function() {
+        return "" + self.data.cid + " - " + self.data.name;
+    }
+    // Override toJSON method since typeahead reads the JSON for the suggestion list
+    self.toJSON = function() {
+        return self.toString();
+    }
+}
+/*InvoiceCustomerModel.prototype.toString = function() {
+
+}*/
+
 var InvoiceListViewModel = function(currentView) {
     var self = this;
 
     self.currentView = currentView;
-    self.customerName = ko.observable("Sven Svensson");
-    self.customerAddr1 = ko.observable("Storgatan 5");
-    self.customerAddr2 = ko.observable("414 62 Göteborg");
-    self.customerAddr3 = ko.observable("Sverige");
+    self.isLocked = ko.observable(false);
     self.customerList = ko.observableArray();
-    self.customer = ko.observable();
+    self.customer = ko.observable({
+        cid: "", name: "", addr1: "", addr2: "", addr3: ""
+    });
 
     self.invoiceItems = ko.observableArray();
     self.numInvoiceItems = ko.pureComputed(function() {
@@ -204,12 +218,18 @@ var InvoiceListViewModel = function(currentView) {
     });
 
 
+    $('#customerId').bind('typeahead:selected', function(obj, datum, name) {
+        // Extract customer id from datum
+        console.log("page.js - InvoiceListViewModel - Customer selected - " + JSON.stringify(datum.data));
+        self.customer(datum.data);
+    });
+
     self.populate = function() {
         Notify_showSpinner(true);
         $.getJSON("/api/customers", function(allData) {
             var mappedCustomers =
                 $.map(allData, function(item) {
-                    return "" + item.cid + " - " + item.name;
+                    return new InvoiceCustomerModel(item);//"" + item.cid + " - " + item.name;
                 });
             self.customerList(mappedCustomers);
             Notify_showSpinner(false);
@@ -231,9 +251,13 @@ var InvoiceListViewModel = function(currentView) {
         self.invoiceItems.push(new InvoiceItemViewModel(data));
     }
     self.deleteItem = function(item) {
-        console.log("Delete: " + JSON.stringify(item));
+        console.log("page.js - InvoiceListViewModel - delete: " + JSON.stringify(item));
         item.isValid(false);
         self.invoiceItems.destroy(item);
+    }
+    self.doToggleLocked = function(item) {
+        self.isLocked(!self.isLocked());
+        console.log("page.js - InvoiceListViewModel - isLocked=" + self.isLocked() + " (new state)");
     }
 };
 
@@ -338,6 +362,4 @@ $(function() {
     ko.applyBindings(
         debugViewModel,
         document.getElementById("app-debug"));
-
-    console.log("page.js - init - end");
 });
