@@ -209,6 +209,10 @@ module.exports.init = function() {
                 {
                     _id: "cid",
                     seq: 103
+                },
+                {
+                    _id: "iid",
+                    seq: 1003
                 }
             ];
             return insertDataPromise("counters", counterList);
@@ -295,13 +299,97 @@ module.exports.init = function() {
             ];
             return insertDataPromise("cust", customerList);
         })
+        // Invoices
+        .then(function () {
+            return dropCollectionPromise("invoice");
+        })
+        .fail(function() {
+	    console.log("Drop collection invoice failed!");
+	})
+        .then(function() {
+            var invoiceList = [
+                {
+                    iid: 1000,
+                    uid: machUserId,
+		    cid: 100,
+                    customer_name: "Pelle",
+                    customer_addr1: "Storgatan 1",
+                    customer_addr2: "414 62 Göteborg",
+                    date: "",
+		    sum: "",
+                    isValid: true
+                },
+                {
+		    iid: 1000,
+                    uid: testUserId,
+                    cid: 100,
+                    customer_name: "TestPelle",
+                    customer_addr1: "TestStorgatan 1",
+                    customer_addr2: "414 62 Göteborg",
+                    date: "",
+		    sum: "",
+                    isValid: true
+                },
+                {
+                    iid: 1001,
+                    uid: machUserId,
+                    cid: 101,
+                    customer_name: "Pära",
+                    isValid: false
+                },
+                {
+                    iid: 1001,
+                    uid: testUserId,
+                    cid: 101,
+                    customer_name: "TestPära",
+                    isValid: false
+                },
+                {
+                    iid: 1002,
+                    uid: machUserId,
+                    cid: 100,
+                    customer_name: "Pär",
+                    isValid: true
+                }
+            ];
+            return insertDataPromise("invoice", invoiceList);
+        })
         .done();
+}
 
+module.exports.getInvoices = function(uid) {
+    var ouid = new ObjectID(uid)
+    return getAllDocsPromise('invoice', {'isValid': true, 'uid': ouid});
 }
 
 module.exports.getCustomers = function(uid) {
     var ouid = new ObjectID(uid)
     return getAllDocsPromise('cust', {'isValid': true, 'uid': ouid});
+}
+
+module.exports.addInvoice = function(uid, invoice) {
+    var deferred = Q.defer();
+    getNextSequencePromise("iid").then(function(iid) {
+        console.log("addInvoice: Allocated new iid=" + cid);
+        //var customer = req.body;
+        invoice.iid = iid;
+        invoice.uid = new ObjectID(uid);
+        insertDataPromise('invoice', invoice).then(function() {
+            deferred.resolve(invoice);
+        }).fail(function(err) {
+            deferred.reject(err);
+        });
+    }).fail(function(err) {
+        console.error("addInvoice: Error: " + err.body);
+        deferred.reject(err);
+    });
+
+    return deferred.promise;
+}
+
+module.exports.updateInvoice = function(invoice) {
+    invoice.uid = new ObjectID(invoice.uid);
+    return updateDataPromise('invoice', invoice);
 }
 
 module.exports.addCustomer = function(uid, customer) {

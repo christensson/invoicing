@@ -117,10 +117,51 @@
                 </form>
             </div>
 
-            <div id="app-invoice" data-bind="visible: currentView() == 'invoices'">
+            <div id="app-invoices" data-bind="visible: currentView() == 'invoices'">
+                <form>
+                    <p>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Id</th>
+                                    <th>Customer Id</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Sum</th>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: invoiceList">
+                                <tr>
+                                    <td>
+                                        <a href="#" class="btn btn-danger" data-bind="click: \$parent.deleteInvoice">
+                                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                        </a>
+                                    </td>
+                                    <td><p class="form-control-static" data-bind="text: cid, visible: isValid"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: iid"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: cid"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: customer_name"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: date"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: sum"></p></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </p>
+
+                    <div class="btn-group">
+                        <a href="#/page/invoice_new" type="button" class="btn btn-success">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                            New invoice
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="app-invoice_new" data-bind="visible: currentView() == 'invoice_new'">
                 <div class="row">
                     <div class="col-md-8 panel panel-default">
-                        <div class="panel-heading"><h3 class="panel-title">Header</h3></div>
+                        <div class="panel-heading"><h3 class="panel-title">Invoice #<span data-bind="text: invoiceId"></span></h3></div>
                         <div class="panel-body">
                             <div class="row">
                                 <div class="col-md-6">

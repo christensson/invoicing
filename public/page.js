@@ -131,6 +131,57 @@ var CustomerListViewModel = function(currentView) {
     }
 };
 
+var InvoiceViewModel = function(data) {
+    var self = this;
+
+    self._id = ko.observable(data._id);
+    self.iid = ko.observable(data.iid);
+    self.uid = ko.observable(data.uid);
+    self.cid = ko.observable(data.cid);
+    self.customer_name = ko.observable(data.customer_name);
+    self.customer_addr1 = ko.observable(data.customer_addr1);
+    self.customer_addr2 = ko.observable(data.customer_addr2);
+    self.date = ko.observable(data.date);
+    self.sum = ko.observable(data.sum);
+    self.isValid = ko.observable(data.isValid);
+};
+
+var InvoiceListViewModel = function(currentView) {
+    var self = this;
+
+    self.currentView = currentView;
+
+    self.currentView.subscribe(function(newValue) {
+        if (newValue == 'invoices') {
+            console.log("page.js - InvoiceListViewModel - activated")
+            self.populate();
+        }
+    });
+
+    // Invoice part
+    self.invoiceList = ko.observableArray();
+    
+    self.populate = function() {
+        Notify_showSpinner(true);
+        $.getJSON("/api/invoices", function(allData) {
+            var mappedInvoices =
+            $.map(allData, function(item) {
+                return new InvoiceViewModel(item)});
+            self.invoiceList(mappedInvoices);
+            Notify_showSpinner(false);
+        }).fail(function() {
+            console.log("page.js - InvoiceListViewModel - populate - failed");
+            Notify_showSpinner(false);
+            Notify_showMsg('error', 'Failed to get invoices!');
+        });
+    }
+
+    self.deleteInvoice = function(c) {
+        console.log("Delete: " + JSON.stringify(c));
+        c.isValid(false);
+        self.invoiceList.destroy(c);
+    }
+};
 
 var InvoiceItemViewModel = function(data) {
     var self = this;
@@ -170,11 +221,12 @@ var InvoiceCustomerModel = function(data) {
 
 }*/
 
-var InvoiceListViewModel = function(currentView) {
+var InvoiceNewViewModel = function(currentView) {
     var self = this;
 
     self.currentView = currentView;
     self.isLocked = ko.observable(false);
+    self.invoiceId = ko.observable();
     self.customerList = ko.observableArray();
     self.customer = ko.observable({
         cid: "", name: "", addr1: "", addr2: "", addr3: ""
@@ -211,8 +263,8 @@ var InvoiceListViewModel = function(currentView) {
     }, this);
 
     self.currentView.subscribe(function(newValue) {
-        if (newValue == 'invoices') {
-            console.log("page.js - InvoiceListViewModel - activated")
+        if (newValue == 'invoice_new') {
+            console.log("page.js - InvoiceNewViewModel - activated")
             self.populate();
         }
     });
@@ -220,7 +272,7 @@ var InvoiceListViewModel = function(currentView) {
 
     $('#customerId').bind('typeahead:selected', function(obj, datum, name) {
         // Extract customer id from datum
-        console.log("page.js - InvoiceListViewModel - Customer selected - " + JSON.stringify(datum.data));
+        console.log("page.js - InvoiceNewViewModel - Customer selected - " + JSON.stringify(datum.data));
         self.customer(datum.data);
     });
 
@@ -234,7 +286,7 @@ var InvoiceListViewModel = function(currentView) {
             self.customerList(mappedCustomers);
             Notify_showSpinner(false);
         }).fail(function() {
-            console.log("page.js - InvoiceListViewModel - populate - failed");
+            console.log("page.js - InvoiceNewViewModel - populate - failed");
             Notify_showSpinner(false);
             Notify_showMsg('error', 'Failed to get customers!');
         });
@@ -251,13 +303,13 @@ var InvoiceListViewModel = function(currentView) {
         self.invoiceItems.push(new InvoiceItemViewModel(data));
     }
     self.deleteItem = function(item) {
-        console.log("page.js - InvoiceListViewModel - delete: " + JSON.stringify(item));
+        console.log("page.js - InvoiceNewViewModel - delete: " + JSON.stringify(item));
         item.isValid(false);
         self.invoiceItems.destroy(item);
     }
     self.doToggleLocked = function(item) {
         self.isLocked(!self.isLocked());
-        console.log("page.js - InvoiceListViewModel - isLocked=" + self.isLocked() + " (new state)");
+        console.log("page.js - InvoiceNewViewModel - isLocked=" + self.isLocked() + " (new state)");
     }
 };
 
@@ -302,9 +354,13 @@ var NavViewModel = function() {
          title: 'Customers',
          icon: 'glyphicon glyphicon-user',
          location: 'main'},
+        {name: '/page/invoice_new',
+         title: 'New Invoice',
+         icon: 'glyphicon glyphicon-file',
+         location: 'main'},
         {name: '/page/invoices',
          title: 'Invoices',
-         icon: 'glyphicon glyphicon-file',
+         icon: 'glyphicon glyphicon-list',
          location: 'main'},
         {name: '/page/settings',
          title: 'Settings',
@@ -339,7 +395,8 @@ $(function() {
     console.log("page.js - init - begin");
     var navViewModel = new NavViewModel();
     var customerViewModel = new CustomerListViewModel(navViewModel.currentView);
-    var invoiceViewModel = new InvoiceListViewModel(navViewModel.currentView);
+    var invoiceListViewModel = new InvoiceListViewModel(navViewModel.currentView);
+    var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView);
     var settingsViewModel = new SettingsViewModel(navViewModel.currentView);
     var debugViewModel = new DebugViewModel(navViewModel.currentView);
  
@@ -352,8 +409,12 @@ $(function() {
         document.getElementById("app-customer"));
 
     ko.applyBindings(
-        invoiceViewModel,
-        document.getElementById("app-invoice"));
+        invoiceListViewModel,
+        document.getElementById("app-invoices"));
+
+    ko.applyBindings(
+        invoiceNewViewModel,
+        document.getElementById("app-invoice_new"));
 
     ko.applyBindings(
         settingsViewModel,

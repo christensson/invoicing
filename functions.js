@@ -39,9 +39,9 @@ exports.localReg = function (username, password) {
 };
 
 //check if user exists
-    //if user exists check if passwords match (use bcrypt.compareSync(password, hash); // true where 'hash' is password in DB)
-      //if password matches take into website
-  //if user doesn't exist or password doesn't match tell them it failed
+//if user exists check if passwords match (use bcrypt.compareSync(password, hash); // true where 'hash' is password in DB)
+//if password matches take into website
+//if user doesn't exist or password doesn't match tell them it failed
 exports.localAuth = function (username, password) {
   var deferred = Q.defer();
 

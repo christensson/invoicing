@@ -182,6 +182,42 @@ app.get("/api/customers", ensureAuthenticated, function(req, res) {
         .fail(myFailureHandler.bind(null, res));
 });
 
+app.get("/api/invoices", ensureAuthenticated, function(req, res) {
+    var uid = req.user._id;
+    console.log("Get invoices: user=" + req.user.username + ", uid=" + uid);
+    mydb.getInvoices(uid)
+        .then(function(docs) {
+            res.status(200).json(docs);
+            res.end();
+        })
+        .fail(myFailureHandler.bind(null, res));
+});
+
+app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
+    var okHandler = function(logText, res, customer) {
+        console.log(logText + ": OK, obj=" + JSON.stringify(customer));
+        resData = {
+            'invoice': invoice
+        };
+        res.status(200).json(resData);
+        res.end();
+    };
+    var uid = req.user._id;
+    if (req.params.id === "undefined") {
+        console.log("New invoice: user=" + req.user.username +
+            ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 4));
+        mydb.addInvoice(uid, req.body)
+            .then(okHandler.bind(null, 'addInvoice', res))
+            .fail(myFailureHandler.bind(null, res));
+    } else {
+        console.log("Update invoice: user=" + req.user.username +
+            ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 4));
+        mydb.updateInvoice(req.body)
+            .then(okHandler.bind(null, 'updateInvoice', res))
+            .fail(myFailureHandler.bind(null, res));
+    }
+});
+
 app.put("/api/customer/:id", ensureAuthenticated, function(req, res) {
     var okHandler = function(logText, res, customer) {
         console.log(logText + ": OK, obj=" + JSON.stringify(customer));
