@@ -202,6 +202,9 @@ function getNextSequencePromise(name) {
 }
 
 module.exports.init = function() {
+    var machUserId = undefined;
+    var testUserId = undefined;
+
     // Counters
     dropCollectionPromise("counters")
         .then(function() {
@@ -217,12 +220,10 @@ module.exports.init = function() {
             ];
             return insertDataPromise("counters", counterList);
         })
-        .done();
-
-    // Users
-    var machUserId = undefined;
-    var testUserId = undefined;
-    dropCollectionPromise("users")
+        // Users
+	.then(function() {
+	    return dropCollectionPromise("users");
+	})
         .then(function() {
             var userList = [
                 {
@@ -255,9 +256,9 @@ module.exports.init = function() {
             return Q();
         })
         // Customers
-        .then(function () {
-            return dropCollectionPromise("cust");
-        })
+        .then(function() {
+	    return dropCollectionPromise("cust");
+	})
         .then(function() {
             var customerList = [
                 {
@@ -299,6 +300,13 @@ module.exports.init = function() {
             ];
             return insertDataPromise("cust", customerList);
         })
+        .then(function() {
+            return getOneDocPromise('cust', {cid: 100, uid: testUserId});
+        })
+        .then(function(c) {
+            console.log("getCustomer: Customer found: " + JSON.stringify(c));
+            return Q();
+        })
         // Invoices
         .then(function () {
             return dropCollectionPromise("invoice");
@@ -311,45 +319,64 @@ module.exports.init = function() {
                 {
                     iid: 1000,
                     uid: machUserId,
-		    cid: 100,
-                    customer_name: "Pelle",
-                    customer_addr1: "Storgatan 1",
-                    customer_addr2: "414 62 Göteborg",
-                    date: "",
-		    sum: "",
-                    isValid: true
+		    isLocked: false,
+                    isValid: true,
+		    customer: {
+			cid: 100,
+			name: "Pelle",
+			addr1: "Storgatan 1",
+			addr2: "414 62 Göteborg"
+		    },
+		    invoiceItems: [],
+                    totalExclVat: 0,
+		    totalInclVat: 0
                 },
                 {
-		    iid: 1000,
+                    iid: 1000,
                     uid: testUserId,
-                    cid: 100,
-                    customer_name: "TestPelle",
-                    customer_addr1: "TestStorgatan 1",
-                    customer_addr2: "414 62 Göteborg",
-                    date: "",
-		    sum: "",
-                    isValid: true
+		    isLocked: false,
+                    isValid: true,
+		    customer: {
+			cid: 100,
+			name: "TestPelle",
+			addr1: "TestStorgatan 1",
+			addr2: "414 62 Göteborg"
+		    },
+		    invoiceItems: [],
+                    totalExclVat: 0,
+		    totalInclVat: 0
                 },
                 {
                     iid: 1001,
-                    uid: machUserId,
-                    cid: 101,
-                    customer_name: "Pära",
-                    isValid: false
-                },
-                {
-                    iid: 1001,
                     uid: testUserId,
-                    cid: 101,
-                    customer_name: "TestPära",
-                    isValid: false
-                },
-                {
-                    iid: 1002,
-                    uid: machUserId,
-                    cid: 100,
-                    customer_name: "Pär",
-                    isValid: true
+		    isLocked: false,
+                    isValid: true,
+		    customer: {
+			cid: 101,
+			name: "TestPära",
+			addr1: "Päron",
+			addr2: "Äpple"
+		    },
+		    invoiceItems: [
+			{
+			    description: "First",
+			    price: 10.0,
+			    count: 1,
+			    vat: 0.25,
+			    total: 10.0,
+			    isValid: true
+			},
+			{
+			    description: "Second",
+			    price: 100.0,
+			    count: 3,
+			    vat: 0.25,
+			    total: 300.0,
+			    isValid: true
+			},
+		    ],
+                    totalExclVat: 310.0,
+		    totalInclVat: 387.5
                 }
             ];
             return insertDataPromise("invoice", invoiceList);
@@ -370,7 +397,7 @@ module.exports.getCustomers = function(uid) {
 module.exports.addInvoice = function(uid, invoice) {
     var deferred = Q.defer();
     getNextSequencePromise("iid").then(function(iid) {
-        console.log("addInvoice: Allocated new iid=" + cid);
+        console.log("addInvoice: Allocated new iid=" + iid);
         //var customer = req.body;
         invoice.iid = iid;
         invoice.uid = new ObjectID(uid);

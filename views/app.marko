@@ -10,7 +10,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
-        <title>Customers</title>
+        <title>Invoices</title>
         <link href="bootstrap.min.css" rel="stylesheet">
         <!-- <link href="bootstrap-theme.min.css" rel="stylesheet"> -->
 
@@ -123,12 +123,12 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th></th>
-                                    <th>Id</th>
+				    <th></th>
+				    <th>Id</th>
                                     <th>Customer Id</th>
                                     <th>Customer</th>
                                     <th>Date</th>
-                                    <th>Sum</th>
+                                    <th>Total Excl. VAT</th>
                                 </tr>
                             </thead>
                             <tbody data-bind="foreach: invoiceList">
@@ -138,12 +138,11 @@
                                             <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                                         </a>
                                     </td>
-                                    <td><p class="form-control-static" data-bind="text: cid, visible: isValid"></p></td>
                                     <td><p class="form-control-static" data-bind="text: iid"></p></td>
-                                    <td><p class="form-control-static" data-bind="text: cid"></p></td>
-                                    <td><p class="form-control-static" data-bind="text: customer_name"></p></td>
-                                    <td><p class="form-control-static" data-bind="text: date"></p></td>
-                                    <td><p class="form-control-static" data-bind="text: sum"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: customer().cid"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: customer().name"></p></td>
+                                    <td></td>
+                                    <td><p class="form-control-static" data-bind="text: totalExclVat"></p></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -227,9 +226,6 @@
                                 <div>
                                     <input type="text" class="form-control input-sm" data-bind="value: data.customer().addr2, disable: data.isLocked"></input>
                                 </div>
-                                <div>
-                                    <input type="text" class="form-control input-sm" data-bind="value: data.customer().addr3, disable: data.isLocked"></input>
-                                </div>
                             </form>
                         </div>
                     </div>
@@ -292,7 +288,7 @@
                     </div>
                 </div>
                 <div class="btn-group">
-                    <button type="button" class="btn btn-success">
+                    <button type="button" class="btn btn-success" data-bind="click: updateServer">
                         <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
                         Save
                     </button>

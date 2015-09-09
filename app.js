@@ -194,8 +194,8 @@ app.get("/api/invoices", ensureAuthenticated, function(req, res) {
 });
 
 app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
-    var okHandler = function(logText, res, customer) {
-        console.log(logText + ": OK, obj=" + JSON.stringify(customer));
+    var okHandler = function(logText, res, invoice) {
+        console.log(logText + ": OK, obj=" + JSON.stringify(invoice));
         resData = {
             'invoice': invoice
         };
