@@ -183,6 +183,18 @@ var InvoiceListViewModel = function(currentView) {
     }
 };
 
+var InvoiceCustomerModel = function(data) {
+    var self = this;
+    self.data = data;
+    self.toString = function() {
+        return "" + self.data.cid + " - " + self.data.name;
+    }
+    // Override toJSON method since typeahead reads the JSON for the suggestion list
+    self.toJSON = function() {
+        return self.toString();
+    }
+}
+
 var InvoiceItemViewModel = function(data) {
     var self = this;
 
@@ -206,33 +218,16 @@ var InvoiceItemViewModel = function(data) {
     };
 };
 
-var InvoiceCustomerModel = function(data) {
+var InvoiceDataViewModel = function(data) {
     var self = this;
-    self.data = data;
-    self.toString = function() {
-        return "" + self.data.cid + " - " + self.data.name;
-    }
-    // Override toJSON method since typeahead reads the JSON for the suggestion list
-    self.toJSON = function() {
-        return self.toString();
-    }
-}
-/*InvoiceCustomerModel.prototype.toString = function() {
-
-}*/
-
-var InvoiceNewViewModel = function(currentView) {
-    var self = this;
-
-    self.currentView = currentView;
-    self.isLocked = ko.observable(false);
-    self.invoiceId = ko.observable();
-    self.customerList = ko.observableArray();
+    self._id = ko.observable(data._id);
+    self.iid = ko.observable(data.iid);
+    self.uid = ko.observable(data.uid);
+    self.isLocked = ko.observable(data.isLocked);
     self.customer = ko.observable({
         cid: "", name: "", addr1: "", addr2: "", addr3: ""
     });
-
-    self.invoiceItems = ko.observableArray();
+    self.invoiceItems = ko.observableArray(data.invoceItems);
     self.numInvoiceItems = ko.pureComputed(function() {
         var sum = 0;
         for (var i = 0; i < this.invoiceItems().length; i++) {
@@ -262,6 +257,93 @@ var InvoiceNewViewModel = function(currentView) {
         return sum;
     }, this);
 
+    self.setCustomer = function(data) {
+	self.customer(data);
+    };
+
+    self.newInvoiceItem = function() {
+        var data = {
+            description: "",
+            price: 0.0,
+            count: 1.0,
+            vat: 0.25,
+            isValid: true
+        }
+        self.invoiceItems.push(new InvoiceItemViewModel(data));
+    };
+
+    self.deleteInvoiceItem = function(item) {
+        item.isValid(false);
+        self.invoiceItems.destroy(item);
+    };
+
+    self.doToggleLocked = function() {
+        self.isLocked(!self.isLocked());
+        console.log("page.js - InvoiceNewViewModel - isLocked=" + self.isLocked() + " (new state)");
+    };
+}
+
+var InvoiceDataViewModelInit = function() {
+    var data = {
+        _id: undefined,
+	iid: undefined,
+        uid: undefined,
+        cid: undefined,
+        cname: "",
+        caddr1: "",
+        caddr2: "",
+	caddr3: "",
+	isLocked: false,
+        isValid: true,
+	invoceItems: []
+    };
+    return new InvoiceDataViewModel(data);
+}
+
+var InvoiceNewViewModel = function(currentView) {
+    var self = this;
+
+    self.data = InvoiceDataViewModelInit();    
+
+    self.currentView = currentView;
+    self.customerList = ko.observableArray();
+
+    /*
+    self.customer = ko.observable({
+        cid: "", name: "", addr1: "", addr2: "", addr3: ""
+    });
+    self.isLocked = ko.observable(false);
+    self.invoiceId = ko.observable();
+    self.invoiceItems = ko.observableArray();
+    self.numInvoiceItems = ko.pureComputed(function() {
+        var sum = 0;
+        for (var i = 0; i < this.invoiceItems().length; i++) {
+            if (this.invoiceItems()[i].isValid()) {
+                sum += 1;
+            }
+        }
+        return sum;
+    }, this);
+
+    self.totalExclVat = ko.pureComputed(function() {
+        var sum = 0;
+        for (var i = 0; i < this.invoiceItems().length; i++) {
+            if (this.invoiceItems()[i].isValid()) {
+                sum += this.invoiceItems()[i].total();
+            }
+        }
+        return sum;
+    }, this);
+    self.totalInclVat = ko.pureComputed(function() {
+        var sum = 0;
+        for (var i = 0; i < this.invoiceItems().length; i++) {
+            if (this.invoiceItems()[i].isValid()) {
+                sum += this.invoiceItems()[i].total() * (1 + parseFloat(this.invoiceItems()[i].vat()));
+            }
+        }
+        return sum;
+    }, this);
+    */
     self.currentView.subscribe(function(newValue) {
         if (newValue == 'invoice_new') {
             console.log("page.js - InvoiceNewViewModel - activated")
@@ -273,7 +355,8 @@ var InvoiceNewViewModel = function(currentView) {
     $('#customerId').bind('typeahead:selected', function(obj, datum, name) {
         // Extract customer id from datum
         console.log("page.js - InvoiceNewViewModel - Customer selected - " + JSON.stringify(datum.data));
-        self.customer(datum.data);
+        //self.customer(datum.data);
+	self.data.setCustomer(datum.data);
     });
 
     self.populate = function() {
@@ -292,7 +375,56 @@ var InvoiceNewViewModel = function(currentView) {
         });
     }
 
+    // HERE!
+    /*
+    self.updateServer = function() {
+        if ((self._id() == undefined) &&
+            !self.isValid())
+        {
+            console.log("updateServer: Nothing to do (invalid entry without _id)")
+            return;
+        } else if (self.name().length == 0) {
+            Notify_showMsg('error', 'Customer <strong>name</strong> must be specified!');
+            self.nameError(true);
+            return;
+        }
+        self.nameError(false);
+        var isNewCustomer = (self._id() == undefined) ? true : false;
+        return $.ajax({
+            url: "/api/customer/" + self._id(),
+            type: "PUT",
+            contentType: "application/json",
+            data: JSON.stringify({
+                _id: self._id(),
+                cid: self.cid(),
+                uid: self.uid(),
+                name: self.name(),
+                addr1: self.addr1(),
+                addr2: self.addr2(),
+                phone: self.phone(),
+                isValid: self.isValid()
+            }),
+            dataType: "json",
+            success: function(data) {
+                var operation = "";
+                console.log("updateServer: response: " + JSON.stringify(data));
+                var opStr = "added";
+                if (!isNewCustomer) {
+                    opStr = (data.customer.isValid)?'updated':'deleted';
+                }
+                Notify_showMsg('success', 'Customer <strong>' + data.customer.name +
+                    '</strong> with customer id ' + data.customer.cid + ' ' + opStr + '.');
+                self.cid(data.customer.cid);
+                self.uid(data.customer.uid);
+                self._id(data.customer._id);
+                self.isValid(data.customer.isValid);
+            },
+        });
+    };
+    */
     self.newItem = function() {
+	self.data.newInvoiceItem();
+	/*
         var data = {
             description: "",
             price: 0.0,
@@ -301,15 +433,16 @@ var InvoiceNewViewModel = function(currentView) {
             isValid: true
         }
         self.invoiceItems.push(new InvoiceItemViewModel(data));
+	*/
     }
     self.deleteItem = function(item) {
         console.log("page.js - InvoiceNewViewModel - delete: " + JSON.stringify(item));
-        item.isValid(false);
-        self.invoiceItems.destroy(item);
+	self.data.deleteInvoiceItem(item);
+        //item.isValid(false);
+        //self.invoiceItems.destroy(item);
     }
     self.doToggleLocked = function(item) {
-        self.isLocked(!self.isLocked());
-        console.log("page.js - InvoiceNewViewModel - isLocked=" + self.isLocked() + " (new state)");
+        self.data.doToggleLocked();
     }
 };
 
