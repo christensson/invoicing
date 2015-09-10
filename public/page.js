@@ -322,6 +322,11 @@ var InvoiceListViewModel = function(currentView) {
         c.isValid(false);
         self.invoiceList.destroy(c);
     }
+    self.showInvoice = function(c) {
+        console.log("Show: " + JSON.stringify(c));
+        //c.isValid(false);
+        //self.invoiceList.destroy(c);
+    }
 };
 
 var InvoiceCustomerModel = function(data) {
@@ -343,10 +348,18 @@ var InvoiceNewViewModel = function(currentView) {
 
     self.currentView = currentView;
     self.customerList = ko.observableArray();
+    self.iid = ko.observable(-1);
 
     self.currentView.subscribe(function(newValue) {
-        if (newValue == 'invoice_new') {
+	var viewArray = newValue.split("/");
+        if (viewArray[0] == 'invoice_new') {
             console.log("page.js - InvoiceNewViewModel - activated")
+            self.populate();
+        } else if (viewArray[0] == 'invoice_show' && viewArray.length > 1) {
+	    var iid = viewArray[1]; 
+	    self.iid(iid);
+            console.log("page.js - InvoiceNewViewModel - activated - show #" + self.iid());
+	    self.getInvoice(iid);
             self.populate();
         }
     });
@@ -371,6 +384,18 @@ var InvoiceNewViewModel = function(currentView) {
             console.log("page.js - InvoiceNewViewModel - populate - failed");
             Notify_showSpinner(false);
             Notify_showMsg('error', 'Failed to get customers!');
+        });
+    }
+
+    self.getInvoice = function(iid) {
+        Notify_showSpinner(true);
+        $.getJSON("/api/invoice/" + iid, function(invoice) {
+	    console.log("Got invoice #" + iid + "data=" + JSON.stringify(invoice));
+            Notify_showSpinner(false);
+        }).fail(function() {
+            console.log("page.js - InvoiceNewViewModel - getInvoice - failed");
+            Notify_showSpinner(false);
+            Notify_showMsg('error', 'Failed to get invoice!');
         });
     }
 
@@ -498,6 +523,10 @@ var NavViewModel = function() {
         '/page/:view' : function(view) {
             self.currentView(view);
             console.log("page.js - navigation - view: " + view);
+        },
+        '/page/:view/:param' : function(view, param) {
+            self.currentView(view + "/" + param);
+            console.log("page.js - navigation - view: " + view + ", param=" + param);
         }
     };
     self.router = Router(self.routes);

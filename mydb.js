@@ -76,7 +76,7 @@ function getOneDocPromise(collectionName, filter) {
                 deferred.reject(
                     new Error("Error: getOneDoc(" + collectionName + "): " + err));
             } else {
-                console.log("getOneDoc(" + collectionName + "): doc: " + JSON.stringify(doc));
+                console.log("getOneDoc(" + collectionName + "): filter=" + JSON.stringify(filter) + ", doc: " + JSON.stringify(doc));
                 deferred.resolve(doc);
             }
         });
@@ -387,6 +387,21 @@ module.exports.init = function() {
 module.exports.getInvoices = function(uid) {
     var ouid = new ObjectID(uid)
     return getAllDocsPromise('invoice', {'isValid': true, 'uid': ouid});
+}
+
+module.exports.getInvoice = function(uid, iid) {
+    var ouid = new ObjectID(uid)
+    var deferred = Q.defer();
+    getOneDocPromise('invoice', {'uid': ouid, 'iid': iid}).then(function(invoice) {
+        if (invoice == undefined) {
+            console.log("getInvoice: No invoice #" + iid + " found");
+            deferred.reject(new Error("The requested invoice #" + iid + " could not be found."));
+        } else {
+            console.log("getInvoice: Invoice found: " + invoice);
+            deferred.resolve(invoice);
+        }
+    });
+    return deferred.promise;
 }
 
 module.exports.getCustomers = function(uid) {

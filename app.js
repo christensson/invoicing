@@ -193,6 +193,19 @@ app.get("/api/invoices", ensureAuthenticated, function(req, res) {
         .fail(myFailureHandler.bind(null, res));
 });
 
+app.get("/api/invoice/:iid", ensureAuthenticated, function(req, res) {
+    var uid = req.user._id;
+    var iid = parseInt(req.params.iid);
+    console.log("Get invoice: user=" + req.user.username +
+		", uid=" + uid + ", iid=" + iid);    
+    mydb.getInvoice(uid, iid)
+        .then(function(invoice) {
+            res.status(200).json(invoice);
+            res.end();
+        })
+        .fail(myFailureHandler.bind(null, res));
+});
+
 app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
     var okHandler = function(logText, res, invoice) {
         console.log(logText + ": OK, obj=" + JSON.stringify(invoice));
