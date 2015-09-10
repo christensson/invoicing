@@ -139,11 +139,11 @@ var InvoiceItemViewModel = function(data) {
     self.price = ko.observable(data.price);
     self.count = ko.observable(data.count);
     self.vat = ko.observable(data.vat);
+    self.isValid = ko.observable(data.isValid);
     self.total = ko.pureComputed(function() {
         var total = parseFloat(this.count()) * parseFloat(this.price());
         return total;
     }, self);
-    self.isValid = ko.observable(data.isValid);
 
     self.updateServer = function() {
         if (!self.isValid())
@@ -177,7 +177,7 @@ var InvoiceDataViewModel = function(data) {
     self.customer = ko.observable(data.customer);
     self.invoiceItems = ko.observableArray();
     for (var i = 0; i < data.invoiceItems.length; i++) {
-	self.invoiceItems.push(new InvoiceItemViewModel(data.invoiceItems));
+	self.invoiceItems.push(new InvoiceItemViewModel(data.invoiceItems[i]));
     }
 	
     self.numInvoiceItems = ko.pureComputed(function() {
