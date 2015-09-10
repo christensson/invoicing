@@ -175,6 +175,11 @@ var InvoiceDataViewModel = function(data) {
     self.isValid = ko.observable(data.isValid);
     self.isLocked = ko.observable(data.isLocked);
     self.customer = ko.observable(data.customer);
+    self.yourRef = ko.observable(data.yourRef);
+    self.ourRef = ko.observable(data.ourRef);
+    self.date = ko.observable(data.date);
+    self.daysUntilPayment = ko.observable(data.daysUntilPayment);
+    self.projId = ko.observable(data.projId);
     self.invoiceItems = ko.observableArray();
     for (var i = 0; i < data.invoiceItems.length; i++) {
 	self.invoiceItems.push(new InvoiceItemViewModel(data.invoiceItems[i]));
@@ -246,6 +251,11 @@ var InvoiceDataViewModel = function(data) {
 	    isLocked: self.isLocked(),
             isValid: self.isValid(),
 	    customer: self.customer(),
+	    yourRef: self.yourRef(),
+	    ourRef: self.ourRef(),
+	    date: self.date(),
+	    daysUntilPayment: self.daysUntilPayment(),
+	    projId: self.projId(),
 	    invoiceItems: items,
 	    totalExclVat: self.totalExclVat(),
 	    totalInclVat: self.totalInclVat()
@@ -266,6 +276,11 @@ var InvoiceDataViewModelInit = function() {
             addr1: "",
             addr2: "",
 	},
+	yourRef: "",
+	ourRef: "",
+	date: "",
+	daysUntilPayment: "",
+	projId: "",
 	isLocked: false,
         isValid: true,
 	invoiceItems: []

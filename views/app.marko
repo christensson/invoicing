@@ -173,7 +173,7 @@
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="yourReference" class="control-label">Your reference</label>
-                                        <input type="text" class="form-control" id="yourReference" data-bind="disable: data.isLocked"></input>
+                                        <input type="text" class="form-control" id="yourReference" data-bind="value: data.yourRef, disable: data.isLocked"></input>
                                     </div>
                                 </div>
                             </div>
@@ -181,13 +181,13 @@
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="date" class="control-label">Date</label>
-                                        <input type="date" class="form-control" id="date" data-bind="disable: data.isLocked"></input>
+                                        <input type="date" class="form-control" id="date" data-bind="value: data.date, disable: data.isLocked"></input>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="ourReference" class="control-label">Our reference</label>
-                                        <input type="text" class="form-control" id="ourReference" data-bind="disable: data.isLocked"></input>
+                                        <input type="text" class="form-control" id="ourReference" data-bind="value: data.ourRef, disable: data.isLocked"></input>
                                     </div>
                                 </div>
                             </div>
@@ -195,13 +195,13 @@
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="daysUntilPayment" class="control-label">Days until payment</label>
-                                        <input type="number" class="form-control" id="daysUntilPayment" data-bind="disable: data.isLocked"></input>
+                                        <input type="number" class="form-control" id="daysUntilPayment" data-bind="value: data.daysUntilPayment, disable: data.isLocked"></input>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="projectId" class="control-label">Project id</label>
-                                        <input type="text" class="form-control" id="projectId" data-bind="disable: data.isLocked"></input>
+                                        <input type="text" class="form-control" id="projectId" data-bind="value: data.projId, disable: data.isLocked"></input>
                                     </div>
                                 </div>
                             </div>
