@@ -145,15 +145,6 @@ var InvoiceItemViewModel = function(data) {
         return total;
     }, self);
 
-    self.updateServer = function() {
-        if (!self.isValid())
-        {
-            console.log("updateServer: Nothing to do (invalid entry)")
-            return;
-        }
-        console.log("updateServer: Doing nothing yet...")
-    };
-
     self.getJson = function() {
 	var res = {
 	    description: self.description(),
@@ -167,24 +158,68 @@ var InvoiceItemViewModel = function(data) {
     };
 };
 
-var InvoiceDataViewModel = function(data) {
+var InvoiceDataViewModel = function() {
     var self = this;
-    self._id = ko.observable(data._id);
-    self.iid = ko.observable(data.iid);
-    self.uid = ko.observable(data.uid);
-    self.isValid = ko.observable(data.isValid);
-    self.isLocked = ko.observable(data.isLocked);
-    self.customer = ko.observable(data.customer);
-    self.yourRef = ko.observable(data.yourRef);
-    self.ourRef = ko.observable(data.ourRef);
-    self.date = ko.observable(data.date);
-    self.daysUntilPayment = ko.observable(data.daysUntilPayment);
-    self.projId = ko.observable(data.projId);
+    self._id = ko.observable();
+    self.iid = ko.observable();
+    self.uid = ko.observable();
+    self.isValid = ko.observable();
+    self.isPaid = ko.observable();
+    self.isLocked = ko.observable();
+    self.customer = ko.observable();
+    self.yourRef = ko.observable();
+    self.ourRef = ko.observable();
+    self.date = ko.observable();
+    self.daysUntilPayment = ko.observable();
+    self.projId = ko.observable();
     self.invoiceItems = ko.observableArray();
-    for (var i = 0; i < data.invoiceItems.length; i++) {
-	self.invoiceItems.push(new InvoiceItemViewModel(data.invoiceItems[i]));
+
+    self.setData = function(newData) {
+	self._id(newData._id);
+	self.iid(newData.iid);
+	self.uid(newData.uid);
+	self.isValid(newData.isValid);
+	self.isPaid(newData.isPaid);
+	self.isLocked(newData.isLocked);
+	self.customer(newData.customer);
+	self.yourRef(newData.yourRef);
+	self.ourRef(newData.ourRef);
+	self.date(newData.date);
+	self.daysUntilPayment(newData.daysUntilPayment);
+	self.projId(newData.projId);
+	self.invoiceItems.removeAll();
+	for (var i = 0; i < newData.invoiceItems.length; i++) {
+	    self.invoiceItems.push(new InvoiceItemViewModel(newData.invoiceItems[i]));
+	}
     }
-	
+
+    self.init = function() {
+	var data = {
+            _id: undefined,
+	    iid: undefined,
+            uid: undefined,
+	    customer: {
+		_id: undefined,
+		cid: undefined,
+		name: "",
+		addr1: "",
+		addr2: "",
+	    },
+	    yourRef: "",
+	    ourRef: "",
+	    date: "",
+	    daysUntilPayment: "",
+	    projId: "",
+	    isLocked: false,
+	    isPaid: false,
+            isValid: true,
+	    invoiceItems: []
+	};
+	self.setData(data);
+    }
+
+    self.init();
+
     self.numInvoiceItems = ko.pureComputed(function() {
         var sum = 0;
         for (var i = 0; i < this.invoiceItems().length; i++) {
@@ -239,6 +274,11 @@ var InvoiceDataViewModel = function(data) {
         console.log("page.js - InvoiceNewViewModel - isLocked=" + self.isLocked() + " (new state)");
     };
 
+    self.doTogglePaid = function() {
+        self.isPaid(!self.isPaid());
+        console.log("page.js - InvoiceNewViewModel - isPaid=" + self.isPaid() + " (new state)");
+    };
+
     self.getJson = function() {
 	var items = [];
         for (var i = 0; i < self.invoiceItems().length; i++) {
@@ -249,6 +289,7 @@ var InvoiceDataViewModel = function(data) {
 	    iid: self.iid(),
             uid: self.uid(),
 	    isLocked: self.isLocked(),
+	    isPaid: self.isPaid(),
             isValid: self.isValid(),
 	    customer: self.customer(),
 	    yourRef: self.yourRef(),
@@ -262,30 +303,6 @@ var InvoiceDataViewModel = function(data) {
 	};
 	return res;
     };
-}
-
-var InvoiceDataViewModelInit = function() {
-    var data = {
-        _id: undefined,
-	iid: undefined,
-        uid: undefined,
-	customer: {
-	    _id: undefined,
-            cid: undefined,
-            name: "",
-            addr1: "",
-            addr2: "",
-	},
-	yourRef: "",
-	ourRef: "",
-	date: "",
-	daysUntilPayment: "",
-	projId: "",
-	isLocked: false,
-        isValid: true,
-	invoiceItems: []
-    };
-    return new InvoiceDataViewModel(data);
 }
 
 var InvoiceListViewModel = function(currentView) {
@@ -307,7 +324,9 @@ var InvoiceListViewModel = function(currentView) {
         Notify_showSpinner(true);
         $.getJSON("/api/invoices", function(allData) {
             var mappedInvoices = $.map(allData, function(item) {
-                return new InvoiceDataViewModel(item)});
+		var m = new InvoiceDataViewModel();
+		m.setData(item);
+                return m});
             self.invoiceList(mappedInvoices);
             Notify_showSpinner(false);
         }).fail(function() {
@@ -321,11 +340,6 @@ var InvoiceListViewModel = function(currentView) {
         console.log("Delete: " + JSON.stringify(c));
         c.isValid(false);
         self.invoiceList.destroy(c);
-    }
-    self.showInvoice = function(c) {
-        console.log("Show: " + JSON.stringify(c));
-        //c.isValid(false);
-        //self.invoiceList.destroy(c);
     }
 };
 
@@ -344,13 +358,15 @@ var InvoiceCustomerModel = function(data) {
 var InvoiceNewViewModel = function(currentView) {
     var self = this;
 
-    self.data = InvoiceDataViewModelInit();    
+    self.data = new InvoiceDataViewModel();    
 
     self.currentView = currentView;
     self.customerList = ko.observableArray();
     self.iid = ko.observable(-1);
 
     self.currentView.subscribe(function(newValue) {
+	self.data.init();
+	$('#customerId').val("");
 	var viewArray = newValue.split("/");
         if (viewArray[0] == 'invoice_new') {
             console.log("page.js - InvoiceNewViewModel - activated")
@@ -358,12 +374,11 @@ var InvoiceNewViewModel = function(currentView) {
         } else if (viewArray[0] == 'invoice_show' && viewArray.length > 1) {
 	    var iid = viewArray[1]; 
 	    self.iid(iid);
-            console.log("page.js - InvoiceNewViewModel - activated - show #" + self.iid());
+            console.log("page.js - InvoiceNewViewModel - activated - show #" + iid);
 	    self.getInvoice(iid);
             self.populate();
         }
     });
-
 
     $('#customerId').bind('typeahead:selected', function(obj, datum, name) {
         // Extract customer id from datum
@@ -376,7 +391,7 @@ var InvoiceNewViewModel = function(currentView) {
         $.getJSON("/api/customers", function(allData) {
             var mappedCustomers =
                 $.map(allData, function(item) {
-                    return new InvoiceCustomerModel(item);//"" + item.cid + " - " + item.name;
+                    return new InvoiceCustomerModel(item);
                 });
             self.customerList(mappedCustomers);
             Notify_showSpinner(false);
@@ -391,6 +406,8 @@ var InvoiceNewViewModel = function(currentView) {
         Notify_showSpinner(true);
         $.getJSON("/api/invoice/" + iid, function(invoice) {
 	    console.log("Got invoice #" + iid + "data=" + JSON.stringify(invoice));
+	    self.data.setData(invoice);
+	    $('#customerId').val(invoice.customer.cid);
             Notify_showSpinner(false);
         }).fail(function() {
             console.log("page.js - InvoiceNewViewModel - getInvoice - failed");
@@ -448,6 +465,9 @@ var InvoiceNewViewModel = function(currentView) {
     }
     self.doToggleLocked = function(item) {
         self.data.doToggleLocked();
+    }
+    self.doTogglePaid = function(item) {
+        self.data.doTogglePaid();
     }
 };
 

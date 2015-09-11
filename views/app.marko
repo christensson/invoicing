@@ -129,6 +129,8 @@
                                     <th>Customer</th>
                                     <th>Date</th>
                                     <th>Total Excl. VAT</th>
+                                    <th></th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody data-bind="foreach: invoiceList">
@@ -141,8 +143,23 @@
                                     <td><p class="form-control-static" data-bind="text: iid"></p></td>
                                     <td><p class="form-control-static" data-bind="text: customer().cid"></p></td>
                                     <td><p class="form-control-static" data-bind="text: customer().name"></p></td>
-                                    <td></td>
+                                    <td><p class="form-control-static" data-bind="text: date"></p></td>
                                     <td><p class="form-control-static" data-bind="text: totalExclVat"></p></td>
+                                    <td>
+                                        <p>
+					  <span data-bind="if: isLocked">
+					    <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+					  </span>
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <p>
+					  <span data-bind="if: isPaid">
+					    <span class="glyphicon glyphicon-piggy-bank" aria-hidden="true"></span>
+					    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+					  </span>
+                                        </p>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -300,6 +317,18 @@
                         <span data-bind="ifnot: data.isLocked">
                             <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
                             Lock
+                        </span>
+                    </button>
+                    <button type="button" class="btn btn-info" data-bind="click: doTogglePaid">
+                        <span data-bind="if: data.isPaid">
+                            <span class="glyphicon glyphicon-piggy-bank" aria-hidden="true"></span>
+			    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                            Set unpaid
+                        </span>
+                        <span data-bind="ifnot: data.isPaid">
+                            <span class="glyphicon glyphicon-piggy-bank" aria-hidden="true"></span>
+			    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                            Set paid
                         </span>
                     </button>
                 </div>
