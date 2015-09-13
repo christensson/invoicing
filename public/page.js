@@ -139,9 +139,11 @@ var InvoiceItemViewModel = function(data) {
     self.price = ko.observable(data.price);
     self.count = ko.observable(data.count);
     self.vat = ko.observable(data.vat);
+    self.discount = ko.observable(data.discount);
     self.isValid = ko.observable(data.isValid);
     self.total = ko.pureComputed(function() {
-        var total = parseFloat(this.count()) * parseFloat(this.price());
+        var total = parseFloat(this.count()) * parseFloat(this.price()) *
+	    (1.0 - parseFloat(this.discount()));
         return total;
     }, self);
 
@@ -151,6 +153,7 @@ var InvoiceItemViewModel = function(data) {
 	    price: self.price(),
 	    count: self.count(),
 	    vat: self.vat(),
+	    discount: self.discount(),
 	    total: self.total(),
 	    isValid: self.isValid()
 	};
@@ -243,7 +246,8 @@ var InvoiceDataViewModel = function() {
         var sum = 0;
         for (var i = 0; i < this.invoiceItems().length; i++) {
             if (this.invoiceItems()[i].isValid()) {
-                sum += this.invoiceItems()[i].total() * (1 + parseFloat(this.invoiceItems()[i].vat()));
+                sum += this.invoiceItems()[i].total() *
+		    (1 + parseFloat(this.invoiceItems()[i].vat()));
             }
         }
         return sum;
@@ -259,6 +263,7 @@ var InvoiceDataViewModel = function() {
             price: 0.0,
             count: 1.0,
             vat: 0.25,
+            discount: 0.0,
             isValid: true
         }
         self.invoiceItems.push(new InvoiceItemViewModel(data));
@@ -305,6 +310,24 @@ var InvoiceDataViewModel = function() {
     };
 }
 
+var InvoiceListDataViewModel = function(data) {
+    var self = this;
+    self._id = ko.observable(data._id);
+    self.iid = ko.observable(data.iid);
+    self.uid = ko.observable(data.uid);
+    self.isValid = ko.observable(data.isValid);
+    self.isPaid = ko.observable(data.isPaid);
+    self.isLocked = ko.observable(data.isLocked);
+    self.customer = ko.observable(data.customer);
+    self.yourRef = ko.observable(data.yourRef);
+    self.ourRef = ko.observable(data.ourRef);
+    self.date = ko.observable(data.date);
+    self.daysUntilPayment = ko.observable(data.daysUntilPayment);
+    self.projId = ko.observable(data.projId);
+    self.totalExclVat = ko.observable(data.totalExclVat);
+    self.totalInclVat = ko.observable(data.totalInclVat);
+}
+
 var InvoiceListViewModel = function(currentView) {
     var self = this;
 
@@ -324,9 +347,7 @@ var InvoiceListViewModel = function(currentView) {
         Notify_showSpinner(true);
         $.getJSON("/api/invoices", function(allData) {
             var mappedInvoices = $.map(allData, function(item) {
-		var m = new InvoiceDataViewModel();
-		m.setData(item);
-                return m});
+		return new InvoiceListDataViewModel(item)});
             self.invoiceList(mappedInvoices);
             Notify_showSpinner(false);
         }).fail(function() {
@@ -334,12 +355,6 @@ var InvoiceListViewModel = function(currentView) {
             Notify_showSpinner(false);
             Notify_showMsg('error', 'Failed to get invoices!');
         });
-    }
-
-    self.deleteInvoice = function(c) {
-        console.log("Delete: " + JSON.stringify(c));
-        c.isValid(false);
-        self.invoiceList.destroy(c);
     }
 };
 
