@@ -171,6 +171,42 @@ function myFailureHandler(res, err) {
     res.end();
 }
 
+app.get("/api/companies", ensureAuthenticated, function(req, res) {
+    var uid = req.user._id;
+    console.log("Get companies: user=" + req.user.username + ", uid=" + uid);
+    mydb.getCompanies(uid)
+        .then(function(docs) {
+            res.status(200).json(docs);
+            res.end();
+        })
+        .fail(myFailureHandler.bind(null, res));
+});
+
+app.put("/api/company/:id", ensureAuthenticated, function(req, res) {
+    var okHandler = function(logText, res, company) {
+        console.log(logText + ": OK, obj=" + JSON.stringify(company));
+        resData = {
+            'company': company
+        };
+        res.status(200).json(resData);
+        res.end();
+    };
+    var uid = req.user._id;
+    if (req.params.id === "undefined") {
+        console.log("New company: user=" + req.user.username +
+            ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 4));
+        mydb.addCompany(uid, req.body)
+            .then(okHandler.bind(null, 'addCompany', res))
+            .fail(myFailureHandler.bind(null, res));
+    } else {
+        console.log("Update company: user=" + req.user.username +
+            ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 4));
+        mydb.updateCompany(req.body)
+            .then(okHandler.bind(null, 'updateCompany', res))
+            .fail(myFailureHandler.bind(null, res));
+    }
+});
+/*
 app.get("/api/customers", ensureAuthenticated, function(req, res) {
     var uid = req.user._id;
     console.log("Get customers: user=" + req.user.username + ", uid=" + uid);
@@ -180,6 +216,44 @@ app.get("/api/customers", ensureAuthenticated, function(req, res) {
             res.end();
         })
         .fail(myFailureHandler.bind(null, res));
+});
+*/
+app.get("/api/customers/:companyId", ensureAuthenticated, function(req, res) {
+    var uid = req.user._id;
+    var companyId = req.params.companyId;
+    console.log("Get customers: user=" + req.user.username + ", uid=" + uid + ", companyId=" + companyId);
+    mydb.getCustomers(uid, companyId)
+        .then(function(docs) {
+            res.status(200).json(docs);
+            res.end();
+        })
+        .fail(myFailureHandler.bind(null, res));
+});
+
+app.put("/api/customer/:id", ensureAuthenticated, function(req, res) {
+    var okHandler = function(logText, res, customer) {
+        console.log(logText + ": OK, obj=" + JSON.stringify(customer));
+        resData = {
+            'customer': customer
+        };
+        res.status(200).json(resData);
+        res.end();
+    };
+    var uid = req.user._id;
+    var companyId = req.body.companyId;
+    if (req.params.id === "undefined") {
+        console.log("New customer: user=" + req.user.username +
+            ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 4));
+        mydb.addCustomer(uid, companyId, req.body)
+            .then(okHandler.bind(null, 'addCustomer', res))
+            .fail(myFailureHandler.bind(null, res));
+    } else {
+        console.log("Update customer: user=" + req.user.username +
+            ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 4));
+        mydb.updateCustomer(req.body)
+            .then(okHandler.bind(null, 'updateCustomer', res))
+            .fail(myFailureHandler.bind(null, res));
+    }
 });
 
 app.get("/api/invoices", ensureAuthenticated, function(req, res) {
@@ -216,10 +290,11 @@ app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
         res.end();
     };
     var uid = req.user._id;
+    var companyId = req.body.companyId;
     if (req.params.id === "undefined") {
         console.log("New invoice: user=" + req.user.username +
             ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 4));
-        mydb.addInvoice(uid, req.body)
+        mydb.addInvoice(uid, companyId, req.body)
             .then(okHandler.bind(null, 'addInvoice', res))
             .fail(myFailureHandler.bind(null, res));
     } else {
@@ -227,31 +302,6 @@ app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
             ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 4));
         mydb.updateInvoice(req.body)
             .then(okHandler.bind(null, 'updateInvoice', res))
-            .fail(myFailureHandler.bind(null, res));
-    }
-});
-
-app.put("/api/customer/:id", ensureAuthenticated, function(req, res) {
-    var okHandler = function(logText, res, customer) {
-        console.log(logText + ": OK, obj=" + JSON.stringify(customer));
-        resData = {
-            'customer': customer
-        };
-        res.status(200).json(resData);
-        res.end();
-    };
-    var uid = req.user._id;
-    if (req.params.id === "undefined") {
-        console.log("New customer: user=" + req.user.username +
-            ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 4));
-        mydb.addCustomer(uid, req.body)
-            .then(okHandler.bind(null, 'addCustomer', res))
-            .fail(myFailureHandler.bind(null, res));
-    } else {
-        console.log("Update customer: user=" + req.user.username +
-            ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 4));
-        mydb.updateCustomer(req.body)
-            .then(okHandler.bind(null, 'updateCustomer', res))
             .fail(myFailureHandler.bind(null, res));
     }
 });

@@ -178,21 +178,24 @@ function updateDataPromise(collectionName, data) {
     });
 }
 
-function getNextSequencePromise(name) {
+function getNextSequencePromise(uid, companyId, name) {
     return dbopPromise().then(function (db) {
         var deferred = Q.defer();
         var coll = db.collection("counters");
+        var ouid = new ObjectID(uid);
+	var ocompanyId = new ObjectID(companyId);
+	var query = { uid: ouid, companyId: ocompanyId, name: name };
         coll.findAndModify(
-            { _id: name }, //query
+            query,
             [], //sort
             { $inc: { seq: 1 } }, //update
             { new: false }, //options
             function(err, obj) {
                 if(err) {
                     deferred.reject(
-                        new Error("getNextSequence(" + name + "): " + err));
+                        new Error("getNextSequence(" + JSON.stringify(query) + "): " + err));
                 } else {
-                    console.log("getNextSequence(" + name + "): success");
+                    console.log("getNextSequence(" + JSON.stringify(query) + "): success: newSeq=" + JSON.stringify(obj));
                     deferred.resolve(obj.value.seq);
                 }
             }
@@ -204,37 +207,31 @@ function getNextSequencePromise(name) {
 module.exports.init = function() {
     var machUserId = undefined;
     var testUserId = undefined;
+    var machCompany1Id = undefined;
+    var testCompany1Id = undefined;
+    var testCompany2Id = undefined;
+    var machCompany1Cid = 100;
+    var testCompany1Cid = 100;
+    var testCompany2Cid = 100;
+    var machCompany1Iid = 1000;
+    var testCompany1Iid = 1000;
+    var testCompany2Iid = 1000;
 
-    // Counters
-    dropCollectionPromise("counters")
-        .then(function() {
-            var counterList = [
-                {
-                    _id: "cid",
-                    seq: 103
-                },
-                {
-                    _id: "iid",
-                    seq: 1003
-                }
-            ];
-            return insertDataPromise("counters", counterList);
-        })
-        // Users
-	.then(function() {
-	    return dropCollectionPromise("users");
-	})
+    // Users
+    dropCollectionPromise("users")
         .then(function() {
             var userList = [
                 {
                     username: "mach",
                     //password is "mach"
-                    password: "$2a$08$3IwByU08C2BdgvwuvMec.eD3ugRp7oRpPHpuRwAOY1q0D8YUiSIYa"
+                    password: "$2a$08$3IwByU08C2BdgvwuvMec.eD3ugRp7oRpPHpuRwAOY1q0D8YUiSIYa",
+		    activeCompanyId: undefined
                 },
                 {
                     username: "test",
                     //password is "test"
-                    password: "$2a$08$8XE3C/OGbaT6v2PvonVqTORGkCmzlXSXEd.62Obd/E5SY4E6MYQSG"
+                    password: "$2a$08$8XE3C/OGbaT6v2PvonVqTORGkCmzlXSXEd.62Obd/E5SY4E6MYQSG",
+		    activeCompanyId: undefined
                 }
             ];
             return insertDataPromise("users", userList);
@@ -255,6 +252,66 @@ module.exports.init = function() {
             testUserId = user._id;
             return Q();
         })
+        // Companies
+        .then(function () {
+            return dropCollectionPromise("company");
+        })
+        .fail(function() {
+	    console.log("Drop collection company failed!");
+	})
+        .then(function() {
+            var companyList = [
+                {
+                    uid: machUserId,
+		    name: "Machapär",
+		    addr1: "Gatan 1",
+		    addr2: "414 62 Göteborg",
+		    phone: "031-123132",
+                    isValid: true
+                },
+                {
+                    uid: testUserId,
+		    name: "Test company 1",
+		    addr1: "Nygatan 1",
+		    addr2: "414 62 Göteborg",
+		    phone: "031-123133",
+                    isValid: true
+                },
+                {
+                    uid: testUserId,
+		    name: "Test company 2",
+		    addr1: "Husargatan 1",
+		    addr2: "414 62 Göteborg",
+		    phone: "031-123132",
+                    isValid: true
+                },
+            ];
+            return insertDataPromise("company", companyList);
+        })
+        .then(function() {
+            return getOneDocPromise('company', {name: 'Machapär'});
+        })
+        .then(function(c) {
+            console.log("getCompany: Found: " + JSON.stringify(c));
+            machCompany1Id = c._id;
+            return Q();
+        })
+        .then(function() {
+            return getOneDocPromise('company', {name: 'Test company 1'});
+        })
+        .then(function(c) {
+            console.log("getCompany: Found: " + JSON.stringify(c));
+            testCompany1Id = c._id;
+            return Q();
+        })
+        .then(function() {
+            return getOneDocPromise('company', {name: 'Test company 2'});
+        })
+        .then(function(c) {
+            console.log("getCompany: Found: " + JSON.stringify(c));
+            testCompany2Id = c._id;
+            return Q();
+        })
         // Customers
         .then(function() {
 	    return dropCollectionPromise("cust");
@@ -262,8 +319,9 @@ module.exports.init = function() {
         .then(function() {
             var customerList = [
                 {
-                    cid: 100,
+                    cid: machCompany1Cid++,
                     uid: machUserId,
+		    companyId: machCompany1Id,
                     name: "Pelle",
                     addr1: "Storgatan 1",
                     addr2: "414 62 Göteborg",
@@ -271,8 +329,9 @@ module.exports.init = function() {
                     isValid: true
                 },
                 {
-                    cid: 100,
+                    cid: testCompany1Cid++,
                     uid: testUserId,
+		    companyId: testCompany1Id,
                     name: "TestPelle",
                     addr1: "TestStorgatan 1",
                     addr2: "414 62 Göteborg",
@@ -280,20 +339,36 @@ module.exports.init = function() {
                     isValid: true
                 },
                 {
-                    cid: 101,
+                    cid: machCompany1Cid++,
                     uid: machUserId,
+		    companyId: machCompany1Id,
                     name: "Pära",
                     isValid: false
                 },
                 {
-                    cid: 101,
+                    cid: testCompany1Cid++,
                     uid: testUserId,
+		    companyId: testCompany1Id,
                     name: "TestPära",
-                    isValid: false
+                    addr1: "TestNygata 2",
+                    addr2: "414 62 Göteborg",
+                    phone: "0706-580223",
+                    isValid: true
                 },
                 {
-                    cid: 102,
+                    cid: testCompany2Cid++,
+                    uid: testUserId,
+		    companyId: testCompany2Id,
+                    name: "TestPära2",
+                    addr1: "2 TestNygata 2",
+                    addr2: "2 414 62 Göteborg",
+                    phone: "2 0706-580223",
+                    isValid: true
+                },
+                {
+                    cid: machCompany1Cid++,
                     uid: machUserId,
+		    companyId: machCompany1Id,
                     name: "Pär",
                     isValid: true
                 }
@@ -317,8 +392,9 @@ module.exports.init = function() {
         .then(function() {
             var invoiceList = [
                 {
-                    iid: 1000,
+                    iid: machCompany1Iid++,
                     uid: machUserId,
+		    companyId: machCompany1Id,
 		    isLocked: false,
                     isValid: true,
 		    customer: {
@@ -332,8 +408,9 @@ module.exports.init = function() {
 		    totalInclVat: 0
                 },
                 {
-                    iid: 1000,
+                    iid: testCompany1Iid++,
                     uid: testUserId,
+		    companyId: testCompany1Id,
 		    isLocked: false,
                     isValid: true,
 		    customer: {
@@ -347,8 +424,9 @@ module.exports.init = function() {
 		    totalInclVat: 0
                 },
                 {
-                    iid: 1001,
+                    iid: testCompany1Iid++,
                     uid: testUserId,
+		    companyId: testCompany1Id,
 		    isLocked: false,
                     isValid: true,
 		    customer: {
@@ -381,6 +459,51 @@ module.exports.init = function() {
             ];
             return insertDataPromise("invoice", invoiceList);
         })
+        // Counters
+	.then(function() {
+	    return dropCollectionPromise("counters")
+	})
+        .then(function() {
+            var counterList = [
+                {
+		    uid: machUserId,
+		    companyId: machCompany1Id,
+                    name: "cid",
+                    seq: machCompany1Cid
+                },
+                {
+		    uid: machUserId,
+		    companyId: machCompany1Id,
+                    name: "iid",
+                    seq: machCompany1Iid
+                },
+                {
+		    uid: testUserId,
+		    companyId: testCompany1Id,
+                    name: "cid",
+                    seq: testCompany1Cid
+                },
+                {
+		    uid: testUserId,
+		    companyId: testCompany1Id,
+                    name: "iid",
+                    seq: testCompany1Iid
+                },
+                {
+		    uid: testUserId,
+		    companyId: testCompany2Id,
+                    name: "cid",
+                    seq: testCompany2Cid
+                },
+                {
+		    uid: testUserId,
+		    companyId: testCompany2Id,
+                    name: "iid",
+                    seq: testCompany2Iid
+                },
+            ];
+            return insertDataPromise("counters", counterList);
+        })
         .done();
 }
 
@@ -404,18 +527,24 @@ module.exports.getInvoice = function(uid, iid) {
     return deferred.promise;
 }
 
-module.exports.getCustomers = function(uid) {
+module.exports.getCustomers = function(uid, companyId) {
     var ouid = new ObjectID(uid)
-    return getAllDocsPromise('cust', {'isValid': true, 'uid': ouid});
+    var ocompanyId = new ObjectID(companyId);
+    return getAllDocsPromise('cust', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId});
 }
 
-module.exports.addInvoice = function(uid, invoice) {
+module.exports.getCompanies = function(uid) {
+    var ouid = new ObjectID(uid)
+    return getAllDocsPromise('company', {'isValid': true, 'uid': ouid});
+}
+
+module.exports.addInvoice = function(uid, companyId, invoice) {
     var deferred = Q.defer();
-    getNextSequencePromise("iid").then(function(iid) {
+    getNextSequencePromise(uid, companyId, "iid").then(function(iid) {
         console.log("addInvoice: Allocated new iid=" + iid);
-        //var customer = req.body;
         invoice.iid = iid;
         invoice.uid = new ObjectID(uid);
+	invoice.companyId = new ObjectID(companyId);
         insertDataPromise('invoice', invoice).then(function() {
             deferred.resolve(invoice);
         }).fail(function(err) {
@@ -434,13 +563,13 @@ module.exports.updateInvoice = function(invoice) {
     return updateDataPromise('invoice', invoice);
 }
 
-module.exports.addCustomer = function(uid, customer) {
+module.exports.addCustomer = function(uid, companyId, customer) {
     var deferred = Q.defer();
-    getNextSequencePromise("cid").then(function(cid) {
+    getNextSequencePromise(uid, companyId, "cid").then(function(cid) {
         console.log("addCustomer: Allocated new cid=" + cid);
-        //var customer = req.body;
         customer.cid = cid;
         customer.uid = new ObjectID(uid);
+        customer.companyId = new ObjectID(companyId);
         insertDataPromise('cust', customer).then(function() {
             deferred.resolve(customer);
         }).fail(function(err) {
@@ -457,6 +586,16 @@ module.exports.addCustomer = function(uid, customer) {
 module.exports.updateCustomer = function(customer) {
     customer.uid = new ObjectID(customer.uid);
     return updateDataPromise('cust', customer);
+}
+
+module.exports.addCompany = function(uid, company) {
+    company.uid = new ObjectID(uid);
+    return insertDataPromise('company', company);
+}
+
+module.exports.updateCompany = function(company) {
+    company.uid = new ObjectID(company.uid);
+    return updateDataPromise('company', company);
 }
 
 module.exports.getUser = function(username) {

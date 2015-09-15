@@ -1,3 +1,124 @@
+var CompanyViewModel = function(data) {
+    var self = this;
+
+    self._id = ko.observable(data._id);
+    self.uid = ko.observable(data.uid);
+    self.name = ko.observable(data.name);
+    self.addr1 = ko.observable(data.addr1);
+    self.addr2 = ko.observable(data.addr2);
+    self.phone = ko.observable(data.phone);
+    self.isValid = ko.observable(data.isValid);
+    self.nameError = ko.observable(false);
+    self.hasErrorCss = ko.pureComputed(function() {
+        //return this.nameError() ? "has-error" : "";
+        return this.nameError() ? "highlighterror" : "";
+    }, self);
+
+    self.updateServer = function() {
+        if ((self._id() == undefined) &&
+            !self.isValid())
+        {
+            console.log("updateServer: Nothing to do (invalid entry without _id)")
+            return;
+        } else if (self.name().length == 0) {
+            Notify_showMsg('error', 'Company <strong>name</strong> must be specified!');
+            self.nameError(true);
+            return;
+        }
+        self.nameError(false);
+        var isNew = (self._id() == undefined) ? true : false;
+        return $.ajax({
+            url: "/api/company/" + self._id(),
+            type: "PUT",
+            contentType: "application/json",
+            data: JSON.stringify({
+                _id: self._id(),
+                uid: self.uid(),
+                name: self.name(),
+                addr1: self.addr1(),
+                addr2: self.addr2(),
+                phone: self.phone(),
+                isValid: self.isValid()
+            }),
+            dataType: "json",
+            success: function(data) {
+                var operation = "";
+                console.log("updateServer: response: " + JSON.stringify(data));
+                var opStr = "added";
+                if (!isNew) {
+                    opStr = (data.company.isValid)?'updated':'deleted';
+                }
+                Notify_showMsg('success', 'Company <strong>' + data.company.name +
+                    '</strong> ' + opStr + '.');
+                self.uid(data.company.uid);
+                self._id(data.company._id);
+                self.isValid(data.company.isValid);
+            },
+        });
+    };
+
+    self.name.subscribe(this.updateServer);
+    self.addr1.subscribe(this.updateServer);
+    self.addr2.subscribe(this.updateServer);
+    self.phone.subscribe(this.updateServer);
+    self.isValid.subscribe(this.updateServer);
+};
+ 
+var CompanyListViewModel = function(currentView) {
+    var self = this;
+
+    self.currentView = currentView;
+
+    self.currentView.subscribe(function(newValue) {
+        if (newValue == 'companies') {
+            console.log("page.js - CompanyListViewModel - activated")
+            self.populate();
+        }
+    });
+
+    self.activeCompanyId = ko.observable("");
+    self.companyList = ko.observableArray();
+    
+    self.populate = function() {
+        Notify_showSpinner(true);
+        $.getJSON("/api/companies", function(allData) {
+            var mappedCompanies =
+		$.map(allData, function(item) {
+                    return new CompanyViewModel(item)});
+            self.companyList(mappedCompanies);
+            Notify_showSpinner(false);
+        }).fail(function() {
+            console.log("page.js - CompanyListViewModel - populate - failed");
+            Notify_showSpinner(false);
+            Notify_showMsg('error', 'Failed to get companies!');
+        });
+    }
+
+    self.newCompany = function() {
+        var data = {
+            _id: undefined,
+            uid: undefined,
+            name: "",
+            addr1: "",
+            addr2: "",
+            phone: "",
+            isValid: true
+        }
+        self.companyList.push(new CompanyViewModel(data));
+    }
+
+    self.deleteCompany = function(c) {
+        console.log("Delete: " + JSON.stringify(c));
+        c.isValid(false);
+        self.companyList.destroy(c);
+    }
+
+    self.activateCompany = function(c) {
+        console.log("Activate company: name=" + c.name() + ", _id=" + c._id());
+	self.activeCompanyId(c._id());
+    }
+};
+
 var CustomerViewModel = function(data) {
     var self = this;
 
@@ -9,6 +130,7 @@ var CustomerViewModel = function(data) {
     self.addr2 = ko.observable(data.addr2);
     self.phone = ko.observable(data.phone);
     self.isValid = ko.observable(data.isValid);
+    self.companyId = ko.observable(data.companyId);
     self.nameError = ko.observable(false);
     self.hasErrorCss = ko.pureComputed(function() {
         //return this.nameError() ? "has-error" : "";
@@ -36,6 +158,7 @@ var CustomerViewModel = function(data) {
                 _id: self._id(),
                 cid: self.cid(),
                 uid: self.uid(),
+		companyId: self.companyId(),
                 name: self.name(),
                 addr1: self.addr1(),
                 addr2: self.addr2(),
@@ -67,10 +190,11 @@ var CustomerViewModel = function(data) {
     self.isValid.subscribe(this.updateServer);
 };
  
-var CustomerListViewModel = function(currentView) {
+var CustomerListViewModel = function(currentView, activeCompanyId) {
     var self = this;
 
     self.currentView = currentView;
+    self.activeCompanyId = activeCompanyId;
 
     self.currentView.subscribe(function(newValue) {
         if (newValue == 'customers') {
@@ -84,7 +208,7 @@ var CustomerListViewModel = function(currentView) {
     
     self.populate = function() {
         Notify_showSpinner(true);
-        $.getJSON("/api/customers", function(allData) {
+        $.getJSON("/api/customers/" + self.activeCompanyId(), function(allData) {
             var mappedCustomers =
             $.map(allData, function(item) {
                 return new CustomerViewModel(item)});
@@ -102,6 +226,7 @@ var CustomerListViewModel = function(currentView) {
             _id: undefined,
             cid: undefined,
             uid: undefined,
+	    companyId: self.activeCompanyId(),
             name: "",
             addr1: "",
             addr2: "",
@@ -130,7 +255,6 @@ var CustomerListViewModel = function(currentView) {
         } catch (e) { }
     }
 };
-
 
 var InvoiceItemViewModel = function(data) {
     var self = this;
@@ -276,12 +400,12 @@ var InvoiceDataViewModel = function() {
 
     self.doToggleLocked = function() {
         self.isLocked(!self.isLocked());
-        console.log("page.js - InvoiceNewViewModel - isLocked=" + self.isLocked() + " (new state)");
+        console.log("page.js - InvoiceDataViewModel - isLocked=" + self.isLocked() + " (new state)");
     };
 
     self.doTogglePaid = function() {
         self.isPaid(!self.isPaid());
-        console.log("page.js - InvoiceNewViewModel - isPaid=" + self.isPaid() + " (new state)");
+        console.log("page.js - InvoiceDataViewModel - isPaid=" + self.isPaid() + " (new state)");
     };
 
     self.getJson = function() {
@@ -328,10 +452,11 @@ var InvoiceListDataViewModel = function(data) {
     self.totalInclVat = ko.observable(data.totalInclVat);
 }
 
-var InvoiceListViewModel = function(currentView) {
+var InvoiceListViewModel = function(currentView, activeCompanyId) {
     var self = this;
 
     self.currentView = currentView;
+    self.activeCompanyId = activeCompanyId;
 
     self.currentView.subscribe(function(newValue) {
         if (newValue == 'invoices') {
@@ -370,12 +495,13 @@ var InvoiceCustomerModel = function(data) {
     }
 }
 
-var InvoiceNewViewModel = function(currentView) {
+var InvoiceNewViewModel = function(currentView, activeCompanyId) {
     var self = this;
 
     self.data = new InvoiceDataViewModel();    
 
     self.currentView = currentView;
+    self.activeCompanyId = activeCompanyId;
     self.customerList = ko.observableArray();
     self.iid = ko.observable(-1);
 
@@ -403,7 +529,7 @@ var InvoiceNewViewModel = function(currentView) {
 
     self.populate = function() {
         Notify_showSpinner(true);
-        $.getJSON("/api/customers", function(allData) {
+        $.getJSON("/api/customers/" + self.activeCompanyId(), function(allData) {
             var mappedCustomers =
                 $.map(allData, function(item) {
                     return new InvoiceCustomerModel(item);
@@ -523,6 +649,10 @@ var NavViewModel = function() {
          title: 'Home',
          icon: 'glyphicon glyphicon-home',
          location: 'main'},
+        {name: '/page/companies',
+         title: 'Companies',
+         icon: 'glyphicon glyphicon-briefcase',
+         location: 'main'},
         {name: '/page/customers',
          title: 'Customers',
          icon: 'glyphicon glyphicon-user',
@@ -571,9 +701,10 @@ var NavViewModel = function() {
 $(function() {
     console.log("page.js - init - begin");
     var navViewModel = new NavViewModel();
-    var customerViewModel = new CustomerListViewModel(navViewModel.currentView);
-    var invoiceListViewModel = new InvoiceListViewModel(navViewModel.currentView);
-    var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView);
+    var companyViewModel = new CompanyListViewModel(navViewModel.currentView);
+    var customerListViewModel = new CustomerListViewModel(navViewModel.currentView, companyViewModel.activeCompanyId);
+    var invoiceListViewModel = new InvoiceListViewModel(navViewModel.currentView, companyViewModel.activeCompanyId);
+    var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView, companyViewModel.activeCompanyId);
     var settingsViewModel = new SettingsViewModel(navViewModel.currentView);
     var debugViewModel = new DebugViewModel(navViewModel.currentView);
  
@@ -582,7 +713,11 @@ $(function() {
         document.getElementById("app-navbar"));
 
     ko.applyBindings(
-        customerViewModel,
+        companyViewModel,
+        document.getElementById("app-companies"));
+
+    ko.applyBindings(
+        customerListViewModel,
         document.getElementById("app-customer"));
 
     ko.applyBindings(
