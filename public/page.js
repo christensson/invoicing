@@ -290,6 +290,7 @@ var InvoiceDataViewModel = function() {
     self._id = ko.observable();
     self.iid = ko.observable();
     self.uid = ko.observable();
+    self.companyId = ko.observable();
     self.isValid = ko.observable();
     self.isPaid = ko.observable();
     self.isLocked = ko.observable();
@@ -305,6 +306,7 @@ var InvoiceDataViewModel = function() {
 	self._id(newData._id);
 	self.iid(newData.iid);
 	self.uid(newData.uid);
+	self.companyId(newData.companyId);
 	self.isValid(newData.isValid);
 	self.isPaid(newData.isPaid);
 	self.isLocked(newData.isLocked);
@@ -320,11 +322,16 @@ var InvoiceDataViewModel = function() {
 	}
     }
 
+    self.setCompanyId = function(companyId) {
+	self.companyId(companyId);
+    };
+
     self.init = function() {
 	var data = {
             _id: undefined,
 	    iid: undefined,
             uid: undefined,
+	    companyId: undefined,
 	    customer: {
 		_id: undefined,
 		cid: undefined,
@@ -417,6 +424,7 @@ var InvoiceDataViewModel = function() {
             _id: self._id(),
 	    iid: self.iid(),
             uid: self.uid(),
+            companyId: self.companyId(),
 	    isLocked: self.isLocked(),
 	    isPaid: self.isPaid(),
             isValid: self.isValid(),
@@ -439,6 +447,7 @@ var InvoiceListDataViewModel = function(data) {
     self._id = ko.observable(data._id);
     self.iid = ko.observable(data.iid);
     self.uid = ko.observable(data.uid);
+    self.companyId = ko.observable(data.companyId);
     self.isValid = ko.observable(data.isValid);
     self.isPaid = ko.observable(data.isPaid);
     self.isLocked = ko.observable(data.isLocked);
@@ -470,7 +479,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     
     self.populate = function() {
         Notify_showSpinner(true);
-        $.getJSON("/api/invoices", function(allData) {
+        $.getJSON("/api/invoices/" + self.activeCompanyId(), function(allData) {
             var mappedInvoices = $.map(allData, function(item) {
 		return new InvoiceListDataViewModel(item)});
             self.invoiceList(mappedInvoices);
@@ -511,6 +520,8 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
 	var viewArray = newValue.split("/");
         if (viewArray[0] == 'invoice_new') {
             console.log("page.js - InvoiceNewViewModel - activated")
+	    self.data = new InvoiceDataViewModel();
+	    self.data.setCompanyId(self.activeCompanyId());
             self.populate();
         } else if (viewArray[0] == 'invoice_show' && viewArray.length > 1) {
 	    var iid = viewArray[1]; 
@@ -545,7 +556,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
 
     self.getInvoice = function(iid) {
         Notify_showSpinner(true);
-        $.getJSON("/api/invoice/" + iid, function(invoice) {
+        $.getJSON("/api/invoice/" + self.activeCompanyId() + "/" + iid, function(invoice) {
 	    console.log("Got invoice #" + iid + "data=" + JSON.stringify(invoice));
 	    self.data.setData(invoice);
 	    $('#customerId').val(invoice.customer.cid);
@@ -592,6 +603,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
                 self.data._id(data.invoice._id);
                 self.data.iid(data.invoice.iid);
                 self.data.uid(data.invoice.uid);
+                self.data.companyId(data.invoice.companyId);
                 self.data.isValid(data.invoice.isValid);
             },
         });
@@ -612,16 +624,59 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
     }
 };
 
-var SettingsViewModel = function(currentView) {
+var SettingsDataModel = function() {
+    var self = this;
+
+    self.activeCompanyId = ko.observable();
+    self.defaultNumDaysUntilPayment = ko.observable();
+
+    self.setData = function(data) {
+	self.activeCompanyId(data.activeCompanyId);
+	self.defaultNumDaysUntilPayment(data.defaultNumDaysUntilPayment);
+
+	for (var prop in data) {
+	    if (data.hasOwnProperty(prop)) {
+		console.log("Property " + prop + " = " + data[prop]);
+	    }
+	}
+    };
+
+    self.setActiveCompanyId = function(id) {
+	self.activeCompanyId(id);
+    };
+};
+
+var SettingsViewModel = function(currentView, activeCompanyId) {
     var self = this;
 
     self.currentView = currentView;
+    self.activeCompanyId = activeCompanyId;
+
+    self.settings = new SettingsDataModel();
 
     self.currentView.subscribe(function(newValue) {
         if (newValue == 'settings') {
             console.log("page.js - SettingsViewModel - activated")
         }
-    });    
+    });
+
+    self.populate = function() {
+        Notify_showSpinner(true);
+        $.getJSON("/api/settings", function(settings) {
+            self.settings.setData(settings);
+	    self.activeCompanyId(settings.activeCompanyId);
+            Notify_showSpinner(false);
+        }).fail(function() {
+            console.log("page.js - SettingsViewModel - populate - failed");
+            Notify_showSpinner(false);
+            Notify_showMsg('error', 'Failed to get settings!');
+        });
+    }
+
+    self.activeCompanyId.subscribe(function(newValue) {
+        console.log("page.js - SettingsViewModel - Active company change detected: ID=" + newValue);
+	self.settings.setActiveCompanyId(newValue);
+    });
 };
 
 var DebugViewModel = function(currentView) {
@@ -705,8 +760,10 @@ $(function() {
     var customerListViewModel = new CustomerListViewModel(navViewModel.currentView, companyViewModel.activeCompanyId);
     var invoiceListViewModel = new InvoiceListViewModel(navViewModel.currentView, companyViewModel.activeCompanyId);
     var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView, companyViewModel.activeCompanyId);
-    var settingsViewModel = new SettingsViewModel(navViewModel.currentView);
+    var settingsViewModel = new SettingsViewModel(navViewModel.currentView, companyViewModel.activeCompanyId);
     var debugViewModel = new DebugViewModel(navViewModel.currentView);
+
+    settingsViewModel.populate();
  
     ko.applyBindings(
         navViewModel,

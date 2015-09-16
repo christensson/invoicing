@@ -394,16 +394,17 @@
                 </div>
 
                 <div>
-                    <form>
-                        <p>
-                        </p>
-
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-success">
-                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                                OK
-                            </button>
-                        </div>
+                    <form class="form-horizontal">
+                      <div class="form-group">
+                        <label for="defNumDaysUntilPayment" class="control-label">Number of days until payment</label>
+                        <input type="number" class="form-control" id="defNumDaysUntilPayment" placeholder="30" data-bind="value: settings.defaultNumDaysUntilPayment">
+                      </div>
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-success">
+                          <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                          OK
+                        </button>
+                      </div>
                     </form>
                 </div>
             </div>

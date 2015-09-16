@@ -216,6 +216,12 @@ module.exports.init = function() {
     var machCompany1Iid = 1000;
     var testCompany1Iid = 1000;
     var testCompany2Iid = 1000;
+    var machComp1Cust1Id = undefined;
+    var machComp1Cust2Id = undefined;
+    var machComp1Cust3Id = undefined;
+    var testComp1Cust1Id = undefined;
+    var testComp1Cust2Id = undefined;
+    var testComp2Cust1Id = undefined;
 
     // Users
     dropCollectionPromise("users")
@@ -225,13 +231,21 @@ module.exports.init = function() {
                     username: "mach",
                     //password is "mach"
                     password: "$2a$08$3IwByU08C2BdgvwuvMec.eD3ugRp7oRpPHpuRwAOY1q0D8YUiSIYa",
-		    activeCompanyId: undefined
+		    settings:
+		    {
+			activeCompanyId: undefined,
+			defaultNumDaysUntilPayment: 30
+		    }
                 },
                 {
                     username: "test",
                     //password is "test"
                     password: "$2a$08$8XE3C/OGbaT6v2PvonVqTORGkCmzlXSXEd.62Obd/E5SY4E6MYQSG",
-		    activeCompanyId: undefined
+		    settings:
+		    {
+			activeCompanyId: undefined,
+			defaultNumDaysUntilPayment: 30
+		    }
                 }
             ];
             return insertDataPromise("users", userList);
@@ -312,6 +326,28 @@ module.exports.init = function() {
             testCompany2Id = c._id;
             return Q();
         })
+        // Settings
+        .then(function () {
+            return dropCollectionPromise("settings");
+        })
+        .fail(function() {
+	    console.log("Drop collection settings failed!");
+	})
+        .then(function() {
+            var settingsList = [
+                {
+		    uid: testUserId,
+		    activeCompanyId: testCompany2Id,
+		    defaultNumDaysUntilPayment: 30
+                },
+                {
+		    uid: machUserId,
+		    activeCompanyId: machCompany1Id,
+		    defaultNumDaysUntilPayment: 25
+                }
+            ];
+            return insertDataPromise("settings", settingsList);
+	})
         // Customers
         .then(function() {
 	    return dropCollectionPromise("cust");
@@ -440,6 +476,7 @@ module.exports.init = function() {
 			    description: "First",
 			    price: 10.0,
 			    count: 1,
+			    discount: 0.0,
 			    vat: 0.25,
 			    total: 10.0,
 			    isValid: true
@@ -448,6 +485,7 @@ module.exports.init = function() {
 			    description: "Second",
 			    price: 100.0,
 			    count: 3,
+			    discount: 0.0,
 			    vat: 0.25,
 			    total: 300.0,
 			    isValid: true
@@ -507,15 +545,27 @@ module.exports.init = function() {
         .done();
 }
 
-module.exports.getInvoices = function(uid) {
-    var ouid = new ObjectID(uid)
-    return getAllDocsPromise('invoice', {'isValid': true, 'uid': ouid});
+module.exports.getSettings = function(uid) {
+    var ouid = new ObjectID(uid);
+    return getOneDocPromise('settings', {'uid': ouid});
 }
 
-module.exports.getInvoice = function(uid, iid) {
-    var ouid = new ObjectID(uid)
+module.exports.updateSettings = function(uid, settings) {
+    settings.uid = new ObjectID(uid);
+    return updateDataPromise('settings', settings);
+}
+
+module.exports.getInvoices = function(uid, companyId) {
+    var ouid = new ObjectID(uid);
+    var ocompanyId = new ObjectID(companyId);
+    return getAllDocsPromise('invoice', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId});
+}
+
+module.exports.getInvoice = function(uid, companyId, iid) {
+    var ouid = new ObjectID(uid);
+    var ocompanyId = new ObjectID(companyId);
     var deferred = Q.defer();
-    getOneDocPromise('invoice', {'uid': ouid, 'iid': iid}).then(function(invoice) {
+    getOneDocPromise('invoice', {'uid': ouid, 'iid': iid, 'companyId': ocompanyId}).then(function(invoice) {
         if (invoice == undefined) {
             console.log("getInvoice: No invoice #" + iid + " found");
             deferred.reject(new Error("The requested invoice #" + iid + " could not be found."));
@@ -560,6 +610,7 @@ module.exports.addInvoice = function(uid, companyId, invoice) {
 
 module.exports.updateInvoice = function(invoice) {
     invoice.uid = new ObjectID(invoice.uid);
+    invoice.companyId = new ObjectID(invoice.companyId);
     return updateDataPromise('invoice', invoice);
 }
 
@@ -585,6 +636,7 @@ module.exports.addCustomer = function(uid, companyId, customer) {
 
 module.exports.updateCustomer = function(customer) {
     customer.uid = new ObjectID(customer.uid);
+    customer.companyId = new ObjectID(customer.companyId);
     return updateDataPromise('cust', customer);
 }
 

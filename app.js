@@ -171,6 +171,25 @@ function myFailureHandler(res, err) {
     res.end();
 }
 
+app.get("/api/settings", ensureAuthenticated, function(req, res) {
+    var uid = req.user._id;
+    console.log("Get settings: user=" + req.user.username + ", uid=" + uid);
+    mydb.getSettings(uid)
+        .then(function(doc) {
+            res.status(200).json(doc);
+            res.end();
+        })
+        .fail(myFailureHandler.bind(null, res));
+});
+
+app.put("/api/settings", ensureAuthenticated, function(req, res) {
+    var uid = req.user._id;
+    console.log("Update settings: user=" + req.user.username + ", uid=" + uid + ", settings=" + JSON.stringify(req.body));
+    mydb.updateSettings(uid, req.body)
+        .then(okHandler.bind(null, 'updateSettings', res))
+        .fail(myFailureHandler.bind(null, res));
+});
+
 app.get("/api/companies", ensureAuthenticated, function(req, res) {
     var uid = req.user._id;
     console.log("Get companies: user=" + req.user.username + ", uid=" + uid);
@@ -206,18 +225,7 @@ app.put("/api/company/:id", ensureAuthenticated, function(req, res) {
             .fail(myFailureHandler.bind(null, res));
     }
 });
-/*
-app.get("/api/customers", ensureAuthenticated, function(req, res) {
-    var uid = req.user._id;
-    console.log("Get customers: user=" + req.user.username + ", uid=" + uid);
-    mydb.getCustomers(uid)
-        .then(function(docs) {
-            res.status(200).json(docs);
-            res.end();
-        })
-        .fail(myFailureHandler.bind(null, res));
-});
-*/
+
 app.get("/api/customers/:companyId", ensureAuthenticated, function(req, res) {
     var uid = req.user._id;
     var companyId = req.params.companyId;
@@ -256,10 +264,11 @@ app.put("/api/customer/:id", ensureAuthenticated, function(req, res) {
     }
 });
 
-app.get("/api/invoices", ensureAuthenticated, function(req, res) {
+app.get("/api/invoices/:companyId", ensureAuthenticated, function(req, res) {
     var uid = req.user._id;
-    console.log("Get invoices: user=" + req.user.username + ", uid=" + uid);
-    mydb.getInvoices(uid)
+    var companyId = req.params.companyId;
+    console.log("Get invoices: user=" + req.user.username + ", uid=" + uid + ", companyId=" + companyId);
+    mydb.getInvoices(uid, companyId)
         .then(function(docs) {
             res.status(200).json(docs);
             res.end();
@@ -267,12 +276,13 @@ app.get("/api/invoices", ensureAuthenticated, function(req, res) {
         .fail(myFailureHandler.bind(null, res));
 });
 
-app.get("/api/invoice/:iid", ensureAuthenticated, function(req, res) {
+app.get("/api/invoice/:companyId/:iid", ensureAuthenticated, function(req, res) {
     var uid = req.user._id;
     var iid = parseInt(req.params.iid);
+    var companyId = req.params.companyId;
     console.log("Get invoice: user=" + req.user.username +
-		", uid=" + uid + ", iid=" + iid);    
-    mydb.getInvoice(uid, iid)
+		", uid=" + uid + ", iid=" + iid, ", companyId=" + companyId);    
+    mydb.getInvoice(uid, companyId, iid)
         .then(function(invoice) {
             res.status(200).json(invoice);
             res.end();
