@@ -46,6 +46,20 @@
             <ul class="nav navbar-nav navbar-right">
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                    <span class="glyphicon glyphicon-briefcase" aria-hidden="true"></span><span data-bind="text: activeCompanyName"></span>
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" role="menu" data-bind="foreach: mainViews">
+                  <li data-bind="if: \$data.location == 'companyMenu'">
+                    <a href='#' data-bind="click: \$root.selectView">
+                        <span class="glyphicon" data-bind="css: \$data.icon" aria-hidden="true"></span>
+                        <span data-bind="text: \$data.title"></span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                     <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
                     $data.user.username
                     <span class="caret"></span>
@@ -65,7 +79,7 @@
                   </li>
                 </ul>
               </li>
-            </ul>            
+            </ul>
           </div><!--/.nav-collapse -->
         </div>
       </nav>
