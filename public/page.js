@@ -515,6 +515,17 @@ var InvoiceListDataViewModel = function(data) {
   self.projId = ko.observable(data.projId);
   self.totalExclVat = ko.observable(data.totalExclVat);
   self.totalInclVat = ko.observable(data.totalInclVat);
+  self.isOverdue = ko.pureComputed(function() {
+    var overdue = false;
+    var today = new Date();
+    var invoiceDate = new Date(self.date());
+    console.log("Invoice isOverdue: iid=" + self.iid() + " today=" + today + ", date=" + invoiceDate);
+    if (today > invoiceDate) {
+      console.log("Invoice " + self.iid() + " is overdue!");
+      overdue = true;
+    }
+    return overdue;
+  });
 };
 
 var InvoiceListViewModel = function(currentView, activeCompanyId) {

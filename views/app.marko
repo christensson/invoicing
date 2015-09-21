@@ -209,7 +209,7 @@
                                 </tr>
                             </thead>
                             <tbody data-bind="foreach: invoiceList">
-                                <tr data-bind="if: !isPaid() || (\$root.showPaid() && isPaid())">
+                                <tr data-bind="if: !isPaid() || (\$root.showPaid() && isPaid()), css: { danger: (!isPaid() && isOverdue()) }">
                                     <td>
                                         <a class="btn btn-primary" data-bind="attr: { href: '#/page/invoice_show/' + iid() }">
                                             <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
