@@ -370,6 +370,7 @@ var InvoiceDataViewModel = function() {
     self.projId(newData.projId);
     self.invoiceItems.removeAll();
     for ( var i = 0; i < newData.invoiceItems.length; i++) {
+      console.log("Push item i=" + i + " desc=" + newData.invoiceItems[i].description);
       self.invoiceItems.push(new InvoiceItemViewModel(newData.invoiceItems[i]));
     }
   };
@@ -450,6 +451,7 @@ var InvoiceDataViewModel = function() {
       isValid : true
     };
     self.invoiceItems.push(new InvoiceItemViewModel(data));
+    console.log("Added new invoice item. #items=" + self.invoiceItems().length + ", data=" + JSON.stringify(data));
   };
 
   self.deleteInvoiceItem = function(item) {
@@ -520,6 +522,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
 
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
+  self.showPaid = ko.observable(true);
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'invoices') {
@@ -545,6 +548,12 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
       Notify_showMsg('error', 'Failed to get invoices!');
     });
   };
+  
+  self.doToggleShowPaid = function() {
+    self.showPaid(!self.showPaid());
+    console.log("page.js - InvoiceListViewModel - showPaid=" + self.showPaid()
+        + " (new state)");
+  };
 };
 
 var InvoiceCustomerModel = function(data) {
@@ -555,9 +564,10 @@ var InvoiceCustomerModel = function(data) {
   };
   // Override toJSON method since typeahead reads the JSON for the suggestion
   // list
+  /*
   self.toJSON = function() {
     return self.toString();
-  };
+  };*/
 };
 
 var InvoiceNewViewModel = function(currentView, activeCompanyId) {
@@ -568,26 +578,38 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
   self.customerList = ko.observableArray();
-  self.iid = ko.observable(-1);
+  self.selectedCustomer = ko.observable();
+  self.numServerReqLeft = 0;
 
   self.currentView.subscribe(function(newValue) {
     self.data.init();
-    $('#customerId').val("");
+    self.selectedCustomer(undefined);
+    //$('#customerId').val("");
     var viewArray = newValue.split("/");
     if (viewArray[0] == 'invoice_new') {
       console.log("page.js - InvoiceNewViewModel - activated");
-      self.data = new InvoiceDataViewModel();
-      self.data.setCompanyId(self.activeCompanyId());
+      self.data.init();
+      self.data.setCompanyId(self.activeCompanyId());      
+      self.numServerReqLeft = 1;
       self.populate();
     } else if (viewArray[0] == 'invoice_show' && viewArray.length > 1) {
       var iid = viewArray[1];
-      self.iid(iid);
       console.log("page.js - InvoiceNewViewModel - activated - show #" + iid);
+      self.numServerReqLeft = 2;
       self.getInvoice(iid);
       self.populate();
     }
   });
+  
+  self.selectedCustomer.subscribe(function(newValue) {
+    if (newValue !== undefined && newValue.data !== undefined) {
+      console.log("page.js - InvoiceNewViewModel - Customer selected - "
+          + JSON.stringify(newValue.data));
+      self.data.setCustomer(newValue.data);
+    }
+  });
 
+  /*
   $('#customerId').bind(
       'typeahead:selected',
       function(obj, datum, name) {
@@ -596,17 +618,20 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
             + JSON.stringify(datum.data));
         self.data.setCustomer(datum.data);
       });
-
+  */
   self.populate = function() {
     Notify_showSpinner(true);
+    self.customerList.removeAll();
     $.getJSON("/api/customers/" + self.activeCompanyId(), function(allData) {
-      var mappedCustomers = $.map(allData, function(item) {
-        return new InvoiceCustomerModel(item);
-      });
-      self.customerList(mappedCustomers);
+      for (var i = 0; i < allData.length; i++) {
+        self.customerList.push(new InvoiceCustomerModel(allData[i]));
+      }
+      self.numServerReqLeft--;
+      self.syncCustomerIdInput();
       Notify_showSpinner(false);
     }).fail(function() {
       console.log("page.js - InvoiceNewViewModel - populate - failed");
+      self.numServerReqLeft--;
       Notify_showSpinner(false);
       Notify_showMsg('error', 'Failed to get customers!');
     });
@@ -618,23 +643,46 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
         "/api/invoice/" + self.activeCompanyId() + "/" + iid,
         function(invoice) {
           console
-              .log("Got invoice #" + iid + "data=" + JSON.stringify(invoice));
+          .log("Got invoice #" + iid + "data=" + JSON.stringify(invoice));
           self.data.setData(invoice);
-          $('#customerId').val(invoice.customer.cid);
+          self.selectedCustomer(self.data.customer());
+          // $('#customerId').val(invoice.customer.cid);
+          self.numServerReqLeft--;
+          self.syncCustomerIdInput();
           Notify_showSpinner(false);
         }).fail(function() {
-      console.log("page.js - InvoiceNewViewModel - getInvoice - failed");
-      Notify_showSpinner(false);
-      Notify_showMsg('error', 'Failed to get invoice!');
-    });
+          console.log("page.js - InvoiceNewViewModel - getInvoice - failed");
+          self.numServerReqLeft--;
+          Notify_showSpinner(false);
+          Notify_showMsg('error', 'Failed to get invoice!');
+        });
+  };
+  
+  self.syncCustomerIdInput = function() {
+    if (self.numServerReqLeft === 0) {
+      console.log("page.js - InvoiceNewViewModel - syncCustomerIdInput");
+      var cid = self.data.customer().cid;
+      if (cid !== undefined) {
+        for (var i = 0; i < self.customerList().length; i++) {
+          if (cid === self.customerList()[i].data.cid) {
+            console.log("page.js - InvoiceNewViewModel - syncCustomerIdInput: cid=" + cid + " found");
+            self.selectedCustomer(self.customerList()[i]);
+            break;
+          }
+        }
+      } else {
+        console.log("page.js - InvoiceNewViewModel - syncCustomerIdInput: customer.cid is undefined");        
+      }
+    }
   };
 
   self.updateServer = function() {
-    if ((self.data._id() == undefined) && !self.data.isValid()) {
+    if ((self.data._id() === undefined) && !self.data.isValid()) {
       console.log("updateServer: Nothing to do (invalid entry without _id)");
       return;
-    } else if (self.data.customer()._id == undefined) {
+    } else if (self.data.customer()._id === undefined) {
       Notify_showMsg('error', 'Customer must be selected!');
+      console.log("No customer selected: " + JSON.stringify(self.data.customer()));
       // self.nameError(true);
       return;
     }

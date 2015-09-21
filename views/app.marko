@@ -189,39 +189,49 @@
                             </colgroup>
                             <thead>
                                 <tr>
-				    <th></th>
-				    <th>Id</th>
+                                    <th></th>
+                                    <th>Id</th>
                                     <th>Date</th>
                                     <th>Customer Id</th>
                                     <th>Customer</th>
                                     <th>Total Excl. VAT</th>
-                                    <th>Paid</th>
+                                    <th>
+                                      Paid
+                                      <button type="button" class="btn btn-default btn-xs" data-bind="click: doToggleShowPaid">
+                                          <span data-bind="if: showPaid">
+                                              <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+                                          </span>
+                                          <span data-bind="ifnot: showPaid">
+                                              <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                                          </span>
+                                      </button>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody data-bind="foreach: invoiceList">
-                                <tr>
+                                <tr data-bind="if: !isPaid() || (\$root.showPaid() && isPaid())">
                                     <td>
                                         <a class="btn btn-primary" data-bind="attr: { href: '#/page/invoice_show/' + iid() }">
                                             <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
                                         </a>
                                     </td>
                                     <td>
-				      <p>
-					<span class="form-control-static" data-bind="text: iid"></span>
-					<span data-bind="if: isLocked">
-					  <span class="form-control-static glyphicon glyphicon-lock" aria-hidden="true"></span>
-					</span>
-				      </p>
-				    </td>
+                                      <p>
+                                        <span class="form-control-static" data-bind="text: iid"></span>
+                                        <span data-bind="if: isLocked">
+                                          <span class="form-control-static glyphicon glyphicon-lock" aria-hidden="true"></span>
+                                        </span>
+                                      </p>
+                                    </td>
                                     <td><p class="form-control-static" data-bind="text: date"></p></td>
                                     <td><p class="form-control-static" data-bind="text: customer().cid"></p></td>
                                     <td><p class="form-control-static" data-bind="text: customer().name"></p></td>
                                     <td><p class="form-control-static" data-bind="text: totalExclVat"></p></td>
                                     <td>
                                         <p>
-					  <span data-bind="if: isPaid">
-					    <span class="form-control-static glyphicon glyphicon-ok" aria-hidden="true"></span>
-					  </span>
+                                          <span data-bind="if: isPaid">
+                                            <span class="form-control-static glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                          </span>
                                         </p>
                                     </td>
                                 </tr>
@@ -233,7 +243,7 @@
                         <a href="#/page/invoice_new" type="button" class="btn btn-success">
                             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                             New invoice
-                        </button>
+                        </a>
                     </div>
                 </form>
             </div>
@@ -241,14 +251,29 @@
             <div id="app-invoice_new" data-bind="visible: currentView() == 'invoice_new' || (currentView() != undefined && currentView().search('invoice_show') == 0)">
                 <div class="row">
                     <div class="col-md-8 panel panel-default">
-                        <div class="panel-heading"><h3 class="panel-title">Invoice #<span data-bind="text: data.iid"></span></h3></div>
+                        <div class="panel-heading">
+                          <h3 class="panel-title">
+                            <span data-bind="ifnot: data.iid() === undefined">
+                              Invoice #<span data-bind="text: data.iid"></span>
+                            </span>
+                            <span data-bind="if: data.iid() === undefined">
+                              New Invoice
+                            </span>
+                          </h3>
+                        </div>
                         <div class="panel-body">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <label for="customerId" class="control-label">Customer</label>
                                         <br/> <!-- br needed to put input below on new line for some strange reason... -->
+                                        <select class="form-control" id="customerId"
+                                          data-bind="options: customerList, value: selectedCustomer, disable: data.isLocked,
+                                                    optionsCaption: 'Choose...'">
+                                        </select>
+                                        <!--
                                         <input type="text" class="form-control" id="customerId" data-bind="typeahead: customerList, disable: data.isLocked"></input>
+                                        -->
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -391,11 +416,11 @@
                     </button>
                     <button type="button" class="btn btn-info" data-bind="click: doTogglePaid">
                         <span data-bind="if: data.isPaid">
-			    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                             Set unpaid
                         </span>
                         <span data-bind="ifnot: data.isPaid">
-			    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
                             Set paid
                         </span>
                     </button>
