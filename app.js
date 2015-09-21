@@ -371,7 +371,7 @@ app.post('/login', passport.authenticate('local-signin', {
 // homepage
 app.get('/logout', ensureAuthenticated, function(req, res) {
   var name = req.user.username;
-  console.log("LOGGIN OUT " + req.user.username)
+  console.log("LOGGIN OUT " + req.user.username);
   req.logout();
   req.session.notice = "You have successfully been logged out " + name + "!";
   res.redirect('/signin');
@@ -383,7 +383,7 @@ var appTemplate = marko.load(appTemplatePath);
 app.get('/', ensureAuthenticated, function(req, res) {
   userInfo = {
     username : req.user.username
-  }
+  };
   appTemplate.render({
     msg : res.locals,
     user : userInfo

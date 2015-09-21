@@ -13,7 +13,7 @@ var generate_mongo_url = function(obj){
   else{
     return "mongodb://" + obj.hostname + ":" + obj.port + "/" + obj.db;
   }
-}
+};
 
 var mongo = {
     "hostname":"localhost",
@@ -21,7 +21,7 @@ var mongo = {
     "username":"",
     "password":"",
     "name":"",
-    "db":"mydb"}
+    "db":"mydb"};
 
 var mongourl = generate_mongo_url(mongo);
 
@@ -190,7 +190,7 @@ function getNextSequencePromise(uid, companyId, name) {
         query,
         [], // sort
         { $inc: { seq: 1 } }, // update
-        { new: false }, // options
+        { 'new': false }, // options
         function(err, obj) {
           if(err) {
             deferred.reject(
@@ -217,12 +217,6 @@ module.exports.init = function() {
   var machCompany1Iid = 1000;
   var testCompany1Iid = 1000;
   var testCompany2Iid = 1000;
-  var machComp1Cust1Id = undefined;
-  var machComp1Cust2Id = undefined;
-  var machComp1Cust3Id = undefined;
-  var testComp1Cust1Id = undefined;
-  var testComp1Cust2Id = undefined;
-  var testComp2Cust1Id = undefined;
 
   // Users
   dropCollectionPromise("users")
@@ -500,7 +494,7 @@ module.exports.init = function() {
   })
   // Counters
   .then(function() {
-    return dropCollectionPromise("counters")
+    return dropCollectionPromise("counters");
   })
   .then(function() {
     var counterList = [
@@ -544,23 +538,23 @@ module.exports.init = function() {
     return insertDataPromise("counters", counterList);
   })
   .done();
-}
+};
 
 module.exports.getSettings = function(uid) {
   var ouid = new ObjectID(uid);
   return getOneDocPromise('settings', {'uid': ouid});
-}
+};
 
 module.exports.updateSettings = function(uid, settings) {
   settings.uid = new ObjectID(uid);
   return updateDataPromise('settings', settings);
-}
+};
 
 module.exports.getInvoices = function(uid, companyId) {
   var ouid = new ObjectID(uid);
   var ocompanyId = new ObjectID(companyId);
   return getAllDocsPromise('invoice', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId});
-}
+};
 
 module.exports.getInvoice = function(uid, companyId, iid) {
   var ouid = new ObjectID(uid);
@@ -576,18 +570,18 @@ module.exports.getInvoice = function(uid, companyId, iid) {
     }
   });
   return deferred.promise;
-}
+};
 
 module.exports.getCustomers = function(uid, companyId) {
-  var ouid = new ObjectID(uid)
+  var ouid = new ObjectID(uid);
   var ocompanyId = new ObjectID(companyId);
   return getAllDocsPromise('cust', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId});
-}
+};
 
 module.exports.getCompanies = function(uid) {
-  var ouid = new ObjectID(uid)
+  var ouid = new ObjectID(uid);
   return getAllDocsPromise('company', {'isValid': true, 'uid': ouid});
-}
+};
 
 module.exports.addInvoice = function(uid, companyId, invoice) {
   var deferred = Q.defer();
@@ -607,13 +601,13 @@ module.exports.addInvoice = function(uid, companyId, invoice) {
   });
 
   return deferred.promise;
-}
+};
 
 module.exports.updateInvoice = function(invoice) {
   invoice.uid = new ObjectID(invoice.uid);
   invoice.companyId = new ObjectID(invoice.companyId);
   return updateDataPromise('invoice', invoice);
-}
+};
 
 module.exports.addCustomer = function(uid, companyId, customer) {
   var deferred = Q.defer();
@@ -629,27 +623,27 @@ module.exports.addCustomer = function(uid, companyId, customer) {
     });
   }).fail(function(err) {
     console.error("addCustomer: Error: " + err.body);
-    deferred.reject(err);
+    deferred.reject(err);;
   });
 
   return deferred.promise;
-}
+};
 
 module.exports.updateCustomer = function(customer) {
   customer.uid = new ObjectID(customer.uid);
   customer.companyId = new ObjectID(customer.companyId);
   return updateDataPromise('cust', customer);
-}
+};
 
 module.exports.addCompany = function(uid, company) {
   company.uid = new ObjectID(uid);
   return insertDataPromise('company', company);
-}
+};
 
 module.exports.updateCompany = function(company) {
   company.uid = new ObjectID(company.uid);
   return updateDataPromise('company', company);
-}
+};
 
 module.exports.getUser = function(username) {
   var deferred = Q.defer();
@@ -663,9 +657,9 @@ module.exports.getUser = function(username) {
     }
   });
   return deferred.promise;
-}
+};
 
 module.exports.addUser = function(user) {
   return insertDataPromise('users', user);
-}
+};
 

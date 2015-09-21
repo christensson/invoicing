@@ -191,7 +191,7 @@ var CustomerViewModel = function(data) {
 
   self.updateServer = function() {
     if ((self._id() == undefined) && !self.isValid()) {
-      console.log("updateServer: Nothing to do (invalid entry without _id)")
+      console.log("updateServer: Nothing to do (invalid entry without _id)");
       return;
     } else if (self.name().length == 0) {
       Notify_showMsg('error',
@@ -218,7 +218,6 @@ var CustomerViewModel = function(data) {
       }),
       dataType : "json",
       success : function(data) {
-        var operation = "";
         console.log("updateServer: response: " + JSON.stringify(data));
         var opStr = "added";
         if (!isNewCustomer) {
@@ -250,7 +249,7 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'customers') {
-      console.log("page.js - CustomerListViewModel - activated")
+      console.log("page.js - CustomerListViewModel - activated");
       self.populate();
     }
   });
@@ -262,7 +261,7 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
     Notify_showSpinner(true);
     $.getJSON("/api/customers/" + self.activeCompanyId(), function(allData) {
       var mappedCustomers = $.map(allData, function(item) {
-        return new CustomerViewModel(item)
+        return new CustomerViewModel(item);
       });
       self.customerList(mappedCustomers);
       Notify_showSpinner(false);
@@ -271,7 +270,7 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
       Notify_showSpinner(false);
       Notify_showMsg('error', 'Failed to get customers!');
     });
-  }
+  };
 
   self.newCustomer = function() {
     var data = {
@@ -284,15 +283,15 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
       addr2 : "",
       phone : "",
       isValid : true
-    }
+    };
     self.customerList.push(new CustomerViewModel(data));
-  }
+  };
 
   self.deleteCustomer = function(c) {
     console.log("Delete: " + JSON.stringify(c));
     c.isValid(false);
     self.customerList.destroy(c);
-  }
+  };
 
   self.doCustomersReport = function() {
     console.log("Report requested");
@@ -306,7 +305,7 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
       child.focus();
     } catch (e) {
     }
-  }
+  };
 };
 
 var InvoiceItemViewModel = function(data) {
@@ -373,7 +372,7 @@ var InvoiceDataViewModel = function() {
     for ( var i = 0; i < newData.invoiceItems.length; i++) {
       self.invoiceItems.push(new InvoiceItemViewModel(newData.invoiceItems[i]));
     }
-  }
+  };
 
   self.setCompanyId = function(companyId) {
     self.companyId(companyId);
@@ -403,7 +402,7 @@ var InvoiceDataViewModel = function() {
       invoiceItems : []
     };
     self.setData(data);
-  }
+  };
 
   self.init();
 
@@ -449,7 +448,7 @@ var InvoiceDataViewModel = function() {
       vat : 0.25,
       discount : 0.0,
       isValid : true
-    }
+    };
     self.invoiceItems.push(new InvoiceItemViewModel(data));
   };
 
@@ -495,7 +494,7 @@ var InvoiceDataViewModel = function() {
     };
     return res;
   };
-}
+};
 
 var InvoiceListDataViewModel = function(data) {
   var self = this;
@@ -514,7 +513,7 @@ var InvoiceListDataViewModel = function(data) {
   self.projId = ko.observable(data.projId);
   self.totalExclVat = ko.observable(data.totalExclVat);
   self.totalInclVat = ko.observable(data.totalInclVat);
-}
+};
 
 var InvoiceListViewModel = function(currentView, activeCompanyId) {
   var self = this;
@@ -524,7 +523,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'invoices') {
-      console.log("page.js - InvoiceListViewModel - activated")
+      console.log("page.js - InvoiceListViewModel - activated");
       self.populate();
     }
   });
@@ -536,7 +535,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     Notify_showSpinner(true);
     $.getJSON("/api/invoices/" + self.activeCompanyId(), function(allData) {
       var mappedInvoices = $.map(allData, function(item) {
-        return new InvoiceListDataViewModel(item)
+        return new InvoiceListDataViewModel(item);
       });
       self.invoiceList(mappedInvoices);
       Notify_showSpinner(false);
@@ -545,7 +544,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
       Notify_showSpinner(false);
       Notify_showMsg('error', 'Failed to get invoices!');
     });
-  }
+  };
 };
 
 var InvoiceCustomerModel = function(data) {
@@ -553,13 +552,13 @@ var InvoiceCustomerModel = function(data) {
   self.data = data;
   self.toString = function() {
     return "" + self.data.cid + " - " + self.data.name;
-  }
+  };
   // Override toJSON method since typeahead reads the JSON for the suggestion
   // list
   self.toJSON = function() {
     return self.toString();
-  }
-}
+  };
+};
 
 var InvoiceNewViewModel = function(currentView, activeCompanyId) {
   var self = this;
@@ -576,7 +575,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
     $('#customerId').val("");
     var viewArray = newValue.split("/");
     if (viewArray[0] == 'invoice_new') {
-      console.log("page.js - InvoiceNewViewModel - activated")
+      console.log("page.js - InvoiceNewViewModel - activated");
       self.data = new InvoiceDataViewModel();
       self.data.setCompanyId(self.activeCompanyId());
       self.populate();
@@ -611,7 +610,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
       Notify_showSpinner(false);
       Notify_showMsg('error', 'Failed to get customers!');
     });
-  }
+  };
 
   self.getInvoice = function(iid) {
     Notify_showSpinner(true);
@@ -628,7 +627,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
       Notify_showSpinner(false);
       Notify_showMsg('error', 'Failed to get invoice!');
     });
-  }
+  };
 
   self.updateServer = function() {
     if ((self.data._id() == undefined) && !self.data.isValid()) {
@@ -652,7 +651,6 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
       data : ajaxData,
       dataType : "json",
       success : function(data) {
-        var operation = "";
         console.log("updateServer: response: " + JSON.stringify(data));
         var opStr = "added";
         if (!isNewInvoice) {
@@ -673,18 +671,18 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
 
   self.newItem = function() {
     self.data.newInvoiceItem();
-  }
+  };
   self.deleteItem = function(item) {
     console.log("page.js - InvoiceNewViewModel - delete: "
         + JSON.stringify(item));
     self.data.deleteInvoiceItem(item);
-  }
+  };
   self.doToggleLocked = function(item) {
     self.data.doToggleLocked();
-  }
+  };
   self.doTogglePaid = function(item) {
     self.data.doTogglePaid();
-  }
+  };
 };
 
 var SettingsDataModel = function() {
@@ -756,7 +754,7 @@ var DebugViewModel = function(currentView) {
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'debug') {
-      console.log("page.js - DebugViewModel - activated")
+      console.log("page.js - DebugViewModel - activated");
     }
   });
 
