@@ -517,12 +517,23 @@ var InvoiceListDataViewModel = function(data) {
   self.totalInclVat = ko.observable(data.totalInclVat);
   self.isOverdue = ko.pureComputed(function() {
     var overdue = false;
-    var today = new Date();
-    var invoiceDate = new Date(self.date());
-    console.log("Invoice isOverdue: iid=" + self.iid() + " today=" + today + ", date=" + invoiceDate);
-    if (today > invoiceDate) {
-      console.log("Invoice " + self.iid() + " is overdue!");
-      overdue = true;
+    if (self.daysUntilPayment() !== undefined && parseInt(self.daysUntilPayment()) >= 0)
+    {
+      var invoiceDate = new Date(self.date());
+      var invoiceAgeMs = Date.now() - invoiceDate.valueOf();
+      var invoiceAgeDays = invoiceAgeMs / (1000 * 3600 * 24);
+      console.log("Invoice isOverdue: iid=" + self.iid() + ", date="
+          + invoiceDate + ", ageInDays=" + invoiceAgeDays + ", daysUntilPayment="
+          + self.daysUntilPayment());
+      if (invoiceAgeDays > parseInt(self.daysUntilPayment())) {
+        console.log("Invoice " + self.iid() + " is overdue!");
+        overdue = true;
+      }
+    }
+    else
+    {
+      console.log("Invoice isOverdue: iid=" + self.iid() + ", not valid daysUntilPayment="
+          + self.daysUntilPayment());
     }
     return overdue;
   });
@@ -534,6 +545,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
   self.showPaid = ko.observable(true);
+  self.invoiceListSort = ko.observable('iidAsc');
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'invoices') {
@@ -564,6 +576,77 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     self.showPaid(!self.showPaid());
     console.log("page.js - InvoiceListViewModel - showPaid=" + self.showPaid()
         + " (new state)");
+  };
+  
+  self.doSortToggle = function(field) {
+    if (self.invoiceListSort() === field + 'Asc') {
+      self.invoiceListSort(field + 'Desc');
+    } else {
+      self.invoiceListSort(field + 'Asc');
+    }
+  };
+
+  self.invoiceListSort.subscribe(function(newVal) {
+    console.log("page.js - InvoiceListViewModel - invoiceListSort.subscribe=" + JSON.stringify(newVal));
+    // Sort according to compare method.
+    self.invoiceList.sort(self[newVal + 'Compare']);
+  });
+  
+  self.iidAscCompare = function(aRow, bRow) {
+    return aRow.iid() - bRow.iid();
+  };
+
+  self.iidDescCompare = function(aRow, bRow) {
+    return self.iidAscCompare(bRow, aRow);
+  };
+
+  self.dateAscCompare = function(aRow, bRow) {
+    var aDate = new Date(aRow.date());
+    var bDate = new Date(bRow.date());
+    return aDate.valueOf() - bDate.valueOf();
+  };
+
+  self.dateDescCompare = function(aRow, bRow) {
+    return self.dateAscCompare(bRow, aRow);
+  };
+
+  self.cidAscCompare = function(aRow, bRow) {
+    return aRow.customer().cid - bRow.customer().cid;
+  };
+
+  self.cidDescCompare = function(aRow, bRow) {
+    return self.cidAscCompare(bRow, aRow);
+  };
+
+  self.customerAscCompare = function(aRow, bRow) {
+    if (aRow.customer().name < bRow.customer().name) {
+      return -1;
+    } else if (aRow.customer().name > bRow.customer().name) {
+      return 1;
+    } else {
+      return 0;
+    }
+;
+  };
+
+  self.customerDescCompare = function(aRow, bRow) {
+    return self.customerAscCompare(bRow, aRow);
+  };
+
+  self.paidAscCompare = function(aRow, bRow) {
+    return aRow.isPaid() - bRow.isPaid();
+  };
+
+  self.paidDescCompare = function(aRow, bRow) {
+    return self.paidAscCompare(bRow, aRow);
+  };
+
+  self.totalExclVatAscCompare = function(aRow, bRow) {
+    return aRow.totalExclVat() - bRow.totalExclVat();
+  };
+
+  self.totalExclVatDescCompare = function(aRow, bRow) {
+    return self.totalExclVatAscCompare(bRow, aRow);
   };
 };
 

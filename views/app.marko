@@ -181,8 +181,8 @@
                             <colgroup>
                               <col class="col-md-1">
                               <col class="col-md-1">
-                              <col class="col-md-2">
                               <col class="col-md-1">
+                              <col class="col-md-2">
                               <col class="col-md-4">
                               <col class="col-md-2">
                               <col class="col-md-1">
@@ -190,13 +190,71 @@
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Id</th>
-                                    <th>Date</th>
-                                    <th>Customer Id</th>
-                                    <th>Customer</th>
-                                    <th>Total Excl. VAT</th>
+                                    <th>
+                                      Id
+                                      <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('iid')">
+                                          <span data-bind="if: invoiceListSort() !== 'iidAsc'">
+                                              <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
+                                          </span>
+                                          <span data-bind="if: invoiceListSort() === 'iidAsc'">
+                                              <span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>
+                                          </span>
+                                      </button>
+                                    </th>
+                                    <th>
+                                      Date
+                                      <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('date')">
+                                          <span data-bind="if: invoiceListSort() !== 'dateAsc'">
+                                              <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
+                                          </span>
+                                          <span data-bind="if: invoiceListSort() === 'dateAsc'">
+                                              <span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>
+                                          </span>
+                                      </button>
+                                    </th>
+                                    <th>
+                                      Customer Id
+                                      <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('cid')">
+                                          <span data-bind="if: invoiceListSort() !== 'cidAsc'">
+                                              <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
+                                          </span>
+                                          <span data-bind="if: invoiceListSort() === 'cidAsc'">
+                                              <span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>
+                                          </span>
+                                      </button>
+                                    </th>
+                                    <th>
+                                      Customer
+                                      <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('customer')">
+                                          <span data-bind="if: invoiceListSort() !== 'customerAsc'">
+                                              <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
+                                          </span>
+                                          <span data-bind="if: invoiceListSort() === 'customerAsc'">
+                                              <span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>
+                                          </span>
+                                      </button>
+                                    </th>
+                                    <th>
+                                      Total Excl. VAT
+                                      <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('totalExclVat')">
+                                          <span data-bind="if: invoiceListSort() !== 'totalExclVatAsc'">
+                                              <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
+                                          </span>
+                                          <span data-bind="if: invoiceListSort() === 'totalExclVatAsc'">
+                                              <span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>
+                                          </span>
+                                      </button>
+                                    </th>
                                     <th>
                                       Paid
+                                      <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('paid')">
+                                          <span data-bind="if: invoiceListSort() !== 'paidAsc'">
+                                              <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
+                                          </span>
+                                          <span data-bind="if: invoiceListSort() === 'paidAsc'">
+                                              <span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>
+                                          </span>
+                                      </button>
                                       <button type="button" class="btn btn-default btn-xs" data-bind="click: doToggleShowPaid">
                                           <span data-bind="if: showPaid">
                                               <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
