@@ -683,14 +683,14 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
     if (viewArray[0] == 'invoice_new') {
       console.log("page.js - InvoiceNewViewModel - activated");
       self.data.init();
-      self.data.setCompanyId(self.activeCompanyId());      
+      self.data.setCompanyId(self.activeCompanyId());
       self.numServerReqLeft = 1;
       self.populate();
     } else if (viewArray[0] == 'invoice_show' && viewArray.length > 1) {
-      var iid = viewArray[1];
-      console.log("page.js - InvoiceNewViewModel - activated - show #" + iid);
+      var _id = viewArray[1];
+      console.log("page.js - InvoiceNewViewModel - activated - show #" + _id);
       self.numServerReqLeft = 2;
-      self.getInvoice(iid);
+      self.getInvoice(_id);
       self.populate();
     }
   });
@@ -731,16 +731,15 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
     });
   };
 
-  self.getInvoice = function(iid) {
+  self.getInvoice = function(_id) {
     Notify_showSpinner(true);
     $.getJSON(
-        "/api/invoice/" + self.activeCompanyId() + "/" + iid,
+        "/api/invoice/" + _id,
         function(invoice) {
           console
-          .log("Got invoice #" + iid + "data=" + JSON.stringify(invoice));
+          .log("Got invoice id=" + _id + ", data=" + JSON.stringify(invoice));
           self.data.setData(invoice);
           self.selectedCustomer(self.data.customer());
-          // $('#customerId').val(invoice.customer.cid);
           self.numServerReqLeft--;
           self.syncCustomerIdInput();
           Notify_showSpinner(false);
@@ -770,9 +769,9 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
     }
   };
 
-  self.updateServer = function() {
+  self.saveInvoice = function() {
     if ((self.data._id() === undefined) && !self.data.isValid()) {
-      console.log("updateServer: Nothing to do (invalid entry without _id)");
+      console.log("saveInvoice: Nothing to do (invalid entry without _id)");
       return;
     } else if (self.data.customer()._id === undefined) {
       Notify_showMsg('error', 'Customer must be selected!');
@@ -784,7 +783,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
     var isNewInvoice = (self.data._id() == undefined) ? true : false;
     var ajaxData = JSON.stringify(self.data.getJson());
     var ajaxUrl = "/api/invoice/" + self.data._id();
-    console.log("updateServer: AJAX PUT (url=" + ajaxUrl + "): JSON="
+    console.log("saveInvoice: AJAX PUT (url=" + ajaxUrl + "): JSON="
         + ajaxData);
     return $.ajax({
       url : ajaxUrl,
@@ -793,7 +792,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
       data : ajaxData,
       dataType : "json",
       success : function(data) {
-        console.log("updateServer: response: " + JSON.stringify(data));
+        console.log("saveInvoice: response: " + JSON.stringify(data));
         var opStr = "added";
         if (!isNewInvoice) {
           opStr = (data.invoice.isValid) ? 'updated' : 'deleted';
@@ -809,6 +808,25 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
         self.data.isValid(data.invoice.isValid);
       },
     });
+  };
+
+  self.doInvoiceReport = function() {
+    console.log("page.js - InvoiceNewViewModel - Report requested");
+    if (self.data._id() !== undefined) {
+      Notify_showSpinner(true);
+      try {
+        var child = window.open("/api/invoiceReport/" + self.data._id());
+        $(child).ready(function() {
+          console.log("page.js - InvoiceNewViewModel - Report done!");
+          Notify_showSpinner(false);
+        });
+        child.focus();
+      } catch (e) {
+      }
+    } else {
+      Notify_showMsg('info', 'Cannot print unsaved invoice, please save it first.');
+      console.log("page.js - InvoiceNewViewModel - Invoice not saved.");
+    }
   };
 
   self.newItem = function() {

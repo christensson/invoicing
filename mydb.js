@@ -556,14 +556,14 @@ module.exports.getInvoices = function(uid, companyId) {
   return getAllDocsPromise('invoice', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId});
 };
 
-module.exports.getInvoice = function(uid, companyId, iid) {
+module.exports.getInvoice = function(uid, id) {
   var ouid = new ObjectID(uid);
-  var ocompanyId = new ObjectID(companyId);
+  var oid = new ObjectID(id);
   var deferred = Q.defer();
-  getOneDocPromise('invoice', {'uid': ouid, 'iid': iid, 'companyId': ocompanyId}).then(function(invoice) {
+  getOneDocPromise('invoice', {'uid': ouid, '_id': oid}).then(function(invoice) {
     if (invoice == undefined) {
-      console.log("getInvoice: No invoice #" + iid + " found");
-      deferred.reject(new Error("The requested invoice #" + iid + " could not be found."));
+      console.log("getInvoice: No invoice id=" + id + " found");
+      deferred.reject(new Error("The requested invoice id=" + id + " could not be found."));
     } else {
       console.log("getInvoice: Invoice found: " + invoice);
       deferred.resolve(invoice);

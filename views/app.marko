@@ -269,7 +269,7 @@
                             <tbody data-bind="foreach: invoiceList">
                                 <tr data-bind="if: !isPaid() || (\$root.showPaid() && isPaid()), css: { danger: (!isPaid() && isOverdue()) }">
                                     <td>
-                                        <a class="btn btn-primary" data-bind="attr: { href: '#/page/invoice_show/' + iid() }">
+                                        <a class="btn btn-primary" data-bind="attr: { href: '#/page/invoice_show/' + _id() }">
                                             <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
                                         </a>
                                     </td>
@@ -458,9 +458,13 @@
                     </div>
                 </div>
                 <div class="btn-group">
-                    <button type="button" class="btn btn-success" data-bind="click: updateServer">
+                    <button type="button" class="btn btn-success" data-bind="click: saveInvoice">
                         <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
                         Save
+                    </button>
+                    <button type="button" class="btn btn-info" data-bind="click: doInvoiceReport">
+                        <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
+                        Print
                     </button>
                     <button type="button" class="btn btn-info" data-bind="click: doToggleLocked">
                         <span data-bind="if: data.isLocked">

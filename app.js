@@ -296,14 +296,13 @@ app.get("/api/invoices/:companyId", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.get("/api/invoice/:companyId/:iid", ensureAuthenticated,
+app.get("/api/invoice/:id", ensureAuthenticated,
     function(req, res) {
       var uid = req.user._id;
-      var iid = parseInt(req.params.iid);
-      var companyId = req.params.companyId;
+      var id = req.params.id;
       console.log("Get invoice: user=" + req.user.username + ", uid=" + uid
-          + ", iid=" + iid, ", companyId=" + companyId);
-      mydb.getInvoice(uid, companyId, iid).then(function(invoice) {
+          + ", _id=" + id);
+      mydb.getInvoice(uid, id).then(function(invoice) {
         res.status(200).json(invoice);
         res.end();
       }).fail(myFailureHandler.bind(null, res));
@@ -340,6 +339,25 @@ app.get("/api/customersReport", ensureAuthenticated, function(req, res) {
   console.log("Customers report: user=" + req.user.username + ", uid=" + uid);
   mydb.getCustomers(uid).then(function(customers) {
     reporter.doCustomersReport(customers, function(reportFilename) {
+      console.log("onCompletion: reportFilename=" + reportFilename);
+      res.type('application/pdf');
+      res.download(reportFilename, reportFilename, function(err) {
+        if (err) {
+          console.error("onCompletion: " + err);
+        } else {
+          res.end();
+        }
+      });
+    });
+  }).fail(myFailureHandler.bind(null, res));
+});
+
+app.get("/api/invoiceReport/:id", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var id = req.params.id;
+  console.log("Invoice report: user=" + req.user.username + ", _id=" + id);
+  mydb.getInvoice(uid, id).then(function(invoice) {
+    reporter.doInvoiceReport(invoice, function(reportFilename) {
       console.log("onCompletion: reportFilename=" + reportFilename);
       res.type('application/pdf');
       res.download(reportFilename, reportFilename, function(err) {
