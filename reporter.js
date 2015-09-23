@@ -122,12 +122,37 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
    *  }
    * 
    */
+  
+  var titleFontSize = 20;
+  var customerAddressFontSize = 10;
+  var headerDetailsFontSize = 8;
+  var detailsFontSize = 10;
+  var detailsSummaryFontSize = 10;
+  var currencyString = "kr";
+  
+  var customerAddrX = 300;
+  var customerAddrY = 80;
+  
+  var formatCurrency = function(value) {
+    return value + " " + currencyString;
+  };
+
+  var mytitleheader = function(x) {
+    x.print('Faktura', {fontSize: titleFontSize});
+
+    x.fontSize(customerAddressFontSize);
+    x.band([{data: invoice.customer.name, width: 150}], {x: customerAddrX, y: customerAddrY});
+    x.band([{data: invoice.customer.addr1, width: 150}], {x: customerAddrX});
+    x.band([{data: invoice.customer.addr2, width: 150}], {x: customerAddrX});
+    x.band([{data: invoice.customer.addr3, width: 150}], {x: customerAddrX});
+
+    mypageheader(x);
+  };
 
   var mypageheader = function(x) {
-    x.print('Faktura', {fontSize: 20});
-    x.newLine();
+    x.fontSize(headerDetailsFontSize);
     x.band([ {
-      data : "Oss tillhandha senast:",
+      data : "Oss tillhandha:",
       width : 80,
       align : x.left,
     }, {
@@ -189,64 +214,49 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
     x.newLine();
   };
 
-  var header = function(x, data) {
-    x.print('Invoice ' + invoice.iid, {fontSize: 20});
-    x.newLine();
-  };
-
   var mypagefooter = function(x) {
     x.band( [
         {data: "Lätt Fakturering", width: x.maxX()/2, align: x.left},
-        {data: "Page " + x.currentPage(), width: x.maxX()/2 - 30, align: x.right}
+        {data: "Sida " + x.currentPage(), width: x.maxX()/2 - 30, align: x.right}
         ], {border: 0, y: x.maxY()-15});
   };
 
+  var detailsColSize = [230, 80, 100, 120];
+  var detailsWidth = detailsColSize.reduce(function(a, b) { return a + b; });
   var invoiceDetailsHeader = function ( x, r ) {
+    x.fontSize(detailsFontSize);
+    //x.line(x.currentX(), x.currentY(), x.currentX() + detailsWidth, x.currentY());
     x.band( [
-      {data: "Description", width: 150, align: x.left},
-      {data: "Price", width: 80},
-      {data: "Count", width: 80},
-      {data: "Total", width: 100}
-    ], {fontBold: 1, border:1, width: 0, wrap: 1} );
+      {data: "Beskrivning", width: detailsColSize[0], align: x.left},
+      {data: "Antal", width: detailsColSize[1], align: x.right},
+      {data: "Pris", width: detailsColSize[2], align: x.right},
+      {data: "Totalt", width: detailsColSize[3], align: x.right}
+    ], {fontBold: 1, border:0, width: 0, wrap: 1} );
+    x.bandLine(1);
   };
 
   var invoiceDetails = function ( x, r ) {
+    x.fontSize(detailsFontSize);
     x.band( [
-      {data: r.description, width: 150, align: x.left},
-      {data: r.price, width: 80},
-      {data: r.count, width: 80},
-      {data: r.total, width: 100}
-    ], {border:1, width: 0, wrap: 1} );
-  };
-/*
-  var namefooter = function ( report, data, state ) {
-    report.band( [
-      ["Totals for " + data.name, 180],
-      [report.totals.hours, 100, 3]
-    ] );
-    report.newLine();
-  };
-*/
-
-/*
-  var weekdetail = function ( report, data ) {
-    // We could do this -->  report.setCurrentY(report.getCurrentY()+2);   Or use the shortcut below of addY: 2
-    report.print( ["Week Number: " + data.week], {x: 100, addY: 2} );
-  };
-*/
-  var totalFormatter = function(data, callback) {
-   // if (data.hours) { data.hours = ': ' + data.hours; }
-    callback(null, data);
+      {data: r.description, width: detailsColSize[0], align: x.left},
+      {data: r.count, width: detailsColSize[1], align: x.right},
+      {data: r.price, width: detailsColSize[2], align: x.right},
+      {data: formatCurrency(r.total), width: detailsColSize[3], align: x.right}
+    ], {border:0, width: 0, wrap: 1} );
   };
 
   var finalsummary = function(x, r) {
+    x.fontSize(detailsSummaryFontSize);
     x.newLine();
-    x.bandLine(1);
+    x.band( [
+             {data: "Totalt exkl moms", width: 410, align: x.right},
+             {data: formatCurrency(invoice.totalExclVat), width: 120, align: x.right}
+           ], {fontBold: 0, border:0, width: 0, wrap: 1} );
+    x.band( [
+             {data: "Att betala", width: 410, align: x.right},
+             {data: formatCurrency(invoice.totalInclVat), width: 120, align: x.right}
+             ], {fontBold: 1, border:0, width: 0, wrap: 1} );
     x.newLine();
-    x.print(
-        "Total number of invoice details is " + x.totals.description); 
-    x.newLine();
-    x.bandLine(1);
   };
 
 
@@ -256,20 +266,20 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
   var rpt = new Report(reportName)
       .margins(30)
       .paper('A4')
+      .titleHeader(mytitleheader)
       .pageHeader(mypageheader)
-      //.header(myheader)
       .pageFooter(mypagefooter)
-      .data( invoice.invoiceItems )   // REQUIRED
+      //.header(myheader)
+      .data(invoice.invoiceItems)   // REQUIRED
       //.count('cid')
       //.finalSummary( finalsummary )// bug: Does not work with pageFooter!
       //.userdata( {hi: 1} )// Optional 
-      .detail( invoiceDetails ) // Optional
+      .detail(invoiceDetails) // Optional
       //.totalFormatter( totalFormatter ) // Optional
       .fontSize(10); // Optional
 
-  rpt.groupBy('')
+  rpt.groupBy('', {runHeader: rpt.newPageOnly})
     .header(invoiceDetailsHeader)
-    .count('description')
     .footer(finalsummary);
 
 
