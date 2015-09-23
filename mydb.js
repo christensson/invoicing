@@ -585,28 +585,50 @@ module.exports.getCompanies = function(uid) {
 
 module.exports.addInvoice = function(uid, companyId, invoice) {
   var deferred = Q.defer();
-  getNextSequencePromise(uid, companyId, "iid").then(function(iid) {
-    console.log("addInvoice: Allocated new iid=" + iid);
-    invoice.iid = iid;
-    invoice.uid = new ObjectID(uid);
-    invoice.companyId = new ObjectID(companyId);
-    insertDataPromise('invoice', invoice).then(function() {
-      deferred.resolve(invoice);
+  var ouid = new ObjectID(uid);
+  var ocompanyId = new ObjectID(companyId);
+  getOneDocPromise('company', {'isValid': true, 'uid': ouid, '_id': ocompanyId}).then(function(company) {
+    getNextSequencePromise(uid, companyId, "iid").then(function(iid) {
+      console.log("addInvoice: Allocated new iid=" + iid);
+      invoice.iid = iid;
+      invoice.uid = ouid;
+      invoice.companyId = ocompanyId;
+      invoice.company = company;
+      insertDataPromise('invoice', invoice).then(function() {
+        deferred.resolve(invoice);
+      }).fail(function(err) {
+        deferred.reject(err);
+      });
     }).fail(function(err) {
+      console.error("addInvoice: Error: " + err.body);
       deferred.reject(err);
     });
   }).fail(function(err) {
     console.error("addInvoice: Error: " + err.body);
     deferred.reject(err);
   });
+  
 
   return deferred.promise;
 };
 
 module.exports.updateInvoice = function(invoice) {
+  var deferred = Q.defer();
   invoice.uid = new ObjectID(invoice.uid);
   invoice.companyId = new ObjectID(invoice.companyId);
-  return updateDataPromise('invoice', invoice);
+  getOneDocPromise('company', {'isValid': true, 'uid': invoice.uid, '_id': invoice.companyId}).then(function(company) {
+    invoice.company = company;
+    updateDataPromise('invoice', invoice).then(function(data) {
+      deferred.resolve(data);
+    }).fail(function(err) {
+      console.error("updateInvoice: Error: " + err.body);
+      deferred.reject(err);
+    });
+  }).fail(function(err) {
+    console.error("updateInvoice: Error: " + err.body);
+    deferred.reject(err);
+  });
+  return deferred.promise;
 };
 
 module.exports.addCustomer = function(uid, companyId, customer) {

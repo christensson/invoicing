@@ -343,6 +343,7 @@ var InvoiceDataViewModel = function() {
   self.iid = ko.observable();
   self.uid = ko.observable();
   self.companyId = ko.observable();
+  self.company = ko.observable();
   self.isValid = ko.observable();
   self.isPaid = ko.observable();
   self.isLocked = ko.observable();
@@ -359,6 +360,7 @@ var InvoiceDataViewModel = function() {
     self.iid(newData.iid);
     self.uid(newData.uid);
     self.companyId(newData.companyId);
+    self.company(newData.company);
     self.isValid(newData.isValid);
     self.isPaid(newData.isPaid);
     self.isLocked(newData.isLocked);
@@ -385,6 +387,7 @@ var InvoiceDataViewModel = function() {
       iid : undefined,
       uid : undefined,
       companyId : undefined,
+      company: undefined,
       customer : {
         _id : undefined,
         cid : undefined,
@@ -481,6 +484,7 @@ var InvoiceDataViewModel = function() {
       iid : self.iid(),
       uid : self.uid(),
       companyId : self.companyId(),
+      company: self.company(),
       isLocked : self.isLocked(),
       isPaid : self.isPaid(),
       isValid : self.isValid(),
@@ -678,7 +682,6 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
   self.currentView.subscribe(function(newValue) {
     self.data.init();
     self.selectedCustomer(undefined);
-    //$('#customerId').val("");
     var viewArray = newValue.split("/");
     if (viewArray[0] == 'invoice_new') {
       console.log("page.js - InvoiceNewViewModel - activated");
@@ -703,16 +706,6 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
     }
   });
 
-  /*
-  $('#customerId').bind(
-      'typeahead:selected',
-      function(obj, datum, name) {
-        // Extract customer id from datum
-        console.log("page.js - InvoiceNewViewModel - Customer selected - "
-            + JSON.stringify(datum.data));
-        self.data.setCustomer(datum.data);
-      });
-  */
   self.populate = function() {
     Notify_showSpinner(true);
     self.customerList.removeAll();
@@ -805,6 +798,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
         self.data.iid(data.invoice.iid);
         self.data.uid(data.invoice.uid);
         self.data.companyId(data.invoice.companyId);
+        self.data.company(data.invoice.company);
         self.data.isValid(data.invoice.isValid);
       },
     });

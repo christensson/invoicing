@@ -123,12 +123,18 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
    * 
    */
   
+  var brandFontSize = 6;
   var titleFontSize = 20;
   var customerAddressFontSize = 10;
+  var companyDetailsHeaderFontSize = 6;
+  var companyDetailsFontSize = 8;
+  var pageNumberFontSize = 8;
   var headerDetailsFontSize = 8;
   var detailsFontSize = 10;
   var detailsSummaryFontSize = 10;
   var currencyString = "kr";
+  var margin = 30;
+  var pageFooterYOffset = -65;
   
   var customerAddrX = 300;
   var customerAddrY = 80;
@@ -214,18 +220,50 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
     x.newLine();
   };
 
-  var mypagefooter = function(x) {
+  var mypagefooter = function(x, r) {
+    var footerY = x.maxY() + pageFooterYOffset;
+    // Workaround since always setting Y doesn't work since details overlaps in that case...
+    if (x.getCurrentY() < footerY) {
+      x.setCurrentY(footerY);
+    }
+    x.addY(5);
+    x.line(margin, x.getCurrentY(), x.maxX(), x.getCurrentY(), {thickness: 0.5});
+    x.addY(3);
+    var companyDetailsColSize = [200, 200];
     x.band( [
-        {data: "Lätt Fakturering", width: x.maxX()/2, align: x.left},
-        {data: "Sida " + x.currentPage(), width: x.maxX()/2 - 30, align: x.right}
-        ], {border: 0, y: x.maxY()-15});
+             {data: "Adress", width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsHeaderFontSize},
+             {data: "Telefon", width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize}
+             ], {border: 0});
+    x.band( [
+             {data: invoice.company.name, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
+             {data: invoice.company.phone, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize}
+             ], {border: 0});
+    x.band( [
+             {data: invoice.company.addr1, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
+             {data: "E-post", width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize}
+             ], {border: 0});
+    x.band( [
+             {data: invoice.company.addr2, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
+             {data: invoice.company.email, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize}
+             ], {border: 0});
+    if (invoice.company.addr3) {
+      x.band( [
+               {data: invoice.company.addr3, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
+               {data: "", width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize}
+               ], {border: 0});
+    }
+    x.addY(6);
+    x.band( [
+        {data: "Lätt Fakturering", width: x.maxX()/2, align: x.left, fontSize: brandFontSize},
+        {data: "Sida " + x.currentPage(), width: x.maxX()/2 - margin, align: x.right, fontSize: pageNumberFontSize}
+        ], {border: 0});
   };
 
   var detailsColSize = [230, 80, 100, 120];
   var detailsWidth = detailsColSize.reduce(function(a, b) { return a + b; });
   var invoiceDetailsHeader = function ( x, r ) {
     x.fontSize(detailsFontSize);
-    //x.line(x.currentX(), x.currentY(), x.currentX() + detailsWidth, x.currentY());
+    //x.line(x.getCurrentX(), x.getCurrentY(), x.getCurrentX() + detailsWidth, x.getCurrentY());
     x.band( [
       {data: "Beskrivning", width: detailsColSize[0], align: x.left},
       {data: "Antal", width: detailsColSize[1], align: x.right},
@@ -264,24 +302,19 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
   var reportName = "report.pdf";
 
   var rpt = new Report(reportName)
-      .margins(30)
+      .margins(margin)
       .paper('A4')
       .titleHeader(mytitleheader)
       .pageHeader(mypageheader)
       .pageFooter(mypagefooter)
-      //.header(myheader)
       .data(invoice.invoiceItems)   // REQUIRED
-      //.count('cid')
-      //.finalSummary( finalsummary )// bug: Does not work with pageFooter!
-      //.userdata( {hi: 1} )// Optional 
       .detail(invoiceDetails) // Optional
-      //.totalFormatter( totalFormatter ) // Optional
       .fontSize(10); // Optional
 
   rpt.groupBy('', {runHeader: rpt.newPageOnly})
-    .header(invoiceDetailsHeader)
-    .footer(finalsummary);
-
+    .footer(finalsummary)
+    .header(invoiceDetailsHeader);
+  
 
 
   // Debug output is always nice (Optional, to help you see the structure)
