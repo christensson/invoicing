@@ -583,6 +583,12 @@ module.exports.getCompanies = function(uid) {
   return getAllDocsPromise('company', {'isValid': true, 'uid': ouid});
 };
 
+module.exports.getCompany = function(uid, companyId) {
+  var ouid = new ObjectID(uid);
+  var ocompanyId = new ObjectID(companyId);
+  return getOneDocPromise('company', {'isValid': true, 'uid': ouid, '_id': ocompanyId});
+};
+
 module.exports.addInvoice = function(uid, companyId, invoice) {
   var deferred = Q.defer();
   var ouid = new ObjectID(uid);

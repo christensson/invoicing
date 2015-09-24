@@ -107,6 +107,9 @@
                                         <button type="button" class="btn btn-danger" data-bind="click: \$parent.deleteCompany">
                                             <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                                         </button>
+                                        <a class="btn btn-info" data-bind="attr: { href: '#/page/company_show/' + _id() }">
+                                            <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+                                        </a>
                                         <button type="button" class="btn btn-info" data-bind="click: \$parent.activateCompany, disable: _id() == \$parent.activeCompanyId()">
                                             <span class="glyphicon glyphicon-check" aria-hidden="true"></span>
                                         </button>
@@ -115,7 +118,51 @@
                                     <td><input type="text" class="form-control" data-bind="value: name, css: hasErrorCss"></input></td>
                                     <td><input type="text" class="form-control" data-bind="value: addr1"></input></td>
                                     <td><input type="text" class="form-control" data-bind="value: addr2"></input></td>
-                                    <td><input type="text" class="form-control" data-bind="value: phone"></input></td>
+                                    <td><input type="text" class="form-control" data-bind="value: addr3"></input></td>
+<!--
+                                    <td>
+                                      <div class="form-group">
+                                        <label for="name" class="control-label">Company name</label>
+                                        <input type="text" id="name" class="form-control" data-bind="value: name, css: hasErrorCss"></input>
+                                      </div>
+                                    </td>
+                                    <td>
+                                      <div class="form-group">
+                                        <label for="addr1" class="control-label">Address</label>
+                                        <input type="text" id="addr1" class="form-control" data-bind="value: addr1"></input>
+                                        <input type="text" class="form-control" data-bind="value: addr2"></input>
+                                        <input type="text" class="form-control" data-bind="value: addr3"></input>
+                                      </div>
+                                    </td>
+                                    <td>
+                                      <div class="form-group">
+                                        <label for="contact1" class="control-label">Contact info 1</label>
+                                        <input type="text" id="contact1" class="form-control" data-bind="value: contact1"></input>
+                                      </div>
+                                      <div class="form-group">
+                                        <label for="contact2" class="control-label">Contact info 2</label>
+                                        <input type="text" id="contact2" class="form-control" data-bind="value: contact2"></input>
+                                      </div>
+                                      <div class="form-group">
+                                        <label for="contact3" class="control-label">Contact info 3</label>
+                                        <input type="text" id="contact3" class="form-control" data-bind="value: contact3"></input>
+                                      </div>
+                                    </td>
+                                    <td>
+                                      <div class="form-group">
+                                        <label for="pay1Cap" class="control-label">Payment option 1 caption</label>
+                                        <input type="text" id="pay1Cap" class="form-control" data-bind="value: payment1Caption"></input>
+                                        <label for="pay1" class="control-label">Payment option 1</label>
+                                        <input type="text" id="pay1" class="form-control" data-bind="value: payment1"></input>
+                                      </div>
+                                      <div class="form-group">
+                                        <label for="pay2Cap" class="control-label">Payment option 2 caption</label>
+                                        <input type="text" id="pay2Cap" class="form-control" data-bind="value: payment2Caption"></input>
+                                        <label for="pay2" class="control-label">Payment option 2</label>
+                                        <input type="text" id="pay2" class="form-control" data-bind="value: payment2"></input>
+                                      </div>
+                                    </td>
+-->
                                 </tr>
                             </tbody>
                         </table>
@@ -127,6 +174,45 @@
                             New company
                         </button>
                     </div>
+                </form>
+            </div>
+
+            <div id="app-company_new" data-bind="visible: currentView() == 'company_new' || (currentView() != undefined && currentView().search('company_show') == 0)">
+                <form>
+                                      <div class="form-group">
+                                        <label for="name" class="control-label">Company name</label>
+                                        <input type="text" id="name" class="form-control" data-bind="value: data.name, css: data.hasErrorCss"></input>
+                                      </div>
+                                      <div class="form-group">
+                                        <label for="addr1" class="control-label">Address</label>
+                                        <input type="text" id="addr1" class="form-control" data-bind="value: data.addr1"></input>
+                                        <input type="text" class="form-control" data-bind="value: data.addr2"></input>
+                                        <input type="text" class="form-control" data-bind="value: data.addr3"></input>
+                                      </div>
+                                      <div class="form-group">
+                                        <label for="contact1" class="control-label">Contact info 1</label>
+                                        <input type="text" id="contact1" class="form-control" data-bind="value: data.contact1"></input>
+                                      </div>
+                                      <div class="form-group">
+                                        <label for="contact2" class="control-label">Contact info 2</label>
+                                        <input type="text" id="contact2" class="form-control" data-bind="value: data.contact2"></input>
+                                      </div>
+                                      <div class="form-group">
+                                        <label for="contact3" class="control-label">Contact info 3</label>
+                                        <input type="text" id="contact3" class="form-control" data-bind="value: data.contact3"></input>
+                                      </div>
+                                      <div class="form-group">
+                                        <label for="pay1Cap" class="control-label">Payment option 1 caption</label>
+                                        <input type="text" id="pay1Cap" class="form-control" data-bind="value: data.payment1Caption"></input>
+                                        <label for="pay1" class="control-label">Payment option 1</label>
+                                        <input type="text" id="pay1" class="form-control" data-bind="value: data.payment1"></input>
+                                      </div>
+                                      <div class="form-group">
+                                        <label for="pay2Cap" class="control-label">Payment option 2 caption</label>
+                                        <input type="text" id="pay2Cap" class="form-control" data-bind="value: data.payment2Caption"></input>
+                                        <label for="pay2" class="control-label">Payment option 2</label>
+                                        <input type="text" id="pay2" class="form-control" data-bind="value: data.payment2"></input>
+                                      </div>
                 </form>
             </div>
 
@@ -269,7 +355,7 @@
                             <tbody data-bind="foreach: invoiceList">
                                 <tr data-bind="if: !isPaid() || (\$root.showPaid() && isPaid()), css: { danger: (!isPaid() && isOverdue()) }">
                                     <td>
-                                        <a class="btn btn-primary" data-bind="attr: { href: '#/page/invoice_show/' + _id() }">
+                                        <a class="btn btn-info" data-bind="attr: { href: '#/page/invoice_show/' + _id() }">
                                             <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
                                         </a>
                                     </td>

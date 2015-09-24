@@ -223,6 +223,18 @@ app.get("/api/companies", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
+app.get("/api/company/:id", ensureAuthenticated,
+    function(req, res) {
+      var uid = req.user._id;
+      var id = req.params.id;
+      console.log("Get company: user=" + req.user.username + ", uid=" + uid
+          + ", _id=" + id);
+      mydb.getCompany(uid, id).then(function(company) {
+        res.status(200).json(company);
+        res.end();
+      }).fail(myFailureHandler.bind(null, res));
+    });
+
 app.put("/api/company/:id", ensureAuthenticated, function(req, res) {
   var okHandler = function(logText, res, company) {
     console.log(logText + ": OK, obj=" + JSON.stringify(company));

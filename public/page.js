@@ -1,18 +1,73 @@
-var CompanyViewModel = function(data) {
+var CompanyViewModel = function() {
   var self = this;
 
-  self._id = ko.observable(data._id);
-  self.uid = ko.observable(data.uid);
-  self.name = ko.observable(data.name);
-  self.addr1 = ko.observable(data.addr1);
-  self.addr2 = ko.observable(data.addr2);
-  self.phone = ko.observable(data.phone);
-  self.isValid = ko.observable(data.isValid);
+  self._id = ko.observable();
+  self.uid = ko.observable();
+  self.name = ko.observable();
+  self.addr1 = ko.observable();
+  self.addr2 = ko.observable();
+  self.addr3 = ko.observable();
+  self.contact1Caption = ko.observable();
+  self.contact2Caption = ko.observable();
+  self.contact3Caption = ko.observable();
+  self.contact1 = ko.observable();
+  self.contact2 = ko.observable();
+  self.contact3 = ko.observable();
+  self.payment1 = ko.observable();
+  self.payment2 = ko.observable();
+  self.payment1Caption = ko.observable();
+  self.payment2Caption = ko.observable();
+  self.isValid = ko.observable();
   self.nameError = ko.observable(false);
   self.hasErrorCss = ko.pureComputed(function() {
     // return this.nameError() ? "has-error" : "";
     return this.nameError() ? "highlighterror" : "";
   }, self);
+  
+  self.setData = function(data) {
+    self._id(data._id);
+    self.uid(data.uid);
+    self.name(data.name);
+    self.addr1(data.addr1);
+    self.addr2(data.addr2);
+    self.addr3(data.addr3);
+    self.contact1Caption(data.contact1Caption);
+    self.contact2Caption(data.contact2Caption);
+    self.contact3Caption(data.contact3Caption);
+    self.contact1(data.contact1);
+    self.contact2(data.contact2);
+    self.contact3(data.contact3);
+    self.payment1(data.payment1);
+    self.payment2(data.payment2);
+    self.payment1Caption(data.payment1Caption);
+    self.payment2Caption(data.payment2Caption);
+    self.isValid(data.isValid);
+  };
+  
+  self.init = function() {
+    var data = {
+        _id : undefined,
+        uid : undefined,
+        name : "",
+        addr1 : "",
+        addr2 : "",
+        addr3 : "",
+        contact1Caption : "",
+        contact2Caption : "",
+        contact3Caption : "",
+        contact1 : "",
+        contact2 : "",
+        contact3 : "",
+        payment1Caption : "",
+        payment2Caption : "",
+        payment1 : "",
+        payment2 : "",
+        isValid : true
+      };
+    self.setData(data);
+  };
+  
+  self.init();
 
   self.updateServer = function() {
     if ((self._id() == undefined) && !self.isValid()) {
@@ -30,15 +85,7 @@ var CompanyViewModel = function(data) {
       url : "/api/company/" + self._id(),
       type : "PUT",
       contentType : "application/json",
-      data : JSON.stringify({
-        _id : self._id(),
-        uid : self.uid(),
-        name : self.name(),
-        addr1 : self.addr1(),
-        addr2 : self.addr2(),
-        phone : self.phone(),
-        isValid : self.isValid()
-      }),
+      data : JSON.stringify(self.toJSON()),
       dataType : "json",
       success : function(data) {
         console.log("updateServer: response: " + JSON.stringify(data));
@@ -55,11 +102,23 @@ var CompanyViewModel = function(data) {
     });
   };
 
+  /*
   self.name.subscribe(this.updateServer);
   self.addr1.subscribe(this.updateServer);
   self.addr2.subscribe(this.updateServer);
-  self.phone.subscribe(this.updateServer);
+  self.addr3.subscribe(this.updateServer);
+  self.contact1Caption.subscribe(this.updateServer);
+  self.contact2Caption.subscribe(this.updateServer);
+  self.contact3Caption.subscribe(this.updateServer);
+  self.contact1.subscribe(this.updateServer);
+  self.contact2.subscribe(this.updateServer);
+  self.contact3.subscribe(this.updateServer);
+  self.payment1.subscribe(this.updateServer);
+  self.payment2.subscribe(this.updateServer);
+  self.payment1Caption.subscribe(this.updateServer);
+  self.payment2Caption.subscribe(this.updateServer);
   self.isValid.subscribe(this.updateServer);
+  */
 
   self.toJSON = function() {
     var res = {
@@ -68,7 +127,17 @@ var CompanyViewModel = function(data) {
       name : self.name(),
       addr1 : self.addr1(),
       addr2 : self.addr2(),
-      phone : self.phone(),
+      addr3 : self.addr3(),
+      contact1Caption : self.contact1Caption(),
+      contact2Caption : self.contact2Caption(),
+      contact3Caption : self.contact3Caption(),
+      contact1 : self.contact1(),
+      contact2 : self.contact2(),
+      contact3 : self.contact3(),
+      payment1Caption : self.payment1Caption(),
+      payment2Caption : self.payment2Caption(),
+      payment1 : self.payment1(),
+      payment2 : self.payment2(),
       isValid : self.isValid()
     };
     return res;
@@ -98,7 +167,9 @@ var CompanyListViewModel = function(currentView, activeCompanyName) {
           console.log("CompanyListViewModel - populate: Got " + allData.length
               + " companies");
           var mappedCompanies = $.map(allData, function(item) {
-            return new CompanyViewModel(item);
+            var company = new CompanyViewModel();
+            company.setData(item);
+            return company;
           });
           self.companyList(mappedCompanies);
           // self.updateActiveCompanyName(self.activeCompanyId(),
@@ -112,16 +183,7 @@ var CompanyListViewModel = function(currentView, activeCompanyName) {
   };
 
   self.newCompany = function() {
-    var data = {
-      _id : undefined,
-      uid : undefined,
-      name : "",
-      addr1 : "",
-      addr2 : "",
-      phone : "",
-      isValid : true
-    };
-    self.companyList.push(new CompanyViewModel(data));
+    self.companyList.push(new CompanyViewModel());
   };
 
   self.deleteCompany = function(c) {
@@ -168,6 +230,87 @@ var CompanyListViewModel = function(currentView, activeCompanyName) {
         break;
       }
     }
+  };
+};
+
+var CompanyNewViewModel = function(currentView, activeCompanyId) {
+  var self = this;
+
+  self.data = new CompanyViewModel();
+
+  self.currentView = currentView;
+
+  self.currentView.subscribe(function(newValue) {
+    self.data.init();
+    var viewArray = newValue.split("/");
+    if (viewArray[0] == 'company_new') {
+      console.log("page.js - CompanyNewViewModel - activated");
+      self.data.init();
+    } else if (viewArray[0] == 'company_show' && viewArray.length > 1) {
+      var _id = viewArray[1];
+      console.log("page.js - CompanyNewViewModel - activated - show #" + _id);
+      self.getCompany(_id);
+    }
+  });
+  
+  self.getCompany = function(_id) {
+    Notify_showSpinner(true);
+    $.getJSON(
+        "/api/company/" + _id,
+        function(company) {
+          console
+          .log("Got company id=" + _id + ", data=" + JSON.stringify(company));
+          self.data.setData(company);
+          Notify_showSpinner(false);
+        }).fail(function() {
+          console.log("page.js - CompanyNewViewModel - getCompany - failed");
+          Notify_showSpinner(false);
+          Notify_showMsg('error', 'Failed to get company!');
+        });
+  };
+  
+  self.saveCompany = function() {
+    /*
+    if ((self.data._id() === undefined) && !self.data.isValid()) {
+      console.log("saveInvoice: Nothing to do (invalid entry without _id)");
+      return;
+    } else if (self.data.customer()._id === undefined) {
+      Notify_showMsg('error', 'Customer must be selected!');
+      console.log("No customer selected: " + JSON.stringify(self.data.customer()));
+      // self.nameError(true);
+      return;
+    }
+    // self.nameError(false);
+    var isNewInvoice = (self.data._id() == undefined) ? true : false;
+    var ajaxData = JSON.stringify(self.data.getJson());
+    var ajaxUrl = "/api/invoice/" + self.data._id();
+    console.log("saveInvoice: AJAX PUT (url=" + ajaxUrl + "): JSON="
+        + ajaxData);
+    return $.ajax({
+      url : ajaxUrl,
+      type : "PUT",
+      contentType : "application/json",
+      data : ajaxData,
+      dataType : "json",
+      success : function(data) {
+        console.log("saveInvoice: response: " + JSON.stringify(data));
+        var opStr = "added";
+        if (!isNewInvoice) {
+          opStr = (data.invoice.isValid) ? 'updated' : 'deleted';
+        }
+        Notify_showMsg('success', 'Invoice <strong>#' + data.invoice.iid
+            + '</strong> to customer id ' + data.invoice.customer.cid + ' '
+            + opStr + '.');
+        // Set params set from server
+        self.data._id(data.invoice._id);
+        self.data.iid(data.invoice.iid);
+        self.data.uid(data.invoice.uid);
+        self.data.companyId(data.invoice.companyId);
+        self.data.company(data.invoice.company);
+        self.data.isValid(data.invoice.isValid);
+      },
+    });
+    */
   };
 };
 
@@ -989,6 +1132,8 @@ $(function() {
   var navViewModel = new NavViewModel();
   var companyViewModel = new CompanyListViewModel(navViewModel.currentView,
       navViewModel.activeCompanyName);
+  var companyNewViewModel = new CompanyNewViewModel(navViewModel.currentView,
+      companyViewModel.activeCompanyId);
   var customerListViewModel = new CustomerListViewModel(
       navViewModel.currentView, companyViewModel.activeCompanyId);
   var invoiceListViewModel = new InvoiceListViewModel(navViewModel.currentView,
@@ -1005,6 +1150,9 @@ $(function() {
   ko.applyBindings(navViewModel, document.getElementById("app-navbar"));
 
   ko.applyBindings(companyViewModel, document.getElementById("app-companies"));
+
+  ko.applyBindings(companyNewViewModel, document
+      .getElementById("app-company_new"));
 
   ko.applyBindings(customerListViewModel, document
       .getElementById("app-customer"));
