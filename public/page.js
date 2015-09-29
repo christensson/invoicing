@@ -69,7 +69,7 @@ var CompanyViewModel = function() {
   
   self.init();
 
-  self.updateServer = function() {
+  self.updateServer = function(onCompletion) {
     if ((self._id() == undefined) && !self.isValid()) {
       console.log("updateServer: Nothing to do (invalid entry without _id)");
       return;
@@ -98,27 +98,12 @@ var CompanyViewModel = function() {
         self.uid(data.company.uid);
         self._id(data.company._id);
         self.isValid(data.company.isValid);
+        if (onCompletion !== undefined) {
+          onCompletion(data.company);
+        }
       },
     });
   };
-
-  /*
-  self.name.subscribe(this.updateServer);
-  self.addr1.subscribe(this.updateServer);
-  self.addr2.subscribe(this.updateServer);
-  self.addr3.subscribe(this.updateServer);
-  self.contact1Caption.subscribe(this.updateServer);
-  self.contact2Caption.subscribe(this.updateServer);
-  self.contact3Caption.subscribe(this.updateServer);
-  self.contact1.subscribe(this.updateServer);
-  self.contact2.subscribe(this.updateServer);
-  self.contact3.subscribe(this.updateServer);
-  self.payment1.subscribe(this.updateServer);
-  self.payment2.subscribe(this.updateServer);
-  self.payment1Caption.subscribe(this.updateServer);
-  self.payment2Caption.subscribe(this.updateServer);
-  self.isValid.subscribe(this.updateServer);
-  */
 
   self.toJSON = function() {
     var res = {
@@ -144,7 +129,7 @@ var CompanyViewModel = function() {
   };
 };
 
-var CompanyListViewModel = function(currentView, activeCompanyName) {
+var CompanyListViewModel = function(currentView, activeCompanyId, activeCompanyName, companyList) {
   var self = this;
 
   self.currentView = currentView;
@@ -152,12 +137,13 @@ var CompanyListViewModel = function(currentView, activeCompanyName) {
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'companies') {
       console.log("page.js - CompanyListViewModel - activated");
+      self.populate();
     }
   });
 
-  self.activeCompanyId = ko.observable();
+  self.activeCompanyId = activeCompanyId;
   self.activeCompanyName = activeCompanyName;
-  self.companyList = ko.observableArray();
+  self.companyList = companyList;
 
   self.populate = function() {
     Notify_showSpinner(true);
@@ -172,8 +158,6 @@ var CompanyListViewModel = function(currentView, activeCompanyName) {
             return company;
           });
           self.companyList(mappedCompanies);
-          // self.updateActiveCompanyName(self.activeCompanyId(),
-          // mappedCompanies);
           Notify_showSpinner(false);
         }).fail(function() {
       console.log("page.js - CompanyListViewModel - populate - failed");
@@ -233,12 +217,14 @@ var CompanyListViewModel = function(currentView, activeCompanyName) {
   };
 };
 
-var CompanyNewViewModel = function(currentView, activeCompanyId) {
+var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyName) {
   var self = this;
 
   self.data = new CompanyViewModel();
 
   self.currentView = currentView;
+  self.activeCompanyId = activeCompanyId;
+  self.activeCompanyName = activeCompanyName;
 
   self.currentView.subscribe(function(newValue) {
     self.data.init();
@@ -270,47 +256,13 @@ var CompanyNewViewModel = function(currentView, activeCompanyId) {
   };
   
   self.saveCompany = function() {
-    /*
-    if ((self.data._id() === undefined) && !self.data.isValid()) {
-      console.log("saveInvoice: Nothing to do (invalid entry without _id)");
-      return;
-    } else if (self.data.customer()._id === undefined) {
-      Notify_showMsg('error', 'Customer must be selected!');
-      console.log("No customer selected: " + JSON.stringify(self.data.customer()));
-      // self.nameError(true);
-      return;
-    }
-    // self.nameError(false);
-    var isNewInvoice = (self.data._id() == undefined) ? true : false;
-    var ajaxData = JSON.stringify(self.data.getJson());
-    var ajaxUrl = "/api/invoice/" + self.data._id();
-    console.log("saveInvoice: AJAX PUT (url=" + ajaxUrl + "): JSON="
-        + ajaxData);
-    return $.ajax({
-      url : ajaxUrl,
-      type : "PUT",
-      contentType : "application/json",
-      data : ajaxData,
-      dataType : "json",
-      success : function(data) {
-        console.log("saveInvoice: response: " + JSON.stringify(data));
-        var opStr = "added";
-        if (!isNewInvoice) {
-          opStr = (data.invoice.isValid) ? 'updated' : 'deleted';
-        }
-        Notify_showMsg('success', 'Invoice <strong>#' + data.invoice.iid
-            + '</strong> to customer id ' + data.invoice.customer.cid + ' '
-            + opStr + '.');
-        // Set params set from server
-        self.data._id(data.invoice._id);
-        self.data.iid(data.invoice.iid);
-        self.data.uid(data.invoice.uid);
-        self.data.companyId(data.invoice.companyId);
-        self.data.company(data.invoice.company);
-        self.data.isValid(data.invoice.isValid);
-      },
+    self.data.updateServer(function(c) {
+      console.log("page.js - CompanyNewViewModel - saveCompany onCompletion: " + JSON.stringify(c) + ", activeId=" + self.activeCompanyId());
+      if (c._id == self.activeCompanyId()) {
+        console.log("page.js - CompanyNewViewModel - active company updated - id=" + self.activeCompanyId());
+        self.activeCompanyName(c.name);
+      }
     });
-    */
   };
 };
 
@@ -1063,7 +1015,7 @@ var DebugViewModel = function(currentView) {
 
 var NavViewModel = function() {
   var self = this;
-
+  
   self.mainViews = [ {
     name : '/page/home',
     title : 'Home',
@@ -1107,10 +1059,20 @@ var NavViewModel = function() {
   } ];
 
   self.currentView = ko.observable();
+  self.activeCompanyId = ko.observable();
   self.activeCompanyName = ko.observable();
+  self.companyList = ko.observableArray();
 
   self.selectView = function(view) {
     location.hash = view.name;
+  };
+  
+  self.selectCompany = function(company) {
+    console.log("page.js - navigation - selectCompany: " + JSON.stringify(company));
+    self.activeCompanyId(company._id());
+    
+    // Work-around: Navigate to home instead of making sure that all views updates when company is changed
+    location.hash = '/page/home';
   };
 
   self.routes = {
@@ -1131,17 +1093,18 @@ $(function() {
   console.log("page.js - init - begin");
   var navViewModel = new NavViewModel();
   var companyViewModel = new CompanyListViewModel(navViewModel.currentView,
-      navViewModel.activeCompanyName);
+      navViewModel.activeCompanyId, navViewModel.activeCompanyName, navViewModel.companyList);
   var companyNewViewModel = new CompanyNewViewModel(navViewModel.currentView,
-      companyViewModel.activeCompanyId);
+      navViewModel.activeCompanyId,
+      navViewModel.activeCompanyName);
   var customerListViewModel = new CustomerListViewModel(
-      navViewModel.currentView, companyViewModel.activeCompanyId);
+      navViewModel.currentView, navViewModel.activeCompanyId);
   var invoiceListViewModel = new InvoiceListViewModel(navViewModel.currentView,
-      companyViewModel.activeCompanyId);
+      navViewModel.activeCompanyId);
   var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView,
-      companyViewModel.activeCompanyId);
+      navViewModel.activeCompanyId);
   var settingsViewModel = new SettingsViewModel(navViewModel.currentView,
-      companyViewModel.activeCompanyId, companyViewModel.setActiveCompanyId);
+      navViewModel.activeCompanyId, companyViewModel.setActiveCompanyId);
   var debugViewModel = new DebugViewModel(navViewModel.currentView);
 
   settingsViewModel.populate();

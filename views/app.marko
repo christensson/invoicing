@@ -49,13 +49,26 @@
                     <span class="glyphicon glyphicon-briefcase" aria-hidden="true"></span><span data-bind="text: activeCompanyName"></span>
                     <span class="caret"></span>
                 </a>
-                <ul class="dropdown-menu" role="menu" data-bind="foreach: mainViews">
-                  <li data-bind="if: \$data.location == 'companyMenu'">
-                    <a href='#' data-bind="click: \$root.selectView">
-                        <span class="glyphicon" data-bind="css: \$data.icon" aria-hidden="true"></span>
-                        <span data-bind="text: \$data.title"></span>
-                    </a>
-                  </li>
+                <ul class="dropdown-menu" role="menu" >
+                  <html-comment> ko foreach: companyList </html-comment>
+                    <li data-bind="css: { active: \$data._id() == \$parent.activeCompanyId() }">
+                      <a href='#' data-bind="click: \$root.selectCompany">
+                        <span data-bind="text: \$data.name"></span>
+                        <span data-bind="if: \$data._id() == \$parent.activeCompanyId()">
+                          <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                        </span>
+                      </a>
+                    </li>
+                  <html-comment> /ko </html-comment>
+                  <li role="separator" class="divider"></li>
+                  <html-comment> ko foreach: mainViews </html-comment>
+                    <li data-bind="if: \$data.location == 'companyMenu'">
+                      <a href='#' data-bind="click: \$root.selectView">
+                          <span class="glyphicon" data-bind="css: \$data.icon" aria-hidden="true"></span>
+                          <span data-bind="text: \$data.title"></span>
+                      </a>
+                    </li>
+                  <html-comment> /ko </html-comment>
                 </ul>
               </li>
               <li class="dropdown">
@@ -97,7 +110,7 @@
                                     <th>Company Name</th>
                                     <th>Address 1</th>
                                     <th>Address 2</th>
-                                    <th>Phone</th>
+                                    <th>Address 3</th>
                                 </tr>
                             </thead>
                             <tbody data-bind="foreach: companyList">
@@ -115,104 +128,95 @@
                                         </button>
                                       </div>
                                     </td>
-                                    <td><input type="text" class="form-control" data-bind="value: name, css: hasErrorCss"></input></td>
-                                    <td><input type="text" class="form-control" data-bind="value: addr1"></input></td>
-                                    <td><input type="text" class="form-control" data-bind="value: addr2"></input></td>
-                                    <td><input type="text" class="form-control" data-bind="value: addr3"></input></td>
-<!--
-                                    <td>
-                                      <div class="form-group">
-                                        <label for="name" class="control-label">Company name</label>
-                                        <input type="text" id="name" class="form-control" data-bind="value: name, css: hasErrorCss"></input>
-                                      </div>
-                                    </td>
-                                    <td>
-                                      <div class="form-group">
-                                        <label for="addr1" class="control-label">Address</label>
-                                        <input type="text" id="addr1" class="form-control" data-bind="value: addr1"></input>
-                                        <input type="text" class="form-control" data-bind="value: addr2"></input>
-                                        <input type="text" class="form-control" data-bind="value: addr3"></input>
-                                      </div>
-                                    </td>
-                                    <td>
-                                      <div class="form-group">
-                                        <label for="contact1" class="control-label">Contact info 1</label>
-                                        <input type="text" id="contact1" class="form-control" data-bind="value: contact1"></input>
-                                      </div>
-                                      <div class="form-group">
-                                        <label for="contact2" class="control-label">Contact info 2</label>
-                                        <input type="text" id="contact2" class="form-control" data-bind="value: contact2"></input>
-                                      </div>
-                                      <div class="form-group">
-                                        <label for="contact3" class="control-label">Contact info 3</label>
-                                        <input type="text" id="contact3" class="form-control" data-bind="value: contact3"></input>
-                                      </div>
-                                    </td>
-                                    <td>
-                                      <div class="form-group">
-                                        <label for="pay1Cap" class="control-label">Payment option 1 caption</label>
-                                        <input type="text" id="pay1Cap" class="form-control" data-bind="value: payment1Caption"></input>
-                                        <label for="pay1" class="control-label">Payment option 1</label>
-                                        <input type="text" id="pay1" class="form-control" data-bind="value: payment1"></input>
-                                      </div>
-                                      <div class="form-group">
-                                        <label for="pay2Cap" class="control-label">Payment option 2 caption</label>
-                                        <input type="text" id="pay2Cap" class="form-control" data-bind="value: payment2Caption"></input>
-                                        <label for="pay2" class="control-label">Payment option 2</label>
-                                        <input type="text" id="pay2" class="form-control" data-bind="value: payment2"></input>
-                                      </div>
-                                    </td>
--->
+                                    <td><p class="form-control-static" data-bind="text: name"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: addr1"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: addr2"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: addr3"></p></td>
                                 </tr>
                             </tbody>
                         </table>
                     </p>
 
                     <div class="btn-group">
-                        <button type="button" class="btn btn-success" data-bind="click: newCompany">
-                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                            New company
-                        </button>
+                      <a href="#/page/company_new" type="button" class="btn btn-success">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                        New company
+                      </a>
                     </div>
                 </form>
             </div>
 
             <div id="app-company_new" data-bind="visible: currentView() == 'company_new' || (currentView() != undefined && currentView().search('company_show') == 0)">
-                <form>
-                                      <div class="form-group">
-                                        <label for="name" class="control-label">Company name</label>
-                                        <input type="text" id="name" class="form-control" data-bind="value: data.name, css: data.hasErrorCss"></input>
-                                      </div>
-                                      <div class="form-group">
-                                        <label for="addr1" class="control-label">Address</label>
-                                        <input type="text" id="addr1" class="form-control" data-bind="value: data.addr1"></input>
-                                        <input type="text" class="form-control" data-bind="value: data.addr2"></input>
-                                        <input type="text" class="form-control" data-bind="value: data.addr3"></input>
-                                      </div>
-                                      <div class="form-group">
-                                        <label for="contact1" class="control-label">Contact info 1</label>
-                                        <input type="text" id="contact1" class="form-control" data-bind="value: data.contact1"></input>
-                                      </div>
-                                      <div class="form-group">
-                                        <label for="contact2" class="control-label">Contact info 2</label>
-                                        <input type="text" id="contact2" class="form-control" data-bind="value: data.contact2"></input>
-                                      </div>
-                                      <div class="form-group">
-                                        <label for="contact3" class="control-label">Contact info 3</label>
-                                        <input type="text" id="contact3" class="form-control" data-bind="value: data.contact3"></input>
-                                      </div>
-                                      <div class="form-group">
-                                        <label for="pay1Cap" class="control-label">Payment option 1 caption</label>
-                                        <input type="text" id="pay1Cap" class="form-control" data-bind="value: data.payment1Caption"></input>
-                                        <label for="pay1" class="control-label">Payment option 1</label>
-                                        <input type="text" id="pay1" class="form-control" data-bind="value: data.payment1"></input>
-                                      </div>
-                                      <div class="form-group">
-                                        <label for="pay2Cap" class="control-label">Payment option 2 caption</label>
-                                        <input type="text" id="pay2Cap" class="form-control" data-bind="value: data.payment2Caption"></input>
-                                        <label for="pay2" class="control-label">Payment option 2</label>
-                                        <input type="text" id="pay2" class="form-control" data-bind="value: data.payment2"></input>
-                                      </div>
+                <form class="form-horizontal">
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">General info</h3>
+                    </div>
+                    <div class="panel-body">
+                      <div class="form-group">
+                        <label for="name" class="col-sm-2 control-label">Company name</label>
+                        <div class="col-sm-4">
+                          <input type="text" id="name" class="form-control" data-bind="value: data.name, css: data.hasErrorCss"></input>
+                        </div>
+                      </div>
+                      <div for="idx in [1,2,3]">
+                        <div class="form-group">
+                          <label for="addr${idx}" class="col-sm-2 control-label">Address ${idx}</label>
+                          <div class="col-sm-4">
+                            <input type="text" id="addr${idx}" class="form-control" data-bind="value: data.addr${idx}"></input>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Contact info</h3>
+                    </div>
+                    <div class="panel-body">
+                      <div for="idx in [1,2,3]">
+                        <div class="form-group">
+                          <label for="contact${idx}Cap" class="col-sm-1 control-label">Caption ${idx}</label>
+                          <div class="col-sm-4">
+                            <input type="text" id="contact${idx}Cap" class="form-control" data-bind="value: data.contact${idx}Caption"></input>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label for="contact${idx}" class="col-sm-1 control-label">Info ${idx}</label>
+                          <div class="col-sm-4">
+                            <input type="text" id="contact${idx}" class="form-control" data-bind="value: data.contact${idx}"></input>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Payment options</h3>
+                    </div>
+                    <div class="panel-body">
+                      <div for="idx in [1,2]">
+                        <div class="form-group">
+                          <label for="pay${idx}Cap" class="col-sm-1 control-label">Caption ${idx}</label>
+                          <div class="col-sm-4">
+                            <input type="text" id="pay${idx}Cap" class="form-control" data-bind="value: data.payment${idx}Caption"></input>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label for="pay${idx}" class="col-sm-1 control-label">Info ${idx}</label>
+                          <div class="col-sm-4">
+                            <input type="text" id="pay${idx}" class="form-control" data-bind="value: data.payment${idx}"></input>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-success" data-bind="click: saveCompany">
+                        <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+                        Save
+                    </button>
+                  </div>
                 </form>
             </div>
 
