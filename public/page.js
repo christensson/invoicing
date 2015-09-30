@@ -441,6 +441,7 @@ var InvoiceDataViewModel = function() {
   self.company = ko.observable();
   self.isValid = ko.observable();
   self.isPaid = ko.observable();
+  self.isCredit = ko.observable();
   self.isLocked = ko.observable();
   self.customer = ko.observable();
   self.yourRef = ko.observable();
@@ -458,6 +459,7 @@ var InvoiceDataViewModel = function() {
     self.company(newData.company);
     self.isValid(newData.isValid);
     self.isPaid(newData.isPaid);
+    self.isCredit(newData.isCredit);
     self.isLocked(newData.isLocked);
     self.customer(newData.customer);
     self.yourRef(newData.yourRef);
@@ -497,6 +499,7 @@ var InvoiceDataViewModel = function() {
       projId : "",
       isLocked : false,
       isPaid : false,
+      isCredit : false,
       isValid : true,
       invoiceItems : []
     };
@@ -522,8 +525,12 @@ var InvoiceDataViewModel = function() {
         sum += this.invoiceItems()[i].total();
       }
     }
+    if (self.isCredit()) {
+      sum = -sum;
+    }
     return sum;
   }, this);
+
   self.totalInclVat = ko.pureComputed(function() {
     var sum = 0;
     for ( var i = 0; i < this.invoiceItems().length; i++) {
@@ -531,6 +538,9 @@ var InvoiceDataViewModel = function() {
         sum += this.invoiceItems()[i].total()
             * (1 + parseFloat(this.invoiceItems()[i].vat()));
       }
+    }
+    if (self.isCredit()) {
+      sum = -sum;
     }
     return sum;
   }, this);
@@ -557,18 +567,6 @@ var InvoiceDataViewModel = function() {
     self.invoiceItems.destroy(item);
   };
 
-  self.doToggleLocked = function() {
-    self.isLocked(!self.isLocked());
-    console.log("page.js - InvoiceDataViewModel - isLocked=" + self.isLocked()
-        + " (new state)");
-  };
-
-  self.doTogglePaid = function() {
-    self.isPaid(!self.isPaid());
-    console.log("page.js - InvoiceDataViewModel - isPaid=" + self.isPaid()
-        + " (new state)");
-  };
-
   self.getJson = function() {
     var items = [];
     for ( var i = 0; i < self.invoiceItems().length; i++) {
@@ -582,6 +580,7 @@ var InvoiceDataViewModel = function() {
       company: self.company(),
       isLocked : self.isLocked(),
       isPaid : self.isPaid(),
+      isCredit : self.isCredit(),
       isValid : self.isValid(),
       customer : self.customer(),
       yourRef : self.yourRef(),
@@ -605,6 +604,7 @@ var InvoiceListDataViewModel = function(data) {
   self.companyId = ko.observable(data.companyId);
   self.isValid = ko.observable(data.isValid);
   self.isPaid = ko.observable(data.isPaid);
+  self.isCredit = ko.observable(data.isCredit);
   self.isLocked = ko.observable(data.isLocked);
   self.customer = ko.observable(data.customer);
   self.yourRef = ko.observable(data.yourRef);
@@ -644,6 +644,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
   self.showPaid = ko.observable(true);
+  self.showCredit = ko.observable(true);
   self.invoiceListSort = ko.observable('iidAsc');
 
   self.currentView.subscribe(function(newValue) {
@@ -677,6 +678,12 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
         + " (new state)");
   };
   
+  self.doToggleShowCredit = function() {
+    self.showCredit(!self.showCredit());
+    console.log("page.js - InvoiceListViewModel - showCredit=" + self.showCredit()
+        + " (new state)");
+  };
+
   self.doSortToggle = function(field) {
     if (self.invoiceListSort() === field + 'Asc') {
       self.invoiceListSort(field + 'Desc');
@@ -738,6 +745,14 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
 
   self.paidDescCompare = function(aRow, bRow) {
     return self.paidAscCompare(bRow, aRow);
+  };
+
+  self.creditAscCompare = function(aRow, bRow) {
+    return aRow.isCredit() - bRow.isCredit();
+  };
+
+  self.creditDescCompare = function(aRow, bRow) {
+    return self.creditAscCompare(bRow, aRow);
   };
 
   self.totalExclVatAscCompare = function(aRow, bRow) {

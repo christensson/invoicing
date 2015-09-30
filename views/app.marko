@@ -273,8 +273,9 @@
                               <col class="col-md-1">
                               <col class="col-md-1">
                               <col class="col-md-2">
-                              <col class="col-md-4">
+                              <col class="col-md-3">
                               <col class="col-md-2">
+                              <col class="col-md-1">
                               <col class="col-md-1">
                             </colgroup>
                             <thead>
@@ -354,10 +355,30 @@
                                           </span>
                                       </button>
                                     </th>
+                                    <th>
+                                      Credit
+                                      <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('credit')">
+                                          <span data-bind="if: invoiceListSort() !== 'creditAsc'">
+                                              <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
+                                          </span>
+                                          <span data-bind="if: invoiceListSort() === 'creditAsc'">
+                                              <span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>
+                                          </span>
+                                      </button>
+                                      <button type="button" class="btn btn-default btn-xs" data-bind="click: doToggleShowCredit">
+                                          <span data-bind="if: showCredit">
+                                              <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+                                          </span>
+                                          <span data-bind="ifnot: showCredit">
+                                              <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                                          </span>
+                                      </button>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody data-bind="foreach: invoiceList">
-                                <tr data-bind="if: !isPaid() || (\$root.showPaid() && isPaid()), css: { danger: (!isPaid() && isOverdue()) }">
+                                <tr data-bind="if: (!isPaid() || (\$root.showPaid() && isPaid())) && (!isCredit() || (\$root.showCredit() && isCredit())),
+                                               css: { danger: (!isPaid() && isOverdue()) }">
                                     <td>
                                         <a class="btn btn-info" data-bind="attr: { href: '#/page/invoice_show/' + _id() }">
                                             <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
@@ -382,6 +403,13 @@
                                           </span>
                                         </p>
                                     </td>
+                                    <td>
+                                        <p>
+                                          <span data-bind="if: isCredit">
+                                            <span class="form-control-static glyphicon glyphicon-ok" aria-hidden="true"></span>
+                                          </span>
+                                        </p>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -402,10 +430,13 @@
                         <div class="panel-heading">
                           <h3 class="panel-title">
                             <span data-bind="ifnot: data.iid() === undefined">
-                              Invoice #<span data-bind="text: data.iid"></span>
+                              <span data-bind="if: data.isCredit">Credit</span> Invoice #<span data-bind="text: data.iid"></span>
                             </span>
                             <span data-bind="if: data.iid() === undefined">
-                              New Invoice
+                              New <span data-bind="if: data.isCredit">Credit</span> Invoice
+                            </span>
+                            <span data-bind="if: data.isLocked">
+                                <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
                             </span>
                           </h3>
                         </div>
@@ -531,6 +562,7 @@
                                 </td>
                                 <td></td>
                                 <td></td>
+                                <td></td>
                                 <td colspan="2">
                                     <p class="form-control-static">
                                         Total excluding VAT:<br/>
@@ -547,35 +579,33 @@
                         </table>
                     </div>
                 </div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" data-bind="checked: data.isLocked">
+                    Locked
+                  </label>
+                </div>
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" data-bind="checked: data.isPaid">
+                    Paid
+                  </label>
+                </div>
+                <div class="checkbox" data-bind="css: {disabled: data.isLocked}">
+                  <label>
+                    <input type="checkbox" value=""  data-bind="checked: data.isCredit, disable: data.isLocked">
+                    Credit invoice
+                  </label>
+                </div>
                 <div class="btn-group">
-                    <button type="button" class="btn btn-success" data-bind="click: saveInvoice">
-                        <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
-                        Save
-                    </button>
-                    <button type="button" class="btn btn-info" data-bind="click: doInvoiceReport">
-                        <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
-                        Print
-                    </button>
-                    <button type="button" class="btn btn-info" data-bind="click: doToggleLocked">
-                        <span data-bind="if: data.isLocked">
-                            <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
-                            Unlock
-                        </span>
-                        <span data-bind="ifnot: data.isLocked">
-                            <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
-                            Lock
-                        </span>
-                    </button>
-                    <button type="button" class="btn btn-info" data-bind="click: doTogglePaid">
-                        <span data-bind="if: data.isPaid">
-                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                            Set unpaid
-                        </span>
-                        <span data-bind="ifnot: data.isPaid">
-                            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                            Set paid
-                        </span>
-                    </button>
+                  <button type="button" class="btn btn-success" data-bind="click: saveInvoice">
+                      <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+                      Save
+                  </button>
+                  <button type="button" class="btn btn-info" data-bind="click: doInvoiceReport">
+                      <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
+                      Print
+                  </button>
                 </div>
             </div>
 
