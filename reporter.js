@@ -128,13 +128,15 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
   var customerAddressFontSize = 10;
   var companyDetailsHeaderFontSize = 6;
   var companyDetailsFontSize = 8;
+  var companyDetailsPaymentFontSize = 8;
   var pageNumberFontSize = 8;
+  var headerDetailsCaptionFontSize = 7;
   var headerDetailsFontSize = 8;
   var detailsFontSize = 10;
   var detailsSummaryFontSize = 10;
   var currencyString = "kr";
   var margin = 30;
-  var pageFooterYOffset = -65;
+  var pageFooterYOffset = -85;
   
   var customerAddrX = 300;
   var customerAddrY = 80;
@@ -142,9 +144,19 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
   var formatCurrency = function(value) {
     return value + " " + currencyString;
   };
+  
+  var formatDate = function(value) {
+    var date = new Date(value);
+    var isoDateString = date.toISOString();
+    return isoDateString.split("T")[0];
+  };
 
   var mytitleheader = function(x) {
-    x.print('Faktura', {fontSize: titleFontSize});
+    var headerString = "Faktura";
+    if (invoice.isCredit) {
+      headerString = "Kreditfaktura";
+    }
+    x.print(headerString, {fontSize: titleFontSize});
 
     x.fontSize(customerAddressFontSize);
     x.band([{data: invoice.customer.name, width: 150}], {x: customerAddrX, y: customerAddrY});
@@ -156,62 +168,35 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
   };
 
   var mypageheader = function(x) {
-    x.fontSize(headerDetailsFontSize);
-    x.band([ {
-      data : "Oss tillhandha:",
-      width : 80,
-      align : x.left,
-    }, {
-      data : "Fakturadatum:",
-      width : 80,
-      align : x.left
-    }, {
-      data : "Fakturanr:",
-      width : 80,
-      align : x.left
-    }, {
-      data : "Kundnr:",
-      width : 80,
-      align : x.left
-    }, {
-      data : "Vår referens:",
-      width : 80,
-      align : x.left
-    }, {
-      data : "Er referens:",
-      width : 80,
-      align : x.left
-    } ], {
+    x.fontSize(headerDetailsCaptionFontSize);
+    
+    var headerList =
+      [{cap: "Oss tillhandha senast", data: formatDate(invoice.lastPaymentDate), isBold : true, colSize: 80},
+       {cap: "Fakturadatum", data: formatDate(invoice.date), colSize: 60},
+       {cap: "Fakturanr", data: "" + invoice.iid, colSize: 40},
+       {cap: "Kundnr", data: "" + invoice.customer.cid, colSize: 40}
+       ];
+    if (invoice.ourRef !== undefined && invoice.ourRef.length > 0) {
+      headerList.push({cap: "Vår referens", data: invoice.ourRef, colSize: 80});
+    }
+    if (invoice.yourRef !== undefined && invoice.yourRef.length > 0) {
+      headerList.push({cap: "Er referens", data: invoice.yourRef, colSize: 80});
+    }
+    
+    var captionList = [];
+    var dataList = [];
+    for (var i = 0; i < headerList.length; i++) {
+      captionList.push({data: headerList[i].cap, width: headerList[i].colSize, align: x.left});
+      dataList.push({data: headerList[i].data, width: headerList[i].colSize, align: x.left, fontBold: headerList[i].isBold});
+    }
+    x.band(captionList, {
       fontBold : 0,
       border : 0,
       width : 0,
       wrap : 1
     });
-    x.band([ {
-      data : "" + invoice.date,
-      width : 80,
-      align : x.left
-    }, {
-      data : "" + invoice.date,
-      width : 80,
-      align : x.left
-    }, {
-      data : "" + invoice.iid,
-      width : 80,
-      align : x.left
-    }, {
-      data : "" + invoice.customer.cid,
-      width : 80,
-      align : x.left
-    }, {
-      data : "" + invoice.ourRef,
-      width : 80,
-      align : x.left
-    }, {
-      data : "" + invoice.yourRef,
-      width : 80,
-      align : x.left
-    } ], {
+    x.fontSize(headerDetailsFontSize);
+    x.band(dataList, {
       fontBold : 0,
       border : 0,
       width : 0,
@@ -229,27 +214,36 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
     x.addY(5);
     x.line(margin, x.getCurrentY(), x.maxX(), x.getCurrentY(), {thickness: 0.5});
     x.addY(3);
-    var companyDetailsColSize = [200, 200];
+    var companyDetailsColSize = [200, 200, 200];
+    var c = invoice.company;
     x.band( [
              {data: "Adress", width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsHeaderFontSize},
-             {data: "Telefon", width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize}
+             {data: c.contact1Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
+             {data: c.payment1Caption, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize}
              ], {border: 0});
     x.band( [
-             {data: invoice.company.name, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
-             {data: invoice.company.phone, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize}
+             {data: c.name, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
+             {data: c.contact1, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
+             {data: c.payment1, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsPaymentFontSize, fontBold: true}
              ], {border: 0});
     x.band( [
-             {data: invoice.company.addr1, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
-             {data: "E-post", width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize}
+             {data: c.addr1, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
+             {data: c.contact2Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
+             {data: c.payment2Caption, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize}
              ], {border: 0});
     x.band( [
-             {data: invoice.company.addr2, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
-             {data: invoice.company.email, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize}
+             {data: c.addr2, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
+             {data: c.contact2, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
+             {data: c.payment2, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsPaymentFontSize, fontBold: true}
              ], {border: 0});
-    if (invoice.company.addr3) {
+    if (c.addr3 || c.contact3) {
       x.band( [
-               {data: invoice.company.addr3, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
-               {data: "", width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize}
+               {data: c.addr3, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
+               {data: c.contact3Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize}
+               ], {border: 0});
+      x.band( [
+               {data: "", width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
+               {data: c.contact3, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize}
                ], {border: 0});
     }
     x.addY(6);

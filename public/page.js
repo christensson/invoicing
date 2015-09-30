@@ -495,7 +495,7 @@ var InvoiceDataViewModel = function() {
       yourRef : "",
       ourRef : "",
       date : "",
-      daysUntilPayment : "",
+      daysUntilPayment : 0,
       projId : "",
       isLocked : false,
       isPaid : false,
@@ -544,6 +544,13 @@ var InvoiceDataViewModel = function() {
     }
     return sum;
   }, this);
+  
+  self.lastPaymentDate = ko.pureComputed(function() {
+    var invoiceDate = new Date(self.date());
+    var lastPaymentDateMs =
+      invoiceDate.valueOf()  + (self.daysUntilPayment() * (1000 * 3600 * 24));
+    return new Date(lastPaymentDateMs);
+  }, this);
 
   self.setCustomer = function(data) {
     self.customer(data);
@@ -587,6 +594,7 @@ var InvoiceDataViewModel = function() {
       ourRef : self.ourRef(),
       date : self.date(),
       daysUntilPayment : self.daysUntilPayment(),
+      lastPaymentDate : self.lastPaymentDate(),
       projId : self.projId(),
       invoiceItems : items,
       totalExclVat : self.totalExclVat(),
