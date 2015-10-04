@@ -124,8 +124,10 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
    */
   
   var brandFontSize = 6;
-  var titleFontSize = 20;
-  var customerAddressFontSize = 10;
+  var titleFontSize = 28;
+  var companyNameFontSize = 14;
+  var customerAddressFontSize = 12;
+  var customerAddressCaptionFontSize = 8;
   var companyDetailsHeaderFontSize = 6;
   var companyDetailsFontSize = 8;
   var companyDetailsPaymentFontSize = 8;
@@ -138,9 +140,15 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
   var margin = 30;
   var pageFooterYOffset = -85;
   
-  var customerAddrX = 300;
-  var customerAddrY = 80;
+  var headerStringX = 345;
+  var headerStringY = 50;
   
+  var customerAddrX = 345;
+  var customerAddrY = 100;
+  
+  var companyNameX = 0;
+  var companyNameY = 160;
+
   var formatCurrency = function(value) {
     return value + " " + currencyString;
   };
@@ -152,18 +160,25 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
   };
 
   var mytitleheader = function(x) {
-    var headerString = "Faktura";
+    var headerString = "FAKTURA";
     if (invoice.isCredit) {
-      headerString = "Kreditfaktura";
+      headerString = "KREDITFAKTURA";
     }
-    x.print(headerString, {fontSize: titleFontSize});
+    x.band([{data: headerString, width: 150, fontSize: titleFontSize, fontBold: true}], {x: headerStringX, y: headerStringY});
 
+    x.band([{data: "Kund", width: 150, fontSize: customerAddressCaptionFontSize}], {x: customerAddrX, y: customerAddrY});
     x.fontSize(customerAddressFontSize);
-    x.band([{data: invoice.customer.name, width: 150}], {x: customerAddrX, y: customerAddrY});
+    x.band([{data: invoice.customer.name, width: 150}], {x: customerAddrX, y: customerAddrY + 20});
     x.band([{data: invoice.customer.addr1, width: 150}], {x: customerAddrX});
     x.band([{data: invoice.customer.addr2, width: 150}], {x: customerAddrX});
     x.band([{data: invoice.customer.addr3, width: 150}], {x: customerAddrX});
+    
+    x.setCurrentX(companyNameX);
+    x.setCurrentY(companyNameY);
+    x.band([{data: invoice.company.name, width: 200, fontSize: companyNameFontSize, fontBold: true}]);
 
+    x.addY(10);
+    
     mypageheader(x);
   };
 
