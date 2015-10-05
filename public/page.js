@@ -264,6 +264,13 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
       }
     });
   };
+  
+  self.uploadLogo = function(formElement) {
+    console.log("page.js - CompanyNewViewModel - uploadLogo");
+    console.log("form: " + JSON.stringify(formElement));
+    formElement.action = formElement.action + "/" + self.data._id();
+    return true;
+  };
 };
 
 var CustomerViewModel = function(data) {

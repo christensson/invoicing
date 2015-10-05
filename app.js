@@ -10,6 +10,7 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var path = require('path');
 var marko = require('marko');
+var multer = require('multer');
 
 function list(val) {
   return val.split(',');
@@ -60,24 +61,28 @@ app.use(express.static('node_modules/bootstrap'));
 app.use(express.static('node_modules/director/build'));
 app.use(express.static('node_modules/jquery/dist'));
 
+var upload = multer({
+  dest: './uploads/',
+  limits: {fileSize: 1024*1024} // Max 1 Mbyte
+});
+
 // Session-persisted message middleware
-app
-    .use(function(req, res, next) {
-      var err = req.session.error, msg = req.session.notice, success = req.session.success;
+app.use(function(req, res, next) {
+  var err = req.session.error, msg = req.session.notice, success = req.session.success;
 
-      delete req.session.error;
-      delete req.session.success;
-      delete req.session.notice;
+  delete req.session.error;
+  delete req.session.success;
+  delete req.session.notice;
 
-      if (err)
-        res.locals.error = err;
-      if (msg)
-        res.locals.notice = msg;
-      if (success)
-        res.locals.success = success;
+  if (err)
+    res.locals.error = err;
+  if (msg)
+    res.locals.notice = msg;
+  if (success)
+    res.locals.success = success;
 
-      next();
-    });
+  next();
+});
 
 // App modules
 var mydb = require('./mydb.js');
@@ -110,13 +115,7 @@ function(req, username, password, done) {
         }
         if (!user) {
           console.log("COULD NOT LOG IN");
-          req.session.error = 'Could not log user in. Please try again.'; // inform
-                                                                          // user
-                                                                          // could
-                                                                          // not
-                                                                          // log
-                                                                          // them
-                                                                          // in
+          req.session.error = 'Could not log user in. Please try again.';
           done(null, user);
         }
       }).fail(function(err) {
@@ -125,40 +124,33 @@ function(req, username, password, done) {
 }));
 
 // Use the LocalStrategy within Passport to register/"signup" users.
-passport
-    .use(
-        'local-signup',
-        new LocalStrategy(
-            {
-              passReqToCallback : true
-            }, // allows us to pass back the request to the callback
-            function(req, username, password, done) {
-              console.log("signup: user=" + username + ", pw=" + password);
-              funct
-                  .localReg(username, password)
-                  .then(
-                      function(user) {
-                        if (user) {
-                          console.log("REGISTERED: " + user.username);
-                          req.session.success = 'You are successfully registered and logged in '
-                              + user.username + '!';
-                          done(null, user);
-                        }
-                        if (!user) {
-                          console.log("COULD NOT REGISTER");
-                          req.session.error = 'That username is already in use, please try a different one.'; // inform
-                                                                                                              // user
-                                                                                                              // could
-                                                                                                              // not
-                                                                                                              // log
-                                                                                                              // them
-                                                                                                              // in
-                          done(null, user);
-                        }
-                      }).fail(function(err) {
-                    console.log(err.body);
-                  });
-            }));
+passport.use(
+    'local-signup',
+    new LocalStrategy(
+        {
+          passReqToCallback : true
+        }, // allows us to pass back the request to the callback
+        function(req, username, password, done) {
+          console.log("signup: user=" + username + ", pw=" + password);
+          funct
+          .localReg(username, password)
+          .then(
+              function(user) {
+                if (user) {
+                  console.log("REGISTERED: " + user.username);
+                  req.session.success = 'You are successfully registered and logged in '
+                    + user.username + '!';
+                  done(null, user);
+                }
+                if (!user) {
+                  console.log("COULD NOT REGISTER");
+                  req.session.error = 'That username is already in use, please try a different one.';
+                  done(null, user);
+                }
+              }).fail(function(err) {
+                console.log(err.body);
+              });
+        }));
 
 // Simple route middleware to ensure user is authenticated.
 // Use this route middleware on any resource that needs to be protected. If
@@ -258,6 +250,18 @@ app.put("/api/company/:id", ensureAuthenticated, function(req, res) {
         okHandler.bind(null, 'updateCompany', res)).fail(
         myFailureHandler.bind(null, res));
   }
+});
+
+app.post("/api/company_logo/:companyId", ensureAuthenticated, upload.single('logo'), function(req, res) {
+  var uid = req.user._id;
+  var companyId = req.params.companyId;
+  console.log("Company logo upload: uid=" + uid + ", companyId=" + companyId +
+      ", file: " + JSON.stringify(req.file));
+  console.log("company_log: path = " + req.file.path +
+      ", originalname=" + req.file.originalname +
+      ", mimetype=" + req.file.mimetype +
+      ", size=" + req.file.size);
+  res.status(204).end();
 });
 
 app.get("/api/customers/:companyId", ensureAuthenticated, function(req, res) {

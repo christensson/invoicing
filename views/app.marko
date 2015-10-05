@@ -147,7 +147,7 @@
             </div>
 
             <div id="app-company_new" data-bind="visible: currentView() == 'company_new' || (currentView() != undefined && currentView().search('company_show') == 0)">
-                <form class="form-horizontal">
+                <div class="form-horizontal">
                   <div class="panel panel-default">
                     <div class="panel-heading">
                       <h3 class="panel-title">General info</h3>
@@ -211,13 +211,29 @@
                       </div>
                     </div>
                   </div>
+                  <div class="row">
+                    <form class="form-horizontal" action="/api/company_logo" method="POST" enctype="multipart/form-data" data-bind="submit: uploadLogo">
+                      <div class="col-sm-6">
+                        <div class="input-group">
+                          <input type="file" name="logo" class="form-control" placeholder="Select logo...">
+                          <span class="input-group-btn">
+                            <button class="btn btn-default" type="submit">
+                              <span class="glyphicon glyphicon-upload" aria-hidden="true"></span>
+                              Upload
+                            </button>
+                          </span>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                  <br/>
                   <div class="btn-group">
                     <button type="button" class="btn btn-success" data-bind="click: saveCompany">
-                        <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
-                        Save
+                      <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+                      Save
                     </button>
                   </div>
-                </form>
+                </div>
             </div>
 
             <div id="app-customer" data-bind="visible: currentView() == 'customers'">
