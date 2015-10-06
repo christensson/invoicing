@@ -53,6 +53,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static('public'));
+app.use('/uploads', express.static('uploads'));
 app.use(express.static('node_modules/knockout/build/output'));
 app.use(express.static('node_modules/bootstrap/js'));
 app.use(express.static('node_modules/bootstrap/dist/js'));
@@ -261,7 +262,20 @@ app.post("/api/company_logo/:companyId", ensureAuthenticated, upload.single('log
       ", originalname=" + req.file.originalname +
       ", mimetype=" + req.file.mimetype +
       ", size=" + req.file.size);
-  res.status(204).end();
+
+  mydb.getCompany(uid, companyId).then(function(company) {
+    var logoInfo = {
+      'mimetype': req.file.mimetype,
+      'path': req.file.path,
+      'originalname': req.file.originalname
+    };
+    company.logo = logoInfo;
+    return mydb.updateCompany(company);
+  }).then(function(company) {
+    console.log("Company logo set: " + JSON.stringify(company));
+    res.status(204).end();
+  }).fail(
+      myFailureHandler.bind(null, res));
 });
 
 app.get("/api/customers/:companyId", ensureAuthenticated, function(req, res) {

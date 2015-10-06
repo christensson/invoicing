@@ -18,6 +18,7 @@ var CompanyViewModel = function() {
   self.payment1Caption = ko.observable();
   self.payment2Caption = ko.observable();
   self.isValid = ko.observable();
+  self.logo = ko.observable();
   self.nameError = ko.observable(false);
   self.hasErrorCss = ko.pureComputed(function() {
     // return this.nameError() ? "has-error" : "";
@@ -42,6 +43,7 @@ var CompanyViewModel = function() {
     self.payment1Caption(data.payment1Caption);
     self.payment2Caption(data.payment2Caption);
     self.isValid(data.isValid);
+    self.logo(data.logo);
   };
   
   self.init = function() {
@@ -62,7 +64,8 @@ var CompanyViewModel = function() {
         payment2Caption : "",
         payment1 : "",
         payment2 : "",
-        isValid : true
+        isValid : true,
+        logo : undefined
       };
     self.setData(data);
   };
@@ -123,7 +126,8 @@ var CompanyViewModel = function() {
       payment2Caption : self.payment2Caption(),
       payment1 : self.payment1(),
       payment2 : self.payment2(),
-      isValid : self.isValid()
+      isValid : self.isValid(),
+      logo : self.logo()
     };
     return res;
   };
@@ -225,6 +229,15 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
   self.activeCompanyName = activeCompanyName;
+  
+  self.logoPath = ko.pureComputed(function() {
+    var path = "#";
+    var logoInfo = self.data.logo();
+    if (logoInfo !== undefined && logoInfo.path !== undefined) {
+      path = "/" + logoInfo.path;
+    }
+    return path;
+  }, self);
 
   self.currentView.subscribe(function(newValue) {
     self.data.init();
@@ -244,8 +257,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
     $.getJSON(
         "/api/company/" + _id,
         function(company) {
-          console
-          .log("Got company id=" + _id + ", data=" + JSON.stringify(company));
+          console.log("Got company id=" + _id + ", data=" + JSON.stringify(company));
           self.data.setData(company);
           Notify_showSpinner(false);
         }).fail(function() {
@@ -266,10 +278,31 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
   };
   
   self.uploadLogo = function(formElement) {
-    console.log("page.js - CompanyNewViewModel - uploadLogo");
-    console.log("form: " + JSON.stringify(formElement));
-    formElement.action = formElement.action + "/" + self.data._id();
-    return true;
+    var _id = self.data._id();
+    console.log("page.js - CompanyNewViewModel - uploadLogo: companyId=" + _id + ", logo=" + formElement.elements.logo.value);
+    console.log("form data: " + JSON.stringify(formElement));
+    var submitForm = false;
+    if (_id === undefined) {
+      Notify_showMsg('error', 'Company must be saved first!');
+    } else if (formElement.elements.logo.value.length == 0) {
+      Notify_showMsg('error', 'No logo selected!');
+    } else {
+      formElement.action = formElement.action + "/" + _id;
+      submitForm = true;
+    }
+    return submitForm;
+  };
+  
+  document.getElementById("companyLogoInput").onchange = function() {
+    var reader = new FileReader();
+
+    reader.onload = function (e) {
+        // get loaded data and render thumbnail.
+        document.getElementById("companyLogoImg").src = e.target.result;
+    };
+
+    // read the image file as a data URL.
+    reader.readAsDataURL(this.files[0]);
   };
 };
 

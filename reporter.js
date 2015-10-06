@@ -106,8 +106,9 @@ module.exports.doCustomersReport = function (customers, onCompletion) {
 
 };
 
-module.exports.doInvoiceReport = function (invoice, onCompletion) {
+module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
   'use strict';
+  debug = typeof debug !== 'undefined' ? debug : false;
   /*  invoice: {
    *    _id, iid, uid, companyId, isLocked, isPaid, isValid
    *    customer:{
@@ -124,7 +125,7 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
    */
   
   var brandFontSize = 6;
-  var titleFontSize = 28;
+  var titleFontSize = 22;
   var companyNameFontSize = 14;
   var customerAddressFontSize = 12;
   var customerAddressCaptionFontSize = 8;
@@ -141,11 +142,16 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
   var pageFooterYOffset = -85;
   
   var headerStringX = 345;
-  var headerStringY = 50;
+  var headerStringY = 30;
   
   var customerAddrX = 345;
   var customerAddrY = 100;
   
+  var companyLogoX = 30;
+  var companyLogoY = 30;
+  var companyLogoWidth = 300;
+  var companyLogoHeight = 120;
+
   var companyNameX = 0;
   var companyNameY = 160;
 
@@ -164,8 +170,8 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
     if (invoice.isCredit) {
       headerString = "KREDITFAKTURA";
     }
-    x.band([{data: headerString, width: 150, fontSize: titleFontSize, fontBold: true}], {x: headerStringX, y: headerStringY});
-
+    x.band([{data: headerString, width: 400, fontSize: titleFontSize, fontBold: true}], {x: headerStringX, y: headerStringY});
+    
     x.band([{data: "Kund", width: 150, fontSize: customerAddressCaptionFontSize}], {x: customerAddrX, y: customerAddrY});
     x.fontSize(customerAddressFontSize);
     x.band([{data: invoice.customer.name, width: 150}], {x: customerAddrX, y: customerAddrY + 20});
@@ -173,6 +179,13 @@ module.exports.doInvoiceReport = function (invoice, onCompletion) {
     x.band([{data: invoice.customer.addr2, width: 150}], {x: customerAddrX});
     x.band([{data: invoice.customer.addr3, width: 150}], {x: customerAddrX});
     
+    x.image(invoice.company.logo.path, {
+      x: companyLogoX, y: companyLogoY, align: "left", fit: [companyLogoWidth, companyLogoHeight]
+    });
+    if (debug) {
+      x.box(companyLogoX, companyLogoY, companyLogoX + companyLogoWidth, companyLogoY + companyLogoHeight);
+    }
+
     x.setCurrentX(companyNameX);
     x.setCurrentY(companyNameY);
     x.band([{data: invoice.company.name, width: 200, fontSize: companyNameFontSize, fontBold: true}]);
