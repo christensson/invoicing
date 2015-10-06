@@ -413,9 +413,14 @@
                                 <tr data-bind="if: (!isPaid() || (\$root.showPaid() && isPaid())) && (!isCredit() || (\$root.showCredit() && isCredit())),
                                                css: { danger: (!isPaid() && isOverdue()) }">
                                     <td>
+                                      <div class="btn-group">
                                         <a class="btn btn-info" data-bind="attr: { href: '#/page/invoice_show/' + _id() }">
                                             <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
                                         </a>
+                                        <a class="btn btn-info" data-bind="click: printInvoice">
+                                            <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
+                                        </a>
+                                      </div>
                                     </td>
                                     <td>
                                       <p>

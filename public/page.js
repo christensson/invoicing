@@ -443,6 +443,28 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
   };
 };
 
+// Trick for doing classmethods...
+function InvoiceOps(){};
+InvoiceOps.printInvoice = function(id) {
+  console.log("page.js - printInvoice - id=" + id);
+  if (id !== undefined) {
+    Notify_showSpinner(true);
+    try {
+      var child = window.open("/api/invoiceReport/" + id);
+      $(child).ready(function() {
+        console.log("page.js - printInvoice - Report done!");
+        Notify_showSpinner(false);
+      });
+      child.focus();
+    } catch (e) {
+      console.log("page.js - printInvoice - Failed!");
+      Notify_showSpinner(false);
+    }
+  } else {
+    console.log("page.js - printInvoice - failure, undefined id");
+  }
+};
+
 var InvoiceItemViewModel = function(data) {
   var self = this;
 
@@ -684,6 +706,16 @@ var InvoiceListDataViewModel = function(data) {
     }
     return overdue;
   });
+
+  self.printInvoice = function() {
+    console.log("page.js - InvoiceListDataViewModel - Report requested");
+    if (self._id() !== undefined) {
+      InvoiceOps.printInvoice(self._id());
+    } else {
+      Notify_showMsg('error', 'Cannot print invoice without id!');
+      console.log("page.js - InvoiceListDataViewModel - Invoice has no id.");
+    }
+  };
 };
 
 var InvoiceListViewModel = function(currentView, activeCompanyId) {
@@ -961,20 +993,11 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
       },
     });
   };
-
+  
   self.doInvoiceReport = function() {
     console.log("page.js - InvoiceNewViewModel - Report requested");
     if (self.data._id() !== undefined) {
-      Notify_showSpinner(true);
-      try {
-        var child = window.open("/api/invoiceReport/" + self.data._id());
-        $(child).ready(function() {
-          console.log("page.js - InvoiceNewViewModel - Report done!");
-          Notify_showSpinner(false);
-        });
-        child.focus();
-      } catch (e) {
-      }
+      InvoiceOps.printInvoice(self.data._id());
     } else {
       Notify_showMsg('info', 'Cannot print unsaved invoice, please save it first.');
       console.log("page.js - InvoiceNewViewModel - Invoice not saved.");
