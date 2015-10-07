@@ -53,7 +53,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static('public'));
-app.use('/uploads', express.static('uploads'));
 app.use(express.static('node_modules/knockout/build/output'));
 app.use(express.static('node_modules/bootstrap/js'));
 app.use(express.static('node_modules/bootstrap/dist/js'));
@@ -64,7 +63,7 @@ app.use(express.static('node_modules/jquery/dist'));
 
 var upload = multer({
   dest: './uploads/',
-  limits: {fileSize: 1024*1024} // Max 1 Mbyte
+  limits: {fileSize: 256*1024} // Max 256 Kbyte
 });
 
 // Session-persisted message middleware
@@ -274,6 +273,41 @@ app.post("/api/company_logo/:companyId", ensureAuthenticated, upload.single('log
   }).then(function(company) {
     console.log("Company logo set: " + JSON.stringify(company));
     res.status(204).end();
+  }).fail(
+      myFailureHandler.bind(null, res));
+});
+
+app.get("/api/company_logo/:companyId", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var companyId = req.params.companyId;
+  console.log("Company logo get: uid=" + uid + ", companyId=" + companyId);
+
+  mydb.getCompany(uid, companyId).then(function(company) {
+    if (company.logo !== undefined && company.logo.path !== undefined) {
+      var logoFilename = company.logo.path;
+      console.log("Company logo for companyId=" + companyId + " path=" + logoFilename +
+          ", mimetype=" + company.logo.mimetype);
+      var options = {
+        root: __dirname,
+        dotfiles: 'deny',
+        headers: {
+            'x-timestamp': Date.now(),
+            'x-sent': true
+        }
+      };
+      res.sendFile(logoFilename, options, function(err) {
+        if (err) {
+          console.log("Error sending company logo:" + err);
+          res.status(err.status).end();
+        }
+        else {
+          console.log("Company logo sent for companyId=" + companyId + " path=" + logoFilename);
+        }
+      });
+    } else {
+      console.log("Company companyId=" + companyId + " has no configured logo!");
+      res.status(404).end();
+    }
   }).fail(
       myFailureHandler.bind(null, res));
 });

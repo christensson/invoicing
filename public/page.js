@@ -232,9 +232,8 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
   
   self.logoPath = ko.pureComputed(function() {
     var path = "#";
-    var logoInfo = self.data.logo();
-    if (logoInfo !== undefined && logoInfo.path !== undefined) {
-      path = "/" + logoInfo.path;
+    if (self.data._id() !== undefined) {
+      path = "/api/company_logo/" + self.data._id();
     }
     return path;
   }, self);

@@ -179,11 +179,14 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
     x.band([{data: invoice.customer.addr2, width: 150}], {x: customerAddrX});
     x.band([{data: invoice.customer.addr3, width: 150}], {x: customerAddrX});
     
-    x.image(invoice.company.logo.path, {
-      x: companyLogoX, y: companyLogoY, align: "left", fit: [companyLogoWidth, companyLogoHeight]
-    });
-    if (debug) {
-      x.box(companyLogoX, companyLogoY, companyLogoX + companyLogoWidth, companyLogoY + companyLogoHeight);
+    if (invoice.company.logo !== undefined && invoice.company.logo.path !== undefined) {
+      x.image(invoice.company.logo.path, {
+        x: companyLogoX, y: companyLogoY, align: "left", fit: [companyLogoWidth, companyLogoHeight]});
+      if (debug) {
+        x.box(companyLogoX, companyLogoY, companyLogoX + companyLogoWidth, companyLogoY + companyLogoHeight);
+      }
+    } else {
+      console.log("doInvoiceReport: No company logo configured for companyId=" + invoice.company._id);
     }
 
     x.setCurrentX(companyNameX);
