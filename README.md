@@ -41,7 +41,7 @@
 - [ ] Translations
 - [ ] Settings: ?
 - [ ] Feature: Invoice detail types
-- [x] Feature: Copy invoice (494f491c20950cda86aaefde82a05b5708396572)
+- [x] Feature: Copy invoice (SHA: 494f491c20950cda86aaefde82a05b5708396572)
 - [ ] Feature: More authentication methods (other than local)
 - [ ] Fix company input. Currently the logo has to be uploaded in a separate form. The upload should be made using the same save button.
 
