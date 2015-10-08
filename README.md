@@ -1,5 +1,5 @@
 # Invoicing
-## Dependencies
+## Tool dependencies
 * nodejs
 * mongodb
 
@@ -9,3 +9,7 @@
 - [ ] Translations
 - [ ] Feature: Invoice detail types
 - [ ] Feature: Copy invoice
+- [ ] Fix company input. Currently the logo has to be uploaded in a separate form. The upload should be made using the same save button.
+
+## Bugs
+- [ ] Placeholder
