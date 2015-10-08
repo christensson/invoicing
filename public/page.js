@@ -616,6 +616,11 @@ var InvoiceDataViewModel = function() {
   self.setCustomer = function(data) {
     self.customer(data);
   };
+  
+  self.forceMarkAsNew = function() {
+    self._id(undefined);
+    self.iid(undefined);
+  };
 
   self.newInvoiceItem = function() {
     var data = {
@@ -958,10 +963,8 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
     } else if (self.data.customer()._id === undefined) {
       Notify_showMsg('error', 'Customer must be selected!');
       console.log("No customer selected: " + JSON.stringify(self.data.customer()));
-      // self.nameError(true);
       return;
     }
-    // self.nameError(false);
     var isNewInvoice = (self.data._id() == undefined) ? true : false;
     var ajaxData = JSON.stringify(self.data.getJson());
     var ajaxUrl = "/api/invoice/" + self.data._id();
@@ -993,8 +996,8 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
     });
   };
   
-  self.doInvoiceReport = function() {
-    console.log("page.js - InvoiceNewViewModel - Report requested");
+  self.doInvoicePrint = function() {
+    console.log("page.js - InvoiceNewViewModel - Print requested");
     if (self.data._id() !== undefined) {
       InvoiceOps.printInvoice(self.data._id());
     } else {
@@ -1002,10 +1005,17 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
       console.log("page.js - InvoiceNewViewModel - Invoice not saved.");
     }
   };
+  
+  self.doCopyInvoice = function() {
+    console.log("page.js - InvoiceNewViewModel - Copy invoice requested");
+    /* Mark datafields so that the next save will allocate new invoice ids */
+    self.data.forceMarkAsNew();
+  };
 
   self.newItem = function() {
     self.data.newInvoiceItem();
   };
+
   self.deleteItem = function(item) {
     console.log("page.js - InvoiceNewViewModel - delete: "
         + JSON.stringify(item));
