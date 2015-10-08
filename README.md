@@ -33,7 +33,7 @@
 ### Server
 * app.js - Binds server code together, all get/put/post handlers
 * functions.js - Authentication logic
-* mydb.hs - Database abstraction
+* mydb.js - Database abstraction
 
 ## TODO
 - [ ] Add more fields to company that needs to show on invoice: vat reg nr, custom text, ...
@@ -46,4 +46,4 @@
 - [ ] Fix company input. Currently the logo has to be uploaded in a separate form. The upload should be made using the same save button.
 
 ## Bugs
-- [ ] Placeholder
+Use GitHub issue tracker.
