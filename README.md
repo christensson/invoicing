@@ -16,6 +16,25 @@
 * Fluentreports: http://www.fluentreports.com/docs.html (PDFs)
 * Multer: https://github.com/expressjs/multer (Multipart form post)
 
+## Structure
+### Client
+* Signin
+  * public/signin.js
+  * views/signin.marko
+
+* Main application
+  * public/page.js
+  * views/app.marko
+
+* Notifications (used both in signin and main application)
+  * public/notification.js
+  * views/notification.marko
+
+### Server
+* app.js - Binds server code together, all get/put/post handlers
+* functions.js - Authentication logic
+* mydb.hs - Database abstraction
+
 ## TODO
 - [ ] Add more fields to company that needs to show on invoice: vat reg nr, custom text, ...
 - [ ] Feature: Currency rounding for totals ("öresutjämning")
