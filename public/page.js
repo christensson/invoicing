@@ -13,10 +13,14 @@ var CompanyViewModel = function() {
   self.contact1 = ko.observable();
   self.contact2 = ko.observable();
   self.contact3 = ko.observable();
-  self.payment1 = ko.observable();
-  self.payment2 = ko.observable();
   self.payment1Caption = ko.observable();
   self.payment2Caption = ko.observable();
+  self.payment1 = ko.observable();
+  self.payment2 = ko.observable();
+  self.paymentCustomText = ko.observable();
+  self.vatNr = ko.observable();
+  self.vatNrCustomText = ko.observable();
+  self.reverseChargeText = ko.observable();
   self.isValid = ko.observable();
   self.logo = ko.observable();
   self.nameError = ko.observable(false);
@@ -38,10 +42,14 @@ var CompanyViewModel = function() {
     self.contact1(data.contact1);
     self.contact2(data.contact2);
     self.contact3(data.contact3);
-    self.payment1(data.payment1);
-    self.payment2(data.payment2);
     self.payment1Caption(data.payment1Caption);
     self.payment2Caption(data.payment2Caption);
+    self.payment1(data.payment1);
+    self.payment2(data.payment2);
+    self.paymentCustomText(data.paymentCustomText);
+    self.vatNr(data.vatNr);
+    self.vatNrCustomText(data.vatNrCustomText);
+    self.reverseChargeText(data.reverseChargeText);
     self.isValid(data.isValid);
     self.logo(data.logo);
   };
@@ -64,6 +72,10 @@ var CompanyViewModel = function() {
         payment2Caption : "",
         payment1 : "",
         payment2 : "",
+        paymentCustomText : "",
+        vatNr : "",
+        vatNrCustomText : "",
+        reverseChargeText : "",
         isValid : true,
         logo : undefined
       };
@@ -126,6 +138,10 @@ var CompanyViewModel = function() {
       payment2Caption : self.payment2Caption(),
       payment1 : self.payment1(),
       payment2 : self.payment2(),
+      paymentCustomText : self.paymentCustomText(),
+      vatNr : self.vatNr(),
+      vatNrCustomText : self.vatNrCustomText(),
+      reverseChargeText : self.reverseChargeText(),
       isValid : self.isValid(),
       logo : self.logo()
     };
@@ -315,6 +331,8 @@ var CustomerViewModel = function(data) {
   self.addr1 = ko.observable(data.addr1);
   self.addr2 = ko.observable(data.addr2);
   self.phone = ko.observable(data.phone);
+  self.vatNr = ko.observable(data.vatNr);
+  self.useReverseCharge = ko.observable(data.useReverseCharge);
   self.isValid = ko.observable(data.isValid);
   self.companyId = ko.observable(data.companyId);
   self.nameError = ko.observable(false);
@@ -348,6 +366,8 @@ var CustomerViewModel = function(data) {
         addr1 : self.addr1(),
         addr2 : self.addr2(),
         phone : self.phone(),
+        vatNr : self.vatNr(),
+        useReverseCharge : self.useReverseCharge(),
         isValid : self.isValid()
       }),
       dataType : "json",
@@ -372,6 +392,8 @@ var CustomerViewModel = function(data) {
   self.addr1.subscribe(this.updateServer);
   self.addr2.subscribe(this.updateServer);
   self.phone.subscribe(this.updateServer);
+  self.vatNr.subscribe(this.updateServer);
+  self.useReverseCharge.subscribe(this.updateServer);
   self.isValid.subscribe(this.updateServer);
 };
 
@@ -416,6 +438,8 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
       addr1 : "",
       addr2 : "",
       phone : "",
+      vatNr : "",
+      useReverseCharge : false,
       isValid : true
     };
     self.customerList.push(new CustomerViewModel(data));

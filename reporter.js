@@ -137,6 +137,7 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
   var headerDetailsFontSize = 8;
   var detailsFontSize = 10;
   var detailsSummaryFontSize = 10;
+  var detailsSummaryCustomTextFontSize = 9;
   var currencyString = "kr";
   var margin = 30;
   var pageFooterYOffset = -85;
@@ -163,6 +164,17 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
     var date = new Date(value);
     var isoDateString = date.toISOString();
     return isoDateString.split("T")[0];
+  };
+  
+  var formatTextTemplate = function(text, cust) {
+    var formatedText = text;
+    if (cust.vatNr !== undefined) {
+      formatedText = formatedText.replace("%c.vatNr%", cust.vatNr);
+    }
+    if (debug) {
+      console.log("formatTextTemplate(): Formated text: " + formatedText);
+    }
+    return formatedText;
   };
 
   var mytitleheader = function(x) {
@@ -245,36 +257,44 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
     x.addY(5);
     x.line(margin, x.getCurrentY(), x.maxX(), x.getCurrentY(), {thickness: 0.5});
     x.addY(3);
-    var companyDetailsColSize = [200, 200, 200];
+    var companyDetailsColSize = [150, 150, 150, 150];
     var c = invoice.company;
     x.band( [
              {data: "Adress", width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsHeaderFontSize},
              {data: c.contact1Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
-             {data: c.payment1Caption, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize}
+             {data: "Momsreg nr", width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize},
+             {data: c.payment1Caption, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsHeaderFontSize}
              ], {border: 0});
     x.band( [
              {data: c.name, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
              {data: c.contact1, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
-             {data: c.payment1, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsPaymentFontSize, fontBold: true}
+             {data: c.vatNr, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsFontSize},
+             {data: c.payment1, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsPaymentFontSize, fontBold: true}
              ], {border: 0});
     x.band( [
              {data: c.addr1, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
              {data: c.contact2Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
-             {data: c.payment2Caption, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize}
+             {data: "", width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize},
+             {data: c.payment2Caption, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsHeaderFontSize}
              ], {border: 0});
     x.band( [
              {data: c.addr2, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
              {data: c.contact2, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
-             {data: c.payment2, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsPaymentFontSize, fontBold: true}
+             {data: c.vatNrCustomText, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsFontSize},
+             {data: c.payment2, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsPaymentFontSize, fontBold: true}
              ], {border: 0});
-    if (c.addr3 || c.contact3) {
+    if (c.addr3 || c.contact3 || c.paymentCustomText) {
       x.band( [
                {data: c.addr3, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
-               {data: c.contact3Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize}
+               {data: c.contact3Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
+               {data: "", width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize},
+               {data: "", width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsHeaderFontSize}
                ], {border: 0});
       x.band( [
                {data: "", width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
-               {data: c.contact3, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize}
+               {data: c.contact3, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
+               {data: "", width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
+               {data: c.paymentCustomText, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize}
                ], {border: 0});
     }
     x.addY(6);
@@ -309,17 +329,28 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
   };
 
   var finalsummary = function(x, r) {
+    var totalVat = invoice.totalInclVat - invoice.totalExclVat;
     x.fontSize(detailsSummaryFontSize);
     x.newLine();
     x.band( [
-             {data: "Totalt exkl moms", width: 410, align: x.right},
+             {data: "Netto", width: 410, align: x.right},
              {data: formatCurrency(invoice.totalExclVat), width: 120, align: x.right}
+           ], {fontBold: 0, border:0, width: 0, wrap: 1} );
+    x.band( [
+             {data: "Moms", width: 410, align: x.right},
+             {data: formatCurrency(totalVat), width: 120, align: x.right}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     x.band( [
              {data: "Att betala", width: 410, align: x.right},
              {data: formatCurrency(invoice.totalInclVat), width: 120, align: x.right}
              ], {fontBold: 1, border:0, width: 0, wrap: 1} );
-    x.newLine();
+    if (invoice.customer.useReverseCharge === true) {
+      x.newLine();
+      x.fontSize(detailsSummaryCustomTextFontSize);
+    
+      var reverseChargeText = formatTextTemplate(invoice.company.reverseChargeText, invoice.customer);
+      x.print(reverseChargeText, {fontBold: 0, border: 0, wrap: 1});
+    }
   };
 
 

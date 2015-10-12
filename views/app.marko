@@ -172,13 +172,13 @@
                     <div class="panel-body">
                       <div for="idx in [1,2,3]">
                         <div class="form-group">
-                          <label for="contact${idx}Cap" class="col-sm-1 control-label">Caption ${idx}</label>
+                          <label for="contact${idx}Cap" class="col-sm-2 control-label">Caption ${idx}</label>
                           <div class="col-sm-4">
                             <input type="text" id="contact${idx}Cap" class="form-control" data-bind="value: data.contact${idx}Caption"></input>
                           </div>
                         </div>
                         <div class="form-group">
-                          <label for="contact${idx}" class="col-sm-1 control-label">Info ${idx}</label>
+                          <label for="contact${idx}" class="col-sm-2 control-label">Info ${idx}</label>
                           <div class="col-sm-4">
                             <input type="text" id="contact${idx}" class="form-control" data-bind="value: data.contact${idx}"></input>
                           </div>
@@ -193,17 +193,56 @@
                     <div class="panel-body">
                       <div for="idx in [1,2]">
                         <div class="form-group">
-                          <label for="pay${idx}Cap" class="col-sm-1 control-label">Caption ${idx}</label>
+                          <label for="pay${idx}Cap" class="col-sm-2 control-label">Caption ${idx}</label>
                           <div class="col-sm-4">
                             <input type="text" id="pay${idx}Cap" class="form-control" data-bind="value: data.payment${idx}Caption"></input>
                           </div>
                         </div>
                         <div class="form-group">
-                          <label for="pay${idx}" class="col-sm-1 control-label">Info ${idx}</label>
+                          <label for="pay${idx}" class="col-sm-2 control-label">Info ${idx}</label>
                           <div class="col-sm-4">
                             <input type="text" id="pay${idx}" class="form-control" data-bind="value: data.payment${idx}"></input>
                           </div>
                         </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="payCustomText" class="col-sm-2 control-label">Custom text</label>
+                        <div class="col-sm-4">
+                          <input type="text" id="payCustomText" class="form-control" data-bind="value: data.paymentCustomText"></input>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">VAT info</h3>
+                    </div>
+                    <div class="panel-body">
+                      <div class="form-group">
+                        <label for="vatNr" class="col-sm-2 control-label">VAT nr</label>
+                        <div class="col-sm-4">
+                          <input type="text" id="vatNr" class="form-control" data-bind="value: data.vatNr"></input>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="vatNrCustomText" class="col-sm-2 control-label">Custom text</label>
+                        <div class="col-sm-4">
+                          <input type="text" id="vatNrCustomText" class="form-control" data-bind="value: data.vatNrCustomText"></input>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Custom text fields</h3>
+                    </div>
+                    <div class="panel-body">
+                      <div class="form-group">
+                        <label for="reverseChargeText" class="col-sm-2 control-label">Reverse charge text</label>
+                        <div class="col-sm-4">
+                          <textarea rows="4" id="reverseChargeText" class="form-control" data-bind="value: data.reverseChargeText"></textarea>
+                        </div>
+                        <span id="helpBlock" class="help-block">Special string %c.vatNr% is replaced by customer VAT-nr.</span>
                       </div>
                     </div>
                   </div>
@@ -261,6 +300,8 @@
                                     <th>Address 1</th>
                                     <th>Address 2</th>
                                     <th>Phone</th>
+                                    <th>VAT-nr</th>
+                                    <th>Reverse charge</th>
                                 </tr>
                             </thead>
                             <tbody data-bind="foreach: customerList">
@@ -275,6 +316,14 @@
                                     <td><input type="text" class="form-control" data-bind="value: addr1"></input></td>
                                     <td><input type="text" class="form-control" data-bind="value: addr2"></input></td>
                                     <td><input type="text" class="form-control" data-bind="value: phone"></input></td>
+                                    <td><input type="text" class="form-control" data-bind="value: vatNr"></input></td>
+                                    <td>
+                                      <div class="checkbox">
+                                        <label>
+                                          <input type="checkbox" data-bind="checked: useReverseCharge" aria-label="Use reverse charge">
+                                        </label>
+                                      </div>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
