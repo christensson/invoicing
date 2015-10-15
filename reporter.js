@@ -157,7 +157,29 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
   var companyNameY = 160;
 
   var formatCurrency = function(value) {
-    return value + " " + currencyString;
+    var decimalSeparator = '.';
+    var valueString = value.toString();
+    var decimalSepPos = valueString.indexOf(decimalSeparator);
+    if (-1 == decimalSepPos) {
+      valueString = valueString + decimalSeparator + "00";
+    } else {
+      var numDecimals = valueString.length - decimalSepPos - 1;
+      if (1 == numDecimals) {
+        valueString = valueString + "0";
+      } else {
+        // Extract 2 decimals after decimal separator, +1 since not inclusive
+        valueString = valueString.slice(0, decimalSepPos + 2 + 1);
+      }
+    }
+    return valueString + " " + currencyString;
+  };
+
+  var calcPaymentAdjustment = function(amount) {
+    var amountRounded = Math.round(amount);
+    var adjustment = amountRounded - amount;
+    var adjustedAmount = amount + adjustment;
+    console.log("calcPaymentAdjustment: amount=" + amount + ", adjAmount=" + adjustedAmount + ", adjustment=" + adjustment);
+    return adjustment;
   };
   
   var formatDate = function(value) {
@@ -330,21 +352,34 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
 
   var finalsummary = function(x, r) {
     var totalVat = invoice.totalInclVat - invoice.totalExclVat;
+    totalVat = parseFloat(totalVat.toFixed(2));
+    var totalExclVat = invoice.totalExclVat;
+    totalExclVat = parseFloat(totalExclVat.toFixed(2));
+    var useReverseCharge = invoice.customer.useReverseCharge === true;
+    var amountToPay = useReverseCharge?invoice.totalExclVat:invoice.totalInclVat;
+    var amountToPayAdjustment = calcPaymentAdjustment(amountToPay);
+    amountToPay = amountToPay + amountToPayAdjustment;
     x.fontSize(detailsSummaryFontSize);
     x.newLine();
     x.band( [
              {data: "Netto", width: 410, align: x.right},
              {data: formatCurrency(invoice.totalExclVat), width: 120, align: x.right}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
+    if (!useReverseCharge) {
+      x.band( [
+               {data: "Moms", width: 410, align: x.right},
+               {data: formatCurrency(totalVat), width: 120, align: x.right}
+             ], {fontBold: 0, border:0, width: 0, wrap: 1} );
+    }
     x.band( [
-             {data: "Moms", width: 410, align: x.right},
-             {data: formatCurrency(totalVat), width: 120, align: x.right}
+             {data: "Öresutjämning", width: 410, align: x.right},
+             {data: formatCurrency(amountToPayAdjustment), width: 120, align: x.right}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     x.band( [
              {data: "Att betala", width: 410, align: x.right},
-             {data: formatCurrency(invoice.totalInclVat), width: 120, align: x.right}
+             {data: formatCurrency(amountToPay), width: 120, align: x.right}
              ], {fontBold: 1, border:0, width: 0, wrap: 1} );
-    if (invoice.customer.useReverseCharge === true) {
+    if (useReverseCharge) {
       x.newLine();
       x.fontSize(detailsSummaryCustomTextFontSize);
     
