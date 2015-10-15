@@ -240,7 +240,8 @@
                       <div class="form-group">
                         <label for="reverseChargeText" class="col-sm-2 control-label">Reverse charge text</label>
                         <div class="col-sm-4">
-                          <textarea rows="4" id="reverseChargeText" class="form-control" data-bind="value: data.reverseChargeText"></textarea>
+                          <textarea rows="4" id="reverseChargeText" class="form-control" data-bind="value: data.reverseChargeText" aria-describedby="reverseChargeTextHelp"></textarea>
+                          <span id="reverseChargeTextHelp" class="help-block">Special string %c.vatNr% is replaced by customer VAT-nr.</span>
                         </div>
                         <span id="helpBlock" class="help-block">Special string %c.vatNr% is replaced by customer VAT-nr.</span>
                       </div>
