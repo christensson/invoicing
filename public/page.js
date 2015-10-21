@@ -450,20 +450,6 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
     c.isValid(false);
     self.customerList.destroy(c);
   };
-
-  self.doCustomersReport = function() {
-    console.log("Report requested");
-    Notify_showSpinner(true);
-    try {
-      var child = window.open("/api/customersReport");
-      $(child).ready(function() {
-        console.log("Report done!");
-        Notify_showSpinner(false);
-      });
-      child.focus();
-    } catch (e) {
-    }
-  };
 };
 
 // Trick for doing classmethods...

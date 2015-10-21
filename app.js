@@ -398,24 +398,6 @@ app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
   }
 });
 
-app.get("/api/customersReport", ensureAuthenticated, function(req, res) {
-  var uid = req.user._id;
-  console.log("Customers report: user=" + req.user.username + ", uid=" + uid);
-  mydb.getCustomers(uid).then(function(customers) {
-    reporter.doCustomersReport(customers, function(reportFilename) {
-      console.log("onCompletion: reportFilename=" + reportFilename);
-      res.type('application/pdf');
-      res.download(reportFilename, reportFilename, function(err) {
-        if (err) {
-          console.error("onCompletion: " + err);
-        } else {
-          res.end();
-        }
-      });
-    });
-  }).fail(myFailureHandler.bind(null, res));
-});
-
 app.get("/api/invoiceReport/:id", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var id = req.params.id;
