@@ -36,13 +36,14 @@
 * mydb.js - Database abstraction
 
 ## TODO
-- [ ] Add more fields to company that needs to show on invoice: vat reg nr, custom text, ...
+- [x] Add more fields to company that needs to show on invoice: vat reg nr, custom text, ...
 - [ ] Feature: Currency rounding for totals ("öresutjämning")
 - [ ] Translations
 - [ ] Settings: ?
 - [ ] Feature: Invoice detail types
 - [x] Feature: Copy invoice (SHA: 494f491c20950cda86aaefde82a05b5708396572)
 - [ ] Feature: More authentication methods (other than local)
+- [ ] Fix customer input. Proper form is needed, not just table view.
 - [ ] Fix company input. Currently the logo has to be uploaded in a separate form. The upload should be made using the same save button.
 
 ## Bugs
