@@ -37,7 +37,9 @@
 
 ## TODO
 - [x] Add more fields to company that needs to show on invoice: vat reg nr, custom text, ...
-- [ ] Feature: Currency rounding for totals ("öresutjämning")
+- [x] Feature: Currency rounding for totals ("öresutjämning")
+- [ ] Feature: Currency rounding improvement: optional, more variants since "öresutjämning" doesn't work that good for more valuable currencies...
+- [ ] Feature: Configurable currencies, default selected per customer
 - [ ] Translations
 - [ ] Settings: ?
 - [ ] Feature: Invoice detail types

@@ -1,4 +1,5 @@
 var Report = require('fluentreports').Report;
+var util = require('./public/util.js');
 
 module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
   'use strict';
@@ -32,7 +33,6 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
   var detailsFontSize = 10;
   var detailsSummaryFontSize = 10;
   var detailsSummaryCustomTextFontSize = 9;
-  var currencyString = "kr";
   var margin = 30;
   var pageFooterYOffset = -85;
   
@@ -49,24 +49,6 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
 
   var companyNameX = 0;
   var companyNameY = 160;
-
-  var formatCurrency = function(value) {
-    var decimalSeparator = '.';
-    var valueString = value.toString();
-    var decimalSepPos = valueString.indexOf(decimalSeparator);
-    if (-1 == decimalSepPos) {
-      valueString = valueString + decimalSeparator + "00";
-    } else {
-      var numDecimals = valueString.length - decimalSepPos - 1;
-      if (1 == numDecimals) {
-        valueString = valueString + "0";
-      } else {
-        // Extract 2 decimals after decimal separator, +1 since not inclusive
-        valueString = valueString.slice(0, decimalSepPos + 2 + 1);
-      }
-    }
-    return valueString + " " + currencyString;
-  };
 
   var calcPaymentAdjustment = function(amount) {
     var amountRounded = Math.round(amount);
@@ -240,7 +222,7 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
       {data: r.description, width: detailsColSize[0], align: x.left},
       {data: r.count, width: detailsColSize[1], align: x.right},
       {data: r.price, width: detailsColSize[2], align: x.right},
-      {data: formatCurrency(r.total), width: detailsColSize[3], align: x.right}
+      {data: util.formatCurrency(r.total, invoice.currency), width: detailsColSize[3], align: x.right}
     ], {border:0, width: 0, wrap: 1} );
   };
 
@@ -257,21 +239,21 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
     x.newLine();
     x.band( [
              {data: "Netto", width: 410, align: x.right},
-             {data: formatCurrency(invoice.totalExclVat), width: 120, align: x.right}
+             {data: util.formatCurrency(invoice.totalExclVat, invoice.currency), width: 120, align: x.right}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     if (!useReverseCharge) {
       x.band( [
                {data: "Moms", width: 410, align: x.right},
-               {data: formatCurrency(totalVat), width: 120, align: x.right}
+               {data: util.formatCurrency(totalVat, invoice.currency), width: 120, align: x.right}
              ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     }
     x.band( [
              {data: "Öresutjämning", width: 410, align: x.right},
-             {data: formatCurrency(amountToPayAdjustment), width: 120, align: x.right}
+             {data: util.formatCurrency(amountToPayAdjustment, invoice.currency), width: 120, align: x.right}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     x.band( [
              {data: "Att betala", width: 410, align: x.right},
-             {data: formatCurrency(amountToPay), width: 120, align: x.right}
+             {data: util.formatCurrency(amountToPay, invoice.currency), width: 120, align: x.right}
              ], {fontBold: 1, border:0, width: 0, wrap: 1} );
     if (useReverseCharge) {
       x.newLine();

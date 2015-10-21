@@ -474,8 +474,9 @@ InvoiceOps.printInvoice = function(id) {
   }
 };
 
-var InvoiceItemViewModel = function(data) {
+var InvoiceItemViewModel = function(data, currency) {
   var self = this;
+  self.activeCurrency = currency;
 
   self.description = ko.observable(data.description);
   self.price = ko.observable(data.price);
@@ -487,6 +488,10 @@ var InvoiceItemViewModel = function(data) {
     var total = parseFloat(this.count()) * parseFloat(this.price())
         * (1.0 - parseFloat(this.discount()));
     return total;
+  }, self);
+
+  self.totalStr = ko.pureComputed(function() {
+    return Util.formatCurrency(self.total(), self.activeCurrency());
   }, self);
 
   self.getJson = function() {
@@ -520,6 +525,7 @@ var InvoiceDataViewModel = function() {
   self.date = ko.observable();
   self.daysUntilPayment = ko.observable();
   self.projId = ko.observable();
+  self.currency = ko.observable();
   self.invoiceItems = ko.observableArray();
 
   self.setData = function(newData) {
@@ -538,15 +544,20 @@ var InvoiceDataViewModel = function() {
     self.date(newData.date);
     self.daysUntilPayment(newData.daysUntilPayment);
     self.projId(newData.projId);
+    self.currency(newData.currency);
     self.invoiceItems.removeAll();
     for ( var i = 0; i < newData.invoiceItems.length; i++) {
       console.log("Push item i=" + i + " desc=" + newData.invoiceItems[i].description);
-      self.invoiceItems.push(new InvoiceItemViewModel(newData.invoiceItems[i]));
+      self.invoiceItems.push(new InvoiceItemViewModel(newData.invoiceItems[i], self.currency));
     }
   };
 
   self.setCompanyId = function(companyId) {
     self.companyId(companyId);
+  };
+
+  self.setCurrency = function(currency) {
+    self.currency(currency);
   };
 
   self.init = function() {
@@ -568,6 +579,7 @@ var InvoiceDataViewModel = function() {
       date : "",
       daysUntilPayment : 0,
       projId : "",
+      currency : "kr",
       isLocked : false,
       isPaid : false,
       isCredit : false,
@@ -601,7 +613,7 @@ var InvoiceDataViewModel = function() {
     }
     return sum;
   }, this);
-
+  
   self.totalInclVat = ko.pureComputed(function() {
     var sum = 0;
     for ( var i = 0; i < this.invoiceItems().length; i++) {
@@ -616,6 +628,14 @@ var InvoiceDataViewModel = function() {
     return sum;
   }, this);
   
+  self.totalExclVatStr = ko.pureComputed(function() {
+    return Util.formatCurrency(self.totalExclVat(), self.currency());
+  }, self);
+
+  self.totalInclVatStr = ko.pureComputed(function() {
+    return Util.formatCurrency(self.totalInclVat(), self.currency());
+  }, self);
+
   self.lastPaymentDate = ko.pureComputed(function() {
     var invoiceDate = new Date(self.date());
     var lastPaymentDateMs =
@@ -641,7 +661,7 @@ var InvoiceDataViewModel = function() {
       discount : 0.0,
       isValid : true
     };
-    self.invoiceItems.push(new InvoiceItemViewModel(data));
+    self.invoiceItems.push(new InvoiceItemViewModel(data, self.currency));
     console.log("Added new invoice item. #items=" + self.invoiceItems().length + ", data=" + JSON.stringify(data));
   };
 
@@ -672,6 +692,7 @@ var InvoiceDataViewModel = function() {
       daysUntilPayment : self.daysUntilPayment(),
       lastPaymentDate : self.lastPaymentDate(),
       projId : self.projId(),
+      currency : self.currency(),
       invoiceItems : items,
       totalExclVat : self.totalExclVat(),
       totalInclVat : self.totalInclVat()
@@ -697,6 +718,9 @@ var InvoiceListDataViewModel = function(data) {
   self.daysUntilPayment = ko.observable(data.daysUntilPayment);
   self.projId = ko.observable(data.projId);
   self.totalExclVat = ko.observable(data.totalExclVat);
+  self.totalExclVatStr = ko.pureComputed(function() {
+    return Util.formatCurrency(self.totalExclVat());
+  }, self);
   self.totalInclVat = ko.observable(data.totalInclVat);
   self.isOverdue = ko.pureComputed(function() {
     var overdue = false;
@@ -881,6 +905,8 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
   self.activeCompanyId = activeCompanyId;
   self.customerList = ko.observableArray();
   self.selectedCustomer = ko.observable();
+  self.currencyList = ko.observableArray(["SEK", "EUR", "USD", "GBP"]);
+  self.selectedCurrency = ko.observable();
   self.numServerReqLeft = 0;
 
   self.currentView.subscribe(function(newValue) {
@@ -907,6 +933,14 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
       console.log("page.js - InvoiceNewViewModel - Customer selected - "
           + JSON.stringify(newValue.data));
       self.data.setCustomer(newValue.data);
+    }
+  });
+
+  self.selectedCurrency.subscribe(function(newValue) {
+    if (newValue !== undefined) {
+      console.log("page.js - InvoiceNewViewModel - Currency selected - "
+          + newValue);
+      self.data.setCurrency(newValue);
     }
   });
 
@@ -937,6 +971,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
           .log("Got invoice id=" + _id + ", data=" + JSON.stringify(invoice));
           self.data.setData(invoice);
           self.selectedCustomer(self.data.customer());
+          self.selectedCurrency(self.data.currency());
           self.numServerReqLeft--;
           self.syncCustomerIdInput();
           Notify_showSpinner(false);
