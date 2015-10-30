@@ -23,6 +23,8 @@ var CompanyViewModel = function() {
   self.reverseChargeText = ko.observable();
   self.isValid = ko.observable();
   self.logo = ko.observable();
+  self.nextCid = ko.observable();
+  self.nextIid = ko.observable();
   self.nameError = ko.observable(false);
   self.hasErrorCss = ko.pureComputed(function() {
     // return this.nameError() ? "has-error" : "";
@@ -52,6 +54,8 @@ var CompanyViewModel = function() {
     self.reverseChargeText(data.reverseChargeText);
     self.isValid(data.isValid);
     self.logo(data.logo);
+    self.nextCid(data.nextCid);
+    self.nextIid(data.nextIid);
   };
   
   self.init = function() {
@@ -77,7 +81,9 @@ var CompanyViewModel = function() {
         vatNrCustomText : "",
         reverseChargeText : "",
         isValid : true,
-        logo : undefined
+        logo : undefined,
+        nextCid : 100,
+        nextIid : 100
       };
     self.setData(data);
   };
@@ -143,7 +149,9 @@ var CompanyViewModel = function() {
       vatNrCustomText : self.vatNrCustomText(),
       reverseChargeText : self.reverseChargeText(),
       isValid : self.isValid(),
-      logo : self.logo()
+      logo : self.logo(),
+      nextCid : parseInt(self.nextCid()),
+      nextIid : parseInt(self.nextIid())
     };
     return res;
   };
@@ -184,10 +192,6 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompanyN
       Notify_showSpinner(false);
       Notify_showMsg('error', 'Failed to get companies!');
     });
-  };
-
-  self.newCompany = function() {
-    self.companyList.push(new CompanyViewModel());
   };
 
   self.deleteCompany = function(c) {
@@ -321,25 +325,75 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
   };
 };
 
-var CustomerViewModel = function(data) {
+var CustomerViewModel = function() {
   var self = this;
 
-  self._id = ko.observable(data._id);
-  self.cid = ko.observable(data.cid);
-  self.uid = ko.observable(data.uid);
-  self.name = ko.observable(data.name);
-  self.addr1 = ko.observable(data.addr1);
-  self.addr2 = ko.observable(data.addr2);
-  self.phone = ko.observable(data.phone);
-  self.vatNr = ko.observable(data.vatNr);
-  self.useReverseCharge = ko.observable(data.useReverseCharge);
-  self.isValid = ko.observable(data.isValid);
-  self.companyId = ko.observable(data.companyId);
+  self._id = ko.observable();
+  self.cid = ko.observable();
+  self.uid = ko.observable();
+  self.name = ko.observable();
+  self.addr1 = ko.observable();
+  self.addr2 = ko.observable();
+  self.addr3 = ko.observable();
+  self.phone1 = ko.observable();
+  self.phone2 = ko.observable();
+  self.phone3 = ko.observable();
+  self.email = ko.observable();
+  self.vatNr = ko.observable();
+  self.useReverseCharge = ko.observable();
+  self.isValid = ko.observable();
+  self.companyId = ko.observable();
+  
   self.nameError = ko.observable(false);
   self.hasErrorCss = ko.pureComputed(function() {
     // return this.nameError() ? "has-error" : "";
     return this.nameError() ? "highlighterror" : "";
   }, self);
+
+  self.setData = function(data) {
+    self._id(data._id);
+    self.cid(data.cid);
+    self.uid(data.uid);
+    self.name(data.name);
+    self.addr1(data.addr1);
+    self.addr2(data.addr2);
+    self.addr3(data.addr3);
+    self.phone1(data.phone1);
+    self.phone2(data.phone2);
+    self.phone3(data.phone3);
+    self.email(data.email);
+    self.vatNr(data.vatNr);
+    self.useReverseCharge(data.useReverseCharge);
+    self.isValid(data.isValid);
+    self.companyId(data.companyId);
+  };
+
+  self.init = function() {
+    var data = {
+      _id : undefined,
+      cid : undefined,
+      uid : undefined,
+      companyId : undefined,
+      name : "",
+      addr1 : "",
+      addr2 : "",
+      addr3 : "",
+      phone1 : "",
+      phone2 : "",
+      phone3 : "",
+      email : "",
+      vatNr : "",
+      useReverseCharge : false,
+      isValid : true,
+    };
+    self.setData(data);
+  };
+  
+  self.init();
+
+  self.setActiveCompanyId = function(companyId) {
+    self.companyId(companyId);
+  };
 
   self.updateServer = function() {
     if ((self._id() == undefined) && !self.isValid()) {
@@ -357,19 +411,7 @@ var CustomerViewModel = function(data) {
       url : "/api/customer/" + self._id(),
       type : "PUT",
       contentType : "application/json",
-      data : JSON.stringify({
-        _id : self._id(),
-        cid : self.cid(),
-        uid : self.uid(),
-        companyId : self.companyId(),
-        name : self.name(),
-        addr1 : self.addr1(),
-        addr2 : self.addr2(),
-        phone : self.phone(),
-        vatNr : self.vatNr(),
-        useReverseCharge : self.useReverseCharge(),
-        isValid : self.isValid()
-      }),
+      data : JSON.stringify(self.toJSON()),
       dataType : "json",
       success : function(data) {
         console.log("updateServer: response: " + JSON.stringify(data));
@@ -387,14 +429,27 @@ var CustomerViewModel = function(data) {
       },
     });
   };
-
-  self.name.subscribe(this.updateServer);
-  self.addr1.subscribe(this.updateServer);
-  self.addr2.subscribe(this.updateServer);
-  self.phone.subscribe(this.updateServer);
-  self.vatNr.subscribe(this.updateServer);
-  self.useReverseCharge.subscribe(this.updateServer);
-  self.isValid.subscribe(this.updateServer);
+  
+  self.toJSON = function() {
+    var res = {
+      _id : self._id(),
+      cid : self.cid(),
+      uid : self.uid(),
+      companyId : self.companyId(),
+      name : self.name(),
+      addr1 : self.addr1(),
+      addr2 : self.addr2(),
+      addr3 : self.addr3(),
+      phone1 : self.phone1(),
+      phone2 : self.phone2(),
+      phone3 : self.phone3(),
+      vatNr : self.vatNr(),
+      email : self.email(),
+      useReverseCharge : self.useReverseCharge(),
+      isValid : self.isValid()
+    };
+    return res;
+  };
 };
 
 var CustomerListViewModel = function(currentView, activeCompanyId) {
@@ -417,7 +472,9 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
     Notify_showSpinner(true);
     $.getJSON("/api/customers/" + self.activeCompanyId(), function(allData) {
       var mappedCustomers = $.map(allData, function(item) {
-        return new CustomerViewModel(item);
+        var customer = new CustomerViewModel();
+        customer.setData(item);
+        return customer;
       });
       self.customerList(mappedCustomers);
       Notify_showSpinner(false);
@@ -427,28 +484,47 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
       Notify_showMsg('error', 'Failed to get customers!');
     });
   };
+};
 
-  self.newCustomer = function() {
-    var data = {
-      _id : undefined,
-      cid : undefined,
-      uid : undefined,
-      companyId : self.activeCompanyId(),
-      name : "",
-      addr1 : "",
-      addr2 : "",
-      phone : "",
-      vatNr : "",
-      useReverseCharge : false,
-      isValid : true
-    };
-    self.customerList.push(new CustomerViewModel(data));
+var CustomerNewViewModel = function(currentView, activeCompanyId) {
+  var self = this;
+
+  self.data = new CustomerViewModel();
+
+  self.currentView = currentView;
+  self.activeCompanyId = activeCompanyId;
+  
+  self.currentView.subscribe(function(newValue) {
+    self.data.init();
+    var viewArray = newValue.split("/");
+    if (viewArray[0] == 'customer_new') {
+      console.log("page.js - CustomerNewViewModel - activated");
+      self.data.init();
+      self.data.setActiveCompanyId(self.activeCompanyId());
+    } else if (viewArray[0] == 'customer_show' && viewArray.length > 1) {
+      var _id = viewArray[1];
+      console.log("page.js - CustomerNewViewModel - activated - show #" + _id);
+      self.getCustomer(_id);
+    }
+  });
+  
+  self.getCustomer = function(_id) {
+    Notify_showSpinner(true);
+    $.getJSON(
+        "/api/customer/" + _id,
+        function(customer) {
+          console.log("Got customer id=" + _id + ", data=" + JSON.stringify(customer));
+          self.data.setData(customer);
+          Notify_showSpinner(false);
+        }).fail(function() {
+          console.log("page.js - CustomerNewViewModel - getCustomer - failed");
+          Notify_showSpinner(false);
+          Notify_showMsg('error', 'Failed to get customer!');
+        });
   };
-
-  self.deleteCustomer = function(c) {
-    console.log("Delete: " + JSON.stringify(c));
-    c.isValid(false);
-    self.customerList.destroy(c);
+  
+  self.saveCustomer = function() {
+    self.data.updateServer();
   };
 };
 
@@ -1239,6 +1315,8 @@ $(function() {
       navViewModel.activeCompanyName);
   var customerListViewModel = new CustomerListViewModel(
       navViewModel.currentView, navViewModel.activeCompanyId);
+  var customerNewViewModel = new CustomerNewViewModel(navViewModel.currentView,
+      navViewModel.activeCompanyId);
   var invoiceListViewModel = new InvoiceListViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId);
   var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView,
@@ -1259,6 +1337,9 @@ $(function() {
 
   ko.applyBindings(customerListViewModel, document
       .getElementById("app-customer"));
+
+  ko.applyBindings(customerNewViewModel, document
+      .getElementById("app-customer_new"));
 
   ko.applyBindings(invoiceListViewModel, document
       .getElementById("app-invoices"));

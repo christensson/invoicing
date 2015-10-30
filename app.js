@@ -246,6 +246,11 @@ app.put("/api/company/:id", ensureAuthenticated, function(req, res) {
   } else {
     console.log("Update company: user=" + req.user.username + ", uid=" + uid
         + ", data=" + JSON.stringify(req.body, null, 4));
+    // Remove nextIid and nextCid, we don't want to modify that
+    // in case of concurrent invoice or customer creation!
+    delete req.body.nextCid;
+    delete req.body.nextIid;
+
     mydb.updateCompany(req.body).then(
         okHandler.bind(null, 'updateCompany', res)).fail(
         myFailureHandler.bind(null, res));
@@ -322,6 +327,18 @@ app.get("/api/customers/:companyId", ensureAuthenticated, function(req, res) {
     res.end();
   }).fail(myFailureHandler.bind(null, res));
 });
+
+app.get("/api/customer/:id", ensureAuthenticated,
+    function(req, res) {
+      var uid = req.user._id;
+      var id = req.params.id;
+      console.log("Get customer: user=" + req.user.username + ", uid=" + uid
+          + ", _id=" + id);
+      mydb.getCustomer(uid, id).then(function(customer) {
+        res.status(200).json(customer);
+        res.end();
+      }).fail(myFailureHandler.bind(null, res));
+    });
 
 app.put("/api/customer/:id", ensureAuthenticated, function(req, res) {
   var okHandler = function(logText, res, customer) {

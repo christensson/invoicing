@@ -247,6 +247,26 @@
                       </div>
                     </div>
                   </div>
+                  <!-- <div class="panel panel-default" data-bind="visible: currentView() == 'company_new'"> -->
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Counters</h3>
+                    </div>
+                    <div class="panel-body">
+                      <div class="form-group">
+                        <label for="cid" class="col-sm-2 control-label">Next customer id</label>
+                        <div class="col-sm-4">
+                          <input type="number" id="cid" class="form-control" data-bind="value: data.nextCid, disable: currentView() != 'company_new'"></input>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="iid" class="col-sm-2 control-label">Next invoice id</label>
+                        <div class="col-sm-4">
+                          <input type="number" id="iid" class="form-control" data-bind="value: data.nextIid, disable: currentView() != 'company_new'"></input>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   <div class="panel panel-default">
                     <div class="panel-heading">
                       <h3 class="panel-title">Logo</h3>
@@ -300,43 +320,119 @@
                                     <th>Name</th>
                                     <th>Address 1</th>
                                     <th>Address 2</th>
-                                    <th>Phone</th>
-                                    <th>VAT-nr</th>
-                                    <th>Reverse charge</th>
+                                    <th>Address 3</th>
+                                    <th>Phone 1</th>
+                                    <th>Phone 2</th>
                                 </tr>
                             </thead>
                             <tbody data-bind="foreach: customerList">
                                 <tr>
                                     <td>
-                                        <a href="#" class="btn btn-danger" data-bind="click: \$parent.deleteCustomer">
-                                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                      <div class="btn-group">
+                                        <a class="btn btn-info" data-bind="attr: { href: '#/page/customer_show/' + _id() }">
+                                            <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
                                         </a>
-                                    </td>
-                                    <td><p class="form-control-static" data-bind="text: cid, visible: isValid"></p></td>
-                                    <td><input type="text" class="form-control" data-bind="value: name, css: hasErrorCss"></input></td>
-                                    <td><input type="text" class="form-control" data-bind="value: addr1"></input></td>
-                                    <td><input type="text" class="form-control" data-bind="value: addr2"></input></td>
-                                    <td><input type="text" class="form-control" data-bind="value: phone"></input></td>
-                                    <td><input type="text" class="form-control" data-bind="value: vatNr"></input></td>
-                                    <td>
-                                      <div class="checkbox">
-                                        <label>
-                                          <input type="checkbox" data-bind="checked: useReverseCharge" aria-label="Use reverse charge">
-                                        </label>
                                       </div>
                                     </td>
+                                    <td><p class="form-control-static" data-bind="text: cid, visible: isValid"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: name, visible: isValid"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: addr1, visible: isValid"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: addr2, visible: isValid"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: addr3, visible: isValid"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: phone1, visible: isValid"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: phone2, visible: isValid"></p></td>
                                 </tr>
                             </tbody>
                         </table>
                     </p>
 
                     <div class="btn-group">
-                        <button type="button" class="btn btn-success" data-bind="click: newCustomer">
+                        <a href="#/page/customer_new" type="button" class="btn btn-success">
                             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                             New customer
-                        </button>
+                        </a>
                     </div>
                 </form>
+            </div>
+
+            <div id="app-customer_new" data-bind="visible: currentView() == 'customer_new' || (currentView() != undefined && currentView().search('customer_show') == 0)">
+                <div class="form-horizontal">
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">General info</h3>
+                    </div>
+                    <div class="panel-body">
+                      <div class="form-group">
+                        <label for="cid" class="col-sm-2 control-label">Customer id</label>
+                        <div class="col-sm-4">
+                          <p id="cid" class="form-control-static" data-bind="text: data.cid, visible: data.isValid"></p>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="name" class="col-sm-2 control-label">Customer name</label>
+                        <div class="col-sm-4">
+                          <input type="text" id="name" class="form-control" data-bind="value: data.name"></input>
+                        </div>
+                      </div>
+                      <div for="idx in [1,2,3]">
+                        <div class="form-group">
+                          <label for="addr${idx}" class="col-sm-2 control-label">Address ${idx}</label>
+                          <div class="col-sm-4">
+                            <input type="text" id="addr${idx}" class="form-control" data-bind="value: data.addr${idx}"></input>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="vatNr" class="col-sm-2 control-label">VAT-nr</label>
+                        <div class="col-sm-4">
+                          <input type="text" id="vatNr" class="form-control" data-bind="value: data.vatNr"></input>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Contact info</h3>
+                    </div>
+                    <div class="panel-body">
+                      <div for="idx in [1,2,3]">
+                        <div class="form-group">
+                          <label for="phone${idx}" class="col-sm-2 control-label">Phone ${idx}</label>
+                          <div class="col-sm-4">
+                            <input type="text" id="phone${idx}" class="form-control" data-bind="value: data.phone${idx}"></input>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="name" class="col-sm-2 control-label">E-mail</label>
+                        <div class="col-sm-4">
+                          <input type="email" id="email" class="form-control" data-bind="value: data.email"></input>
+                        </div>
+                      </div>
+                      
+                    </div>
+                  </div>
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Options</h3>
+                    </div>
+                    <div class="panel-body">
+                      <div class="checkbox">
+                        <label>
+                          <input type="checkbox" data-bind="checked: data.useReverseCharge" aria-label="Use reverse charge">
+                          Use reverse charge
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <br/>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-success" data-bind="click: saveCustomer">
+                      <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+                      Save
+                    </button>
+                  </div>
+                </div>
             </div>
 
             <div id="app-invoices" data-bind="visible: currentView() == 'invoices'">
