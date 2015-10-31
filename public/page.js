@@ -1243,6 +1243,12 @@ var NavViewModel = function() {
     icon : 'glyphicon glyphicon-wrench',
     location : 'companyMenu'
   }, {
+    name : '/page/customer_new',
+    title : 'New Customer',
+    icon : 'glyphicon glyphicon-user',
+    location : 'main'
+  }, {
+  }, {
     name : '/page/customers',
     title : 'Customers',
     icon : 'glyphicon glyphicon-user',
