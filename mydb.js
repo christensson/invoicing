@@ -1,5 +1,6 @@
 mongodb = require('mongodb');
 Q = require('q');
+util = require('./public/util.js');
 var ObjectID = mongodb.ObjectID;
 
 var generate_mongo_url = function(obj){
@@ -83,6 +84,8 @@ function getOneDocPromise(collectionName, filter) {
     return deferred.promise;
   });
 }
+
+module.exports.getOneDocPromise = getOneDocPromise;
 
 function dropCollectionPromise(collectionName) {
   return dbopPromise().then(function (db) {
@@ -241,18 +244,21 @@ function getNextIidPromise(uid, companyId) {
   });
 }
 
-module.exports.init = function() {
+module.exports.init = function(doneCb) {
   var machUserId = undefined;
   var testUserId = undefined;
-  var machCompany1Id = undefined;
-  var testCompany1Id = undefined;
-  var testCompany2Id = undefined;
+  var machCompany1 = undefined;
+  var testCompany1 = undefined;
+  var testCompany2 = undefined;
   var machCompany1Cid = 100;
   var testCompany1Cid = 100;
   var testCompany2Cid = 100;
-  var machCompany1Iid = 1000;
-  var testCompany1Iid = 1000;
-  var testCompany2Iid = 1000;
+  var machCompany1Iid = 100;
+  var testCompany1Iid = 100;
+  var testCompany2Iid = 100;
+  var machCompanyCid100 = undefined;
+  var testCompanyCid100 = undefined;
+  var testCompanyCid101 = undefined;
 
   // Users
   dropCollectionPromise("users")
@@ -262,21 +268,11 @@ module.exports.init = function() {
                       username: "mach",
                       // password is "mach"
                       password: "$2a$08$3IwByU08C2BdgvwuvMec.eD3ugRp7oRpPHpuRwAOY1q0D8YUiSIYa",
-                      settings:
-                      {
-                        activeCompanyId: undefined,
-                        defaultNumDaysUntilPayment: 30
-                      }
                     },
                     {
                       username: "test",
                       // password is "test"
                       password: "$2a$08$8XE3C/OGbaT6v2PvonVqTORGkCmzlXSXEd.62Obd/E5SY4E6MYQSG",
-                      settings:
-                      {
-                        activeCompanyId: undefined,
-                        defaultNumDaysUntilPayment: 30
-                      }
                     }
                     ];
     return insertDataPromise("users", userList);
@@ -286,7 +282,7 @@ module.exports.init = function() {
   })
   .then(function(user) {
     console.log("getUser: User found: " + JSON.stringify(user));
-    machUserId = user._id;
+    machUserId = ObjectID(user._id);
     return Q();
   })
   .then(function() {
@@ -294,7 +290,7 @@ module.exports.init = function() {
   })
   .then(function(user) {
     console.log("getUser: User found: " + JSON.stringify(user));
-    testUserId = user._id;
+    testUserId = ObjectID(user._id);
     return Q();
   })
   // Companies
@@ -314,17 +310,31 @@ module.exports.init = function() {
                          phone: "031-123132",
                          isValid: true,
                          nextCid: 1000,
-                         nextIid: 1000
+                         nextIid: 2000
                        },
                        {
                          uid: testUserId,
                          name: "Test company 1",
                          addr1: "Nygatan 1",
                          addr2: "414 62 Göteborg",
-                         phone: "031-123133",
+                         contact1Caption: "Telefon",
+                         contact1: "031-123133",
+                         contact2Caption: "Mobil",
+                         contact2: "0730-650238",
+                         contact3Caption: "E-post",
+                         contact3: "test.company@somedomain.se",
+                         payment1Caption: "Bankgiro",
+                         payment1: "1234-5879",
+                         payment2Caption: "Postgiro",
+                         payment2: "345659879",
+                         paymentCustomText: "Dröjsmålsränta 25%",
+                         vatNr: "SE501212456701",
+                         vatNrCustomText: "",
+                         reverseChargeText: "Moms på byggtjänster har inte debiterats enligt Mervärdesskattelagen 1 kap 2§.\nKöparens momsregistreringsnr: %c.vatNr%",
+                         "logo" : { "mimetype" : "image/png", "path" : "uploads/pepsi-logo.png", "originalname" : "pepsi-logo.png" },
                          isValid: true,
-                         nextCid: 1000,
-                         nextIid: 1000
+                         nextCid: 3000,
+                         nextIid: 4000
                        },
                        {
                          uid: testUserId,
@@ -333,8 +343,8 @@ module.exports.init = function() {
                          addr2: "414 62 Göteborg",
                          phone: "031-123132",
                          isValid: true,
-                         nextCid: 1000,
-                         nextIid: 1000
+                         nextCid: 5000,
+                         nextIid: 6000
                        },
                        ];
     return insertDataPromise("company", companyList);
@@ -344,7 +354,7 @@ module.exports.init = function() {
   })
   .then(function(c) {
     console.log("getCompany: Found: " + JSON.stringify(c));
-    machCompany1Id = c._id;
+    machCompany1 = c;
     return Q();
   })
   .then(function() {
@@ -352,7 +362,7 @@ module.exports.init = function() {
   })
   .then(function(c) {
     console.log("getCompany: Found: " + JSON.stringify(c));
-    testCompany1Id = c._id;
+    testCompany1 = c;
     return Q();
   })
   .then(function() {
@@ -360,7 +370,7 @@ module.exports.init = function() {
   })
   .then(function(c) {
     console.log("getCompany: Found: " + JSON.stringify(c));
-    testCompany2Id = c._id;
+    testCompany2 = c;
     return Q();
   })
   // Settings
@@ -374,12 +384,12 @@ module.exports.init = function() {
     var settingsList = [
                         {
                           uid: testUserId,
-                          activeCompanyId: testCompany2Id,
+                          activeCompanyId: ObjectID(testCompany1._id),
                           defaultNumDaysUntilPayment: 30
                         },
                         {
                           uid: machUserId,
-                          activeCompanyId: machCompany1Id,
+                          activeCompanyId: ObjectID(machCompany1._id),
                           defaultNumDaysUntilPayment: 25
                         }
                         ];
@@ -394,54 +404,57 @@ module.exports.init = function() {
                         {
                           cid: machCompany1Cid++,
                           uid: machUserId,
-                          companyId: machCompany1Id,
+                          companyId: ObjectID(machCompany1._id),
                           name: "Pelle",
                           addr1: "Storgatan 1",
                           addr2: "414 62 Göteborg",
-                          phone: "0706-580222",
+                          phone1: "0706-580222",
                           isValid: true
                         },
                         {
                           cid: testCompany1Cid++,
                           uid: testUserId,
-                          companyId: testCompany1Id,
+                          companyId: ObjectID(testCompany1._id),
                           name: "TestPelle",
                           addr1: "TestStorgatan 1",
                           addr2: "414 62 Göteborg",
-                          phone: "0706-580222",
+                          phone1: "0706-580222",
+                          useReverseCharge: false,
                           isValid: true
                         },
                         {
                           cid: machCompany1Cid++,
                           uid: machUserId,
-                          companyId: machCompany1Id,
+                          companyId: ObjectID(machCompany1._id),
                           name: "Pära",
                           isValid: false
                         },
                         {
                           cid: testCompany1Cid++,
                           uid: testUserId,
-                          companyId: testCompany1Id,
+                          companyId: ObjectID(testCompany1._id),
                           name: "TestPära",
                           addr1: "TestNygata 2",
                           addr2: "414 62 Göteborg",
-                          phone: "0706-580223",
+                          phone1: "0706-580223",
+                          vatNr: "SE401212567801",
+                          useReverseCharge: true,
                           isValid: true
                         },
                         {
                           cid: testCompany2Cid++,
                           uid: testUserId,
-                          companyId: testCompany2Id,
+                          companyId: ObjectID(testCompany2._id),
                           name: "TestPära2",
                           addr1: "2 TestNygata 2",
                           addr2: "2 414 62 Göteborg",
-                          phone: "2 0706-580223",
+                          phone1: "2 0706-580223",
                           isValid: true
                         },
                         {
                           cid: machCompany1Cid++,
                           uid: machUserId,
-                          companyId: machCompany1Id,
+                          companyId: ObjectID(machCompany1._id),
                           name: "Pär",
                           isValid: true
                         }
@@ -449,10 +462,24 @@ module.exports.init = function() {
     return insertDataPromise("cust", customerList);
   })
   .then(function() {
+    return getOneDocPromise('cust', {cid: 100, uid: machUserId});
+  })
+  .then(function(c) {
+    machCompanyCid100 = c;
+    return Q();
+  })
+  .then(function() {
     return getOneDocPromise('cust', {cid: 100, uid: testUserId});
   })
   .then(function(c) {
-    console.log("getCustomer: Customer found: " + JSON.stringify(c));
+    testCompanyCid100 = c;
+    return Q();
+  })
+  .then(function() {
+    return getOneDocPromise('cust', {cid: 101, uid: testUserId});
+  })
+  .then(function(c) {
+    testCompanyCid101 = c;
     return Q();
   })
   // Invoices
@@ -467,15 +494,16 @@ module.exports.init = function() {
                        {
                          iid: machCompany1Iid++,
                          uid: machUserId,
-                         companyId: machCompany1Id,
+                         companyId: ObjectID(machCompany1._id),
+                         company: machCompany1,
                          isLocked: false,
                          isValid: true,
-                         customer: {
-                           cid: 100,
-                           name: "Pelle",
-                           addr1: "Storgatan 1",
-                           addr2: "414 62 Göteborg"
-                         },
+                         isPaid: true,
+                         date: new Date("2015-10-10").toISOString().split("T")[0],
+                         daysUntilPayment: 20,
+                         lastPaymentDate: util.dateAddDays(new Date("2015-10-10"), 20).toISOString().split("T")[0],
+                         customer: machCompanyCid100,
+                         currency: "SEK",
                          invoiceItems: [],
                          totalExclVat: 0,
                          totalInclVat: 0
@@ -483,15 +511,16 @@ module.exports.init = function() {
                        {
                          iid: testCompany1Iid++,
                          uid: testUserId,
-                         companyId: testCompany1Id,
+                         companyId: ObjectID(testCompany1._id),
+                         company: testCompany1,
                          isLocked: false,
                          isValid: true,
-                         customer: {
-                           cid: 100,
-                           name: "TestPelle",
-                           addr1: "TestStorgatan 1",
-                           addr2: "414 62 Göteborg"
-                         },
+                         isPaid: false,
+                         date: new Date("2015-10-10").toISOString().split("T")[0],
+                         daysUntilPayment: 10,
+                         lastPaymentDate: util.dateAddDays(new Date("2015-10-10"), 10).toISOString().split("T")[0],
+                         customer: testCompanyCid100,
+                         currency: "SEK",
                          invoiceItems: [],
                          totalExclVat: 0,
                          totalInclVat: 0
@@ -499,15 +528,16 @@ module.exports.init = function() {
                        {
                          iid: testCompany1Iid++,
                          uid: testUserId,
-                         companyId: testCompany1Id,
+                         companyId: ObjectID(testCompany1._id),
+                         company: testCompany1,
                          isLocked: false,
                          isValid: true,
-                         customer: {
-                           cid: 101,
-                           name: "TestPära",
-                           addr1: "Päron",
-                           addr2: "Äpple"
-                         },
+                         isPaid: false,
+                         date: new Date("2015-10-10").toISOString().split("T")[0],
+                         daysUntilPayment: 30,
+                         lastPaymentDate: util.dateAddDays(new Date("2015-10-10"), 30).toISOString().split("T")[0],
+                         customer: testCompanyCid101,
+                         currency: "SEK",
                          invoiceItems: [
                                         {
                                           description: "First",
@@ -530,11 +560,47 @@ module.exports.init = function() {
                                         ],
                                         totalExclVat: 310.0,
                                         totalInclVat: 387.5
+                       },
+                       {
+                         iid: testCompany1Iid++,
+                         uid: testUserId,
+                         companyId: ObjectID(testCompany1._id),
+                         company: testCompany1,
+                         isLocked: false,
+                         isValid: true,
+                         isPaid: false,
+                         date: new Date("2015-10-10").toISOString().split("T")[0],
+                         daysUntilPayment: 10,
+                         lastPaymentDate: util.dateAddDays(new Date("2015-10-10"), 10).toISOString().split("T")[0],
+                         customer: testCompanyCid101,
+                         currency: "EUR",
+                         invoiceItems: [
+                                        {
+                                          description: "Första",
+                                          price: 10.0,
+                                          count: 10,
+                                          discount: 0.0,
+                                          vat: 0.25,
+                                          total: 100.0,
+                                          isValid: true
+                                        },
+                                        {
+                                          description: "Andra",
+                                          price: 100.0,
+                                          count: 5,
+                                          discount: 0.0,
+                                          vat: 0.25,
+                                          total: 500.0,
+                                          isValid: true
+                                        },
+                                        ],
+                                        totalExclVat: 600.0,
+                                        totalInclVat: 750.5
                        }
                        ];
     return insertDataPromise("invoice", invoiceList);
   })
-  .done();
+  .done(doneCb);
 };
 
 module.exports.getSettings = function(uid) {

@@ -714,9 +714,7 @@ var InvoiceDataViewModel = function() {
 
   self.lastPaymentDate = ko.pureComputed(function() {
     var invoiceDate = new Date(self.date());
-    var lastPaymentDateMs =
-      invoiceDate.valueOf()  + (self.daysUntilPayment() * (1000 * 3600 * 24));
-    return new Date(lastPaymentDateMs);
+    return Util.dateAddDays(invoiceDate, self.daysUntilPayment());
   }, this);
 
   self.setCustomer = function(data) {
@@ -793,11 +791,15 @@ var InvoiceListDataViewModel = function(data) {
   self.date = ko.observable(data.date);
   self.daysUntilPayment = ko.observable(data.daysUntilPayment);
   self.projId = ko.observable(data.projId);
+  self.currency = ko.observable(data.currency);
   self.totalExclVat = ko.observable(data.totalExclVat);
-  self.totalExclVatStr = ko.pureComputed(function() {
-    return Util.formatCurrency(self.totalExclVat());
-  }, self);
   self.totalInclVat = ko.observable(data.totalInclVat);
+  self.totalExclVatStr = ko.pureComputed(function() {
+    return Util.formatCurrency(self.totalExclVat(), self.currency());
+  }, self);
+  self.totalInclVatStr = ko.pureComputed(function() {
+    return Util.formatCurrency(self.totalInclVat(), self.currency());
+  }, self);
   self.isOverdue = ko.pureComputed(function() {
     var overdue = false;
     if (self.daysUntilPayment() !== undefined && parseInt(self.daysUntilPayment()) >= 0)

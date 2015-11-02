@@ -32,8 +32,14 @@ var formatCurrency = function(value, currencyString) {
   return prefix + valueString + suffix;
 };
 
+var dateAddDays = function(date, numDaysToAdd) {
+  var newDateMs = date.valueOf() + (numDaysToAdd * 1000 * 3600 * 24);
+  return new Date(newDateMs);
+};
+
 // Hack to get module.exports working on server side and namespace Util working on client side
 (typeof module !== "undefined" && module !== null ? module : {}).exports = this.Util = {
   formatCurrency: formatCurrency,
+  dateAddDays: dateAddDays,
 };
 

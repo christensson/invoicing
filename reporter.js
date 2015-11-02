@@ -110,7 +110,6 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
 
   var mypageheader = function(x) {
     x.fontSize(headerDetailsCaptionFontSize);
-    
     var headerList =
       [{cap: "Oss tillhandha senast", data: formatDate(invoice.lastPaymentDate), isBold : true, colSize: 80},
        {cap: "Fakturadatum", data: formatDate(invoice.date), colSize: 60},

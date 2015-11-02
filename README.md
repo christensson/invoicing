@@ -15,6 +15,8 @@
 * Passport: http://passportjs.org/ (Authentication)
 * Fluentreports: http://www.fluentreports.com/docs.html (PDFs)
 * Multer: https://github.com/expressjs/multer (Multipart form post)
+* MongoDb:
+** node-js driver: http://mongodb.github.io/node-mongodb-native/2.0/api/
 
 ## Structure
 ### Client
