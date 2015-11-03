@@ -198,6 +198,14 @@ app.get("/api/settings", ensureAuthenticated, function(req, res) {
 });
 
 app.put("/api/settings", ensureAuthenticated, function(req, res) {
+  var okHandler = function(logText, res, settings) {
+    console.log(logText + ": OK, obj=" + JSON.stringify(settings));
+    resData = {
+      'settings' : settings
+    };
+    res.status(200).json(resData);
+    res.end();
+  };
   var uid = req.user._id;
   console.log("Update settings: user=" + req.user.username + ", uid=" + uid
       + ", settings=" + JSON.stringify(req.body));

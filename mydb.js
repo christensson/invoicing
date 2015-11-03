@@ -613,6 +613,7 @@ module.exports.getSettings = function(uid) {
 
 module.exports.updateSettings = function(uid, settings) {
   settings.uid = new ObjectID(uid);
+  settings.activeCompanyId = new ObjectID(settings.activeCompanyId);
   return updateDataPromise('settings', settings, true);
 };
 

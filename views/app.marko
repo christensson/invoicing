@@ -809,9 +809,9 @@
                         <input type="number" class="form-control" id="defNumDaysUntilPayment" placeholder="30" data-bind="value: settings.defaultNumDaysUntilPayment">
                       </div>
                       <div class="btn-group">
-                        <button type="button" class="btn btn-success">
-                          <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                          OK
+                        <button type="button" class="btn btn-success" data-bind="click: saveSettings">
+                          <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+                          Save
                         </button>
                       </div>
                     </form>

@@ -1,3 +1,95 @@
+var SettingsDataModel = function() {
+  var self = this;
+
+  self._id = ko.observable();
+  self.activeCompanyId = ko.observable();
+  self.defaultNumDaysUntilPayment = ko.observable();
+
+  self.setData = function(data) {
+    self._id(data._id);
+    self.activeCompanyId(data.activeCompanyId);
+    self.defaultNumDaysUntilPayment(data.defaultNumDaysUntilPayment);
+
+    for ( var prop in data) {
+      if (data.hasOwnProperty(prop)) {
+        console.log("Property " + prop + " = " + data[prop]);
+      }
+    }
+  };
+
+  self.setActiveCompanyId = function(id) {
+    self.activeCompanyId(id);
+  };
+  
+  self.getJson = function() {
+    var data = {
+        _id: self._id(),
+        activeCompanyId: self.activeCompanyId(),
+        defaultNumDaysUntilPayment: self.defaultNumDaysUntilPayment()
+    };
+    return data;
+  };
+};
+
+var SettingsViewModel = function(currentView, settings, activeCompanyId,
+    setActiveCompanyId) {
+  var self = this;
+
+  self.currentView = currentView;
+  self.activeCompanyId = activeCompanyId;
+  self.setActiveCompanyId = setActiveCompanyId;
+
+  self.settings = settings;
+
+  self.currentView.subscribe(function(newValue) {
+    if (newValue == 'settings') {
+      console.log("page.js - SettingsViewModel - activated");
+    }
+  });
+
+  self.populate = function() {
+    Notify_showSpinner(true);
+    $
+    .getJSON(
+        "/api/settings",
+        function(settings) {
+          self.settings.setData(settings);
+          self.setActiveCompanyId(settings.activeCompanyId);
+          self.activeCompanyId
+          .subscribe(function(newValue) {
+            console
+            .log("page.js - SettingsViewModel - Active company change detected: ID="
+                + newValue);
+            self.settings.setActiveCompanyId(newValue);
+            self.saveSettings();
+          });
+          Notify_showSpinner(false);
+        }).fail(function() {
+          console.log("page.js - SettingsViewModel - populate - failed");
+          Notify_showSpinner(false);
+          Notify_showMsg('error', 'Failed to get settings!');
+        });
+  };
+  
+  self.saveSettings = function() {
+    var ajaxData = self.settings.getJson();
+    var ajaxUrl = "/api/settings";
+    console.log("saveSettings: AJAX PUT (url=" + ajaxUrl + "): JSON="
+        + JSON.stringify(ajaxData));
+    return $.ajax({
+      url : ajaxUrl,
+      type : "PUT",
+      contentType : "application/json",
+      data : JSON.stringify(ajaxData),
+      dataType : "json",
+      success : function(data) {
+        console.log("saveSettings: response: " + JSON.stringify(data));
+        Notify_showMsg('success', 'Settings saved!');
+      },
+    });
+  };
+};
+
 var CompanyViewModel = function() {
   var self = this;
 
@@ -636,7 +728,7 @@ var InvoiceDataViewModel = function() {
     self.currency(currency);
   };
 
-  self.init = function() {
+  self.init = function(defaultNumDaysUntilPayment) {
     var data = {
       _id : undefined,
       iid : undefined,
@@ -653,9 +745,9 @@ var InvoiceDataViewModel = function() {
       yourRef : "",
       ourRef : "",
       date : "",
-      daysUntilPayment : 0,
+      daysUntilPayment : defaultNumDaysUntilPayment,
       projId : "",
-      currency : "kr",
+      currency : "SEK",
       isLocked : false,
       isPaid : false,
       isCredit : false,
@@ -974,7 +1066,7 @@ var InvoiceCustomerModel = function(data) {
   };*/
 };
 
-var InvoiceNewViewModel = function(currentView, activeCompanyId) {
+var InvoiceNewViewModel = function(currentView, activeCompanyId, settings) {
   var self = this;
 
   self.data = new InvoiceDataViewModel();
@@ -985,6 +1077,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
   self.selectedCustomer = ko.observable();
   self.currencyList = ko.observableArray(["SEK", "EUR", "USD", "GBP"]);
   self.selectedCurrency = ko.observable();
+  self.settings = settings;
   self.numServerReqLeft = 0;
 
   self.currentView.subscribe(function(newValue) {
@@ -993,7 +1086,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
     var viewArray = newValue.split("/");
     if (viewArray[0] == 'invoice_new') {
       console.log("page.js - InvoiceNewViewModel - activated");
-      self.data.init();
+      self.data.init(settings.defaultNumDaysUntilPayment());
       self.data.setCompanyId(self.activeCompanyId());
       self.numServerReqLeft = 1;
       self.populate();
@@ -1152,68 +1245,6 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId) {
   };
 };
 
-var SettingsDataModel = function() {
-  var self = this;
-
-  self.activeCompanyId = ko.observable();
-  self.defaultNumDaysUntilPayment = ko.observable();
-
-  self.setData = function(data) {
-    self.activeCompanyId(data.activeCompanyId);
-    self.defaultNumDaysUntilPayment(data.defaultNumDaysUntilPayment);
-
-    for ( var prop in data) {
-      if (data.hasOwnProperty(prop)) {
-        console.log("Property " + prop + " = " + data[prop]);
-      }
-    }
-  };
-
-  self.setActiveCompanyId = function(id) {
-    self.activeCompanyId(id);
-  };
-};
-
-var SettingsViewModel = function(currentView, activeCompanyId,
-    setActiveCompanyId) {
-  var self = this;
-
-  self.currentView = currentView;
-  self.activeCompanyId = activeCompanyId;
-  self.setActiveCompanyId = setActiveCompanyId;
-
-  self.settings = new SettingsDataModel();
-
-  self.currentView.subscribe(function(newValue) {
-    if (newValue == 'settings') {
-      console.log("page.js - SettingsViewModel - activated");
-    }
-  });
-
-  self.populate = function() {
-    Notify_showSpinner(true);
-    $
-        .getJSON(
-            "/api/settings",
-            function(settings) {
-              self.settings.setData(settings);
-              self.setActiveCompanyId(settings.activeCompanyId);
-              self.activeCompanyId
-                  .subscribe(function(newValue) {
-                    console
-                        .log("page.js - SettingsViewModel - Active company change detected: ID="
-                            + newValue);
-                    self.settings.setActiveCompanyId(newValue);
-                  });
-              Notify_showSpinner(false);
-            }).fail(function() {
-          console.log("page.js - SettingsViewModel - populate - failed");
-          Notify_showSpinner(false);
-          Notify_showMsg('error', 'Failed to get settings!');
-        });
-  };
-};
-
 var DebugViewModel = function(currentView) {
   var self = this;
   self.currentView = currentView;
@@ -1316,6 +1347,7 @@ var NavViewModel = function() {
 $(function() {
   console.log("page.js - init - begin");
   var navViewModel = new NavViewModel();
+  var settings = new SettingsDataModel();
   var companyViewModel = new CompanyListViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId, navViewModel.activeCompanyName, navViewModel.companyList);
   var companyNewViewModel = new CompanyNewViewModel(navViewModel.currentView,
@@ -1328,9 +1360,9 @@ $(function() {
   var invoiceListViewModel = new InvoiceListViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId);
   var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView,
-      navViewModel.activeCompanyId);
+      navViewModel.activeCompanyId, settings);
   var settingsViewModel = new SettingsViewModel(navViewModel.currentView,
-      navViewModel.activeCompanyId, companyViewModel.setActiveCompanyId);
+      settings, navViewModel.activeCompanyId, companyViewModel.setActiveCompanyId);
   var debugViewModel = new DebugViewModel(navViewModel.currentView);
 
   settingsViewModel.populate();
