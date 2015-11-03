@@ -12,11 +12,11 @@ var NotifyViewModel = function() {
 
     self.formatMsgHtml = function(kind, msg) {
         //var msgHtml = '<a class="close" href="#">×</a>' + msg;
-        var icon = "glyphicon-info-sign";
+        var icon = undefined;
         switch(kind) {
             default:
             case 'info':
-                icon = "glyphicon-info-sign";
+            case 'success':
                 break;
             case 'warn':
             case 'warning':
@@ -25,14 +25,14 @@ var NotifyViewModel = function() {
             case 'error':
                 icon = "glyphicon-warning-sign";
                 break;
-            case 'success':
-                icon = "glyphicon-ok-sign";
-                break;
         }
-        var msgHtml = '<span class="glyphicon ' + icon +
-            '" aria-hidden="true"></span><p>' + msg + '</p>';
+        var msgHtml = msg;
+        if (icon !== undefined) {
+          msgHtml = '<span class="glyphicon ' + icon + '" aria-hidden="true"></span>' +
+            '<p>' + msg + '</p>';
+        }
         return msgHtml;
-    }
+    };
 
     self.showMsg = function(kind, msg, hideDelayMs) {
         hideDelayMs = setDefaultArg(hideDelayMs, 3000);
