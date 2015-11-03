@@ -397,7 +397,10 @@ module.exports.init = function(doneCb) {
   })
   // Customers
   .then(function() {
-    return dropCollectionPromise("cust");
+    return dropCollectionPromise('customer');
+  })
+  .fail(function() {
+    console.log("Drop collection customer failed!");
   })
   .then(function() {
     var customerList = [
@@ -459,24 +462,24 @@ module.exports.init = function(doneCb) {
                           isValid: true
                         }
                         ];
-    return insertDataPromise("cust", customerList);
+    return insertDataPromise('customer', customerList);
   })
   .then(function() {
-    return getOneDocPromise('cust', {cid: 100, uid: machUserId});
+    return getOneDocPromise('customer', {cid: 100, uid: machUserId});
   })
   .then(function(c) {
     machCompanyCid100 = c;
     return Q();
   })
   .then(function() {
-    return getOneDocPromise('cust', {cid: 100, uid: testUserId});
+    return getOneDocPromise('customer', {cid: 100, uid: testUserId});
   })
   .then(function(c) {
     testCompanyCid100 = c;
     return Q();
   })
   .then(function() {
-    return getOneDocPromise('cust', {cid: 101, uid: testUserId});
+    return getOneDocPromise('customer', {cid: 101, uid: testUserId});
   })
   .then(function(c) {
     testCompanyCid101 = c;
@@ -638,13 +641,13 @@ module.exports.getInvoice = function(uid, id) {
 module.exports.getCustomers = function(uid, companyId) {
   var ouid = new ObjectID(uid);
   var ocompanyId = new ObjectID(companyId);
-  return getAllDocsPromise('cust', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId});
+  return getAllDocsPromise('customer', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId});
 };
 
 module.exports.getCustomer = function(uid, id) {
   var ouid = new ObjectID(uid);
   var oid = new ObjectID(id);
-  return getOneDocPromise('cust', {'isValid': true, 'uid': ouid, '_id': oid});
+  return getOneDocPromise('customer', {'isValid': true, 'uid': ouid, '_id': oid});
 };
 
 module.exports.getCompanies = function(uid) {
@@ -713,7 +716,7 @@ module.exports.addCustomer = function(uid, companyId, customer) {
     customer.cid = cid;
     customer.uid = new ObjectID(uid);
     customer.companyId = new ObjectID(companyId);
-    insertDataPromise('cust', customer).then(function() {
+    insertDataPromise('customer', customer).then(function() {
       deferred.resolve(customer);
     }).fail(function(err) {
       deferred.reject(err);
@@ -729,7 +732,7 @@ module.exports.addCustomer = function(uid, companyId, customer) {
 module.exports.updateCustomer = function(customer) {
   customer.uid = new ObjectID(customer.uid);
   customer.companyId = new ObjectID(customer.companyId);
-  return updateDataPromise('cust', customer, true);
+  return updateDataPromise('customer', customer, true);
 };
 
 module.exports.addCompany = function(uid, company) {
