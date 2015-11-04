@@ -1,6 +1,11 @@
 # Application generated data
 *.pdf
 views/*.marko.js
+.settings
+uploads/*
+
+# Secret keys
+*_auth.json
 
 # Logs
 logs
