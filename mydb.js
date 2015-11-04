@@ -265,20 +265,28 @@ module.exports.init = function(doneCb) {
   .then(function() {
     var userList = [
                     {
-                      username: "mach",
+                      "username-local": "mach",
                       // password is "mach"
-                      password: "$2a$08$3IwByU08C2BdgvwuvMec.eD3ugRp7oRpPHpuRwAOY1q0D8YUiSIYa",
+                      "password": "$2a$08$3IwByU08C2BdgvwuvMec.eD3ugRp7oRpPHpuRwAOY1q0D8YUiSIYa",
+                      "info": {
+                        "name": "Marcus",
+                        "email": "marcus@domain.se",
+                      }
                     },
                     {
-                      username: "test",
+                      "username-local": "test",
                       // password is "test"
-                      password: "$2a$08$8XE3C/OGbaT6v2PvonVqTORGkCmzlXSXEd.62Obd/E5SY4E6MYQSG",
+                      "password": "$2a$08$8XE3C/OGbaT6v2PvonVqTORGkCmzlXSXEd.62Obd/E5SY4E6MYQSG",
+                      "info": {
+                        "name": "Test",
+                        "email": "test@someotherdomain.net",
+                      }
                     }
                     ];
     return insertDataPromise("users", userList);
   })
   .then(function() {
-    return getOneDocPromise('users', {username: 'mach'});
+    return getOneDocPromise('users', {"username-local": 'mach'});
   })
   .then(function(user) {
     console.log("getUser: User found: " + JSON.stringify(user));
@@ -286,7 +294,7 @@ module.exports.init = function(doneCb) {
     return Q();
   })
   .then(function() {
-    return getOneDocPromise('users', {username: 'test'});
+    return getOneDocPromise('users', {"username-local": 'test'});
   })
   .then(function(user) {
     console.log("getUser: User found: " + JSON.stringify(user));
@@ -746,10 +754,10 @@ module.exports.updateCompany = function(company) {
   return updateDataPromise('company', company, false);
 };
 
-module.exports.getUser = function(username) {
+module.exports.getUser = function(query) {
   var deferred = Q.defer();
-  getOneDocPromise('users', {username: username}).then(function(user) {
-    if (user == undefined) {
+  getOneDocPromise('users', query).then(function(user) {
+    if (!user) {
       console.log("getUser: No user found");
       deferred.reject(new Error("The requested items could not be found."));
     } else {
