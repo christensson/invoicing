@@ -22,8 +22,12 @@ exports.localReg = function (username, password, data) {
       if (result.message == 'The requested items could not be found.'){
         console.log('Username is free for use');
         mydb.addUser(user).then(function () {
-          console.log("USER: " + user);
-          deferred.resolve(user);
+          console.log("USER: " + JSON.stringify(user));
+          mydb.initUserContext({"username-local": username}).then(function(addedUser) {
+            deferred.resolve(addedUser);
+          }).fail(function(err) {
+            deferred.reject(new Error(err.body));
+          });
         })
         .fail(function (err) {
           console.log("PUT FAIL:" + err.body);
@@ -46,20 +50,17 @@ exports.localAuth = function (username, password) {
 
   mydb.getUser({"username-local": username}).then(function (result){
     var hash = result.password;
-    console.log("FOUND USER: hash=" + hash);
-    if (hash === "") {
-      console.log("EMPTY PASSWORD HASH: any password accepted...");
-      deferred.resolve(result);
-    } else if (bcrypt.compareSync(password, hash)) {
+    console.log("Found local user=" + result.info.name);
+    if (bcrypt.compareSync(password, hash)) {
       deferred.resolve(result);
     } else {
-      console.log("PASSWORDS NOT MATCH");
+      console.log("Password incorrect!");
       deferred.resolve(false);
     }
   }).fail(function (err){
     if (err.message == 'The requested items could not be found.') {
-          console.log("COULD NOT FIND USER IN DB FOR SIGNIN");
-          deferred.resolve(false);
+      console.log("Couldn't find user " + username + " in DB for signin!");
+      deferred.resolve(false);
     } else {
       deferred.reject(new Error(err));
     }
@@ -75,15 +76,15 @@ exports.localAuth = function (username, password) {
 exports.findOrCreate = function(idField, userData) {
   var deferred = Q.defer();
   
-  var filter =  {};
+  var query =  {};
   var userid = userData[idField];
-  filter[idField] = userid;
+  query[idField] = userid;
   
   console.log("findOrCreate: idField=" + idField + ", userid=" + userid +
       ", userData=" + JSON.stringify(userData) +
-      ", filter=" + JSON.stringify(filter));
+      ", query=" + JSON.stringify(query));
 
-  mydb.getUser(filter).then(function (user) {
+  mydb.getUser(query).then(function (user) {
     console.log("FOUND USER: _id=" + user._id + ", user=" + JSON.stringify(user));
     var result = {
         "user": user,
@@ -96,7 +97,7 @@ exports.findOrCreate = function(idField, userData) {
           "Creating new user=" + JSON.stringify(userData));
       mydb.addUser(userData).then(function() {
         // Add success, retrieve user to return it...
-        mydb.getUser(filter).then(function(user) {
+        mydb.initUserContext(query).then(function(user) {
           var result = {
               "user": user,
               "isNew": true,

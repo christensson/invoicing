@@ -745,8 +745,14 @@ module.exports.updateCustomer = function(customer) {
 };
 
 module.exports.addCompany = function(uid, company) {
+  var deferred = Q.defer();
   company.uid = new ObjectID(uid);
-  return insertDataPromise('company', company);
+  insertDataPromise('company', company).then(function() {
+    deferred.resolve(company);
+  }).fail(function(err) {
+    deferred.reject(err);
+  });
+  return deferred.promise;
 };
 
 module.exports.updateCompany = function(company) {
@@ -772,3 +778,35 @@ module.exports.addUser = function(user) {
   return insertDataPromise('users', user);
 };
 
+/** Inits all collections for user.
+ * - settings
+ * @param userQuery query for 
+ * @return promise of user
+ */
+module.exports.initUserContext = function(userQuery) {
+  var deferred = Q.defer();
+  console.log("initUserContext: query=" + JSON.stringify(userQuery));
+  var user = undefined;
+  module.exports.getUser(userQuery).then(function (result) {
+    console.log("initUserContext: Found user=" + JSON.stringify(result));
+    user = result;
+    console.log("initUserContext: Found user=" + JSON.stringify(user));
+    return Q();
+  }).fail(function(err) {
+    deferred.reject(err);
+  }).then(function() {
+    var defaultSettings = {
+        "uid" : user._id,
+        "activeCompanyId" : undefined,
+        "defaultNumDaysUntilPayment" : 30,
+    };
+    console.log("initUserContext: Set default settings: " + JSON.stringify(defaultSettings));
+    return insertDataPromise("settings", defaultSettings);
+  }).then(function() {
+    deferred.resolve(user);
+  }).fail(function(err) {
+    deferred.reject(err);
+  });
+  
+  return deferred.promise;
+};

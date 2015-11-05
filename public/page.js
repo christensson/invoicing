@@ -49,8 +49,7 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
 
   self.populate = function() {
     Notify_showSpinner(true);
-    $
-    .getJSON(
+    $.getJSON(
         "/api/settings",
         function(settings) {
           self.settings.setData(settings);
@@ -333,7 +332,7 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompanyN
   };
 };
 
-var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyName) {
+var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyName, onCompanyChange) {
   var self = this;
 
   self.data = new CompanyViewModel();
@@ -341,6 +340,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
   self.activeCompanyName = activeCompanyName;
+  self.onCompanyChange = onCompanyChange;
   
   self.logoPath = ko.pureComputed(function() {
     var path = "#";
@@ -381,10 +381,16 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
   self.saveCompany = function() {
     self.data.updateServer(function(c) {
       console.log("page.js - CompanyNewViewModel - saveCompany onCompletion: " + JSON.stringify(c) + ", activeId=" + self.activeCompanyId());
-      if (c._id == self.activeCompanyId()) {
+      var prevActiveCompanyId = self.activeCompanyId();
+      if (prevActiveCompanyId == null) {
+        console.log("page.js - CompanyNewViewModel - No previosly active company, setting to new one - id=" + c._id);
+        self.activeCompanyId(c._id);
+        self.activeCompanyName(c.name);
+      } else if (c._id == self.activeCompanyId()) {
         console.log("page.js - CompanyNewViewModel - active company updated - id=" + self.activeCompanyId());
         self.activeCompanyName(c.name);
       }
+      self.onCompanyChange();
     });
   };
   
@@ -488,7 +494,11 @@ var CustomerViewModel = function() {
   };
 
   self.updateServer = function() {
-    if ((self._id() == undefined) && !self.isValid()) {
+    if (self.companyId() == null) {
+      Notify_showMsg('error',
+        'Cannot save customer! No company selected.');
+      return;
+    } else if ((self._id() == undefined) && !self.isValid()) {
       console.log("updateServer: Nothing to do (invalid entry without _id)");
       return;
     } else if (self.name().length == 0) {
@@ -561,20 +571,25 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
   self.customerList = ko.observableArray();
 
   self.populate = function() {
-    Notify_showSpinner(true);
-    $.getJSON("/api/customers/" + self.activeCompanyId(), function(allData) {
-      var mappedCustomers = $.map(allData, function(item) {
-        var customer = new CustomerViewModel();
-        customer.setData(item);
-        return customer;
+    var companyId = self.activeCompanyId();
+    if (companyId != null) {
+      Notify_showSpinner(true);
+      $.getJSON("/api/customers/" + companyId, function(allData) {
+        var mappedCustomers = $.map(allData, function(item) {
+          var customer = new CustomerViewModel();
+          customer.setData(item);
+          return customer;
+        });
+        self.customerList(mappedCustomers);
+        Notify_showSpinner(false);
+      }).fail(function() {
+        console.log("page.js - CustomerListViewModel - populate - failed");
+        Notify_showSpinner(false);
+        Notify_showMsg('error', 'Failed to get customers!');
       });
-      self.customerList(mappedCustomers);
-      Notify_showSpinner(false);
-    }).fail(function() {
-      console.log("page.js - CustomerListViewModel - populate - failed");
-      Notify_showSpinner(false);
-      Notify_showMsg('error', 'Failed to get customers!');
-    });
+    } else {
+      Notify_showMsg('info', 'Cannot get customers! Company not selected or doesn\'t exist.');
+    }
   };
 };
 
@@ -946,18 +961,23 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   self.invoiceList = ko.observableArray();
 
   self.populate = function() {
-    Notify_showSpinner(true);
-    $.getJSON("/api/invoices/" + self.activeCompanyId(), function(allData) {
-      var mappedInvoices = $.map(allData, function(item) {
-        return new InvoiceListDataViewModel(item);
+    var companyId = self.activeCompanyId();
+    if (companyId != null) {
+      Notify_showSpinner(true);
+      $.getJSON("/api/invoices/" + companyId, function(allData) {
+        var mappedInvoices = $.map(allData, function(item) {
+          return new InvoiceListDataViewModel(item);
+        });
+        self.invoiceList(mappedInvoices);
+        Notify_showSpinner(false);
+      }).fail(function() {
+        console.log("page.js - InvoiceListViewModel - populate - failed");
+        Notify_showSpinner(false);
+        Notify_showMsg('error', 'Failed to get invoices!');
       });
-      self.invoiceList(mappedInvoices);
-      Notify_showSpinner(false);
-    }).fail(function() {
-      console.log("page.js - InvoiceListViewModel - populate - failed");
-      Notify_showSpinner(false);
-      Notify_showMsg('error', 'Failed to get invoices!');
-    });
+    } else {
+      Notify_showMsg('info', 'Cannot get invoices! Company not selected or doesn\'t exist.');
+    }
   };
   
   self.doToggleShowPaid = function() {
@@ -1116,21 +1136,26 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, settings) {
   });
 
   self.populate = function() {
-    Notify_showSpinner(true);
-    self.customerList.removeAll();
-    $.getJSON("/api/customers/" + self.activeCompanyId(), function(allData) {
-      for (var i = 0; i < allData.length; i++) {
-        self.customerList.push(new InvoiceCustomerModel(allData[i]));
-      }
-      self.numServerReqLeft--;
-      self.syncCustomerIdInput();
-      Notify_showSpinner(false);
-    }).fail(function() {
-      console.log("page.js - InvoiceNewViewModel - populate - failed");
-      self.numServerReqLeft--;
-      Notify_showSpinner(false);
-      Notify_showMsg('error', 'Failed to get customers!');
-    });
+    var companyId = self.activeCompanyId();
+    if (companyId != null) {
+      Notify_showSpinner(true);
+      self.customerList.removeAll();
+      $.getJSON("/api/customers/" + companyId, function(allData) {
+        for (var i = 0; i < allData.length; i++) {
+          self.customerList.push(new InvoiceCustomerModel(allData[i]));
+        }
+        self.numServerReqLeft--;
+        self.syncCustomerIdInput();
+        Notify_showSpinner(false);
+      }).fail(function() {
+        console.log("page.js - InvoiceNewViewModel - populate - failed");
+        self.numServerReqLeft--;
+        Notify_showSpinner(false);
+        Notify_showMsg('error', 'Failed to get customers!');
+      });
+    } else {
+      Notify_showMsg('info', 'Cannot get customers! Company not selected or doesn\'t exist.');
+    }
   };
 
   self.getInvoice = function(_id) {
@@ -1352,7 +1377,8 @@ $(function() {
       navViewModel.activeCompanyId, navViewModel.activeCompanyName, navViewModel.companyList);
   var companyNewViewModel = new CompanyNewViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId,
-      navViewModel.activeCompanyName);
+      navViewModel.activeCompanyName,
+      companyViewModel.populate);
   var customerListViewModel = new CustomerListViewModel(
       navViewModel.currentView, navViewModel.activeCompanyId);
   var customerNewViewModel = new CustomerNewViewModel(navViewModel.currentView,

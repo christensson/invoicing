@@ -138,8 +138,8 @@ passport.use(
         function(req, username, password, done) {
           console.log("signup: user=" + username + ", pw=" + password);
           info = {
-              "name": username,
-              "email": "",
+              "name": req.body.fullName,
+              "email": req.body.email,
           };
           funct.localReg(username, password, info).then(
               function(user) {
@@ -545,7 +545,7 @@ app.get('/auth/google/callback',
       res.redirect('/');
     },
     function(req, res) {
-      console.log("Here! req=" + JSON.stringify(req));
+      console.log("Login using google account failed! req=" + JSON.stringify(req));
       req.session.success = 'Login using Google account failed!';
       // Failed authentication, redirect to login.
       res.redirect(401, '/signin');
