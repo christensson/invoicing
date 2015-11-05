@@ -43,12 +43,13 @@
 - [ ] Feature: Currency rounding improvement: optional, more variants since "öresutjämning" doesn't work that good for more valuable currencies...
 - [ ] Feature: Configurable currencies, default selected per customer
 - [ ] Translations
-- [ ] Settings: ?
+- [x] Settings: ?
 - [ ] Feature: Invoice detail types
 - [x] Feature: Copy invoice (SHA: 494f491c20950cda86aaefde82a05b5708396572)
-- [ ] Feature: More authentication methods (other than local)
+- [x] Feature: More authentication methods (other than local)
 - [x] Fix customer input. Proper form is needed, not just table view.
 - [ ] Fix company input. Currently the logo has to be uploaded in a separate form. The upload should be made using the same save button.
+- [ ] Add licenced features, demo invoice
 
 ## Bugs
 Use GitHub issue tracker.
