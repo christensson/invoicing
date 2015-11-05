@@ -6,6 +6,21 @@ body { padding-top: 70px; }
     color: white;
 }
 
+.button-signin-google {
+  width: 191px;
+  height:46px;
+  display:block;
+  background:transparent url('img/btn_google_signin_dark_normal_web.png') center top no-repeat;
+}
+
+.button-signin-google:hover {
+  background-image: url('img/btn_google_signin_dark_focus_web.png');
+}
+
+.button-signin-google:active {
+   background-image: url('img/btn_google_signin_dark_pressed_web.png');
+}
+
 .glyphicon-spin {
   -webkit-animation: spin 1000ms infinite linear;
   animation: spin 1000ms infinite linear;
