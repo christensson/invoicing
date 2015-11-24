@@ -1,6 +1,6 @@
 setDefaultArg = function(arg, def) {
    return (typeof arg == 'undefined' ? def : arg);
-}
+};
 
 var NotifyViewModel = function() {
     var self = this;
@@ -20,16 +20,20 @@ var NotifyViewModel = function() {
                 break;
             case 'warn':
             case 'warning':
-                icon = "glyphicon-exclamation-sign";
+                //icon = "glyphicon-exclamation-sign";
                 break;
             case 'error':
-                icon = "glyphicon-warning-sign";
+                //icon = "glyphicon-warning-sign";
                 break;
         }
         var msgHtml = msg;
         if (icon !== undefined) {
-          msgHtml = '<span class="glyphicon ' + icon + '" aria-hidden="true"></span>' +
-            '<p>' + msg + '</p>';
+          if (true) {
+            msgHtml = '<span class="glyphicon ' + icon + '" aria-hidden="true"></span>' + msg;
+          } else {
+            msgHtml = '<span class="glyphicon ' + icon + '" aria-hidden="true"></span>' +
+              '<p>' + msg + '</p>';
+          }
         }
         return msgHtml;
     };
@@ -60,7 +64,13 @@ var NotifyViewModel = function() {
                 //self.msgSuccess(msgHtml);
                 break;
         }
-        var notification = {'message': msgHtml, 'priority': prio};
+        var cssClass = 'list-group-item-' + prio;
+        var notification = {'message': msgHtml, 'priority': prio, 'css': cssClass};
+        notification.onClick = function() {
+          console.log("Hiding client notification by click: " + JSON.stringify(notification));
+          self.notificationArray.remove(notification);
+        };
+        console.log("showMsg: push notification: " + JSON.stringify(notification));
         self.notificationArray.push(notification);
         if (hideDelayMs > 0) {
             setTimeout(function(note) {
@@ -89,6 +99,12 @@ var NotifyViewModel = function() {
             notification = {'message': msgHtml, 'priority': 'info'};
         }
         if (notification !== undefined) {
+            notification.css = 'list-group-item-' + notification.priority;
+            notification.onClick = function() {
+              console.log("Hiding server notification by click: " + JSON.stringify(notification));
+              self.notificationArray.remove(notification);
+            };
+            console.log("showServerMsg: push notification: " + JSON.stringify(notification));
             self.notificationArray.push(notification);
             if (hideDelayMs > 0) {
                 setTimeout(function(note) {

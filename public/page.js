@@ -1274,6 +1274,7 @@ var DebugViewModel = function(currentView) {
   var self = this;
   self.currentView = currentView;
   self.spinnerVisible = ko.observable(false);
+  self.infoVisible = ko.observable(false);
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'debug') {
@@ -1285,6 +1286,22 @@ var DebugViewModel = function(currentView) {
     console.log("page.js - DebugViewModel - showSpinner: " + showSpinner);
     Notify_showSpinner(showSpinner);
   });
+
+  self.showInfoMsg = function() {
+    Notify_showMsg('info', "This is an <strong>info</strong> message!");
+  };
+
+  self.showSuccessMsg = function() {
+    Notify_showMsg('success', "This is a <strong>success</strong> message!");
+  };
+
+  self.showWarningMsg = function() {
+    Notify_showMsg('warning', "This is a <strong>warning</strong> message!");
+  };
+
+  self.showErrorMsg = function() {
+    Notify_showMsg('error', "This is an <strong>error</strong> message!");
+  };
 };
 
 var NavViewModel = function() {

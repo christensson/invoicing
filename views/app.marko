@@ -827,14 +827,31 @@
                     <form>
                         <p>
                         </p>
-
-                        <div class="btn-group" role="group" aria-label="...">
-                            <button type="button" class="btn btn-default" data-bind="click: spinnerVisible.bind(\$data,true), css: { active: spinnerVisible==true}">
-                                Show spinner
-                            </button>
-                            <button type="button" class="btn btn-default" data-bind="click: spinnerVisible.bind(\$data,false), css: { active: spinnerVisible==false}">
-                                Hide spinner
-                            </button>
+                        <div class="row">
+                          <div class="btn-group" role="group" aria-label="...">
+                              <button type="button" class="btn btn-default" data-bind="click: spinnerVisible.bind(\$data,true), css: { active: spinnerVisible==true}">
+                                  Show spinner
+                              </button>
+                              <button type="button" class="btn btn-default" data-bind="click: spinnerVisible.bind(\$data,false), css: { active: spinnerVisible==false}">
+                                  Hide spinner
+                              </button>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="btn-group" role="group" aria-label="...">
+                              <button type="button" class="btn btn-default" data-bind="click: showInfoMsg">
+                                  Show info
+                              </button>
+                              <button type="button" class="btn btn-default" data-bind="click: showSuccessMsg">
+                                  Show success
+                              </button>
+                              <button type="button" class="btn btn-default" data-bind="click: showWarningMsg">
+                                  Show warning
+                              </button>
+                              <button type="button" class="btn btn-default" data-bind="click: showErrorMsg">
+                                  Show error
+                              </button>
+                          </div>
                         </div>
                     </form>
                 </div>
