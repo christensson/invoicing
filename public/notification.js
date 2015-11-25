@@ -9,6 +9,10 @@ var NotifyViewModel = function() {
     self.spinnerMsg = ko.observable(
         '<span class="glyphicon glyphicon-refresh glyphicon-spin"></span>' +
         '<p>Loading...</p>');
+    self.notificationPlacement = ko.observable(cfg.notificationAreaPlacement);
+    self.notificationCss = ko.pureComputed(function() {
+      return "notification-area-" + self.notificationPlacement();
+    }, self);
 
     self.formatMsgHtml = function(kind, msg) {
         //var msgHtml = '<a class="close" href="#">×</a>' + msg;
@@ -66,7 +70,7 @@ var NotifyViewModel = function() {
         }
         var cssClass = 'list-group-item-' + prio;
         var notification = {'message': msgHtml, 'priority': prio, 'css': cssClass};
-        notification.onClick = function() {
+        notification.doClose = function() {
           console.log("Hiding client notification by click: " + JSON.stringify(notification));
           self.notificationArray.remove(notification);
         };
@@ -100,7 +104,7 @@ var NotifyViewModel = function() {
         }
         if (notification !== undefined) {
             notification.css = 'list-group-item-' + notification.priority;
-            notification.onClick = function() {
+            notification.doClose = function() {
               console.log("Hiding server notification by click: " + JSON.stringify(notification));
               self.notificationArray.remove(notification);
             };

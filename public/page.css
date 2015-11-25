@@ -120,7 +120,7 @@ body { padding-top: 70px; }
   margin: 0;
 }
 
-.notification-area {
+.notification-area-center {
   position: fixed;
   width: 300px;
   left: 50%;
@@ -132,15 +132,15 @@ body { padding-top: 70px; }
   z-index: 9999;
 }
 
-.notification-area2 {
+.notification-area-right {
   position: fixed;
-  width: 100%;
-  bottom: 0px;
-  left: 0px;
+  width: 30%;
+  top: 70px;
+  right: 0px;
   /*margin-left: -150px;
   top: 0px;
   right: 0px;*/
   margin: 5 auto;
-  text-align: center;
+  text-align: left;
   z-index: 9999;
 }

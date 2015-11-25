@@ -1,26 +1,14 @@
 <div id="notification-area">
-  <div class="notification-area">
+  <div class="notification-area-center">
     <div class="alert alert-info" role="alert" data-bind="html: spinnerMsg, visible: spinnerVisible"></div>
-
-    <!--
-    <div data-bind="foreach: notificationArray">
-        <div data-bind="alert: \$data"></div>
-    </div>
-    -->
-    <!--
-    <div class="alert alert-danger" role="alert" data-bind="notification: {message: serverMsgError, duration: 3000, hide: true}"></div>
-    <div class="alert alert-success" role="alert" data-bind="notification: {message: serverMsgSuccess, duration: 3000, hide: true}"></div>
-    <div class="alert alert-info" role="alert" data-bind="notification: {message: serverMsgNotice, duration: 3000, hide: true}"></div>
-    <div class="alert alert-info" role="alert" data-bind="notification: {message: msgInfo, duration: 3000, hide: autoHideMessage }"></div>
-    <div class="alert alert-warning" role="alert" data-bind="notification: {message: msgWarning, duration: 3000, hide: autoHideMessage }"></div>
-    <div class="alert alert-success" role="alert" data-bind="notification: {message: msgSuccess, duration: 3000, hide: autoHideMessage }"></div>
-    <div class="alert alert-danger" role="alert" data-bind="notification: {message: msgError, duration: 3000, hide: autoHideMessage }"></div>
-    -->
   </div>
 
-  <div class="notification-area2">
+  <div data-bind="css: notificationCss">
     <ul class="list-group" data-bind="foreach: notificationArray">
-      <li class="list-group-item" data-bind="html: \$data.message, css: \$data.css, click: \$data.onClick"></li>
+      <li class="list-group-item" data-bind="css: \$data.css">
+        <span data-bind="html: \$data.message"></span>
+        <button type="button" class="close" aria-label="Close" data-bind="click: \$data.doClose"><span aria-hidden="true">&times;</span></button>
+      </li>
     </ul>
   </div>
 </div>
