@@ -49,7 +49,7 @@
 - [x] Feature: More authentication methods (other than local)
 - [x] Fix customer input. Proper form is needed, not just table view.
 - [ ] Fix company input. Currently the logo has to be uploaded in a separate form. The upload should be made using the same save button.
-- [ ] Add licenced features, demo invoice
+- [x] Add licenced features, demo invoice
 
 ## Bugs
 Use GitHub issue tracker.
