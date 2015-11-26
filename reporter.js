@@ -1,8 +1,9 @@
 var Report = require('fluentreports').Report;
 var util = require('./public/util.js');
 
-module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
+module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, debug) {
   'use strict';
+  isDemoMode = typeof isDemoMode !== 'undefined' ? isDemoMode : false;
   debug = typeof debug !== 'undefined' ? debug : false;
   /*  invoice: {
    *    _id, iid, uid, companyId, isLocked, isPaid, isValid
@@ -39,6 +40,9 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
   var headerStringX = 345;
   var headerStringY = 30;
   
+  var demoStringX = 345;
+  var demoStringY = 60;
+
   var customerAddrX = 345;
   var customerAddrY = 100;
   
@@ -49,6 +53,10 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
 
   var companyNameX = 0;
   var companyNameY = 160;
+  
+  var demoModeBgImg = "img/invoice_demo.png";
+  var demoModeBgW = 442;
+  var demoModeBgH = 442;
 
   var calcPaymentAdjustment = function(amount) {
     var amountRounded = Math.round(amount);
@@ -59,9 +67,14 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
   };
   
   var formatDate = function(value) {
-    var date = new Date(value);
-    var isoDateString = date.toISOString();
-    return isoDateString.split("T")[0];
+    var dateStr = "";
+    if (value !== undefined) {
+      var date = new Date(value);
+      console.log("Date: " + date.toString())
+      var isoDateString = date.toISOString();
+      dateStr = isoDateString.split("T")[0];
+    }
+    return dateStr;
   };
   
   var formatTextTemplate = function(text, cust) {
@@ -143,6 +156,13 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, debug) {
       wrap : 1
     });
     x.newLine();
+
+    if (isDemoMode) {
+      x.image(demoModeBgImg, {
+        x: (x.maxX() / 2) - (demoModeBgW/2) + margin/2,
+        y: (x.maxY() / 2) - (demoModeBgH/2) + margin/2,
+        align: "left", fit: [demoModeBgW, demoModeBgH]});
+    }
   };
 
   var mypagefooter = function(x, r) {

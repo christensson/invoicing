@@ -805,6 +805,10 @@
                 <div>
                     <form class="form-horizontal">
                       <div class="form-group">
+                        <label for="license" class="control-label">License</label>
+                        <p class="form-control-static" id="license" data-bind="text: settings.license"></p>
+                      </div>
+                      <div class="form-group">
                         <label for="defNumDaysUntilPayment" class="control-label">Number of days until payment</label>
                         <input type="number" class="form-control" id="defNumDaysUntilPayment" placeholder="30" data-bind="value: settings.defaultNumDaysUntilPayment">
                       </div>

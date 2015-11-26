@@ -393,12 +393,14 @@ module.exports.init = function(doneCb) {
                         {
                           uid: testUserId,
                           activeCompanyId: ObjectID(testCompany1._id),
-                          defaultNumDaysUntilPayment: 30
+                          defaultNumDaysUntilPayment: 30,
+                          license: "unlimited",
                         },
                         {
                           uid: machUserId,
                           activeCompanyId: ObjectID(machCompany1._id),
-                          defaultNumDaysUntilPayment: 25
+                          defaultNumDaysUntilPayment: 25,
+                          license: "demo",
                         }
                         ];
     return insertDataPromise("settings", settingsList);
@@ -788,7 +790,6 @@ module.exports.initUserContext = function(userQuery) {
   console.log("initUserContext: query=" + JSON.stringify(userQuery));
   var user = undefined;
   module.exports.getUser(userQuery).then(function (result) {
-    console.log("initUserContext: Found user=" + JSON.stringify(result));
     user = result;
     console.log("initUserContext: Found user=" + JSON.stringify(user));
     return Q();
@@ -799,6 +800,7 @@ module.exports.initUserContext = function(userQuery) {
         "uid" : user._id,
         "activeCompanyId" : undefined,
         "defaultNumDaysUntilPayment" : 30,
+        "license" : "demo"
     };
     console.log("initUserContext: Set default settings: " + JSON.stringify(defaultSettings));
     return insertDataPromise("settings", defaultSettings);

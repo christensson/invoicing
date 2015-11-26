@@ -473,18 +473,32 @@ app.get("/api/invoiceReport/:id", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var id = req.params.id;
   console.log("Invoice report: user=" + req.user.info.name + ", _id=" + id);
-  mydb.getInvoice(uid, id).then(function(invoice) {
+  
+  // Check license in settings
+  var isDemoMode = false;
+  var debug = false;
+  mydb.getSettings(uid).then(function(settings) {
+    if (settings.license === undefined ||
+        settings.license === "demo") {
+      isDemoMode = true;
+    }
+    console.log("Invoice report: user=" + req.user.info.name + ", _id=" + id +
+        ", isDemoMode=" + isDemoMode);
+    return mydb.getInvoice(uid, id);
+  }).then(function(invoice) {
     reporter.doInvoiceReport(invoice, function(reportFilename) {
-      console.log("onCompletion: reportFilename=" + reportFilename);
-      res.type('application/pdf');
-      res.download(reportFilename, reportFilename, function(err) {
-        if (err) {
-          console.error("onCompletion: " + err);
-        } else {
-          res.end();
-        }
-      });
-    });
+        console.log("onCompletion: reportFilename=" + reportFilename);
+        res.type('application/pdf');
+        res.download(reportFilename, reportFilename, function(err) {
+          if (err) {
+            console.error("onCompletion: " + err);
+          } else {
+            res.end();
+          }
+        });
+      },
+      isDemoMode,
+      debug);
   }).fail(myFailureHandler.bind(null, res));
 });
 

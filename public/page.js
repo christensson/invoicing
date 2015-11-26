@@ -4,13 +4,15 @@ var SettingsDataModel = function() {
   self._id = ko.observable();
   self.activeCompanyId = ko.observable();
   self.defaultNumDaysUntilPayment = ko.observable();
+  self.license = ko.observable();
 
   self.setData = function(data) {
     self._id(data._id);
     self.activeCompanyId(data.activeCompanyId);
     self.defaultNumDaysUntilPayment(data.defaultNumDaysUntilPayment);
+    self.license(data.license);
 
-    for ( var prop in data) {
+    for (var prop in data) {
       if (data.hasOwnProperty(prop)) {
         console.log("Property " + prop + " = " + data[prop]);
       }
@@ -25,7 +27,8 @@ var SettingsDataModel = function() {
     var data = {
         _id: self._id(),
         activeCompanyId: self.activeCompanyId(),
-        defaultNumDaysUntilPayment: self.defaultNumDaysUntilPayment()
+        defaultNumDaysUntilPayment: self.defaultNumDaysUntilPayment(),
+        license: self.license(),
     };
     return data;
   };
@@ -706,6 +709,7 @@ var InvoiceDataViewModel = function() {
   self.yourRef = ko.observable();
   self.ourRef = ko.observable();
   self.date = ko.observable();
+  console.log("Date: " + self.date());
   self.daysUntilPayment = ko.observable();
   self.projId = ko.observable();
   self.currency = ko.observable();
@@ -759,7 +763,8 @@ var InvoiceDataViewModel = function() {
       },
       yourRef : "",
       ourRef : "",
-      date : "",
+      // Initialize to current date
+      date : new Date().toISOString().split("T")[0],
       daysUntilPayment : defaultNumDaysUntilPayment,
       projId : "",
       currency : "SEK",
@@ -1205,6 +1210,9 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, settings) {
       Notify_showMsg('error', 'Customer must be selected!');
       console.log("No customer selected: " + JSON.stringify(self.data.customer()));
       return;
+    } else if (self.data.date() === undefined) {
+      Notify_showMsg('error', 'Invoice must have a date!');
+      return;
     }
     var isNewInvoice = (self.data._id() == undefined) ? true : false;
     var ajaxData = JSON.stringify(self.data.getJson());
@@ -1392,6 +1400,8 @@ $(function() {
   var settings = new SettingsDataModel();
   var companyViewModel = new CompanyListViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId, navViewModel.activeCompanyName, navViewModel.companyList);
+  var settingsViewModel = new SettingsViewModel(navViewModel.currentView,
+      settings, navViewModel.activeCompanyId, companyViewModel.setActiveCompanyId);
   var companyNewViewModel = new CompanyNewViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId,
       navViewModel.activeCompanyName,
@@ -1404,8 +1414,6 @@ $(function() {
       navViewModel.activeCompanyId);
   var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId, settings);
-  var settingsViewModel = new SettingsViewModel(navViewModel.currentView,
-      settings, navViewModel.activeCompanyId, companyViewModel.setActiveCompanyId);
   var debugViewModel = new DebugViewModel(navViewModel.currentView);
 
   settingsViewModel.populate();
