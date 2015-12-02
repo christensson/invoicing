@@ -1,0 +1,26 @@
+{
+    "signin": {
+        "header": "signin.header",
+        "welcomeText": "signin.welcomeText",
+        "pageTitle": "signin.pageTitle",
+        "cloudAccountTitle": "signin.cloudAccountTitle",
+        "localAccountTitle": "signin.localAccountTitle",
+        "accountExistsBtn": "signin.accountExistsBtn",
+        "createAccountBtn": "signin.createAccountBtn",
+        "usernameLbl": "signin.usernameLbl",
+        "usernamePlaceholder": "signin.usernamePlaceholder",
+        "passwordLbl": "signin.passwordLbl",
+        "passwordPlaceholder": "signin.passwordPlaceholder",
+        "signinBtn": "signin.signinBtn",
+        "regFullNameLbl": "signin.regFullNameLbl",
+        "regEmailLbl": "signin.regEmailLbl",
+        "regPasswordLbl": "signin.regPasswordLbl",
+        "registerBtn": "signin.registerBtn",
+        "lngSvBtn": "signin.lngSvBtn",
+        "lngEnBtn": "signin.lngEnBtn"
+    },
+    "app": {
+        "pageTitle": "app.pageTitle",
+        "navBarTitle": "app.navBarTitle"
+    }
+}

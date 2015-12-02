@@ -1,0 +1,26 @@
+{
+    "signin": {
+        "lngSvBtn": "Svenska",
+        "lngEnBtn": "English",
+        "pageTitle": "Inloggning",
+        "header": "Fakturering",
+        "welcomeText": "Välkommen till nästa generations fakturering!",
+        "cloudAccountTitle": "Molnkonto",
+        "localAccountTitle": "Lokalt konto",
+        "accountExistsBtn": "Jag har redan ett konto",
+        "createAccountBtn": "Jag behöver skapa ett konto",
+        "usernameLbl": "Användarnamn",
+        "passwordLbl": "Lösenord",
+        "usernamePlaceholder": "Användarnamn",
+        "passwordPlaceholder": "Lösenord",
+        "regFullNameLbl": "Fullständigt namn",
+        "regEmailLbl": "E-post",
+        "regPasswordLbl": "Lösenord",
+        "signinBtn": "Logga in",
+        "registerBtn": "Registrera användare"
+    },
+    "app": {
+        "pageTitle": "Fakturering",
+        "navBarTitle": "Fakturering"
+    }
+}

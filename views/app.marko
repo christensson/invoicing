@@ -1,4 +1,7 @@
 <!doctype html>
+
+<require module="i18next" var="i18n" />
+
 <html>
     <head>
         <meta charset="utf-8">
@@ -6,7 +9,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
-        <title>Invoices</title>
+        <title>${i18n.t('app.pageTitle')}</title>
         <link href="bootstrap.min.css" rel="stylesheet">
         <!-- <link href="bootstrap-theme.min.css" rel="stylesheet"> -->
 
@@ -28,7 +31,7 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">Invoices</a>
+            <a class="navbar-brand" href="#">${i18n.t('app.navBarTitle')}</a>
           </div>
           <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav" data-bind="foreach: mainViews">

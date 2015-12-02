@@ -8,6 +8,7 @@
 * Knockout JS: http://knockoutjs.com/documentation/introduction.html
 * Bootstrap: http://getbootstrap.com (CSS, Glyphicons)
 * Director: https://github.com/flatiron/director (Routing)
+* Locale flag icons: http://www.famfamfam.com/lab/icons/flags/
 
 ### Server
 * Express JS: http://expressjs.com/4x/api.html

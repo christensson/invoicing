@@ -1,0 +1,26 @@
+{
+    "signin": {
+        "lngSvBtn": "Svenska",
+        "lngEnBtn": "English",
+        "pageTitle": "Signin",
+        "header": "Invoicing",
+        "welcomeText": "Welcome to the next generation Invoicing!",
+        "cloudAccountTitle": "Cloud account",
+        "localAccountTitle": "Local account",
+        "accountExistsBtn": "I already have an account",
+        "createAccountBtn": "I need to make an account",
+        "usernameLbl": "Username",
+        "passwordLbl": "Password",
+        "usernamePlaceholder": "Username",
+        "passwordPlaceholder": "Password",
+        "regFullNameLbl": "Full Name",
+        "regEmailLbl": "E-mail",
+        "regPasswordLbl": "Password",
+        "signinBtn": "Sign in",
+        "registerBtn": "Register user"
+    },
+    "app": {
+        "pageTitle": "Invoicing",
+        "navBarTitle": "Invoice"
+    }
+}

@@ -120,6 +120,12 @@ body { padding-top: 70px; }
   margin: 0;
 }
 
+.setlng-bar {
+  position: fixed;
+  top: 0px;
+  right: 0px;
+}
+
 .notification-area-center {
   position: fixed;
   width: 300px;
@@ -143,4 +149,22 @@ body { padding-top: 70px; }
   margin: 5 auto;
   text-align: left;
   z-index: 9999;
+}
+
+.icon-lng-sv {
+  background:transparent url('img/locale/se.png') center top;
+  background-repeat: no-repeat;
+  display: inline-block;  
+  width: 16px;
+  height: 11px;
+  margin-right: 5px;
+}
+
+.icon-lng-en {
+  background:transparent url('img/locale/gb.png') center top;
+  background-repeat: no-repeat;
+  display: inline-block;  
+  width: 16px;
+  height: 11px;
+  margin-right: 5px;
 }

@@ -4,6 +4,8 @@
  bootstrap
  Font Awesome: http://fortawesome.github.io/Font-Awesome/
 -->
+<require module="i18next" var="i18n" />
+
 <html>
     <head>
         <meta charset="utf-8">
@@ -11,7 +13,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
-        <title>Signin</title>
+        <title>${i18n.t('signin.pageTitle')}</title>
         <!-- Bootstrap -->
         <link href="bootstrap.min.css" rel="stylesheet">
         <!-- <link href="bootstrap-theme.min.css" rel="stylesheet"> -->
@@ -30,12 +32,24 @@
     <div>
         <include template="./notification.marko"/>
         <div id="signin">
-            <h1>Invoicing</h1>
-            <p>Welcome to the next generation Invoicing!</p>
+            <div class="setlng-bar">
+              <div class="btn-group" role="group" aria-label="...">
+                <a href="/signin?setLng=sv" role="button" class="btn btn-default">
+                  <span class="icon-lng-sv" aria-hidden="true"></span>
+                  ${i18n.t('signin.lngSvBtn')}
+                </a>
+                <a href="/signin?setLng=en" role="button" class="btn btn-default">
+                  <i class="icon-lng-en" aria-hidden="true"></i>
+                  ${i18n.t('signin.lngEnBtn')}
+                </a>
+              </div>
+            </div>
+            <h1>${i18n.t('signin.header')}</h1>
+            <p>${i18n.t('signin.welcomeText')}</p>
             <p></p>
             <div class="panel panel-default">
               <div class="panel-heading">
-                <h3 class="panel-title">Cloud account</h3>
+                <h3 class="panel-title">${i18n.t('signin.cloudAccountTitle')}</h3>
               </div>
               <div class="panel-body">
                 <a href="/auth/google" class="button-signin-google" role="button"></a>
@@ -44,15 +58,15 @@
 
             <div class="panel panel-default">
               <div class="panel-heading">
-                <h3 class="panel-title">Local account</h3>
+                <h3 class="panel-title">${i18n.t('signin.localAccountTitle')}</h3>
               </div>
 
               <div class="panel-body">
                 <form>
                   <div class="form-group">
                     <div class="btn-group" role="group" aria-label="...">
-                        <button type="button" class="btn btn-default" data-bind="click: activateSignIn, css: { active: isSignInVisible}">I already have an account</button>
-                        <button type="button" class="btn btn-default" data-bind="click: activateLocalReg, css: { active: isLocalRegVisible}">I need to make an account</button>
+                        <button type="button" class="btn btn-default" data-bind="click: activateSignIn, css: { active: isSignInVisible}">${i18n.t('signin.accountExistsBtn')}</button>
+                        <button type="button" class="btn btn-default" data-bind="click: activateLocalReg, css: { active: isLocalRegVisible}">${i18n.t('signin.createAccountBtn')}</button>
                     </div>
                   </div>
                 </form>
@@ -60,21 +74,21 @@
                 <form id="local-sign-in" data-bind="visible: isSignInVisible" action="/login" method="post">
                   <div class="row form-group">
                     <div class="col-sm-4">
-                      <label for="username" class="control-label">Username</label>
-                      <input type="text" class="form-control" name="username" placeholder="Username" required/>
+                      <label for="username" class="control-label">${i18n.t('signin.usernameLbl')}</label>
+                      <input type="text" class="form-control" name="username" placeholder="${i18n.t('signin.usernamePlaceholder')}" required/>
                     </div>
                   </div>
                   <div class="row form-group">
                     <div class="col-sm-4">
-                      <label for="password" class="control-label">Password</label>
-                      <input type="password" class="form-control" name="password" placeholder="Password" required/>
+                      <label for="password" class="control-label">${i18n.t('signin.passwordLbl')}</label>
+                      <input type="password" class="form-control" name="password" placeholder="${i18n.t('signin.passwordPlaceholder')}" required/>
                     </div>
                   </div>
                   <div class="form-group">
                     <div>
                       <button type="submit" class="btn btn-primary">
                           <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
-                          Sign in
+                          ${i18n.t('signin.signinBtn')}
                       </button>
                     </div>
                   </div>
@@ -83,33 +97,33 @@
                 <form id="local-reg" data-bind="visible: isLocalRegVisible" action="/local-reg" method="post">
                     <div class="row form-group">
                         <div class="col-sm-4">
-                          <label for="username" class="control-label">Username</label>
-                          <input type="text" class="form-control" name="username" placeholder="Username" required/>
+                          <label for="username" class="control-label">${i18n.t('signin.usernameLbl')}</label>
+                          <input type="text" class="form-control" name="username" placeholder="${i18n.t('signin.usernamePlaceholder')}" required/>
                         </div>
                     </div>
                     <div class="row form-group">
                         <div class="col-sm-4">
-                          <label for="fullName" class="control-label">Full Name</label>
-                          <input type="text" class="form-control" name="fullName" placeholder="Full Name" required/>
+                          <label for="fullName" class="control-label">${i18n.t('signin.regFullNameLbl')}</label>
+                          <input type="text" class="form-control" name="fullName" placeholder="${i18n.t('signin.regFullNameLbl')}" required/>
                         </div>
                     </div>
                     <div class="row form-group">
                         <div class="col-sm-4">
-                          <label for="email" class="control-label">E-mail</label>
-                          <input type="email" class="form-control" name="email" placeholder="E-mail" required/>
+                          <label for="email" class="control-label">${i18n.t('signin.regEmailLbl')}</label>
+                          <input type="email" class="form-control" name="email" placeholder="${i18n.t('signin.regEmailLbl')}" required/>
                         </div>
                     </div>
                     <div class="row form-group">
                         <div class="col-sm-4">
-                          <label for="password" class="control-label">Password</label>
-                          <input type="password" class="form-control" name="password" placeholder="Password" required/>
+                          <label for="password" class="control-label">${i18n.t('signin.regPasswordLbl')}</label>
+                          <input type="password" class="form-control" name="password" placeholder="${i18n.t('signin.regPasswordLbl')}" required/>
                         </div>
                     </div>
                     <div class="form-group">
                       <div>
                         <button type="submit" class="btn btn-primary">
                             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                            Register
+                            ${i18n.t('signin.registerBtn')}
                         </button>
                       </div>
                     </div>

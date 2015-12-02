@@ -12,6 +12,7 @@ var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var path = require('path');
 var marko = require('marko');
 var multer = require('multer');
+var i18n = require('i18next');
 
 function list(val) {
   return val.split(',');
@@ -84,6 +85,24 @@ app.use(function(req, res, next) {
 
   next();
 });
+
+// i18n
+i18n.init({
+  preload: ['sv', 'en'],
+  supportedLngs: ['en', 'sv'],
+  saveMissing: true,
+  debug: true,
+  ignoreRoutes: ['uploads/', 'public/img/', 'public/', 'views/']}
+/*, function(t) {
+  // after initialisation with preloading needed languages
+  // you could add localizable routes:
+  i18n.addRoute('/:lng/route.products/route.harddrives/route.overview', ['sv', 'en'], app, 'get', function(req, res) {
+    // res.send(...);
+  });
+}*/);
+
+app.use(i18n.handle);
+i18n.registerAppHelper(app);
 
 // App modules
 var mydb = require('./mydb.js');
@@ -543,6 +562,8 @@ var signinTemplatePath = require.resolve('./views/signin.marko');
 var signinTemplate = marko.load(signinTemplatePath);
 
 app.get('/signin', function(req, res) {
+  var currentLng = req.locale;
+  console.log("signing: currentLng=" + currentLng);
   signinTemplate.render({
     msg : res.locals
   }, res);
