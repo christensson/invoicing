@@ -21,6 +21,22 @@
     },
     "app": {
         "pageTitle": "app.pageTitle",
-        "navBarTitle": "app.navBarTitle"
+        "navBar": {
+            "title": "app.navBarTitle",
+            "home": "app.navBarHome",
+            "companyAdmin": "app.navBarCompanyAdmin",
+            "customerNew": "app.navBarCustomerNew",
+            "customerList": "app.navBarCustomerList",
+            "invoiceNew": "app.navBarInvoiceNew",
+            "invoiceList": "app.navBarInvoiceList",
+            "settings": "app.navBarSettings",
+            "debug": "app.navBarDebug",
+            "logout": "app.navBarLogout"
+        },
+        "invoice": {
+            "saveOk": "app.invoice.saveOk",
+            "saveOk_update": "app.invoice.saveOk_update",
+            "saveOk_delete": "app.invoice.saveOk_delete",
+        }
     }
 }

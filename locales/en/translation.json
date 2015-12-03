@@ -21,6 +21,22 @@
     },
     "app": {
         "pageTitle": "Invoicing",
-        "navBarTitle": "Invoice"
+        "navBar": {
+            "title": "Invoice",
+            "home": "Home",
+            "companyAdmin": "Administer Companies",
+            "customerNew": "New Customer",
+            "customerList": "Customers",
+            "invoiceNew": "New Invoice",
+            "invoiceList": "Invoices",
+            "settings": "Settings",
+            "debug": "Debug",
+            "logout": "Log out"
+        },
+        "invoice": {
+            "saveOk": "Invoice <strong>__iid__</strong> created.",
+            "saveOk_update": "Invoice <strong>__iid__</strong> updated.",
+            "saveOk_delete": "Invoice <strong>__iid__</strong> deleted."
+        }
     }
 }

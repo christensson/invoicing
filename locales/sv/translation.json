@@ -21,6 +21,22 @@
     },
     "app": {
         "pageTitle": "Fakturering",
-        "navBarTitle": "Fakturering"
+        "navBar": {
+            "title": "Fakturering",
+            "home": "Hem",
+            "companyAdmin": "Hantera Företag",
+            "customerNew": "Ny Kund",
+            "customerList": "Kunder",
+            "invoiceNew": "Ny Faktura",
+            "invoiceList": "Fakturor",
+            "settings": "Inställningar",
+            "debug": "Debug",
+            "logout": "Logga ut"
+        },
+        "invoice": {
+            "saveOk": "Faktura <strong>__iid__</strong> skapad.",
+            "saveOk_update": "Faktura <strong>__iid__</strong> uppdaterad.",
+            "saveOk_delete": "Invoice <strong>__iid__</strong> raderad."
+        }
     }
 }

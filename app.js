@@ -103,6 +103,11 @@ i18n.init({
 
 app.use(i18n.handle);
 i18n.registerAppHelper(app);
+i18n.serveClientScript(app)      // grab i18next.js in browser
+  .serveDynamicResources(app)    // route which returns all resources in on response
+  .serveMissingKeyRoute(app)     // route to send missing keys
+  .serveChangeKeyRoute(app)      // route to post value changes
+  .serveRemoveKeyRoute(app);     // route to remove key/value
 
 // App modules
 var mydb = require('./mydb.js');

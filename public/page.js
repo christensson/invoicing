@@ -1227,13 +1227,16 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, settings) {
       dataType : "json",
       success : function(data) {
         console.log("saveInvoice: response: " + JSON.stringify(data));
-        var opStr = "added";
+        var tContext = "";
         if (!isNewInvoice) {
-          opStr = (data.invoice.isValid) ? 'updated' : 'deleted';
+          tContext = (data.invoice.isValid) ? 'update' : 'delete';
         }
-        Notify_showMsg('success', 'Invoice <strong>#' + data.invoice.iid
+        /*Notify_showMsg('success', 'Invoice <strong>#' + data.invoice.iid
             + '</strong> to customer id ' + data.invoice.customer.cid + ' '
-            + opStr + '.');
+            + opStr + '.'); */
+        Notify_showMsg('success',
+            i18n.t("app.invoice.saveOk",
+                   {context: tContext, iid: data.invoice.iid}));
         // Set params set from server
         self.data._id(data.invoice._id);
         self.data.iid(data.invoice.iid);
@@ -1317,48 +1320,48 @@ var NavViewModel = function() {
   
   self.mainViews = [ {
     name : '/page/home',
-    title : 'Home',
+    title : i18n.t("app.navBar.home"),
     icon : 'glyphicon glyphicon-home',
     location : 'main'
   }, {
     name : '/page/companies',
-    title : 'Administer Companies',
+    title : i18n.t("app.navBar.companyAdmin"),
     icon : 'glyphicon glyphicon-wrench',
     location : 'companyMenu'
   }, {
     name : '/page/customer_new',
-    title : 'New Customer',
+    title : i18n.t("app.navBar.customerNew"),
     icon : 'glyphicon glyphicon-user',
     location : 'main'
   }, {
   }, {
     name : '/page/customers',
-    title : 'Customers',
+    title : i18n.t("app.navBar.customerList"),
     icon : 'glyphicon glyphicon-user',
     location : 'main'
   }, {
     name : '/page/invoice_new',
-    title : 'New Invoice',
+    title : i18n.t("app.navBar.invoiceNew"),
     icon : 'glyphicon glyphicon-file',
     location : 'main'
   }, {
     name : '/page/invoices',
-    title : 'Invoices',
+    title : i18n.t("app.navBar.invoiceList"),
     icon : 'glyphicon glyphicon-list',
     location : 'main'
   }, {
     name : '/page/settings',
-    title : 'Settings',
+    title : i18n.t("app.navBar.settings"),
     icon : 'glyphicon glyphicon-wrench',
     location : 'userMenu'
   }, {
     name : '/page/debug',
-    title : 'Debug',
+    title : i18n.t("app.navBar.debug"),
     icon : 'glyphicon glyphicon-eye-open',
     location : 'userMenu'
   }, {
     name : '/logout',
-    title : 'Log out',
+    title : i18n.t("app.navBar.logout"),
     icon : 'glyphicon glyphicon-log-out',
     location : 'userMenuNoRoute'
   } ];
@@ -1394,8 +1397,7 @@ var NavViewModel = function() {
   self.router.init(self.mainViews[0].name);
 };
 
-$(function() {
-  console.log("page.js - init - begin");
+var setupKo = function() {
   var navViewModel = new NavViewModel();
   var settings = new SettingsDataModel();
   var companyViewModel = new CompanyListViewModel(navViewModel.currentView,
@@ -1441,4 +1443,22 @@ $(function() {
   ko.applyBindings(settingsViewModel, document.getElementById("app-settings"));
 
   ko.applyBindings(debugViewModel, document.getElementById("app-debug"));
+};
+
+$(function() {
+  console.log("page.js - init - load translations");
+  $.i18n.init({
+    //lng: 'en-US',
+    useLocalStorage: false,
+    supportedLngs: ['en', 'sv'],
+    resGetPath: "locales/resources.json?lng=__lng__&ns=__ns__",
+    sendMissing: true,
+    dynamicLoad: true,
+    debug: true
+    }, function() {
+    console.log("page.js - init - load translations - done");
+    console.log("page.js - init - setupKo");
+    setupKo();
+    console.log("page.js - init - setupKo - done");
+  });  
 });
