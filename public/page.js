@@ -284,7 +284,7 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompanyN
         }).fail(function() {
       console.log("page.js - CompanyListViewModel - populate - failed");
       Notify_showSpinner(false);
-      Notify_showMsg('error', 'Failed to get companies!');
+      Notify_showMsg('error', i18n.t("app.customerList.getNok"));
     });
   };
 
@@ -377,7 +377,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
         }).fail(function() {
           console.log("page.js - CompanyNewViewModel - getCompany - failed");
           Notify_showSpinner(false);
-          Notify_showMsg('error', 'Failed to get company!');
+          Notify_showMsg('error', i18n.t("app.company.getNok"));
         });
   };
   
@@ -403,9 +403,9 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
     console.log("form data: " + JSON.stringify(formElement));
     var submitForm = false;
     if (_id === undefined) {
-      Notify_showMsg('error', 'Company must be saved first!');
+      Notify_showMsg('error', i18n.t("app.company.uploadLogoNok", {context: "noId"}));
     } else if (formElement.elements.logo.value.length == 0) {
-      Notify_showMsg('error', 'No logo selected!');
+      Notify_showMsg('error', i18n.t("app.company.uploadLogoNok", {context: "noFile"}));
     } else {
       formElement.action = formElement.action + "/" + _id;
       submitForm = true;
@@ -498,15 +498,14 @@ var CustomerViewModel = function() {
 
   self.updateServer = function() {
     if (self.companyId() == null) {
-      Notify_showMsg('error',
-        'Cannot save customer! No company selected.');
+      Notify_showMsg('error', i18n.t("app.customer.saveNok", {context: "noCompany"}));
       return;
     } else if ((self._id() == undefined) && !self.isValid()) {
       console.log("updateServer: Nothing to do (invalid entry without _id)");
+      Notify_showMsg('error', i18n.t("app.customer.saveNok"));
       return;
     } else if (self.name().length == 0) {
-      Notify_showMsg('error',
-          'Customer <strong>name</strong> must be specified!');
+      Notify_showMsg('error', i18n.t("app.customer.saveNok", {context: "noName"}));
       self.nameError(true);
       return;
     }
@@ -520,13 +519,12 @@ var CustomerViewModel = function() {
       dataType : "json",
       success : function(data) {
         console.log("updateServer: response: " + JSON.stringify(data));
-        var opStr = "added";
+        var tContext = "";
         if (!isNewCustomer) {
-          opStr = (data.customer.isValid) ? 'updated' : 'deleted';
+          tContext = (data.customer.isValid) ? 'updated' : 'deleted';
         }
-        Notify_showMsg('success', 'Customer <strong>' + data.customer.name
-            + '</strong> with customer id ' + data.customer.cid + ' ' + opStr
-            + '.');
+        Notify_showMsg('success', i18n.t("app.customer.saveOk",
+            {context: tContext, cid: ""+data.customer.cid, name: data.customer.name}));
         self.cid(data.customer.cid);
         self.uid(data.customer.uid);
         self._id(data.customer._id);
@@ -588,10 +586,10 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
       }).fail(function() {
         console.log("page.js - CustomerListViewModel - populate - failed");
         Notify_showSpinner(false);
-        Notify_showMsg('error', 'Failed to get customers!');
+        Notify_showMsg('error', i18n.t("app.customerList.getNok"));
       });
     } else {
-      Notify_showMsg('info', 'Cannot get customers! Company not selected or doesn\'t exist.');
+      Notify_showMsg('info', i18n.t("app.customerList.getNok", {context: "noCompany"}));
     }
   };
 };
@@ -629,7 +627,7 @@ var CustomerNewViewModel = function(currentView, activeCompanyId) {
         }).fail(function() {
           console.log("page.js - CustomerNewViewModel - getCustomer - failed");
           Notify_showSpinner(false);
-          Notify_showMsg('error', 'Failed to get customer!');
+          Notify_showMsg('error', i18n.t("app.customer.getNok"));
         });
   };
   
@@ -709,7 +707,6 @@ var InvoiceDataViewModel = function() {
   self.yourRef = ko.observable();
   self.ourRef = ko.observable();
   self.date = ko.observable();
-  console.log("Date: " + self.date());
   self.daysUntilPayment = ko.observable();
   self.projId = ko.observable();
   self.currency = ko.observable();
@@ -940,7 +937,7 @@ var InvoiceListDataViewModel = function(data) {
     if (self._id() !== undefined) {
       InvoiceOps.printInvoice(self._id());
     } else {
-      Notify_showMsg('error', 'Cannot print invoice without id!');
+      Notify_showMsg('error', i18n.t("app.invoiceList.printNok", {context: "noId"}));
       console.log("page.js - InvoiceListDataViewModel - Invoice has no id.");
     }
   };
@@ -978,10 +975,10 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
       }).fail(function() {
         console.log("page.js - InvoiceListViewModel - populate - failed");
         Notify_showSpinner(false);
-        Notify_showMsg('error', 'Failed to get invoices!');
+        Notify_showMsg('error', i18n.t("app.invoiceList.getNok"));
       });
     } else {
-      Notify_showMsg('info', 'Cannot get invoices! Company not selected or doesn\'t exist.');
+      Notify_showMsg('info', i18n.t("app.invoiceList.getNok", {context: "noCompany"}));
     }
   };
   
@@ -1083,12 +1080,6 @@ var InvoiceCustomerModel = function(data) {
   self.toString = function() {
     return "" + self.data.cid + " - " + self.data.name;
   };
-  // Override toJSON method since typeahead reads the JSON for the suggestion
-  // list
-  /*
-  self.toJSON = function() {
-    return self.toString();
-  };*/
 };
 
 var InvoiceNewViewModel = function(currentView, activeCompanyId, settings) {
@@ -1156,10 +1147,10 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, settings) {
         console.log("page.js - InvoiceNewViewModel - populate - failed");
         self.numServerReqLeft--;
         Notify_showSpinner(false);
-        Notify_showMsg('error', 'Failed to get customers!');
+        Notify_showMsg('error', i18n.t("app.invoice.getCustomersNok"));
       });
     } else {
-      Notify_showMsg('info', 'Cannot get customers! Company not selected or doesn\'t exist.');
+      Notify_showMsg('info', i18n.t("app.invoice.getCustomersNok", {context: "noCompany"}));
     }
   };
 
@@ -1168,8 +1159,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, settings) {
     $.getJSON(
         "/api/invoice/" + _id,
         function(invoice) {
-          console
-          .log("Got invoice id=" + _id + ", data=" + JSON.stringify(invoice));
+          console.log("Got invoice id=" + _id + ", data=" + JSON.stringify(invoice));
           self.data.setData(invoice);
           self.selectedCustomer(self.data.customer());
           self.selectedCurrency(self.data.currency());
@@ -1180,7 +1170,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, settings) {
           console.log("page.js - InvoiceNewViewModel - getInvoice - failed");
           self.numServerReqLeft--;
           Notify_showSpinner(false);
-          Notify_showMsg('error', 'Failed to get invoice!');
+          Notify_showMsg('error', i18n.t("app.invoice.getNok"));
         });
   };
   
@@ -1204,14 +1194,15 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, settings) {
 
   self.saveInvoice = function() {
     if ((self.data._id() === undefined) && !self.data.isValid()) {
+      Notify_showMsg('error', i18n.t("app.invoice.saveNok"));
       console.log("saveInvoice: Nothing to do (invalid entry without _id)");
       return;
     } else if (self.data.customer()._id === undefined) {
-      Notify_showMsg('error', 'Customer must be selected!');
+      Notify_showMsg('error', i18n.t("app.invoice.saveNok", {context: 'invalidCustomer'}));
       console.log("No customer selected: " + JSON.stringify(self.data.customer()));
       return;
     } else if (self.data.date() === undefined) {
-      Notify_showMsg('error', 'Invoice must have a date!');
+      Notify_showMsg('error', i18n.t("app.invoice.saveNok", {context: 'invalidDate'}));
       return;
     }
     var isNewInvoice = (self.data._id() == undefined) ? true : false;
@@ -1253,7 +1244,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, settings) {
     if (self.data._id() !== undefined) {
       InvoiceOps.printInvoice(self.data._id());
     } else {
-      Notify_showMsg('info', 'Cannot print unsaved invoice, please save it first.');
+      Notify_showMsg('info', i18n.t("app.invoice.printNok", {context: 'noId'}));
       console.log("page.js - InvoiceNewViewModel - Invoice not saved.");
     }
   };

@@ -33,10 +33,43 @@
             "debug": "app.navBarDebug",
             "logout": "app.navBarLogout"
         },
+        "company": {
+            "getNok": "app.company.getNok",
+            "uploadLogoNok_noId": "app.company.uploadLogoNok_noId",
+            "uploadLogoNok_noFile": "app.company.uploadLogoNok_noFile"
+        },
+        "companyList": {
+            "getNok": "app.companyList.getNok"
+        },
+        "customer": {
+            "getNok": "app.customer.getNok",
+            "saveOk": "app.customer.saveOk",
+            "saveOk_update": "app.customer.saveOk_update",
+            "saveOk_delete": "app.customer.saveOk_delete",
+            "saveNok": "app.customer.saveNok",
+            "saveNok_noCompany": "app.customer.saveNok_noCompany",
+            "saveNok_noName": "app.customer.saveNok_noName"
+        },
+        "customerList": {
+            "getNok": "app.customerList.getNok",
+            "getNok_noCompany": "app.customerList.getNok_noCompany"
+        },
         "invoice": {
+            "getCustomersNok": "app.invoice.getCustomersNok",
+            "getCustomersNok_noCompany": "app.invoice.getCustomersNok_noCompany",
+            "getNok": "app.invoice.getNok",
             "saveOk": "app.invoice.saveOk",
             "saveOk_update": "app.invoice.saveOk_update",
             "saveOk_delete": "app.invoice.saveOk_delete",
+            "saveNok": "app.invoice.saveNok",
+            "saveNok_invalidCustomer": "app.invoice.saveNok_noCustomer",
+            "saveNok_invalidDate": "app.invoice.saveNok_invalidDate",
+            "printNok_noId": "app.invoice.printNok_noId"
+        },
+        "invoiceList": {
+            "getNok": "app.invoiceList.getNok",
+            "getNok_noCompany": "app.invoiceList.getNok_noCompany",
+            "printNok_noId": "app.invoiceList.printNok_noId"
         }
     }
 }

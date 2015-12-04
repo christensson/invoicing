@@ -33,10 +33,43 @@
             "debug": "Debug",
             "logout": "Log out"
         },
+        "company": {
+            "getNok": "Failed to get company!",
+            "uploadLogoNok_noId": "Company must be saved first!",
+            "uploadLogoNok_noFile": "No logo selected!"
+        },
+        "companyList": {
+            "getNok": "Failed to get companies!"
+        },
+        "customer": {
+            "getNok": "Failed to get customer!",
+            "saveOk": "Customer <strong>__name__</strong> with customer id __cid__ created.",
+            "saveOk_update": "Customer <strong>__name__</strong> with customer id __cid__ updated.",
+            "saveOk_delete": "Customer <strong>__name__</strong> with customer id __cid__ deleted.",
+            "saveNok": "Customer save failed!",
+            "saveNok_noCompany": "Customer save failed! No company selected.",
+            "saveNok_noName": "Customer name must be specified!"
+        },
+        "customerList": {
+            "getNok": "Failed to get customers!",
+            "getNok_noCompany": "Cannot get customers! Company not selected or doesn't exist."
+        },
         "invoice": {
+            "getCustomersNok": "Failed to get customers!",
+            "getCustomersNok_noCompany": "Cannot get customers! Company not selected or doesn't exist.",
+            "getNok": "Failed to get invoice!",
             "saveOk": "Invoice <strong>__iid__</strong> created.",
             "saveOk_update": "Invoice <strong>__iid__</strong> updated.",
-            "saveOk_delete": "Invoice <strong>__iid__</strong> deleted."
+            "saveOk_delete": "Invoice <strong>__iid__</strong> deleted.",
+            "saveNok": "Invoice save failed!",
+            "saveNok_invalidCustomer": "Customer must be selected!",
+            "saveNok_invalidDate": "Date must be set!",
+            "printNok_noId": "Cannot print unsaved invoice, please save it first!"
+        },
+        "invoiceList": {
+            "getNok": "Failed to get invoices!",
+            "getNok_noCompany": "Cannot get invoices! Company not selected or doesn't exist.",
+            "printNok_noId": "Cannot print invoice without id!"
         }
     }
 }

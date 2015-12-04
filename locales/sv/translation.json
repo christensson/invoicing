@@ -33,10 +33,43 @@
             "debug": "Debug",
             "logout": "Logga ut"
         },
+        "company": {
+            "getNok": "Misslyckades att hämta företag!",
+            "uploadLogoNok_noId": "Företaget måste sparas först!",
+            "uploadLogoNok_noFile": "Ingen logo vald!"
+        },
+        "companyList": {
+            "getNok": "Misslyckades med att hämta företag!"
+        },
+        "customer": {
+            "getNok": "Misslyckades med att hämta kund!",
+            "saveOk": "Kund <strong>__name__</strong> med kundnr __cid__ skapad.",
+            "saveOk_update": "Kund <strong>__name__</strong> med kundnr __cid__ uppdaterad.",
+            "saveOk_delete": "Kund <strong>__name__</strong> med kundnr __cid__ raderad.",
+            "saveNok": "Misslyckades att spara kund!",
+            "saveNok_noCompany": "Misslyckades att spara kund! Inget företag valt.",
+            "saveNok_noName": "Kund måste anges!"
+        },
+        "customerList": {
+            "getNok": "Misslyckades med att hämnta kunder!",
+            "getNok_noCompany": "Misslyckades med att hämta kunder! Företag ej valt eller ogiltigt."
+        },
         "invoice": {
+            "getCustomersNok": "Misslyckades med att hämta kunder!",
+            "getCustomersNok_noCompany": "Misslyckades med att hämta kunder! Företag ej valt eller ogiltigt.",
+            "getNok": "Misslyckades med att hämta faktura!",
             "saveOk": "Faktura <strong>__iid__</strong> skapad.",
             "saveOk_update": "Faktura <strong>__iid__</strong> uppdaterad.",
-            "saveOk_delete": "Invoice <strong>__iid__</strong> raderad."
+            "saveOk_delete": "Faktura <strong>__iid__</strong> raderad.",
+            "saveNok": "Misslyckades att spara fakturan!",
+            "saveNok_invalidCustomer": "Ingen kund vald!",
+            "saveNok_invalidDate": "Ingen datum angiven!",
+            "printNok_noId": "Utskriften misslyckades, fakturan ej sparad!"
+        },
+        "invoiceList": {
+            "getNok": "Misslyckades med att hämta fakturor!",
+            "getNok_noCompany": "Misslyckades med att hämta fakturor! Företag ej valt eller ogiltigt.",
+            "printNok_noId": "Utskriften misslyckades, fakturan har inget id!"
         }
     }
 }
