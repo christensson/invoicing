@@ -93,6 +93,11 @@
             "saveNok_noName": "Kund måste anges!"
         },
         "customerList": {
+            "cidCol": "Nr",
+            "nameCol": "Namn",
+            "addrCol": "Adress __nr__",
+            "phoneCol": "Telefon __nr__",
+            "newCustomerBtn": "Ny kund",
             "getNok": "Misslyckades med att hämnta kunder!",
             "getNok_noCompany": "Misslyckades med att hämta kunder! Företag ej valt eller ogiltigt."
         },

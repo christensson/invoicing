@@ -317,13 +317,13 @@
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Id</th>
-                                    <th>Name</th>
-                                    <th>Address 1</th>
-                                    <th>Address 2</th>
-                                    <th>Address 3</th>
-                                    <th>Phone 1</th>
-                                    <th>Phone 2</th>
+                                    <th>${i18n.t('app.customerList.cidCol')}</th>
+                                    <th>${i18n.t('app.customerList.nameCol')}</th>
+                                    <th>${i18n.t('app.customerList.addrCol', {nr: 1})}</th>
+                                    <th>${i18n.t('app.customerList.addrCol', {nr: 2})}</th>
+                                    <th>${i18n.t('app.customerList.addrCol', {nr: 3})}</th>
+                                    <th>${i18n.t('app.customerList.phoneCol', {nr: 1})}</th>
+                                    <th>${i18n.t('app.customerList.phoneCol', {nr: 2})}</th>
                                 </tr>
                             </thead>
                             <tbody data-bind="foreach: customerList">
@@ -350,7 +350,7 @@
                     <div class="btn-group">
                         <a href="#/page/customer_new" type="button" class="btn btn-success">
                             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                            New customer
+                            ${i18n.t('app.customerList.newCustomerBtn')}
                         </a>
                     </div>
                 </form>

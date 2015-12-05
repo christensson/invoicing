@@ -94,6 +94,11 @@
             "saveNok_noName": "Customer name must be specified!"
         },
         "customerList": {
+            "cidCol": "Nr",
+            "nameCol": "Name",
+            "addrCol": "Address __nr__",
+            "phoneCol": "Phone __nr__",
+            "newCustomerBtn": "New customer",
             "getNok": "Failed to get customers!",
             "getNok_noCompany": "Cannot get customers! Company not selected or doesn't exist."
         },
