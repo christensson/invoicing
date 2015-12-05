@@ -7,14 +7,12 @@ var SigninViewModel = function() {
     self.activateSignIn = function() {
         self.isLocalRegVisible(false);
         self.isSignInVisible(true);
-    }
+    };
     self.activateLocalReg = function() {
         self.isSignInVisible(false);
         self.isLocalRegVisible(true);
-    }
+    };
 };
-
-
 
 $(function() {
     var viewModel = new SigninViewModel();

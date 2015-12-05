@@ -59,9 +59,8 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
           self.setActiveCompanyId(settings.activeCompanyId);
           self.activeCompanyId
           .subscribe(function(newValue) {
-            console
-            .log("page.js - SettingsViewModel - Active company change detected: ID="
-                + newValue);
+            console.log("page.js - SettingsViewModel - Active company change detected: ID="
+                  + newValue);
             self.settings.setActiveCompanyId(newValue);
             self.saveSettings();
           });
@@ -69,7 +68,7 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
         }).fail(function() {
           console.log("page.js - SettingsViewModel - populate - failed");
           Notify_showSpinner(false);
-          Notify_showMsg('error', 'Failed to get settings!');
+          Notify_showMsg('error', i18n.t("app.settings.getNok"));
         });
   };
   
@@ -86,7 +85,7 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
       dataType : "json",
       success : function(data) {
         console.log("saveSettings: response: " + JSON.stringify(data));
-        Notify_showMsg('success', 'Settings saved!');
+        Notify_showMsg('success', i18n.t("app.settings.saveOk"));
       },
     });
   };
@@ -186,11 +185,10 @@ var CompanyViewModel = function() {
 
   self.updateServer = function(onCompletion) {
     if ((self._id() == undefined) && !self.isValid()) {
-      console.log("updateServer: Nothing to do (invalid entry without _id)");
+      Notify_showMsg('error', i18n.t("app.company.saveNok"));
       return;
     } else if (self.name().length == 0) {
-      Notify_showMsg('error',
-          'Company <strong>name</strong> must be specified!');
+      Notify_showMsg('error', i18n.t("app.company.saveNok", {context: "noName"}));
       self.nameError(true);
       return;
     }
@@ -204,12 +202,12 @@ var CompanyViewModel = function() {
       dataType : "json",
       success : function(data) {
         console.log("updateServer: response: " + JSON.stringify(data));
-        var opStr = "added";
+        var tContext = "";
         if (!isNew) {
-          opStr = (data.company.isValid) ? 'updated' : 'deleted';
+          tContext = (data.company.isValid) ? 'update' : 'delete';
         }
-        Notify_showMsg('success', 'Company <strong>' + data.company.name
-            + '</strong> ' + opStr + '.');
+        Notify_showMsg('success', i18n.t("app.company.saveOk",
+            {context: tContext, name: data.company.name}));
         self.uid(data.company.uid);
         self._id(data.company._id);
         self.isValid(data.company.isValid);
@@ -521,7 +519,7 @@ var CustomerViewModel = function() {
         console.log("updateServer: response: " + JSON.stringify(data));
         var tContext = "";
         if (!isNewCustomer) {
-          tContext = (data.customer.isValid) ? 'updated' : 'deleted';
+          tContext = (data.customer.isValid) ? 'update' : 'delete';
         }
         Notify_showMsg('success', i18n.t("app.customer.saveOk",
             {context: tContext, cid: ""+data.customer.cid, name: data.customer.name}));

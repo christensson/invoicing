@@ -17,7 +17,13 @@
         "regPasswordLbl": "signin.regPasswordLbl",
         "registerBtn": "signin.registerBtn",
         "lngSvBtn": "signin.lngSvBtn",
-        "lngEnBtn": "signin.lngEnBtn"
+        "lngEnBtn": "signin.lngEnBtn",
+        "loginOkMsg": "signin.loginOkMsg",
+        "loginNokMsg": "signin.loginNokMsg",
+        "logoutOkMsg": "signin.logoutOkMsg",
+        "registerOkMsg": "signin.registerOkMsg",
+        "registerNokMsg": "signin.registerNokMsg",
+        "authNokMsg": "signin.authNokMsg"
     },
     "app": {
         "pageTitle": "app.pageTitle",
@@ -33,8 +39,17 @@
             "debug": "app.navBarDebug",
             "logout": "app.navBarLogout"
         },
+        "settings": {
+            "getNok": "app.settings.getNok",
+            "saveOk": "app.settings.saveOk"
+        },
         "company": {
             "getNok": "app.company.getNok",
+            "saveOk": "app.company.saveOk",
+            "saveOk_update": "app.company.saveOk_update",
+            "saveOk_delete": "app.company.saveOk_delete",
+            "saveNok": "app.company.saveNok",
+            "saveNok_noName": "app.company.saveNok_noName",
             "uploadLogoNok_noId": "app.company.uploadLogoNok_noId",
             "uploadLogoNok_noFile": "app.company.uploadLogoNok_noFile"
         },

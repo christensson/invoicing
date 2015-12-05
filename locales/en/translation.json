@@ -17,7 +17,14 @@
         "regEmailLbl": "E-mail",
         "regPasswordLbl": "Password",
         "signinBtn": "Sign in",
-        "registerBtn": "Register user"
+        "registerBtn": "Register user",
+        "loginOkMsg": "Welcome __name__!",
+        "loginNokMsg_local": "Could not log in! Please try again.",
+        "loginNokMsg_google": "Could not log in using Google account! Please try again.",
+        "logoutOkMsg": "Successfully logged out __name__!",
+        "registerOkMsg": "Welcome __name__! You are now registed.",
+        "registerNokMsg": "Username __name__ already in use! Please try another one.",
+        "authNokMsg": "Please sign in!"
     },
     "app": {
         "pageTitle": "Invoicing",
@@ -33,8 +40,17 @@
             "debug": "Debug",
             "logout": "Log out"
         },
+        "settings": {
+            "getNok": "Failed to get settings!",
+            "saveOk": "Settings saved."
+        },
         "company": {
             "getNok": "Failed to get company!",
+            "saveOk": "Company <strong>__name__</strong> created.",
+            "saveOk_update": "Company <strong>__name__</strong> updated.",
+            "saveOk_delete": "Company <strong>__name__</strong> removed.",
+            "saveNok": "Company save failed!",
+            "saveNok_noName": "Company name must be specified!",
             "uploadLogoNok_noId": "Company must be saved first!",
             "uploadLogoNok_noFile": "No logo selected!"
         },

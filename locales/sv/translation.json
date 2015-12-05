@@ -17,7 +17,13 @@
         "regEmailLbl": "E-post",
         "regPasswordLbl": "Lösenord",
         "signinBtn": "Logga in",
-        "registerBtn": "Registrera användare"
+        "registerBtn": "Registrera användare",
+        "loginOkMsg": "Välkommen __name__!",
+        "loginNokMsg": "Inloggning misslyckades! Var god försök igen.",
+        "logoutOkMsg": "Du är nu utloggad __name__!",
+        "registerOkMsg": "Välkommen __name__! Du är nu registrerad.",
+        "registerNokMsg": "Användarnamnet __name__ är upptaget! Var god ange ett annat.",
+        "authNokMsg": "Var god logga in!"
     },
     "app": {
         "pageTitle": "Fakturering",
@@ -33,8 +39,17 @@
             "debug": "Debug",
             "logout": "Logga ut"
         },
+        "settings": {
+            "getNok": "Misslyckades med att hämta inställningar!",
+            "saveOk": "Inställningar sparade."
+        },
         "company": {
             "getNok": "Misslyckades att hämta företag!",
+            "saveOk": "Företag <strong>__name__</strong> skapat.",
+            "saveOk_update": "Företag <strong>__name__</strong> uppdaterat.",
+            "saveOk_delete": "Företag <strong>__name__</strong> raderat.",
+            "saveNok": "Misslyckades att spara företag!",
+            "saveNok_noName": "Företagsnamn måste anges!",
             "uploadLogoNok_noId": "Företaget måste sparas först!",
             "uploadLogoNok_noFile": "Ingen logo vald!"
         },

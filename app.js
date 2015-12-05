@@ -138,13 +138,12 @@ passport.use(
               function(user) {
                 if (user) {
                   console.log("LOGGED IN AS: " + user.info.name);
-                  req.session.success = 'You are successfully logged in '
-                    + user.info.name + '!';
+                  req.session.success = i18n.t("signin.loginOkMsg", {name: user.info.name});
                   done(null, user);
                 }
                 if (!user) {
                   console.log("COULD NOT LOG IN");
-                  req.session.error = 'Could not log user in. Please try again.';
+                  req.session.error = i18n.t("signin.loginNokMsg", {context: "local"});
                   done(null, user);
                 }
               }).fail(function(err) {
@@ -169,12 +168,11 @@ passport.use(
               function(user) {
                 if (user) {
                   console.log("REGISTERED: " + user.info.name);
-                  req.session.success = 'You are successfully registered and logged in '
-                    + user.info.name + '!';
+                  req.session.success = i18n.t("signin.registerOkMsg", {name: user.info.name});
                   done(null, user);
                 } else {
                   console.log("COULD NOT REGISTER");
-                  req.session.error = 'That username is already in use, please try a different one.';
+                  req.session.error = i18n.t("signin.registerNokMsg", {name: username});
                   done(null, user);
                 }
               }).fail(function(err) {
@@ -204,11 +202,9 @@ passport.use(new GoogleStrategy(
         funct.findOrCreate("googleId", userData).then(function(result) {
           if (result.user) {
             if (result.isNew) {
-              result.user.greetingMsg = 'You are successfully registered and logged in '
-                + result.user.info.name + '!';
+              result.user.greetingMsg = i18n.t("signin.registerOkMsg", {name: result.user.info.name});
             } else {
-              result.user.greetingMsg = 'You are successfully logged in '
-                  + result.user.info.name + '!';
+              result.user.greetingMsg = i18n.t("signin.loginOkMsg", {name: result.user.info.name});
             }
             return done(null, result.user);
           } else {
@@ -234,7 +230,7 @@ function ensureAuthenticated(req, res, next) {
       return next();
     }
     console.log("ensureAuthenticated: Not authenticated!");
-    req.session.error = 'Please sign in!';
+    req.session.error = i18n.t("signin.authNokMsg");
     res.redirect('/signin');
   } else {
     console.log(
@@ -546,7 +542,7 @@ app.get('/logout', ensureAuthenticated, function(req, res) {
   var name = req.user.info.name;
   console.log("LOGGIN OUT " + req.user.info.name);
   req.logout();
-  req.session.notice = "You have successfully been logged out " + name + "!";
+  req.session.notice = i18n.t("signin.logoutOkMsg", {name: name});
   res.redirect('/signin');
 });
 
@@ -586,7 +582,7 @@ app.get('/auth/google/callback',
     },
     function(req, res) {
       console.log("Login using google account failed! req=" + JSON.stringify(req));
-      req.session.success = 'Login using Google account failed!';
+      req.session.success = i18n.t("signin.loginNokMsg", {context: "google"});
       // Failed authentication, redirect to login.
       res.redirect(401, '/signin');
     });
