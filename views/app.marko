@@ -106,10 +106,10 @@
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Company Name</th>
-                                    <th>Address 1</th>
-                                    <th>Address 2</th>
-                                    <th>Address 3</th>
+                                    <th>${i18n.t('app.companyList.nameCol')}</th>
+                                    <th>${i18n.t('app.companyList.addrCol', {nr: 1})}</th>
+                                    <th>${i18n.t('app.companyList.addrCol', {nr: 2})}</th>
+                                    <th>${i18n.t('app.companyList.addrCol', {nr: 3})}</th>
                                 </tr>
                             </thead>
                             <tbody data-bind="foreach: companyList">
@@ -139,7 +139,7 @@
                     <div class="btn-group">
                       <a href="#/page/company_new" type="button" class="btn btn-success">
                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                        New company
+                        ${i18n.t('app.companyList.newCompanyBtn')}
                       </a>
                     </div>
                 </form>
@@ -149,18 +149,18 @@
                 <div class="form-horizontal">
                   <div class="panel panel-default">
                     <div class="panel-heading">
-                      <h3 class="panel-title">General info</h3>
+                      <h3 class="panel-title">${i18n.t('app.company.generalPaneHeader')}</h3>
                     </div>
                     <div class="panel-body">
                       <div class="form-group">
-                        <label for="name" class="col-sm-2 control-label">Company name</label>
+                        <label for="name" class="col-sm-2 control-label">${i18n.t('app.company.companyNameLbl')}</label>
                         <div class="col-sm-4">
                           <input type="text" id="name" class="form-control" data-bind="value: data.name, css: data.hasErrorCss"></input>
                         </div>
                       </div>
-                      <div for="idx in [1,2,3]">
+                      <div for="idx from 1 to 3">
                         <div class="form-group">
-                          <label for="addr${idx}" class="col-sm-2 control-label">Address ${idx}</label>
+                          <label for="addr${idx}" class="col-sm-2 control-label">${i18n.t('app.company.addrLbl', {nr: "${idx}"})}</label>
                           <div class="col-sm-4">
                             <input type="text" id="addr${idx}" class="form-control" data-bind="value: data.addr${idx}"></input>
                           </div>
@@ -170,18 +170,18 @@
                   </div>
                   <div class="panel panel-default">
                     <div class="panel-heading">
-                      <h3 class="panel-title">Contact info</h3>
+                      <h3 class="panel-title">${i18n.t('app.company.contactPaneHeader')}</h3>
                     </div>
                     <div class="panel-body">
                       <div for="idx in [1,2,3]">
                         <div class="form-group">
-                          <label for="contact${idx}Cap" class="col-sm-2 control-label">Caption ${idx}</label>
+                          <label for="contact${idx}Cap" class="col-sm-2 control-label">${i18n.t('app.company.contactCaptionHeader', {nr: "${idx}"})}</label>
                           <div class="col-sm-4">
                             <input type="text" id="contact${idx}Cap" class="form-control" data-bind="value: data.contact${idx}Caption"></input>
                           </div>
                         </div>
                         <div class="form-group">
-                          <label for="contact${idx}" class="col-sm-2 control-label">Info ${idx}</label>
+                          <label for="contact${idx}" class="col-sm-2 control-label">${i18n.t('app.company.contactInfoHeader', {nr: "${idx}"})}</label>
                           <div class="col-sm-4">
                             <input type="text" id="contact${idx}" class="form-control" data-bind="value: data.contact${idx}"></input>
                           </div>
@@ -191,25 +191,25 @@
                   </div>
                   <div class="panel panel-default">
                     <div class="panel-heading">
-                      <h3 class="panel-title">Payment options</h3>
+                      <h3 class="panel-title">${i18n.t('app.company.paymentOptPaneHeader')}</h3>
                     </div>
                     <div class="panel-body">
                       <div for="idx in [1,2]">
                         <div class="form-group">
-                          <label for="pay${idx}Cap" class="col-sm-2 control-label">Caption ${idx}</label>
+                          <label for="pay${idx}Cap" class="col-sm-2 control-label">${i18n.t('app.company.paymentOptCaptionHeader', {nr: "${idx}"})}</label>
                           <div class="col-sm-4">
                             <input type="text" id="pay${idx}Cap" class="form-control" data-bind="value: data.payment${idx}Caption"></input>
                           </div>
                         </div>
                         <div class="form-group">
-                          <label for="pay${idx}" class="col-sm-2 control-label">Info ${idx}</label>
+                          <label for="pay${idx}" class="col-sm-2 control-label">${i18n.t('app.company.paymentOptInfoHeader', {nr: "${idx}"})}</label>
                           <div class="col-sm-4">
                             <input type="text" id="pay${idx}" class="form-control" data-bind="value: data.payment${idx}"></input>
                           </div>
                         </div>
                       </div>
                       <div class="form-group">
-                        <label for="payCustomText" class="col-sm-2 control-label">Custom text</label>
+                        <label for="payCustomText" class="col-sm-2 control-label">${i18n.t('app.company.paymentOptCustomTextHeader')}</label>
                         <div class="col-sm-4">
                           <input type="text" id="payCustomText" class="form-control" data-bind="value: data.paymentCustomText"></input>
                         </div>
@@ -218,17 +218,17 @@
                   </div>
                   <div class="panel panel-default">
                     <div class="panel-heading">
-                      <h3 class="panel-title">VAT info</h3>
+                      <h3 class="panel-title">${i18n.t('app.company.vatInfoPaneHeader')}</h3>
                     </div>
                     <div class="panel-body">
                       <div class="form-group">
-                        <label for="vatNr" class="col-sm-2 control-label">VAT nr</label>
+                        <label for="vatNr" class="col-sm-2 control-label">${i18n.t('app.company.vatInfoVatNrLbl')}</label>
                         <div class="col-sm-4">
                           <input type="text" id="vatNr" class="form-control" data-bind="value: data.vatNr"></input>
                         </div>
                       </div>
                       <div class="form-group">
-                        <label for="vatNrCustomText" class="col-sm-2 control-label">Custom text</label>
+                        <label for="vatNrCustomText" class="col-sm-2 control-label">${i18n.t('app.company.vatInfoCustomTextLbl')}</label>
                         <div class="col-sm-4">
                           <input type="text" id="vatNrCustomText" class="form-control" data-bind="value: data.vatNrCustomText"></input>
                         </div>
@@ -237,32 +237,31 @@
                   </div>
                   <div class="panel panel-default">
                     <div class="panel-heading">
-                      <h3 class="panel-title">Custom text fields</h3>
+                      <h3 class="panel-title">${i18n.t('app.company.customTextFieldsPaneHeader')}</h3>
                     </div>
                     <div class="panel-body">
                       <div class="form-group">
-                        <label for="reverseChargeText" class="col-sm-2 control-label">Reverse charge text</label>
+                        <label for="reverseChargeText" class="col-sm-2 control-label">${i18n.t('app.company.customTextFieldsReverseChargeTextLbl')}</label>
                         <div class="col-sm-4">
                           <textarea rows="4" id="reverseChargeText" class="form-control" data-bind="value: data.reverseChargeText" aria-describedby="reverseChargeTextHelp"></textarea>
-                          <span id="reverseChargeTextHelp" class="help-block">Special string %c.vatNr% is replaced by customer VAT-nr.</span>
+                          <span id="reverseChargeTextHelp" class="help-block">${i18n.t('app.company.customTextFieldsReverseChargeHelpText')}</span>
                         </div>
-                        <span id="helpBlock" class="help-block">Special string %c.vatNr% is replaced by customer VAT-nr.</span>
                       </div>
                     </div>
                   </div>
                   <div class="panel panel-default">
                     <div class="panel-heading">
-                      <h3 class="panel-title">Counters</h3>
+                      <h3 class="panel-title">${i18n.t('app.company.countersPaneHeader')}</h3>
                     </div>
                     <div class="panel-body">
                       <div class="form-group">
-                        <label for="cid" class="col-sm-2 control-label">Next customer id</label>
+                        <label for="cid" class="col-sm-2 control-label">${i18n.t('app.company.countersNextCustomerNrLbl')}</label>
                         <div class="col-sm-4">
                           <input type="number" id="cid" class="form-control" data-bind="value: data.nextCid, disable: currentView() != 'company_new'"></input>
                         </div>
                       </div>
                       <div class="form-group">
-                        <label for="iid" class="col-sm-2 control-label">Next invoice id</label>
+                        <label for="iid" class="col-sm-2 control-label">${i18n.t('app.company.countersNextInvoiceNrLbl')}</label>
                         <div class="col-sm-4">
                           <input type="number" id="iid" class="form-control" data-bind="value: data.nextIid, disable: currentView() != 'company_new'"></input>
                         </div>
@@ -271,7 +270,7 @@
                   </div>
                   <div class="panel panel-default">
                     <div class="panel-heading">
-                      <h3 class="panel-title">Logo</h3>
+                      <h3 class="panel-title">${i18n.t('app.company.logoPaneHeader')}</h3>
                     </div>
                     <div class="panel-body">
                       <div class="row">
@@ -283,11 +282,11 @@
                               data-bind="submit: uploadLogo">
                           <div class="col-sm-6">
                             <div class="input-group">
-                              <input type="file" name="logo" id="companyLogoInput" class="form-control" placeholder="Select logo...">
+                              <input type="file" name="logo" id="companyLogoInput" class="form-control" placeholder="${i18n.t('app.company.logoSelectPlaceholder')}">
                               <span class="input-group-btn">
                                 <button class="btn btn-default" type="submit">
                                   <span class="glyphicon glyphicon-upload" aria-hidden="true"></span>
-                                  Upload
+                                  ${i18n.t('app.company.logoUploadBtn')}
                                 </button>
                               </span>
                             </div>
@@ -296,7 +295,7 @@
                       </div>
                       <div class="row">
                         <div class="col-sm-6">
-                          <img alt="Company Logo" id="companyLogoImg" data-bind="attr: { src: logoPath }" class="img-thumbnail"/>
+                          <img alt="${i18n.t('app.company.logoImgAltText')}" id="companyLogoImg" data-bind="attr: { src: logoPath }" class="img-thumbnail"/>
                         </div>
                       </div>
                     </div>
@@ -305,7 +304,7 @@
                   <div class="btn-group">
                     <button type="button" class="btn btn-success" data-bind="click: saveCompany">
                       <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
-                      Save
+                      ${i18n.t('app.company.companySaveBtn')}
                     </button>
                   </div>
                 </div>

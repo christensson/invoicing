@@ -45,6 +45,30 @@
             "saveOk": "Settings saved."
         },
         "company": {
+            "generalPaneHeader": "General info",
+            "companyNameLbl": "Company name",
+            "addrLbl": "Address __nr__",
+            "contactPaneHeader": "Contact info",
+            "contactCaptionHeader": "Caption __nr__",
+            "contactInfoHeader": "Info __nr__",
+            "paymentOptPaneHeader": "Payment options",
+            "paymentOptCaptionHeader": "Caption __nr__",
+            "paymentOptInfoHeader": "Info __nr__",
+            "paymentOptCustomTextHeader": "Custom text",
+            "vatInfoPaneHeader": "VAT info",
+            "vatInfoVatNrLbl": "VAT nr",
+            "vatInfoCustomTextLbl": "Custom text",
+            "customTextFieldsPaneHeader": "Custom text fields",
+            "customTextFieldsReverseChargeTextLbl": "Reverse charge text",
+            "customTextFieldsReverseChargeHelpText": "Special string %c.vatNr% is replaced by customer VAT-nr.",
+            "countersPaneHeader": "Counters",
+            "countersNextCustomerNrLbl": "Next customer nr",
+            "countersNextInvoiceNrLbl": "Next invoice nr",
+            "logoPaneHeader": "Logo",
+            "logoSelectPlaceholder": "Select logo...",
+            "logoUploadBtn": "Upload",
+            "logoImgAltText": "Company Logo",
+            "companySaveBtn": "Save",
             "getNok": "Failed to get company!",
             "saveOk": "Company <strong>__name__</strong> created.",
             "saveOk_update": "Company <strong>__name__</strong> updated.",
@@ -55,6 +79,9 @@
             "uploadLogoNok_noFile": "No logo selected!"
         },
         "companyList": {
+            "nameCol": "Company Name",
+            "addrCol": "Address __nr__",
+            "newCompanyBtn": "New company",
             "getNok": "Failed to get companies!"
         },
         "customer": {

@@ -44,6 +44,30 @@
             "saveOk": "Inställningar sparade."
         },
         "company": {
+            "generalPaneHeader": "Generell info",
+            "companyNameLbl": "Företagsnamn",
+            "addrLbl": "Adress __nr__",
+            "contactPaneHeader": "Kontaktinfo",
+            "contactCaptionHeader": "Rubrik __nr__",
+            "contactInfoHeader": "Info __nr__",
+            "paymentOptPaneHeader": "Betalningsalternativ",
+            "paymentOptCaptionHeader": "Rubrik __nr__",
+            "paymentOptInfoHeader": "Info __nr__",
+            "paymentOptCustomTextHeader": "Valfritt textfält",
+            "vatInfoPaneHeader": "Momsinfo",
+            "vatInfoVatNrLbl": "Momsregnr",
+            "vatInfoCustomTextLbl": "Valfritt textfält",
+            "customTextFieldsPaneHeader": "Valfria textfält",
+            "customTextFieldsReverseChargeTextLbl": "Omvänd momsskyldighet text",
+            "customTextFieldsReverseChargeHelpText": "Strängen %c.vatNr% ersätts med kundens momsregnr.",
+            "countersPaneHeader": "Räknare",
+            "countersNextCustomerNrLbl": "Nästa kundnr",
+            "countersNextInvoiceNrLbl": "Nästa fakturanr",
+            "logoPaneHeader": "Logotyp",
+            "logoSelectPlaceholder": "Välj logotyp...",
+            "logoUploadBtn": "Ladda upp",
+            "logoImgAltText": "Företagslogotyp",
+            "companySaveBtn": "Spara",
             "getNok": "Misslyckades att hämta företag!",
             "saveOk": "Företag <strong>__name__</strong> skapat.",
             "saveOk_update": "Företag <strong>__name__</strong> uppdaterat.",
@@ -54,6 +78,9 @@
             "uploadLogoNok_noFile": "Ingen logo vald!"
         },
         "companyList": {
+            "nameCol": "Företagsnamn",
+            "addrCol": "Adress __nr__",
+            "newCompanyBtn": "Nytt företag",
             "getNok": "Misslyckades med att hämta företag!"
         },
         "customer": {

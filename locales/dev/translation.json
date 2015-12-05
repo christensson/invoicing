@@ -44,6 +44,12 @@
             "saveOk": "app.settings.saveOk"
         },
         "company": {
+            "generalPaneHeader": "app.company.generalPaneHeader",
+            "companyNameLbl": "app.company.companyNameLbl",
+            "addrLbl": "app.company.addrLbl",
+            "contactPaneHeader": "app.company.contactPaneHeader",
+            "contactCaptionHeader": "app.company.contactCaptionHeader",
+            "contactInfoHeader": "app.company.contactInfoHeader",
             "getNok": "app.company.getNok",
             "saveOk": "app.company.saveOk",
             "saveOk_update": "app.company.saveOk_update",
@@ -54,6 +60,9 @@
             "uploadLogoNok_noFile": "app.company.uploadLogoNok_noFile"
         },
         "companyList": {
+            "nameCol": "app.companyList.nameCol",
+            "addrCol": "app.companyList.addrCol __nr__",
+            "newCompanyBtn": "app.companyList.newCompanyBtn",
             "getNok": "app.companyList.getNok"
         },
         "customer": {
