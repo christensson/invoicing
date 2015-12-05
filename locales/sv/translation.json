@@ -84,6 +84,17 @@
             "getNok": "Misslyckades med att hämta företag!"
         },
         "customer": {
+            "generalInfoPaneHeader": "Generell info",
+            "customerNrLbl": "Kundnr",
+            "nameLbl": "Kundnamn",
+            "addrLbl": "Adress __nr__",
+            "vatNrLbl": "Momsregnr",
+            "contactInfoPaneHeader": "Kontaktinfo",
+            "phoneLbl": "Telefon __nr__",
+            "emailLbl": "E-post",
+            "optionPaneHeader": "Alternativ",
+            "optionUseReverseChargeLbl": "Använd omvänd momsskylldighet",
+            "saveBtn": "Spara",
             "getNok": "Misslyckades med att hämta kund!",
             "saveOk": "Kund <strong>__name__</strong> med kundnr __cid__ skapad.",
             "saveOk_update": "Kund <strong>__name__</strong> med kundnr __cid__ uppdaterad.",

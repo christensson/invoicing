@@ -85,6 +85,17 @@
             "getNok": "Failed to get companies!"
         },
         "customer": {
+            "generalInfoPaneHeader": "General info",
+            "customerNrLbl": "Customer nr",
+            "nameLbl": "Customer name",
+            "addrLbl": "Address __nr__",
+            "vatNrLbl": "VAT-nr",
+            "contactInfoPaneHeader": "Contact info",
+            "phoneLbl": "Phone __nr__",
+            "emailLbl": "E-mail",
+            "optionPaneHeader": "Options",
+            "optionUseReverseChargeLbl": "Use reverse charge",
+            "saveBtn": "Save",
             "getNok": "Failed to get customer!",
             "saveOk": "Customer <strong>__name__</strong> with customer id __cid__ created.",
             "saveOk_update": "Customer <strong>__name__</strong> with customer id __cid__ updated.",
