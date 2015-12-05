@@ -454,7 +454,7 @@
                                 <tr>
                                     <th></th>
                                     <th>
-                                      Id
+                                       ${i18n.t('app.invoiceList.colNr')}
                                       <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('iid')">
                                           <span data-bind="if: invoiceListSort() !== 'iidAsc'">
                                               <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
@@ -465,7 +465,7 @@
                                       </button>
                                     </th>
                                     <th>
-                                      Date
+                                      ${i18n.t('app.invoiceList.colDate')}
                                       <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('date')">
                                           <span data-bind="if: invoiceListSort() !== 'dateAsc'">
                                               <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
@@ -476,7 +476,7 @@
                                       </button>
                                     </th>
                                     <th>
-                                      Customer Id
+                                      ${i18n.t('app.invoiceList.colCustomerNr')}
                                       <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('cid')">
                                           <span data-bind="if: invoiceListSort() !== 'cidAsc'">
                                               <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
@@ -487,7 +487,7 @@
                                       </button>
                                     </th>
                                     <th>
-                                      Customer
+                                      ${i18n.t('app.invoiceList.colCustomerName')}
                                       <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('customer')">
                                           <span data-bind="if: invoiceListSort() !== 'customerAsc'">
                                               <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
@@ -498,7 +498,7 @@
                                       </button>
                                     </th>
                                     <th>
-                                      Total Excl. VAT
+                                      ${i18n.t('app.invoiceList.colTotalExclVat')}
                                       <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('totalExclVat')">
                                           <span data-bind="if: invoiceListSort() !== 'totalExclVatAsc'">
                                               <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
@@ -509,7 +509,7 @@
                                       </button>
                                     </th>
                                     <th>
-                                      Paid
+                                      ${i18n.t('app.invoiceList.colIsPaid')}
                                       <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('paid')">
                                           <span data-bind="if: invoiceListSort() !== 'paidAsc'">
                                               <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
@@ -528,7 +528,7 @@
                                       </button>
                                     </th>
                                     <th>
-                                      Credit
+                                      ${i18n.t('app.invoiceList.colIsCredit')}
                                       <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('credit')">
                                           <span data-bind="if: invoiceListSort() !== 'creditAsc'">
                                               <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
@@ -595,7 +595,7 @@
                     <div class="btn-group">
                         <a href="#/page/invoice_new" type="button" class="btn btn-success">
                             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                            New invoice
+                            ${i18n.t('app.invoiceList.newInvoiceBtn')}
                         </a>
                     </div>
                 </form>

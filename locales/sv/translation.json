@@ -125,6 +125,14 @@
             "printNok_noId": "Utskriften misslyckades, fakturan ej sparad!"
         },
         "invoiceList": {
+            "colNr": "Nr",
+            "colDate": "Datum",
+            "colCustomerNr": "Kundnr",
+            "colCustomerName": "Kund",
+            "colTotalExclVat": "Totalt Exkl. Moms",
+            "colIsPaid": "Betald",
+            "colIsCredit": "Kredit",
+            "newInvoiceBtn": "Ny faktura",
             "getNok": "Misslyckades med att hämta fakturor!",
             "getNok_noCompany": "Misslyckades med att hämta fakturor! Företag ej valt eller ogiltigt.",
             "printNok_noId": "Utskriften misslyckades, fakturan har inget id!"

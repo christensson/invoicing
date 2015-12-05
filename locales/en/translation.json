@@ -126,6 +126,14 @@
             "printNok_noId": "Cannot print unsaved invoice, please save it first!"
         },
         "invoiceList": {
+            "colNr": "Nr",
+            "colDate": "Date",
+            "colCustomerNr": "Customer nr",
+            "colCustomerName": "Customer",
+            "colTotalExclVat": "Total Excl. VAT",
+            "colIsPaid": "Paid",
+            "colIsCredit": "Credit",
+            "newInvoiceBtn": "New invoice",
             "getNok": "Failed to get invoices!",
             "getNok_noCompany": "Cannot get invoices! Company not selected or doesn't exist.",
             "printNok_noId": "Cannot print invoice without id!"
