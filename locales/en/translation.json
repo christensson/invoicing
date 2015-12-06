@@ -41,6 +41,10 @@
             "logout": "Log out"
         },
         "settings": {
+            "pageHeader": "Settings",
+            "licenseLbl": "License",
+            "defNumDaysUntilPayLbl": "Number of days until payment",
+            "saveSettingsBtn": "Save",
             "getNok": "Failed to get settings!",
             "saveOk": "Settings saved."
         },
@@ -114,6 +118,35 @@
             "getNok_noCompany": "Cannot get customers! Company not selected or doesn't exist."
         },
         "invoice": {
+            "mainPanelHeader_newInvoice" : "New Invoice",
+            "mainPanelHeader_newCreditInvoice" : "New Credit Invoice",
+            "mainPanelHeader_invoice" : "Invoice",
+            "mainPanelHeader_creditInvoice" : "Credit Invoice",
+            "customerLbl": "Customer",
+            "customerOptCap": "Choose...",
+            "yourRefLbl": "Your reference",
+            "ourRefLbl": "Our reference",
+            "dateLbl": "Date",
+            "daysUntilPayLbl": "Days until payment",
+            "projIdLbl": "Project id",
+            "currencyLbl": "Currency",
+            "customerDetailsPaneHeader": "Customer details",
+            "customerDetailsCustomerNrLbl": "Customer nr:",
+            "detailsPaneHeader": "Details",
+            "detailsDescCol": "Description",
+            "detailsPriceCol": "Price",
+            "detailsCountCol": "Count",
+            "detailsDiscountCol": "Discount",
+            "detailsVatCol": "VAT",
+            "detailsTotalCol": "Total",
+            "totalExclVatLbl": "Total excluding VAT:",
+            "totalInclVatLbl": "Total including VAT:",
+            "optIsLockedLbl": "Locked",
+            "optIsPaidLbl": "Paid",
+            "optIsCreditLbl": "Credit invoice",
+            "saveInvoiceBtn": "Save",
+            "printInvoiceBtn": "Print",
+            "copyInvoiceBtn": "Copy",
             "getCustomersNok": "Failed to get customers!",
             "getCustomersNok_noCompany": "Cannot get customers! Company not selected or doesn't exist.",
             "getNok": "Failed to get invoice!",
@@ -137,6 +170,15 @@
             "getNok": "Failed to get invoices!",
             "getNok_noCompany": "Cannot get invoices! Company not selected or doesn't exist.",
             "printNok_noId": "Cannot print invoice without id!"
+        },
+        "debugAndTest": {
+            "pageHeader": "Debug and Test",
+            "showSpinnerBtn": "Show spinner",
+            "hideSpinnerBtn": "Hide spinner",
+            "showInfoMsgBtn": "Show info",
+            "showSuccessMsgBtn": "Show success",
+            "showWarningMsgBtn": "Show warning",
+            "showErrorMsgBtn": "Show error"
         }
     }
 }

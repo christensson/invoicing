@@ -40,6 +40,10 @@
             "logout": "Logga ut"
         },
         "settings": {
+            "pageHeader": "Inställningar",
+            "licenseLbl": "Licens",
+            "defNumDaysUntilPayLbl": "Betalningsvillkor (dagar)",
+            "saveSettingsBtn": "Spara",
             "getNok": "Misslyckades med att hämta inställningar!",
             "saveOk": "Inställningar sparade."
         },
@@ -113,6 +117,35 @@
             "getNok_noCompany": "Misslyckades med att hämta kunder! Företag ej valt eller ogiltigt."
         },
         "invoice": {
+            "mainPanelHeader_newInvoice" : "Ny Faktura",
+            "mainPanelHeader_newCreditInvoice" : "Ny Kreditfaktura",
+            "mainPanelHeader_invoice" : "Faktura",
+            "mainPanelHeader_creditInvoice" : "Kreditfaktura",
+            "customerLbl": "Kund",
+            "customerOptCap": "Välj...",
+            "yourRefLbl": "Er referens",
+            "ourRefLbl": "Vår referens",
+            "dateLbl": "Fakturadatum",
+            "daysUntilPayLbl": "Betalningsvillkor (dagar)",
+            "projIdLbl": "Projektid",
+            "currencyLbl": "Valuta",
+            "customerDetailsPaneHeader": "Kunduppgifter",
+            "customerDetailsCustomerNrLbl": "Kundnr:",
+            "detailsPaneHeader": "Fakturadetaljer",
+            "detailsDescCol": "Beskrivning",
+            "detailsPriceCol": "Pris",
+            "detailsCountCol": "Antal",
+            "detailsDiscountCol": "Rabatt",
+            "detailsVatCol": "Moms",
+            "detailsTotalCol": "Summa",
+            "totalExclVatLbl": "Summa exklusive moms:",
+            "totalInclVatLbl": "Summa inklusive moms:",
+            "optIsLockedLbl": "Låst",
+            "optIsPaidLbl": "Betald",
+            "optIsCreditLbl": "Kreditfaktura",
+            "saveInvoiceBtn": "Spara",
+            "printInvoiceBtn": "Skriv ut",
+            "copyInvoiceBtn": "Kopiera",
             "getCustomersNok": "Misslyckades med att hämta kunder!",
             "getCustomersNok_noCompany": "Misslyckades med att hämta kunder! Företag ej valt eller ogiltigt.",
             "getNok": "Misslyckades med att hämta faktura!",
@@ -136,6 +169,15 @@
             "getNok": "Misslyckades med att hämta fakturor!",
             "getNok_noCompany": "Misslyckades med att hämta fakturor! Företag ej valt eller ogiltigt.",
             "printNok_noId": "Utskriften misslyckades, fakturan har inget id!"
+        },
+        "debugAndTest": {
+            "pageHeader": "Debug och Test",
+            "showSpinnerBtn": "Visa spinner",
+            "hideSpinnerBtn": "Dölj spinner",
+            "showInfoMsgBtn": "Visa infomeddelande",
+            "showSuccessMsgBtn": "Visa succeemeddelande",
+            "showWarningMsgBtn": "Visa varningsmeddelande",
+            "showErrorMsgBtn": "Visa felmeddelande"
         }
     }
 }

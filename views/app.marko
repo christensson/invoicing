@@ -606,11 +606,17 @@
                     <div class="col-md-8 panel panel-default">
                         <div class="panel-heading">
                           <h3 class="panel-title">
-                            <span data-bind="ifnot: data.iid() === undefined">
-                              <span data-bind="if: data.isCredit">Credit</span> Invoice #<span data-bind="text: data.iid"></span>
+                            <span data-bind="if: data.iid() === undefined && !data.isCredit()">
+                              ${i18n.t('app.invoice.mainPanelHeader', {context: 'newInvoice'})}
                             </span>
-                            <span data-bind="if: data.iid() === undefined">
-                              New <span data-bind="if: data.isCredit">Credit</span> Invoice
+                            <span data-bind="if: data.iid() === undefined && data.isCredit()">
+                              ${i18n.t('app.invoice.mainPanelHeader', {context: 'newCreditInvoice'})}
+                            </span>
+                            <span data-bind="if: data.iid() != undefined && !data.isCredit()">
+                              ${i18n.t('app.invoice.mainPanelHeader', {context: 'invoice'})} #<span data-bind="text: data.iid()"></span>
+                            </span>
+                            <span data-bind="if: data.iid() != undefined && data.isCredit()">
+                              ${i18n.t('app.invoice.mainPanelHeader', {context: 'creditInvoice'})} #<span data-bind="text: data.iid()"></span>
                             </span>
                             <span data-bind="if: data.isLocked">
                                 <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
@@ -621,19 +627,16 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="input-group">
-                                        <label for="customerId" class="control-label">Customer</label>
+                                        <label for="customerId" class="control-label">${i18n.t('app.invoice.customerLbl')}</label>
                                         <select class="form-control" id="customerId"
                                           data-bind="options: customerList, value: selectedCustomer, disable: data.isLocked,
-                                                    optionsCaption: 'Choose...'">
+                                                    optionsCaption: '${i18n.t('app.invoice.customerOptCap')}'">
                                         </select>
-                                        <!--
-                                        <input type="text" class="form-control" id="customerId" data-bind="typeahead: customerList, disable: data.isLocked"></input>
-                                        -->
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="input-group">
-                                        <label for="yourReference" class="control-label">Your reference</label>
+                                        <label for="yourReference" class="control-label">${i18n.t('app.invoice.yourRefLbl')}</label>
                                         <input type="text" class="form-control" id="yourReference" data-bind="value: data.yourRef, disable: data.isLocked"></input>
                                     </div>
                                 </div>
@@ -641,13 +644,13 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="input-group">
-                                        <label for="date" class="control-label">Date</label>
+                                        <label for="date" class="control-label">${i18n.t('app.invoice.dateLbl')}</label>
                                         <input type="date" class="form-control" id="date" data-bind="value: data.date, disable: data.isLocked"></input>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="input-group">
-                                        <label for="ourReference" class="control-label">Our reference</label>
+                                        <label for="ourReference" class="control-label">${i18n.t('app.invoice.ourRefLbl')}</label>
                                         <input type="text" class="form-control" id="ourReference" data-bind="value: data.ourRef, disable: data.isLocked"></input>
                                     </div>
                                 </div>
@@ -655,13 +658,13 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="input-group">
-                                        <label for="daysUntilPayment" class="control-label">Days until payment</label>
+                                        <label for="daysUntilPayment" class="control-label">${i18n.t('app.invoice.daysUntilPayLbl')}</label>
                                         <input type="number" class="form-control" id="daysUntilPayment" data-bind="value: data.daysUntilPayment, disable: data.isLocked"></input>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="input-group">
-                                        <label for="projectId" class="control-label">Project id</label>
+                                        <label for="projectId" class="control-label">${i18n.t('app.invoice.projIdLbl')}</label>
                                         <input type="text" class="form-control" id="projectId" data-bind="value: data.projId, disable: data.isLocked"></input>
                                     </div>
                                 </div>
@@ -669,7 +672,7 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="input-group">
-                                        <label for="currencyInput" class="control-label">Currency</label>
+                                        <label for="currencyInput" class="control-label">${i18n.t('app.invoice.currencyLbl')}</label>
                                         <select class="form-control" id="currencyInput"
                                           data-bind="options: currencyList, value: selectedCurrency, disable: data.isLocked">
                                         </select>
@@ -679,12 +682,12 @@
                         </div>
                     </div>
                     <div class="col-md-4 panel panel-default">
-                        <div class="panel-heading"><h3 class="panel-title">Customer details</h3></div>
+                        <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.invoice.customerDetailsPaneHeader')}</h3></div>
                         <div class="panel-body">
                             <form class="form-horizontal">
                                 <div>
                                     <p class="form-control-static">
-                                        Customer Id:
+                                        ${i18n.t('app.invoice.customerDetailsCustomerNrLbl')}
                                         <span data-bind="text: data.customer().cid"></span>
                                     </p>
                                 </div>
@@ -703,7 +706,7 @@
 
                 <div class="row">
                     <div class="col-md-12 panel panel-default">
-                        <div class="panel-heading"><h3 class="panel-title">Details (<span data-bind="text: data.numInvoiceItems"></span>)</h3></div>
+                        <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.invoice.detailsPaneHeader')} (<span data-bind="text: data.numInvoiceItems"></span>)</h3></div>
                         <table class="table table-striped table-condensed">
                             <colgroup>
                               <col class="col-md-1">
@@ -717,12 +720,12 @@
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Description</th>
-                                    <th>Price</th>
-                                    <th>Count</th>
-                                    <th>Discount</th>
-                                    <th>VAT</th>
-                                    <th>Total</th>
+                                    <th>${i18n.t('app.invoice.detailsDescCol')}</th>
+                                    <th>${i18n.t('app.invoice.detailsPriceCol')}</th>
+                                    <th>${i18n.t('app.invoice.detailsCountCol')}</th>
+                                    <th>${i18n.t('app.invoice.detailsDiscountCol')}</th>
+                                    <th>${i18n.t('app.invoice.detailsVatCol')}</th>
+                                    <th>${i18n.t('app.invoice.detailsTotalCol')}</th>
                                 </tr>
                             </thead>
                             <tbody data-bind="foreach: data.invoiceItems">
@@ -751,8 +754,8 @@
                                 <td></td>
                                 <td colspan="2">
                                     <p class="form-control-static">
-                                        Total excluding VAT:<br/>
-                                        <strong>Total including VAT:</strong>
+                                        ${i18n.t('app.invoice.totalExclVatLbl')}<br/>
+                                        <strong>${i18n.t('app.invoice.totalInclVatLbl')}</strong>
                                     </p>
                                 </td>
                                 <td>
@@ -768,56 +771,56 @@
                 <div class="checkbox">
                   <label>
                     <input type="checkbox" data-bind="checked: data.isLocked">
-                    Locked
+                    ${i18n.t('app.invoice.optIsLockedLbl')}
                   </label>
                 </div>
                 <div class="checkbox">
                   <label>
                     <input type="checkbox" data-bind="checked: data.isPaid">
-                    Paid
+                    ${i18n.t('app.invoice.optIsPaidLbl')}
                   </label>
                 </div>
                 <div class="checkbox" data-bind="css: {disabled: data.isLocked}">
                   <label>
                     <input type="checkbox" value=""  data-bind="checked: data.isCredit, disable: data.isLocked">
-                    Credit invoice
+                    ${i18n.t('app.invoice.optIsCreditLbl')}
                   </label>
                 </div>
                 <div class="btn-group">
                   <button type="button" class="btn btn-success" data-bind="click: saveInvoice">
                       <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
-                      Save
+                      ${i18n.t('app.invoice.saveInvoiceBtn')}
                   </button>
                   <button type="button" class="btn btn-info" data-bind="click: doInvoicePrint">
                       <span class="glyphicon glyphicon-print" aria-hidden="true"></span>
-                      Print
+                      ${i18n.t('app.invoice.printInvoiceBtn')}
                   </button>
                   <button type="button" class="btn btn-info" data-bind="click: doCopyInvoice">
                       <span class="glyphicon glyphicon-duplicate" aria-hidden="true"></span>
-                      Copy
+                      ${i18n.t('app.invoice.copyInvoiceBtn')}
                   </button>
                 </div>
             </div>
 
             <div id="app-settings" data-bind="visible: currentView() == 'settings'">
                 <div class="page-header">
-                    <h1>Settings</h1>
+                    <h1>${i18n.t('app.settings.pageHeader')}</h1>
                 </div>
 
                 <div>
                     <form class="form-horizontal">
                       <div class="form-group">
-                        <label for="license" class="control-label">License</label>
+                        <label for="license" class="control-label">${i18n.t('app.settings.licenseLbl')}</label>
                         <p class="form-control-static" id="license" data-bind="text: settings.license"></p>
                       </div>
                       <div class="form-group">
-                        <label for="defNumDaysUntilPayment" class="control-label">Number of days until payment</label>
+                        <label for="defNumDaysUntilPayment" class="control-label">${i18n.t('app.settings.defNumDaysUntilPayLbl')}</label>
                         <input type="number" class="form-control" id="defNumDaysUntilPayment" placeholder="30" data-bind="value: settings.defaultNumDaysUntilPayment">
                       </div>
                       <div class="btn-group">
                         <button type="button" class="btn btn-success" data-bind="click: saveSettings">
                           <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
-                          Save
+                          ${i18n.t('app.settings.saveSettingsBtn')}
                         </button>
                       </div>
                     </form>
@@ -826,7 +829,7 @@
 
             <div id="app-debug" data-bind="visible: currentView() == 'debug'">
                 <div class="page-header">
-                    <h1>Debug and test</h1>
+                    <h1>${i18n.t('app.debugAndTest.pageHeader')}</h1>
                 </div>
 
                 <div>
@@ -836,26 +839,26 @@
                         <div class="row">
                           <div class="btn-group" role="group" aria-label="...">
                               <button type="button" class="btn btn-default" data-bind="click: spinnerVisible.bind(\$data,true), css: { active: spinnerVisible==true}">
-                                  Show spinner
+                                  ${i18n.t('app.debugAndTest.showSpinnerBtn')}
                               </button>
                               <button type="button" class="btn btn-default" data-bind="click: spinnerVisible.bind(\$data,false), css: { active: spinnerVisible==false}">
-                                  Hide spinner
+                                  ${i18n.t('app.debugAndTest.hideSpinnerBtn')}
                               </button>
                           </div>
                         </div>
                         <div class="row">
                           <div class="btn-group" role="group" aria-label="...">
                               <button type="button" class="btn btn-default" data-bind="click: showInfoMsg">
-                                  Show info
+                                  ${i18n.t('app.debugAndTest.showInfoMsgBtn')}
                               </button>
                               <button type="button" class="btn btn-default" data-bind="click: showSuccessMsg">
-                                  Show success
+                                  ${i18n.t('app.debugAndTest.showSuccessMsgBtn')}
                               </button>
                               <button type="button" class="btn btn-default" data-bind="click: showWarningMsg">
-                                  Show warning
+                                  ${i18n.t('app.debugAndTest.showWarningMsgBtn')}
                               </button>
                               <button type="button" class="btn btn-default" data-bind="click: showErrorMsg">
-                                  Show error
+                                  ${i18n.t('app.debugAndTest.showErrorMsgBtn')}
                               </button>
                           </div>
                         </div>
