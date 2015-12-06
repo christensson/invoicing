@@ -8,7 +8,7 @@ var NotifyViewModel = function() {
     self.spinnerVisible = ko.observable(cfg.showInitialTicker);
     self.spinnerMsg = ko.observable(
         '<span class="glyphicon glyphicon-refresh glyphicon-spin"></span>' +
-        '<p>Loading...</p>');
+        '<p>' + cfg.tickerText + '</p>');
     self.notificationPlacement = ko.observable(cfg.notificationAreaPlacement);
     self.notificationCss = ko.pureComputed(function() {
       return "notification-area-" + self.notificationPlacement();

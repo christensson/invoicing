@@ -1,5 +1,6 @@
 {
     "signin": {
+        "tickerText": "Laddar...",
         "lngSvBtn": "Svenska",
         "lngEnBtn": "English",
         "pageTitle": "Inloggning",
@@ -27,6 +28,7 @@
     },
     "app": {
         "pageTitle": "Fakturering",
+        "tickerText": "Laddar...",
         "navBar": {
             "title": "Fakturering",
             "home": "Hem",

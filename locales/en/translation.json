@@ -1,5 +1,6 @@
 {
     "signin": {
+        "tickerText": "Loading...",
         "lngSvBtn": "Svenska",
         "lngEnBtn": "English",
         "pageTitle": "Signin",
@@ -28,6 +29,7 @@
     },
     "app": {
         "pageTitle": "Invoicing",
+        "tickerText": "Loading...",
         "navBar": {
             "title": "Invoice",
             "home": "Home",

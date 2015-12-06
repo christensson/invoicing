@@ -1432,6 +1432,8 @@ var setupKo = function() {
   ko.applyBindings(settingsViewModel, document.getElementById("app-settings"));
 
   ko.applyBindings(debugViewModel, document.getElementById("app-debug"));
+  
+  Notify_showSpinner(false);
 };
 
 $(function() {
