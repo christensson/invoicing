@@ -159,20 +159,20 @@ var CompanyViewModel = function() {
         addr1 : "",
         addr2 : "",
         addr3 : "",
-        contact1Caption : "",
-        contact2Caption : "",
-        contact3Caption : "",
+        contact1Caption : i18n.t("app.company.defaultContact1Caption"),
+        contact2Caption : i18n.t("app.company.defaultContact2Caption"),
+        contact3Caption : i18n.t("app.company.defaultContact3Caption"),
         contact1 : "",
         contact2 : "",
         contact3 : "",
-        payment1Caption : "",
-        payment2Caption : "",
+        payment1Caption : i18n.t("app.company.defaultPayment1Caption"),
+        payment2Caption : i18n.t("app.company.defaultPayment2Caption"),
         payment1 : "",
         payment2 : "",
-        paymentCustomText : "",
+        paymentCustomText : i18n.t("app.company.defaultPaymentCustomText"),
         vatNr : "",
-        vatNrCustomText : "",
-        reverseChargeText : "",
+        vatNrCustomText : i18n.t("app.company.defaultVatNrCustomText"),
+        reverseChargeText : i18n.t("app.company.defaultReverseChargeCustomText"),
         isValid : true,
         logo : undefined,
         nextCid : 100,
@@ -182,6 +182,10 @@ var CompanyViewModel = function() {
   };
   
   self.init();
+  
+  self.setDefaultReverseChargeCustomText = function() {
+    self.reverseChargeText(i18n.t("app.company.defaultReverseChargeCustomText"));
+  };
 
   self.updateServer = function(onCompletion) {
     if ((self._id() == undefined) && !self.isValid()) {
@@ -243,7 +247,7 @@ var CompanyViewModel = function() {
       isValid : self.isValid(),
       logo : self.logo(),
       nextCid : parseInt(self.nextCid()),
-      nextIid : parseInt(self.nextIid())
+      nextIid : parseInt(self.nextIid()),
     };
     return res;
   };
@@ -328,8 +332,8 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompanyN
             + name + " for id=" + id);
         self.activeCompanyName(name);
         break;
-      }
-    }
+      };
+    };
   };
 };
 
@@ -409,6 +413,10 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
       submitForm = true;
     }
     return submitForm;
+  };
+  
+  self.setDefaultReverseChargeText = function() {
+    self.data.setDefaultReverseChargeCustomText();
   };
   
   document.getElementById("companyLogoInput").onchange = function() {
@@ -1355,7 +1363,7 @@ var NavViewModel = function() {
     location : 'userMenuNoRoute'
   } ];
 
-  self.currentView = ko.observable();
+  self.currentView = ko.observable("");
   self.activeCompanyId = ko.observable();
   self.activeCompanyName = ko.observable();
   self.companyList = ko.observableArray();

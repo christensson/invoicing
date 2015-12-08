@@ -70,7 +70,7 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
     var dateStr = "";
     if (value !== undefined) {
       var date = new Date(value);
-      console.log("Date: " + date.toString())
+      console.log("Date: " + date.toString());
       var isoDateString = date.toISOString();
       dateStr = isoDateString.split("T")[0];
     }

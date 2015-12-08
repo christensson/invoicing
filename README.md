@@ -43,7 +43,8 @@
 - [x] Feature: Currency rounding for totals ("öresutjämning")
 - [ ] Feature: Currency rounding improvement: optional, more variants since "öresutjämning" doesn't work that good for more valuable currencies...
 - [ ] Feature: Configurable currencies, default selected per customer
-- [ ] Translations
+- [x] Translations
+- [ ] Translate invoice
 - [x] Settings: ?
 - [ ] Feature: Invoice detail types
 - [x] Feature: Copy invoice (SHA: 494f491c20950cda86aaefde82a05b5708396572)
