@@ -4,12 +4,19 @@ views/*.marko.js
 .settings
 uploads/*
 
+# Stuff not wanted in repo...
+public/img/locale/*.png
+
 # Secret keys
 *_auth.json
 
 # Logs
 logs
+*debuglog.txt*
 *.log
+
+# Backup files
+*~
 
 # Runtime data
 pids
