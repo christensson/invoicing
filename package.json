@@ -13,6 +13,7 @@
     "commander": "^2.9.0",
     "director": "^1.2.8",
     "express": "^4.13.3",
+    "express-simulate-latency": "0.0.2",
     "fluentreports": "^1.0.5",
     "i18next": "^1.10.6",
     "i18next-client": "^1.11.2",

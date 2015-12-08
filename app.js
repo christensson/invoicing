@@ -13,13 +13,16 @@ var path = require('path');
 var marko = require('marko');
 var multer = require('multer');
 var i18n = require('i18next');
+var simLatency = require('express-simulate-latency');
 
 function list(val) {
   return val.split(',');
 }
 
-args.version('0.0.1').option('-l, --login <username,password>',
-    'Login with username and password', list).parse(process.argv);
+args.version('0.0.1')
+  .option('-l, --login <username,password>', 'Login with username and password', list)
+  .option('--sim_latency', 'Simulate network latency')
+  .parse(process.argv);
 
 explicitUser = null;
 if (args.login) {
@@ -36,6 +39,12 @@ if (args.login) {
 }
 if (explicitUser !== null) {
   console.log("Starting server with user: " + JSON.stringify(explicitUser));
+}
+
+var smallLag = undefined;
+if (args.sim_latency) {
+  console.log("Server started in NW latency simulation mode.");
+  smallLag = simLatency({ min: 100, max: 600 });
 }
 
 app = express();
@@ -62,6 +71,10 @@ app.use(express.static('node_modules/bootstrap/dist/css'));
 app.use(express.static('node_modules/bootstrap'));
 app.use(express.static('node_modules/director/build'));
 app.use(express.static('node_modules/jquery/dist'));
+
+if (smallLag != undefined) {
+  app.use(smallLag);
+}
 
 var upload = multer({
   dest: './uploads/',
