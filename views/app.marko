@@ -207,6 +207,14 @@
                             <input type="text" id="pay${idx}" class="form-control" data-bind="value: data.payment${idx}"></input>
                           </div>
                         </div>
+                        <div class="form-group">
+                          <div class="checkbox">
+                            <label class="col-sm-offset-2 control-label">
+                              <input type="checkbox" data-bind="checked: data.payment${idx}Focus" aria-label="${i18n.t('app.company.paymentOptFocusHeader', {nr: '${idx}'})}">
+                              ${i18n.t('app.company.paymentOptFocusHeader', {nr: "${idx}"})}
+                            </label>
+                          </div>
+                        </div>
                       </div>
                       <div class="form-group">
                         <label for="payCustomText" class="col-sm-2 control-label">${i18n.t('app.company.paymentOptCustomTextHeader')}</label>

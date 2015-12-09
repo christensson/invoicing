@@ -59,6 +59,7 @@
             "paymentOptPaneHeader": "Betalningsalternativ",
             "paymentOptCaptionHeader": "Rubrik __nr__",
             "paymentOptInfoHeader": "Info __nr__",
+            "paymentOptFocusHeader": "Betona betalningsalternativ __nr__",
             "paymentOptCustomTextHeader": "Valfritt textfält",
             "vatInfoPaneHeader": "Momsinfo",
             "vatInfoVatNrLbl": "Momsregnr",

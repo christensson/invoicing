@@ -110,6 +110,8 @@ var CompanyViewModel = function() {
   self.payment2Caption = ko.observable();
   self.payment1 = ko.observable();
   self.payment2 = ko.observable();
+  self.payment1Focus = ko.observable();
+  self.payment2Focus = ko.observable();
   self.paymentCustomText = ko.observable();
   self.vatNr = ko.observable();
   self.vatNrCustomText = ko.observable();
@@ -141,6 +143,8 @@ var CompanyViewModel = function() {
     self.payment2Caption(data.payment2Caption);
     self.payment1(data.payment1);
     self.payment2(data.payment2);
+    self.payment1Focus(data.payment1Focus);
+    self.payment2Focus(data.payment2Focus);
     self.paymentCustomText(data.paymentCustomText);
     self.vatNr(data.vatNr);
     self.vatNrCustomText(data.vatNrCustomText);
@@ -169,6 +173,8 @@ var CompanyViewModel = function() {
         payment2Caption : i18n.t("app.company.defaultPayment2Caption"),
         payment1 : "",
         payment2 : "",
+        payment1Focus : true,
+        payment2Focus : false,
         paymentCustomText : i18n.t("app.company.defaultPaymentCustomText"),
         vatNr : "",
         vatNrCustomText : i18n.t("app.company.defaultVatNrCustomText"),
@@ -240,6 +246,8 @@ var CompanyViewModel = function() {
       payment2Caption : self.payment2Caption(),
       payment1 : self.payment1(),
       payment2 : self.payment2(),
+      payment1Focus : self.payment1Focus(),
+      payment2Focus : self.payment2Focus(),
       paymentCustomText : self.paymentCustomText(),
       vatNr : self.vatNr(),
       vatNrCustomText : self.vatNrCustomText(),

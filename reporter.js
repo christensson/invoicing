@@ -28,6 +28,7 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
   var companyDetailsHeaderFontSize = 6;
   var companyDetailsFontSize = 8;
   var companyDetailsPaymentFontSize = 8;
+  var companyDetailsPaymentFocusFontSize = 10;
   var pageNumberFontSize = 8;
   var headerDetailsCaptionFontSize = 7;
   var headerDetailsFontSize = 8;
@@ -186,7 +187,9 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
              {data: c.name, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
              {data: c.contact1, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
              {data: c.vatNr, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsFontSize},
-             {data: c.payment1, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsPaymentFontSize, fontBold: true}
+             {data: c.payment1, width: companyDetailsColSize[3], align: x.left,
+               fontSize: c.payment1Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
+               fontBold: c.payment1Focus}
              ], {border: 0});
     x.band( [
              {data: c.addr1, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
@@ -198,7 +201,9 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
              {data: c.addr2, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
              {data: c.contact2, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
              {data: c.vatNrCustomText, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsFontSize},
-             {data: c.payment2, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsPaymentFontSize, fontBold: true}
+             {data: c.payment2, width: companyDetailsColSize[3], align: x.left,
+               fontSize: c.payment2Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
+               fontBold: c.payment2Focus}
              ], {border: 0});
     if (c.addr3 || c.contact3 || c.paymentCustomText) {
       x.band( [
