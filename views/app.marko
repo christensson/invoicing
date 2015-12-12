@@ -31,7 +31,7 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">${i18n.t('app.navBar.title')}</a>
+            <a class="navbar-brand" href="#/page/home">${i18n.t('app.navBar.title')}</a>
           </div>
           <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav" data-bind="foreach: mainViews">
@@ -98,6 +98,68 @@
     <div id="layout">
         <div id="main" class="container">
             <include template="./notification.marko"/>
+
+            <div id="app-home" data-bind="visible: currentView() == 'home'">
+                <div class="page-header">
+                    <h1>${i18n.t('app.home.pageHeader')}</h1>
+                </div>
+
+                <div>
+                  <p data-bind="i18n: 'app.home.greetingsText'"></p>
+
+                  <p></p>
+
+                  <div class="col-md-4">
+                    <div class="panel" data-bind='css: {"panel-primary": numCompanies() == 0, "panel-success": numCompanies() > 0}'>
+                      <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.companiesHeader')}</h3></div>
+                      <div class="panel-body">
+                        <p><span data-bind="html: companiesTextTrans"></span></p>
+                        <div class="btn-group">
+                          <a href="#/page/company_new" type="button" class="btn btn-success">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                            ${i18n.t('app.gettingStarted.companiesNewCompanyBtn')}
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+  
+                  <div class="col-md-4">
+                    <div data-bind="if: numCompanies() > 0">
+                      <div class="panel" data-bind='css: {"panel-primary": numCustomers() == 0, "panel-success": numCustomers() > 0}'>
+                        <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.customersHeader')}</h3></div>
+                        <div class="panel-body">
+                          <p><span data-bind="html: customersTextTrans"></span></p>
+                          <div class="btn-group">
+                            <a href="#/page/customer_new" type="button" class="btn btn-success">
+                              <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                              ${i18n.t('app.gettingStarted.customersNewCustomerBtn')}
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-4">
+                    <div data-bind="if: numCustomers() > 0">
+                      <div class="panel" data-bind='css: {"panel-primary": numInvoices() == 0, "panel-success": numInvoices() > 0}'>
+                        <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.invoicesHeader')}</h3></div>
+                        <div class="panel-body">
+                          <p><span data-bind="html: invoicesTextTrans"></span></p>
+                          <div class="btn-group">
+                            <a href="#/page/invoice_new" type="button" class="btn btn-success">
+                              <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                              ${i18n.t('app.gettingStarted.invoicesNewInvoiceBtn')}
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+            </div>
 
             <div id="app-companies" data-bind="visible: currentView() == 'companies'">
                 <form>

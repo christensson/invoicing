@@ -1373,7 +1373,7 @@ var NavViewModel = function() {
 
   self.currentView = ko.observable("");
   self.activeCompanyId = ko.observable();
-  self.activeCompanyName = ko.observable();
+  self.activeCompanyName = ko.observable(i18n.t('app.navBar.noCompanyName'));
   self.companyList = ko.observableArray();
 
   self.selectView = function(view) {
@@ -1402,7 +1402,131 @@ var NavViewModel = function() {
   self.router.init(self.mainViews[0].name);
 };
 
+var GettingStartedViewModel = function(currentView, activeCompanyId) {
+  var self = this;
+  self.currentView = currentView;
+  self.activeCompanyId = activeCompanyId;
+  self.stats = ko.observable();
+
+  self.numCompanies = ko.pureComputed(function() {
+    if ((self.activeCompanyId() === undefined) || (self.activeCompanyId() === null) ||
+        (self.stats() === undefined)) {
+      return 0;
+    } else {
+      return self.stats().total.numCompanies;
+    }
+  }, self);
+
+  self.numCustomers = ko.pureComputed(function() {
+    if ((self.activeCompanyId() === undefined) || (self.activeCompanyId() === null) ||
+        (self.stats() === undefined)) {
+      return 0;
+    } else {
+      return self.stats().activeCompany.numCustomers;
+    }
+  }, self);
+
+  self.numInvoices = ko.pureComputed(function() {
+    if ((self.activeCompanyId() === undefined) || (self.activeCompanyId() === null) ||
+        (self.stats() === undefined)) {
+      return 0;
+    } else {
+      return self.stats().activeCompany.numInvoices;
+    }
+  }, self);
+  
+  self.companiesTextTrans = ko.pureComputed(function() {
+    if (self.numCompanies() > 0) {
+      return i18n.t("app.gettingStarted.companiesText", {count: self.numCompanies()});
+    } else {
+      return i18n.t("app.gettingStarted.noCompaniesText");
+    }
+  }, self);
+
+  self.customersTextTrans = ko.pureComputed(function() {
+    if (self.numCustomers() > 0) {
+      return i18n.t("app.gettingStarted.customersText", {count: self.numCustomers()});
+    } else {
+      return i18n.t("app.gettingStarted.noCustomersText");
+    }
+  }, self);
+
+  self.invoicesTextTrans = ko.pureComputed(function() {
+    if (self.numInvoices() > 0) {
+      return i18n.t("app.gettingStarted.invoicesText", {count: self.numInvoices()});
+    } else {
+      return i18n.t("app.gettingStarted.noInvoicesText");
+    }
+  }, self);
+
+  self.currentView.subscribe(function(newValue) {
+    if (newValue == 'home') {
+      console.log("page.js - GettingStartedViewModel - activated");
+      self.populate();
+    }
+  });
+  
+  self.activeCompanyId.subscribe(function(newValue) {
+    console.log("GettingStartedViewModel - activeCompanyId.subscribe: value="
+        + newValue);
+    if (self.currentView() == 'home') {
+      self.populate();
+    }
+  });
+
+  self.populate = function() {
+    $.getJSON(
+        "/api/stats/" + self.activeCompanyId(),
+        function(stats) {
+          console.log("Got stats id=" + self.activeCompanyId() + ", stats=" + JSON.stringify(stats));
+          self.stats(stats);
+        }).fail(function() {
+          console.log("page.js - GettingStartedViewModel - populate - failed");
+        });
+  };
+
+};
+
 var setupKo = function() {
+  ko.bindingHandlers.i18n = {
+      update: function (element, valueAccessor, allBindings) {
+          var key = ko.unwrap(valueAccessor()),
+              options = ko.toJS(allBindings.get('i18n-options') || {}),
+              translation,
+              parts,
+              attr;
+
+          // Check whether we are dealing with attributes
+          if (key.indexOf('[') === 0) {
+              parts = key.split(']');
+              key = parts[1];
+              attr = parts[0].substr(1, parts[0].length - 1);
+          }
+
+          translation = i18n.t(key, options);
+
+          if (attr === undefined) {
+              // Check whether the translation contains markup
+              if (translation.match(/<(\w+)((?:\s+\w+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/)) {
+                  //noinspection InnerHTMLJS
+                  element.innerHTML = translation;
+              } else {
+                  // Check whether the translation contains HTML entities
+                  if (translation.match(/&(?:[a-z]+|#x?\d+);/gi)) {
+                      //noinspection InnerHTMLJS
+                      element.innerHTML = translation;
+                  } else {
+                      // Treat translation as plain text
+                      element.innerText = translation;
+                  }
+              }
+          } else {
+              // Add translation to given attribute
+              element.setAttribute(attr, translation);
+          }
+      }
+  };
+  
   var navViewModel = new NavViewModel();
   var settings = new SettingsDataModel();
   var companyViewModel = new CompanyListViewModel(navViewModel.currentView,
@@ -1422,13 +1546,17 @@ var setupKo = function() {
   var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId, settings);
   var debugViewModel = new DebugViewModel(navViewModel.currentView);
+  var gettingStartedViewModel = new GettingStartedViewModel(navViewModel.currentView,
+      navViewModel.activeCompanyId);
 
   settingsViewModel.populate();
   companyViewModel.populate();
-
+  
   ko.applyBindings(navViewModel, document.getElementById("app-navbar"));
 
   ko.applyBindings(companyViewModel, document.getElementById("app-companies"));
+
+  ko.applyBindings(gettingStartedViewModel, document.getElementById("app-home"));
 
   ko.applyBindings(companyNewViewModel, document
       .getElementById("app-company_new"));

@@ -34,6 +34,7 @@
             "title": "Invoice",
             "home": "Home",
             "companyAdmin": "Administer Companies",
+            "noCompanyName": "<No company>",
             "customerNew": "New Customer",
             "customerList": "Customers",
             "invoiceNew": "New Invoice",
@@ -41,6 +42,42 @@
             "settings": "Settings",
             "debug": "Debug",
             "logout": "Log out"
+        },
+        "home": {
+            "pageHeader": "Invoicing",
+            "greetings": "An invoicing application that is <strong>easy</strong> to use."
+        },
+        "gettingStarted": {
+            "companiesHeader": "Companies",
+            "noCompaniesText": [
+                "There are <strong>no companies</strong> configured.",
+                "The first step is to create one or more companies."],
+            "companiesText": [
+                "You have <strong>one company</strong> configured.",
+                "You can whenever you want create more companies."],
+            "companiesText_plural": [
+                "You have <strong>__count__ companies</strong> configured.",
+                "You can whenever you want create more companies."],
+            "companiesNewCompanyBtn": "New company",
+            "customersHeader": "Customers",
+            "noCustomersText": [
+                "The active company has <strong>no customers</strong> configured.",
+                "You need to create one or more customers"],
+            "customersText": [
+                "The active company has <strong>one customer</strong> configured.",
+                "You can whenever you want create more customers."],
+            "customersText_plural": [
+                "The active company has <strong>__count__ customers</strong> configured.",
+                "You can whenever you want create more customers."],
+            "customersNewCustomerBtn": "New customer",
+            "invoicesHeader": "Invoices",
+            "noInvoicesText": [
+                "It's time to create your <strong>first invoice</strong>!"],
+            "invoicesText":  [
+                "The active company has <strong>one invoice</strong>."],
+            "invoicesText_plural":  [
+                "The active company has <strong>__count__ invoices</strong>."],
+            "invoicesNewInvoiceBtn": "New invoice"
         },
         "settings": {
             "pageHeader": "Settings",

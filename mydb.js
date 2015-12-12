@@ -50,6 +50,24 @@ function dbopPromise() {
   return deferred.promise;
 }
 
+function countAllDocsPromise(collectionName, filter) {
+  return dbopPromise().then(function(db) {
+    var deferred = Q.defer();
+    var custColl = db.collection(collectionName);
+    custColl.count(filter, {}, function(err, count) {
+      if (err) {
+        deferred.reject(
+            new Error("Error: countAllDocs(" + collectionName + "): " + err));
+      } else {
+        console.log("countAllDocs(" + collectionName +
+            ", filter=" + JSON.stringify(filter) + "): count: " + count);
+        deferred.resolve(count);
+      }
+    });
+    return deferred.promise;
+  });
+}
+
 function getAllDocsPromise(collectionName, filter) {
   return dbopPromise().then(function(db) {
     var deferred = Q.defer();
@@ -614,6 +632,49 @@ module.exports.init = function(doneCb) {
     return insertDataPromise("invoice", invoiceList);
   })
   .done(doneCb);
+};
+
+module.exports.getStats = function(uid, companyId) {
+  var ouid = new ObjectID(uid);
+  var deferred = Q.defer();
+  
+  var res = {
+      "total": {
+        "numCompanies": 0,
+        "numCustomers": 0,
+        "numInvoices": 0,
+      },
+      "activeCompany": {
+        "numCustomers": 0,
+        "numInvoices": 0,
+      }
+  };
+  
+  countAllDocsPromise('company', {'isValid': true, 'uid': ouid}).then(function(count) {
+    res.total.numCompanies = count;
+    return countAllDocsPromise('customer', {'isValid': true, 'uid': ouid});
+  }).then(function(count) {
+    res.total.numCustomers = count;
+    return countAllDocsPromise('invoice', {'isValid': true, 'uid': ouid});
+  }).then(function(count) {
+    res.total.numInvoices = count;
+    if (companyId === "undefined" || companyId === "null") {
+      console.log("getStats: No active company, stats=" + JSON.stringify(res));
+      deferred.resolve(res);
+    } else {
+      console.log("getStats: Active company is " + companyId);
+      var ocompanyId = new ObjectID(companyId);
+      countAllDocsPromise('customer', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId}).then(function(count) {
+        res.activeCompany.numCustomers = count;
+        return countAllDocsPromise('invoice', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId});
+      }).then(function(count) {
+        res.activeCompany.numInvoices = count;
+        deferred.resolve(res);
+      });
+    }
+  });
+  
+  return deferred.promise;
 };
 
 module.exports.getSettings = function(uid) {

@@ -535,6 +535,18 @@ app.get("/api/invoiceReport/:id", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
+app.get("/api/stats/:cid", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var cid = req.params.cid;
+  console.log("Statistics: user=" + req.user.info.name + ", cid=" + cid);
+  
+  mydb.getStats(uid, cid).then(function(stats) {
+    console.log("Statistics: user=" + req.user.info.name + ", cid=" + cid, ", stats=" + JSON.stringify(stats));
+    res.status(200).json(stats);
+    res.end();
+  }).fail(myFailureHandler.bind(null, res));
+});
+
 // sends the request through our local signup strategy, and if successful takes
 // user to homepage, otherwise returns then to signin page
 app.post('/local-reg', passport.authenticate('local-signup', {

@@ -33,6 +33,7 @@
             "title": "Fakturering",
             "home": "Hem",
             "companyAdmin": "Hantera Företag",
+            "noCompanyName": "<Inget företag>",
             "customerNew": "Ny Kund",
             "customerList": "Kunder",
             "invoiceNew": "Ny Faktura",
@@ -40,6 +41,42 @@
             "settings": "Inställningar",
             "debug": "Debug",
             "logout": "Logga ut"
+        },
+        "home": {
+            "pageHeader": "Fakturering",
+            "greetingsText": "Ett faktureringsprogram som är <strong>enkelt</strong> att använda."
+        },
+        "gettingStarted": {
+            "companiesHeader": "Företag",
+            "noCompaniesText": [
+                "Det finns <strong>inga företag</strong> konfigurerade.",
+                "Det första du behöver göra är att skapa ett eller flera företag."],
+            "companiesText": [
+                "Du har <strong>ett företag</strong> konfigurerat.",
+                "Du kan när du vill skapa fler företag."],
+            "companiesText_plural": [
+                "Du har <strong>__count__ företag</strong> konfigurerade.",
+                "Du kan när du vill skapa fler företag."],
+            "companiesNewCompanyBtn": "Nytt företag",
+            "customersHeader": "Kunder",
+            "noCustomersText": [
+                "Det aktiva företaget har <strong>inga kunder</strong> konfigurerade.",
+                "Du behöver skapa en eller flera kunder."],
+            "customersText": [
+                "Det aktiva företaget har <strong>en kund</strong> konfigurerad.",
+                "Du kan när du vill skapa fler kunder."],
+            "customersText_plural": [
+                "Det aktiva företaget har <strong>__count__ kunder</strong> konfigurerade.",
+                "Du kan när du vill skapa fler kunder."],
+            "customersNewCustomerBtn": "Ny kund",
+            "invoicesHeader": "Fakturor",
+            "noInvoicesText": [
+                "Det är dags att skapa din <strong>första faktura</strong>!"],
+            "invoicesText":  [
+                "Det aktiva företaget har <strong>en faktura</strong>."],
+            "invoicesText_plural":  [
+                "Det aktiva företaget har <strong>__count__ fakturor</strong>."],
+            "invoicesNewInvoiceBtn": "Ny faktura"
         },
         "settings": {
             "pageHeader": "Inställningar",
