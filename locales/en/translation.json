@@ -47,7 +47,7 @@
         },
         "home": {
             "pageHeader": "Invoicing",
-            "greetings": "An invoicing application that is <strong>easy</strong> to use."
+            "greetingsText": "An invoicing application that is <strong>easy</strong> to use."
         },
         "gettingStarted": {
             "companiesHeader": "Companies",
