@@ -160,7 +160,7 @@ passport.use(
           console.log("signup: user=" + username + ", pw=" + password);
           var hash = bcrypt.hashSync(password, 8);
           var userData = {
-            "username-local": username,
+            "username-local": username, // username is e-mail for local users!
             "password": hash,
             "info" : funct.createUserInfo(req.body.fullName, username)
           };
