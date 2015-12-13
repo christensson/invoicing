@@ -24,7 +24,9 @@
         "loginNokMsg_google": "Could not log in using Google account! Please try again.",
         "logoutOkMsg": "Successfully logged out __name__!",
         "registerOkMsg": "Welcome __name__! You are now registed.",
-        "registerNokMsg": "Username __name__ already in use! Please try another one.",
+        "registerNokMsg_userExists": "Username __name__ already in use! Please try another one.",
+        "registerNokMsg_notInvited": "Invite missing for E-mail __email__! Please try again when invited or use a different E-mail address.",
+        "registerNokMsg": "Registration failed! Please try again.",
         "authNokMsg": "Please sign in!"
     },
     "app": {
@@ -82,6 +84,8 @@
         "settings": {
             "pageHeader": "Settings",
             "licenseLbl": "License",
+            "emailLbl": "E-post",
+            "regDateLbl": "Registration date",
             "defNumDaysUntilPayLbl": "Number of days until payment",
             "saveSettingsBtn": "Save",
             "getNok": "Failed to get settings!",

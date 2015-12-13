@@ -20,10 +20,13 @@
         "signinBtn": "Logga in",
         "registerBtn": "Registrera användare",
         "loginOkMsg": "Välkommen __name__!",
-        "loginNokMsg": "Inloggning misslyckades! Var god försök igen.",
+        "loginNokMsg_local": "Inloggning misslyckades! Var god försök igen.",
+        "loginNokMsg_google": "Inloggning med Google konto misslyckades! Var god försök igen.",
         "logoutOkMsg": "Du är nu utloggad __name__!",
         "registerOkMsg": "Välkommen __name__! Du är nu registrerad.",
-        "registerNokMsg": "Användarnamnet __name__ är upptaget! Var god ange ett annat.",
+        "registerNokMsg_userExists": "Användarnamnet __name__ är upptaget! Var god ange ett annat.",
+        "registerNokMsg_notInvited": "Inbjudan saknas för E-post __email__! Försök igen när du har fått en inbjudan eller ange annan e-postadress.",
+        "registerNokMsg": "Registreringen misslyckades! Var god försök igen.",
         "authNokMsg": "Var god logga in!"
     },
     "app": {
@@ -81,6 +84,8 @@
         "settings": {
             "pageHeader": "Inställningar",
             "licenseLbl": "Licens",
+            "emailLbl": "E-post",
+            "regDateLbl": "Registreringsdatum",
             "defNumDaysUntilPayLbl": "Betalningsvillkor (dagar)",
             "saveSettingsBtn": "Spara",
             "getNok": "Misslyckades med att hämta inställningar!",

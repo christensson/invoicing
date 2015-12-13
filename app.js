@@ -6,6 +6,7 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var methodOverride = require('method-override');
+var flash = require('connect-flash');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
@@ -14,6 +15,7 @@ var marko = require('marko');
 var multer = require('multer');
 var i18n = require('i18next');
 var simLatency = require('express-simulate-latency');
+var bcrypt = require('bcryptjs');
 
 function list(val) {
   return val.split(',');
@@ -61,6 +63,7 @@ app.use(session({
   resave : false,
   saveUninitialized : false
 }));
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static('public'));
@@ -79,24 +82,6 @@ if (smallLag != undefined) {
 var upload = multer({
   dest: './uploads/',
   limits: {fileSize: 256*1024} // Max 256 Kbyte
-});
-
-// Session-persisted message middleware
-app.use(function(req, res, next) {
-  var err = req.session.error, msg = req.session.notice, success = req.session.success;
-
-  delete req.session.error;
-  delete req.session.success;
-  delete req.session.notice;
-
-  if (err)
-    res.locals.error = err;
-  if (msg)
-    res.locals.notice = msg;
-  if (success)
-    res.locals.success = success;
-
-  next();
 });
 
 // i18n
@@ -151,12 +136,12 @@ passport.use(
               function(user) {
                 if (user) {
                   console.log("LOGGED IN AS: " + user.info.name);
-                  req.session.success = i18n.t("signin.loginOkMsg", {name: user.info.name});
+                  req.flash('success', i18n.t("signin.loginOkMsg", {name: user.info.name}));
                   done(null, user);
                 }
                 if (!user) {
                   console.log("COULD NOT LOG IN");
-                  req.session.error = i18n.t("signin.loginNokMsg", {context: "local"});
+                  req.flash('error', i18n.t("signin.loginNokMsg", {context: "local"}));
                   done(null, user);
                 }
               }).fail(function(err) {
@@ -173,24 +158,34 @@ passport.use(
         }, // allows us to pass back the request to the callback
         function(req, username, password, done) {
           console.log("signup: user=" + username + ", pw=" + password);
-          info = {
-              "name": req.body.fullName,
-              "email": req.body.email,
+          var hash = bcrypt.hashSync(password, 8);
+          var userData = {
+            "username-local": username,
+            "password": hash,
+            "info" : funct.createUserInfo(req.body.fullName, req.body.email)
           };
-          funct.localReg(username, password, info).then(
-              function(user) {
-                if (user) {
-                  console.log("REGISTERED: " + user.info.name);
-                  req.session.success = i18n.t("signin.registerOkMsg", {name: user.info.name});
-                  done(null, user);
-                } else {
-                  console.log("COULD NOT REGISTER");
-                  req.session.error = i18n.t("signin.registerNokMsg", {name: username});
-                  done(null, user);
-                }
-              }).fail(function(err) {
-                console.log(err.body);
-              });
+          var errorMessage = i18n.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"});
+          mydb.isEmailInvited(userData.info.email).then(function(inviteInfo) {
+            errorMessage = i18n.t("signin.registerNokMsg");
+            return funct.findOrCreate("username-local", userData, inviteInfo.license);
+          }).then(function(result) {
+            if (result.user) {
+              if (result.isNew) {
+                req.flash('success', i18n.t("signin.registerOkMsg", {name: result.user.info.name}));
+                done(null, result.user);
+              } else {
+                // Failure, registration doesn't expect user to exist.
+                done(null, false, {message: i18n.t("signin.registerNokMsg", {name: username, context: "userExists"})});
+              }
+              return done(null, result.user);
+            } else {
+              console.log("Registration failed.");
+              done(null, false, {message: errorMessage});
+            }
+          }).fail(function(error) {
+            console.log("ERROR: " + error.message);
+            done(null, false, {message: errorMessage});
+          });
         }));
 
 passport.use(new GoogleStrategy(
@@ -207,12 +202,15 @@ passport.use(new GoogleStrategy(
         console.log("Google-auth: profile=" + JSON.stringify(profile));
         var userData = {
             "googleId" : profile.id,
-            "info" : {
-              "name" : profile.displayName,
-              "email" : profile.emails[0].value, // pull the first email
-            }
+            "info" : funct.createUserInfo(profile.displayName, profile.emails[0].value)
         };
-        funct.findOrCreate("googleId", userData).then(function(result) {
+        mydb.isEmailInvited(userData.info.email).fail(function(error) {
+          console.log("ERROR: " + error.message);
+          done(null, false, {
+            message: i18n.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"})});
+        }).then(function(inviteInfo) {
+          return funct.findOrCreate("googleId", userData, inviteInfo.license);
+        }).then(function(result) {
           if (result.user) {
             if (result.isNew) {
               result.user.greetingMsg = i18n.t("signin.registerOkMsg", {name: result.user.info.name});
@@ -222,10 +220,11 @@ passport.use(new GoogleStrategy(
             return done(null, result.user);
           } else {
             console.log("Google authentication failed.");
-            done(new Error("Google authentication failed"), null);
+            done(null, false);
           }
         }).fail(function(error) {
-          done(error, null);
+          console.log("ERROR: " + error.message);
+          done(null, false, {message: error.message});
         });
       });
     }
@@ -243,7 +242,7 @@ function ensureAuthenticated(req, res, next) {
       return next();
     }
     console.log("ensureAuthenticated: Not authenticated!");
-    req.session.error = i18n.t("signin.authNokMsg");
+    req.flash('error', i18n.t("signin.authNokMsg"));
     res.redirect('/signin');
   } else {
     console.log(
@@ -551,14 +550,16 @@ app.get("/api/stats/:cid", ensureAuthenticated, function(req, res) {
 // user to homepage, otherwise returns then to signin page
 app.post('/local-reg', passport.authenticate('local-signup', {
   successRedirect : '/',
-  failureRedirect : '/signin'
+  failureRedirect : '/signin',
+  failureFlash: true
 }));
 
 // sends the request through our local login/signin strategy, and if successful
 // takes user to homepage, otherwise returns then to signin page
 app.post('/login', passport.authenticate('local-signin', {
   successRedirect : '/',
-  failureRedirect : '/signin'
+  failureRedirect : '/signin',
+  failureFlash: true
 }));
 
 // logs user out of site, deleting them from the session, and returns to
@@ -567,7 +568,7 @@ app.get('/logout', ensureAuthenticated, function(req, res) {
   var name = req.user.info.name;
   console.log("LOGGIN OUT " + req.user.info.name);
   req.logout();
-  req.session.notice = i18n.t("signin.logoutOkMsg", {name: name});
+  req.flash('notice', i18n.t("signin.logoutOkMsg", {name: name}));
   res.redirect('/signin');
 });
 
@@ -575,11 +576,14 @@ var appTemplatePath = require.resolve('./views/app.marko');
 var appTemplate = marko.load(appTemplatePath);
 
 app.get('/', ensureAuthenticated, function(req, res) {
-  userInfo = {
-    username : req.user.info.name
-  };
+  var userInfo = req.user.info;
+  var msg =  {
+      "error": req.flash('error'),
+      "notice": req.flash('notice'),
+      "success": req.flash('success')
+    };
   appTemplate.render({
-    msg : res.locals,
+    msg : msg,
     user : userInfo
   }, res);
 });
@@ -590,24 +594,27 @@ var signinTemplate = marko.load(signinTemplatePath);
 app.get('/signin', function(req, res) {
   var currentLng = req.locale;
   console.log("signing: currentLng=" + currentLng);
-  signinTemplate.render({
-    msg : res.locals
-  }, res);
+  var msg =  {
+    "error": req.flash('error'),
+    "notice": req.flash('notice'),
+    "success": req.flash('success'),
+  };
+  signinTemplate.render({msg : msg}, res);
 });
 
 app.get('/auth/google',
     passport.authenticate('google', { scope : ['https://www.googleapis.com/auth/plus.login', 'https://www.googleapis.com/auth/userinfo.email'] }));
 
 app.get('/auth/google/callback', 
-    passport.authenticate('google'),
+    passport.authenticate('google', { successRedirect: '/', failureRedirect: '/signin', failureFlash: true}),
     function(req, res) {
-      req.session.success = req.user.greetingMsg;
+      req.flash('success', req.user.greetingMsg);
       // Successful authentication, redirect home.
       res.redirect('/');
     },
     function(req, res) {
       console.log("Login using google account failed! req=" + JSON.stringify(req));
-      req.session.success = i18n.t("signin.loginNokMsg", {context: "google"});
+      req.flash('error', i18n.t("signin.loginNokMsg", {context: "google"}));
       // Failed authentication, redirect to login.
       res.redirect(401, '/signin');
     });

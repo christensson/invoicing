@@ -279,7 +279,32 @@ module.exports.init = function(doneCb) {
   var testCompanyCid101 = undefined;
 
   // Users
-  dropCollectionPromise("users")
+  dropCollectionPromise("invite").fail(function() {
+    console.log("Drop collection invite failed!");
+  })
+  .then(function() {
+    var inviteList = [
+                    {
+                      "email": "marcus@domain.se",
+                      "license": "demo"
+                    },
+                    {
+                      "email": "test@test.se",
+                      "license": "demo"
+                    },
+                    {
+                      "email": "marcus.christensson@gmail.com",
+                      "license": "unlimited"
+                    },
+                    ];
+    return insertDataPromise("invite", inviteList);
+  })
+  .then(function() {
+    return dropCollectionPromise("users");
+  })
+  .fail(function() {
+    console.log("Drop collection users failed!");
+  })
   .then(function() {
     var userList = [
                     {
@@ -841,12 +866,27 @@ module.exports.addUser = function(user) {
   return insertDataPromise('users', user);
 };
 
+module.exports.isEmailInvited = function(email) {
+  var deferred = Q.defer();
+  getOneDocPromise('invite', {email: email}).then(function(doc) {
+    if (!doc) {
+      console.log("isEmailInvited: email=" + email + " hasn't been invited!");
+      deferred.reject(new Error("User with email " + email + " hasn't been invited!"));
+    } else {
+      console.log("isEmailInvited: email=" + email + " has been invited. info=" + JSON.stringify(doc));
+      deferred.resolve(doc);
+    }
+  });
+  return deferred.promise;
+};
+
 /** Inits all collections for user.
  * - settings
  * @param userQuery query for 
  * @return promise of user
  */
-module.exports.initUserContext = function(userQuery) {
+module.exports.initUserContext = function(userQuery, license) {
+  license = typeof license !== 'undefined' ? license : "demo";
   var deferred = Q.defer();
   console.log("initUserContext: query=" + JSON.stringify(userQuery));
   var user = undefined;
@@ -854,14 +894,12 @@ module.exports.initUserContext = function(userQuery) {
     user = result;
     console.log("initUserContext: Found user=" + JSON.stringify(user));
     return Q();
-  }).fail(function(err) {
-    deferred.reject(err);
   }).then(function() {
     var defaultSettings = {
         "uid" : user._id,
         "activeCompanyId" : undefined,
         "defaultNumDaysUntilPayment" : 30,
-        "license" : "demo"
+        "license" : license
     };
     console.log("initUserContext: Set default settings: " + JSON.stringify(defaultSettings));
     return insertDataPromise("settings", defaultSettings);
