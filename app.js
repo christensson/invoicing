@@ -162,7 +162,7 @@ passport.use(
           var userData = {
             "username-local": username,
             "password": hash,
-            "info" : funct.createUserInfo(req.body.fullName, req.body.email)
+            "info" : funct.createUserInfo(req.body.fullName, username)
           };
           var errorMessage = i18n.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"});
           mydb.isEmailInvited(userData.info.email).then(function(inviteInfo) {
