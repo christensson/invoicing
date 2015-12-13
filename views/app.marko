@@ -74,6 +74,7 @@
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                     <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
                     $data.user.name
+                    <span if="data.user.isAdmin === true" class="label label-primary">${i18n.t('app.navBar.adminUserLbl')}</span>
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu" role="menu" data-bind="foreach: mainViews">

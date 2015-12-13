@@ -1,6 +1,7 @@
-mongodb = require('mongodb');
-Q = require('q');
-util = require('./public/util.js');
+var mongodb = require('mongodb');
+var Q = require('q');
+var util = require('./public/util.js');
+var funct = require('./functions.js');
 var ObjectID = mongodb.ObjectID;
 
 var generate_mongo_url = function(obj){
@@ -286,15 +287,18 @@ module.exports.init = function(doneCb) {
     var inviteList = [
                     {
                       "email": "marcus@domain.se",
-                      "license": "demo"
+                      "license": "demo",
+                      "isAdmin": "false"
                     },
                     {
                       "email": "test@test.se",
-                      "license": "demo"
+                      "license": "demo",
+                      "isAdmin": "false"
                     },
                     {
                       "email": "marcus.christensson@gmail.com",
-                      "license": "unlimited"
+                      "license": "unlimited",
+                      "isAdmin": "true"
                     },
                     ];
     return insertDataPromise("invite", inviteList);
@@ -311,19 +315,13 @@ module.exports.init = function(doneCb) {
                       "username-local": "mach",
                       // password is "mach"
                       "password": "$2a$08$3IwByU08C2BdgvwuvMec.eD3ugRp7oRpPHpuRwAOY1q0D8YUiSIYa",
-                      "info": {
-                        "name": "Marcus",
-                        "email": "marcus@domain.se",
-                      }
+                      "info": funct.createUserInfo("Marcus", "marcus@domain.se"),
                     },
                     {
                       "username-local": "test",
                       // password is "test"
                       "password": "$2a$08$8XE3C/OGbaT6v2PvonVqTORGkCmzlXSXEd.62Obd/E5SY4E6MYQSG",
-                      "info": {
-                        "name": "Test",
-                        "email": "test@someotherdomain.net",
-                      }
+                      "info": funct.createUserInfo("Test", "test@someotherdomain.net"),
                     }
                     ];
     return insertDataPromise("users", userList);
@@ -899,7 +897,7 @@ module.exports.initUserContext = function(userQuery, license) {
         "uid" : user._id,
         "activeCompanyId" : undefined,
         "defaultNumDaysUntilPayment" : 30,
-        "license" : license
+        "license" : license,
     };
     console.log("initUserContext: Set default settings: " + JSON.stringify(defaultSettings));
     return insertDataPromise("settings", defaultSettings);

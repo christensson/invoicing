@@ -167,7 +167,7 @@ passport.use(
           var errorMessage = i18n.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"});
           mydb.isEmailInvited(userData.info.email).then(function(inviteInfo) {
             errorMessage = i18n.t("signin.registerNokMsg");
-            return funct.findOrCreate("username-local", userData, inviteInfo.license);
+            return funct.findOrCreate("username-local", userData, inviteInfo);
           }).then(function(result) {
             if (result.user) {
               if (result.isNew) {
@@ -209,7 +209,7 @@ passport.use(new GoogleStrategy(
           done(null, false, {
             message: i18n.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"})});
         }).then(function(inviteInfo) {
-          return funct.findOrCreate("googleId", userData, inviteInfo.license);
+          return funct.findOrCreate("googleId", userData, inviteInfo);
         }).then(function(result) {
           if (result.user) {
             if (result.isNew) {

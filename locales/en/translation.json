@@ -41,6 +41,7 @@
             "customerList": "Customers",
             "invoiceNew": "New Invoice",
             "invoiceList": "Invoices",
+            "adminUserLbl" : "Admin",
             "settings": "Settings",
             "debug": "Debug",
             "logout": "Log out"

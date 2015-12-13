@@ -41,6 +41,7 @@
             "customerList": "Kunder",
             "invoiceNew": "Ny Faktura",
             "invoiceList": "Fakturor",
+            "adminUserLbl" : "Admin",
             "settings": "Inställningar",
             "debug": "Debug",
             "logout": "Logga ut"
