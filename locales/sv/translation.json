@@ -63,13 +63,13 @@
             "companiesNewCompanyBtn": "Nytt företag",
             "customersHeader": "Kunder",
             "noCustomersText": [
-                "Det aktiva företaget har <strong>inga kunder</strong> konfigurerade.",
+                "Det aktiva företaget har <strong>inga kunder</strong>.",
                 "Du behöver skapa en eller flera kunder."],
             "customersText": [
-                "Det aktiva företaget har <strong>en kund</strong> konfigurerad.",
+                "Det aktiva företaget har <strong>en kund</strong>.",
                 "Du kan när du vill skapa fler kunder."],
             "customersText_plural": [
-                "Det aktiva företaget har <strong>__count__ kunder</strong> konfigurerade.",
+                "Det aktiva företaget har <strong>__count__ kunder</strong>.",
                 "Du kan när du vill skapa fler kunder."],
             "customersNewCustomerBtn": "Ny kund",
             "invoicesHeader": "Fakturor",

@@ -63,13 +63,13 @@
             "companiesNewCompanyBtn": "New company",
             "customersHeader": "Customers",
             "noCustomersText": [
-                "The active company has <strong>no customers</strong> configured.",
+                "The active company has <strong>no customers</strong>.",
                 "You need to create one or more customers"],
             "customersText": [
-                "The active company has <strong>one customer</strong> configured.",
+                "The active company has <strong>one customer</strong>.",
                 "You can whenever you want create more customers."],
             "customersText_plural": [
-                "The active company has <strong>__count__ customers</strong> configured.",
+                "The active company has <strong>__count__ customers</strong>.",
                 "You can whenever you want create more customers."],
             "customersNewCustomerBtn": "New customer",
             "invoicesHeader": "Invoices",
