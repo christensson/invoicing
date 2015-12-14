@@ -1,6 +1,12 @@
 /* Required by navbar-fixed-top */
 body { padding-top: 70px; }
 
+.top5 { margin-top:5px; }
+.top7 { margin-top:7px; }
+.top10 { margin-top:10px; }
+.top15 { margin-top:15px; }
+.top20 { margin-top:20px; }
+
 .highlighterror {
     background: rgb(202, 60, 60);
     color: white;

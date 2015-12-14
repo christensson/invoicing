@@ -209,7 +209,8 @@
             </div>
 
             <div id="app-company_new" data-bind="visible: currentView() == 'company_new' || (currentView() != undefined && currentView().search('company_show') == 0)">
-                <div class="form-horizontal">
+              <div class="form-horizontal">
+                <div class="panel-group">
                   <div class="panel panel-default">
                     <div class="panel-heading">
                       <h3 class="panel-title">${i18n.t('app.company.generalPaneHeader')}</h3>
@@ -236,18 +237,20 @@
                       <h3 class="panel-title">${i18n.t('app.company.contactPaneHeader')}</h3>
                     </div>
                     <div class="panel-body">
-                      <div for="idx in [1,2,3]">
-                        <div class="form-group">
-                          <label for="contact${idx}Cap" class="col-sm-2 control-label">${i18n.t('app.company.contactCaptionHeader', {nr: "${idx}"})}</label>
-                          <div class="col-sm-4">
-                            <input type="text" id="contact${idx}Cap" class="form-control" data-bind="value: data.contact${idx}Caption"></input>
-                          </div>
+                      <div class="row">
+                        <div class="col-md-2">
+                          <label class="control-label">${i18n.t('app.company.contactCaptionHeader')}</label>
                         </div>
-                        <div class="form-group">
-                          <label for="contact${idx}" class="col-sm-2 control-label">${i18n.t('app.company.contactInfoHeader', {nr: "${idx}"})}</label>
-                          <div class="col-sm-4">
-                            <input type="text" id="contact${idx}" class="form-control" data-bind="value: data.contact${idx}"></input>
-                          </div>
+                        <div class="col-md-3">
+                          <label class="control-label">${i18n.t('app.company.contactInfoHeader')}</label>
+                        </div>
+                      </div>
+                      <div class="row top5" for="idx in [1,2,3]">
+                        <div class="col-md-2">
+                          <input type="text" id="contact${idx}Cap" class="form-control" data-bind="value: data.contact${idx}Caption"></input>
+                        </div>
+                        <div class="col-md-3">
+                          <input type="text" id="contact${idx}" class="form-control" data-bind="value: data.contact${idx}"></input>
                         </div>
                       </div>
                     </div>
@@ -257,31 +260,37 @@
                       <h3 class="panel-title">${i18n.t('app.company.paymentOptPaneHeader')}</h3>
                     </div>
                     <div class="panel-body">
-                      <div for="idx in [1,2]">
-                        <div class="form-group">
-                          <label for="pay${idx}Cap" class="col-sm-2 control-label">${i18n.t('app.company.paymentOptCaptionHeader', {nr: "${idx}"})}</label>
-                          <div class="col-sm-4">
-                            <input type="text" id="pay${idx}Cap" class="form-control" data-bind="value: data.payment${idx}Caption"></input>
-                          </div>
+                      <div class="row">
+                        <div class="col-md-2">
+                          <label class="control-label">${i18n.t('app.company.paymentOptCaptionHeader')}</label>
                         </div>
-                        <div class="form-group">
-                          <label for="pay${idx}" class="col-sm-2 control-label">${i18n.t('app.company.paymentOptInfoHeader', {nr: "${idx}"})}</label>
-                          <div class="col-sm-4">
-                            <input type="text" id="pay${idx}" class="form-control" data-bind="value: data.payment${idx}"></input>
-                          </div>
+                        <div class="col-md-3">
+                          <label class="control-label">${i18n.t('app.company.paymentOptInfoHeader')}</label>
                         </div>
-                        <div class="form-group">
+                        <div class="col-md-3">
+                          <label class="control-label">${i18n.t('app.company.paymentOptFocusHeader')}</label>
+                        </div>
+                      </div>
+                      <div class="row top5" for="idx in [1,2]">
+                        <div class="col-sm-2">
+                          <input type="text" id="pay${idx}Cap" class="form-control" data-bind="value: data.payment${idx}Caption"></input>
+                        </div>
+                        <div class="col-sm-3">
+                          <input type="text" id="pay${idx}" class="form-control" data-bind="value: data.payment${idx}"></input>
+                        </div>
+                        <div class="col-sm-3">
                           <div class="checkbox">
                             <label class="col-sm-offset-2 control-label">
-                              <input type="checkbox" data-bind="checked: data.payment${idx}Focus" aria-label="${i18n.t('app.company.paymentOptFocusHeader', {nr: '${idx}'})}">
-                              ${i18n.t('app.company.paymentOptFocusHeader', {nr: "${idx}"})}
+                              <input type="checkbox" data-bind="checked: data.payment${idx}Focus" aria-label="${i18n.t('app.company.paymentOptFocusLbl')}">
+                              ${i18n.t('app.company.paymentOptFocusLbl')}
                             </label>
                           </div>
                         </div>
                       </div>
-                      <div class="form-group">
-                        <label for="payCustomText" class="col-sm-2 control-label">${i18n.t('app.company.paymentOptCustomTextHeader')}</label>
-                        <div class="col-sm-4">
+                      <hr/>
+                      <div class="row"> 
+                        <label for="payCustomText" class="col-md-2 control-label">${i18n.t('app.company.paymentOptCustomTextHeader')}</label>
+                        <div class="col-md-3">
                           <input type="text" id="payCustomText" class="form-control" data-bind="value: data.paymentCustomText"></input>
                         </div>
                       </div>
@@ -372,14 +381,14 @@
                       </div>
                     </div>
                   </div>
-                  <br/>
-                  <div class="btn-group">
-                    <button type="button" class="btn btn-success" data-bind="click: saveCompany">
-                      <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
-                      ${i18n.t('app.company.companySaveBtn')}
-                    </button>
-                  </div>
                 </div>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-success" data-bind="click: saveCompany">
+                    <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+                    ${i18n.t('app.company.companySaveBtn')}
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div id="app-customer" data-bind="visible: currentView() == 'customers'">
