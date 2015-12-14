@@ -128,6 +128,9 @@
             "logoSelectPlaceholder": "Select logo...",
             "logoUploadBtn": "Upload",
             "logoImgAltText": "Company Logo",
+            "logoUploadCompanyNotSavedText": [
+                "It's not possible to select a logo until the company is created.",
+                "First, create the company by clicking save. Then select a logo."],
             "companySaveBtn": "Save",
             "getNok": "Failed to get company!",
             "saveOk": "Company <strong>__name__</strong> created.",

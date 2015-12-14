@@ -128,6 +128,9 @@
             "logoSelectPlaceholder": "Välj logotyp...",
             "logoUploadBtn": "Ladda upp",
             "logoImgAltText": "Företagslogotyp",
+            "logoUploadCompanyNotSavedText": [
+                "Det går inte att ange logotyp förän företaget är skapat.",
+                "Skapa företaget genom att spara det. Därefter kan du välja en logotyp."],
             "companySaveBtn": "Spara",
             "getNok": "Misslyckades att hämta företag!",
             "saveOk": "Företag <strong>__name__</strong> skapat.",

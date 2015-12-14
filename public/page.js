@@ -220,6 +220,7 @@ var CompanyViewModel = function() {
             {context: tContext, name: data.company.name}));
         self.uid(data.company.uid);
         self._id(data.company._id);
+        self.logo(data.company.logo);
         self.isValid(data.company.isValid);
         if (onCompletion !== undefined) {
           onCompletion(data.company);
@@ -349,6 +350,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
   var self = this;
 
   self.data = new CompanyViewModel();
+  self.companyLogoInput = ko.observable();
 
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
@@ -356,8 +358,8 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
   self.onCompanyChange = onCompanyChange;
   
   self.logoPath = ko.pureComputed(function() {
-    var path = "#";
-    if (self.data._id() !== undefined) {
+    var path = "";
+    if (self.data._id() !== undefined && self.data.logo() !== undefined) {
       path = "/api/company_logo/" + self.data._id();
     }
     return path;
@@ -368,6 +370,8 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
     var viewArray = newValue.split("/");
     if (viewArray[0] == 'company_new') {
       console.log("page.js - CompanyNewViewModel - activated");
+      self.companyLogoInput("");
+      document.getElementById("companyLogoImg").src = "";
       self.data.init();
     } else if (viewArray[0] == 'company_show' && viewArray.length > 1) {
       var _id = viewArray[1];
@@ -417,7 +421,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
     } else if (formElement.elements.logo.value.length == 0) {
       Notify_showMsg('error', i18n.t("app.company.uploadLogoNok", {context: "noFile"}));
     } else {
-      formElement.action = formElement.action + "/" + _id;
+      formElement.action = "/api/company_logo/" + _id;
       submitForm = true;
     }
     return submitForm;

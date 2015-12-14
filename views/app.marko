@@ -354,29 +354,32 @@
                       <h3 class="panel-title">${i18n.t('app.company.logoPaneHeader')}</h3>
                     </div>
                     <div class="panel-body">
-                      <div class="row">
-                        <form class="form-horizontal"
-                              action="/api/company_logo"
-                              accept="image/gif, image/jpeg, image/png"
-                              method="POST"
-                              enctype="multipart/form-data"
-                              data-bind="submit: uploadLogo">
-                          <div class="col-sm-6">
-                            <div class="input-group">
-                              <input type="file" name="logo" id="companyLogoInput" class="form-control" placeholder="${i18n.t('app.company.logoSelectPlaceholder')}"></input>
-                              <span class="input-group-btn">
-                                <button class="btn btn-default" type="submit">
-                                  <span class="glyphicon glyphicon-upload" aria-hidden="true"></span>
-                                  ${i18n.t('app.company.logoUploadBtn')}
-                                </button>
-                              </span>
+                      <p data-bind="visible: data._id() == undefined">${i18n.t('app.company.logoUploadCompanyNotSavedText')}</p>
+                      <div data-bind="visible: data._id() != undefined">
+                        <div class="row">
+                          <form class="form-horizontal"
+                                action="/api/company_logo"
+                                accept="image/gif, image/jpeg, image/png"
+                                method="POST"
+                                enctype="multipart/form-data"
+                                data-bind="submit: uploadLogo">
+                            <div class="col-sm-6">
+                              <div class="input-group">
+                                <input type="file" name="logo" id="companyLogoInput" class="form-control" placeholder="${i18n.t('app.company.logoSelectPlaceholder')}" data-bind="value: companyLogoInput"></input>
+                                <span class="input-group-btn">
+                                  <button class="btn btn-default" type="submit" data-bind="css: {'btn-primary': companyLogoInput() != ''}">
+                                    <span class="glyphicon glyphicon-upload" aria-hidden="true"></span>
+                                    ${i18n.t('app.company.logoUploadBtn')}
+                                  </button>
+                                </span>
+                              </div>
                             </div>
+                          </form>
+                        </div>
+                        <div class="row">
+                          <div class="col-sm-6">
+                            <img id="companyLogoImg" data-bind="attr: { src: logoPath }" class="img-thumbnail"/>
                           </div>
-                        </form>
-                      </div>
-                      <div class="row">
-                        <div class="col-sm-6">
-                          <img alt="${i18n.t('app.company.logoImgAltText')}" id="companyLogoImg" data-bind="attr: { src: logoPath }" class="img-thumbnail"/>
                         </div>
                       </div>
                     </div>
