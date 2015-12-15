@@ -104,6 +104,7 @@
             "paymentOptFocusHeader": "Betona betalningsalternativ",
             "paymentOptFocusLbl": "Betona",
             "paymentOptCustomTextHeader": "Valfritt textfält",
+            "paymentOptDefNumDaysUntilPayLbl": "Betalningsvillkor (dagar)",
             "vatInfoPaneHeader": "Momsinfo",
             "vatInfoVatNrLbl": "Momsregnr",
             "vatInfoCustomTextLbl": "Valfritt textfält",

@@ -104,6 +104,7 @@
             "paymentOptFocusHeader": "Emphasize payment option",
             "paymentOptFocusLbl": "Emphasize",
             "paymentOptCustomTextHeader": "Custom text",
+            "paymentOptDefNumDaysUntilPayLbl": "Number of days until payment",
             "vatInfoPaneHeader": "VAT info",
             "vatInfoVatNrLbl": "VAT nr",
             "vatInfoCustomTextLbl": "Custom text",

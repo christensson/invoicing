@@ -113,6 +113,7 @@ var CompanyViewModel = function() {
   self.payment1Focus = ko.observable();
   self.payment2Focus = ko.observable();
   self.paymentCustomText = ko.observable();
+  self.defaultNumDaysUntilPayment = ko.observable();
   self.vatNr = ko.observable();
   self.vatNrCustomText = ko.observable();
   self.reverseChargeText = ko.observable();
@@ -146,6 +147,7 @@ var CompanyViewModel = function() {
     self.payment1Focus(data.payment1Focus);
     self.payment2Focus(data.payment2Focus);
     self.paymentCustomText(data.paymentCustomText);
+    self.defaultNumDaysUntilPayment(data.defaultNumDaysUntilPayment);
     self.vatNr(data.vatNr);
     self.vatNrCustomText(data.vatNrCustomText);
     self.reverseChargeText(data.reverseChargeText);
@@ -176,6 +178,7 @@ var CompanyViewModel = function() {
         payment1Focus : true,
         payment2Focus : false,
         paymentCustomText : i18n.t("app.company.defaultPaymentCustomText"),
+        defaultNumDaysUntilPayment : 30,
         vatNr : "",
         vatNrCustomText : i18n.t("app.company.defaultVatNrCustomText"),
         reverseChargeText : i18n.t("app.company.defaultReverseChargeCustomText"),
@@ -250,6 +253,7 @@ var CompanyViewModel = function() {
       payment1Focus : self.payment1Focus(),
       payment2Focus : self.payment2Focus(),
       paymentCustomText : self.paymentCustomText(),
+      defaultNumDaysUntilPayment : self.defaultNumDaysUntilPayment(),
       vatNr : self.vatNr(),
       vatNrCustomText : self.vatNrCustomText(),
       reverseChargeText : self.reverseChargeText(),
@@ -262,7 +266,7 @@ var CompanyViewModel = function() {
   };
 };
 
-var CompanyListViewModel = function(currentView, activeCompanyId, activeCompanyName, companyList) {
+var CompanyListViewModel = function(currentView, activeCompanyId, activeCompany, companyList) {
   var self = this;
 
   self.currentView = currentView;
@@ -275,7 +279,7 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompanyN
   });
 
   self.activeCompanyId = activeCompanyId;
-  self.activeCompanyName = activeCompanyName;
+  self.activeCompany = activeCompany;
   self.companyList = companyList;
 
   self.populate = function() {
@@ -308,7 +312,6 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompanyN
   self.activateCompany = function(c) {
     console.log("Activate company: name=" + c.name() + ", _id=" + c._id());
     self.activeCompanyId(c._id());
-    self.activeCompanyName(c.name());
   };
 
   self.setActiveCompanyId = function(id) {
@@ -319,34 +322,34 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompanyN
   self.activeCompanyId.subscribe(function(newValue) {
     console.log("CompanyListViewModel - activeCompanyId.subscribe: value="
         + newValue);
-    self.updateActiveCompanyName(newValue, self.companyList());
+    self.updateActiveCompany(newValue, self.companyList());
   });
 
   self.companyList.subscribe(function(changes) {
     console.log("CompanyListViewModel - companyList.subscribe changes="
         + JSON.stringify(changes));
-    self.updateActiveCompanyName(self.activeCompanyId(), changes);
+    self.updateActiveCompany(self.activeCompanyId(), changes);
   });
 
-  self.updateActiveCompanyName = function(id, companyList) {
+  self.updateActiveCompany = function(id, companyList) {
     console
-        .log("CompanyListViewModel - updateActiveCompanyName: companyList.length="
+        .log("CompanyListViewModel - updateActiveCompany: companyList.length="
             + companyList.length + ", id=" + id);
     for ( var i = 0; i < companyList.length; i++) {
-      var name = companyList[i].name();
-      console.log("CompanyListViewModel - updateActiveCompanyName: i=" + i
-          + ", name=" + name + ", id=" + companyList[i]._id());
-      if (companyList[i]._id() == id) {
-        console.log("CompanyListViewModel - updateActiveCompanyName: found "
+      var c = companyList[i];
+      console.log("CompanyListViewModel - updateActiveCompany: i=" + i
+          + ", name=" + c.name() + ", id=" + c._id());
+      if (c._id() == id) {
+        console.log("CompanyListViewModel - updateActiveCompany: found "
             + name + " for id=" + id);
-        self.activeCompanyName(name);
+        self.activeCompany(c);
         break;
       };
     };
   };
 };
 
-var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyName, onCompanyChange) {
+var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany, onCompanyChange) {
   var self = this;
 
   self.data = new CompanyViewModel();
@@ -354,7 +357,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
 
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
-  self.activeCompanyName = activeCompanyName;
+  self.activeCompany = activeCompany;
   self.onCompanyChange = onCompanyChange;
   
   self.logoPath = ko.pureComputed(function() {
@@ -403,10 +406,10 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
       if (prevActiveCompanyId == null) {
         console.log("page.js - CompanyNewViewModel - No previosly active company, setting to new one - id=" + c._id);
         self.activeCompanyId(c._id);
-        self.activeCompanyName(c.name);
       } else if (c._id == self.activeCompanyId()) {
         console.log("page.js - CompanyNewViewModel - active company updated - id=" + self.activeCompanyId());
-        self.activeCompanyName(c.name);
+        // c.name in this case is not a function. Fix done in activeCompany.subscribe()
+        self.activeCompany(c);
       }
       self.onCompanyChange();
     });
@@ -1101,18 +1104,18 @@ var InvoiceCustomerModel = function(data) {
   };
 };
 
-var InvoiceNewViewModel = function(currentView, activeCompanyId, settings) {
+var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) {
   var self = this;
 
   self.data = new InvoiceDataViewModel();
 
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
+  self.activeCompany = activeCompany;
   self.customerList = ko.observableArray();
   self.selectedCustomer = ko.observable();
   self.currencyList = ko.observableArray(["SEK", "EUR", "USD", "GBP"]);
   self.selectedCurrency = ko.observable();
-  self.settings = settings;
   self.numServerReqLeft = 0;
 
   self.currentView.subscribe(function(newValue) {
@@ -1121,7 +1124,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, settings) {
     var viewArray = newValue.split("/");
     if (viewArray[0] == 'invoice_new') {
       console.log("page.js - InvoiceNewViewModel - activated");
-      self.data.init(settings.defaultNumDaysUntilPayment());
+      self.data.init(self.activeCompany().defaultNumDaysUntilPayment());
       self.data.setCompanyId(self.activeCompanyId());
       self.numServerReqLeft = 1;
       self.populate();
@@ -1378,12 +1381,26 @@ var NavViewModel = function() {
 
   self.currentView = ko.observable("");
   self.activeCompanyId = ko.observable();
+  self.activeCompany = ko.observable();
   self.activeCompanyName = ko.observable(i18n.t('app.navBar.noCompanyName'));
   self.companyList = ko.observableArray();
 
   self.selectView = function(view) {
     location.hash = view.name;
   };
+  
+  self.activeCompany.subscribe(function(c) {
+    if (c != undefined) {
+      console.log("Active company change detected: new=" + JSON.stringify(c) + ", c.name type is " + typeof c.name);
+      // Fix for problem when c.name is not a function in case activeCompany()
+      // is set when updating currently active company
+      if (typeof c.name === "function") {
+        self.activeCompanyName(c.name());
+      } else {
+        self.activeCompanyName(c.name);
+      }
+    }
+  });
   
   self.selectCompany = function(company) {
     console.log("page.js - navigation - selectCompany: " + JSON.stringify(company));
@@ -1535,13 +1552,11 @@ var setupKo = function() {
   var navViewModel = new NavViewModel();
   var settings = new SettingsDataModel();
   var companyViewModel = new CompanyListViewModel(navViewModel.currentView,
-      navViewModel.activeCompanyId, navViewModel.activeCompanyName, navViewModel.companyList);
+      navViewModel.activeCompanyId, navViewModel.activeCompany, navViewModel.companyList);
   var settingsViewModel = new SettingsViewModel(navViewModel.currentView,
       settings, navViewModel.activeCompanyId, companyViewModel.setActiveCompanyId);
   var companyNewViewModel = new CompanyNewViewModel(navViewModel.currentView,
-      navViewModel.activeCompanyId,
-      navViewModel.activeCompanyName,
-      companyViewModel.populate);
+      navViewModel.activeCompanyId, navViewModel.activeCompany, companyViewModel.populate);
   var customerListViewModel = new CustomerListViewModel(
       navViewModel.currentView, navViewModel.activeCompanyId);
   var customerNewViewModel = new CustomerNewViewModel(navViewModel.currentView,
@@ -1549,7 +1564,7 @@ var setupKo = function() {
   var invoiceListViewModel = new InvoiceListViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId);
   var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView,
-      navViewModel.activeCompanyId, settings);
+      navViewModel.activeCompanyId, navViewModel.activeCompany);
   var debugViewModel = new DebugViewModel(navViewModel.currentView);
   var gettingStartedViewModel = new GettingStartedViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId);
