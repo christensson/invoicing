@@ -441,7 +441,8 @@
             </div>
 
             <div id="app-customer_new" data-bind="visible: currentView() == 'customer_new' || (currentView() != undefined && currentView().search('customer_show') == 0)">
-                <div class="form-horizontal">
+              <div class="form-horizontal">
+                <div class="panel-group">
                   <div class="panel panel-default">
                     <div class="panel-heading">
                       <h3 class="panel-title">${i18n.t('app.customer.generalInfoPaneHeader')}</h3>
@@ -510,14 +511,14 @@
                       </div>
                     </div>
                   </div>
-                  <br/>
-                  <div class="btn-group">
-                    <button type="button" class="btn btn-success" data-bind="click: saveCustomer">
-                      <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
-                      ${i18n.t('app.customer.saveBtn')}
-                    </button>
-                  </div>
                 </div>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-success" data-bind="click: saveCustomer">
+                    <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+                    ${i18n.t('app.customer.saveBtn')}
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div id="app-invoices" data-bind="visible: currentView() == 'invoices'">
