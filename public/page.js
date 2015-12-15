@@ -375,6 +375,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompanyNa
       self.data.init();
     } else if (viewArray[0] == 'company_show' && viewArray.length > 1) {
       var _id = viewArray[1];
+      self.companyLogoInput("");
       console.log("page.js - CompanyNewViewModel - activated - show #" + _id);
       self.getCompany(_id);
     }
