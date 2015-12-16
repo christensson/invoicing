@@ -206,7 +206,7 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
                fontSize: c.payment2Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
                fontBold: c.payment2Focus}
              ], {border: 0});
-    if (c.addr3 || c.contact3 || c.payment3 || c.paymentCustomText) {
+    if (c.addr3 || c.contact3 || c.payment3) {
       x.band( [
                {data: c.addr3, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
                {data: c.contact3Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
@@ -216,7 +216,7 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
       x.band( [
                {data: "", width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
                {data: c.contact3, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
-               {data: c.paymentCustomText, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
+               {data: "", width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
                {data: c.payment3, width: companyDetailsColSize[1], align: x.left,
                  fontSize: c.payment3Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
                  fontBold: c.payment3Focus}
@@ -254,11 +254,13 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
   };
 
   var finalsummary = function(x, r) {
+    var company = invoice.company;
+    var cust = invoice.customer;
     var totalVat = invoice.totalInclVat - invoice.totalExclVat;
     totalVat = parseFloat(totalVat.toFixed(2));
     var totalExclVat = invoice.totalExclVat;
     totalExclVat = parseFloat(totalExclVat.toFixed(2));
-    var useReverseCharge = invoice.customer.useReverseCharge === true;
+    var useReverseCharge = cust.useReverseCharge === true;
     var amountToPay = useReverseCharge?invoice.totalExclVat:invoice.totalInclVat;
     var amountToPayAdjustment = calcPaymentAdjustment(amountToPay);
     amountToPay = amountToPay + amountToPayAdjustment;
@@ -286,8 +288,13 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
       x.newLine();
       x.fontSize(detailsSummaryCustomTextFontSize);
     
-      var reverseChargeText = formatTextTemplate(invoice.company.reverseChargeText, invoice.customer);
+      var reverseChargeText = formatTextTemplate(company.reverseChargeText, cust);
       x.print(reverseChargeText, {fontBold: 0, border: 0, wrap: 1});
+    }
+    if (company.paymentCustomText) {
+      x.newLine();
+      x.fontSize(detailsSummaryCustomTextFontSize);
+      x.print(company.paymentCustomText, {fontBold: 0, border: 0, wrap: 1});
     }
   };
 
