@@ -231,6 +231,9 @@
             "getNok_noCompany": "Cannot get invoices! Company not selected or doesn't exist.",
             "printNok_noId": "Cannot print invoice without id!"
         },
+        "invoiceReport": {
+            "fileName": "invoice-__iid__-customer-__cid__.pdf"
+        },
         "debugAndTest": {
             "pageHeader": "Debug and Test",
             "showSpinnerBtn": "Show spinner",

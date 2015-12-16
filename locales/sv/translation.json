@@ -231,6 +231,9 @@
             "getNok_noCompany": "Misslyckades med att hämta fakturor! Företag ej valt eller ogiltigt.",
             "printNok_noId": "Utskriften misslyckades, fakturan har inget id!"
         },
+        "invoiceReport": {
+            "fileName": "faktura-__iid__-kund-__cid__.pdf"
+        },
         "debugAndTest": {
             "pageHeader": "Debug och Test",
             "showSpinnerBtn": "Visa spinner",

@@ -1,5 +1,6 @@
 var Report = require('fluentreports').Report;
 var util = require('./public/util.js');
+var i18n = require('i18next');
 
 module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, debug) {
   'use strict';
@@ -205,18 +206,20 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
                fontSize: c.payment2Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
                fontBold: c.payment2Focus}
              ], {border: 0});
-    if (c.addr3 || c.contact3 || c.paymentCustomText) {
+    if (c.addr3 || c.contact3 || c.payment3 || c.paymentCustomText) {
       x.band( [
                {data: c.addr3, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
                {data: c.contact3Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
                {data: "", width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize},
-               {data: "", width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsHeaderFontSize}
+               {data: c.payment3Caption, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsHeaderFontSize}
                ], {border: 0});
       x.band( [
                {data: "", width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
                {data: c.contact3, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
-               {data: "", width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
-               {data: c.paymentCustomText, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize}
+               {data: c.paymentCustomText, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
+               {data: c.payment3, width: companyDetailsColSize[1], align: x.left,
+                 fontSize: c.payment3Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
+                 fontBold: c.payment3Focus}
                ], {border: 0});
     }
     x.addY(6);
@@ -290,7 +293,7 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
 
 
   // You don't have to pass in a report name; it will default to "report.pdf"
-  var reportName = "report.pdf";
+  var reportName = i18n.t('app.invoiceReport.fileName', {'cid': invoice.customer.cid, 'iid': invoice.iid});
 
   var rpt = new Report(reportName)
       .margins(margin)

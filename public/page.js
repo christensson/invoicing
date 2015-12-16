@@ -105,10 +105,13 @@ var CompanyViewModel = function() {
   self.contact3 = ko.observable();
   self.payment1Caption = ko.observable();
   self.payment2Caption = ko.observable();
+  self.payment3Caption = ko.observable();
   self.payment1 = ko.observable();
   self.payment2 = ko.observable();
+  self.payment3 = ko.observable();
   self.payment1Focus = ko.observable();
   self.payment2Focus = ko.observable();
+  self.payment3Focus = ko.observable();
   self.paymentCustomText = ko.observable();
   self.defaultNumDaysUntilPayment = ko.observable();
   self.vatNr = ko.observable();
@@ -139,10 +142,13 @@ var CompanyViewModel = function() {
     self.contact3(data.contact3);
     self.payment1Caption(data.payment1Caption);
     self.payment2Caption(data.payment2Caption);
+    self.payment3Caption(data.payment3Caption);
     self.payment1(data.payment1);
     self.payment2(data.payment2);
+    self.payment3(data.payment3);
     self.payment1Focus(data.payment1Focus);
     self.payment2Focus(data.payment2Focus);
+    self.payment3Focus(data.payment3Focus);
     self.paymentCustomText(data.paymentCustomText);
     self.defaultNumDaysUntilPayment(data.defaultNumDaysUntilPayment);
     self.vatNr(data.vatNr);
@@ -170,10 +176,13 @@ var CompanyViewModel = function() {
         contact3 : "",
         payment1Caption : i18n.t("app.company.defaultPayment1Caption"),
         payment2Caption : i18n.t("app.company.defaultPayment2Caption"),
+        payment3Caption : "",
         payment1 : "",
         payment2 : "",
+        payment3 : "",
         payment1Focus : true,
         payment2Focus : false,
+        payment3Focus : false,
         paymentCustomText : i18n.t("app.company.defaultPaymentCustomText"),
         defaultNumDaysUntilPayment : 30,
         vatNr : "",
@@ -245,10 +254,13 @@ var CompanyViewModel = function() {
       contact3 : self.contact3(),
       payment1Caption : self.payment1Caption(),
       payment2Caption : self.payment2Caption(),
+      payment3Caption : self.payment3Caption(),
       payment1 : self.payment1(),
       payment2 : self.payment2(),
+      payment3 : self.payment3(),
       payment1Focus : self.payment1Focus(),
       payment2Focus : self.payment2Focus(),
+      payment3Focus : self.payment3Focus(),
       paymentCustomText : self.paymentCustomText(),
       defaultNumDaysUntilPayment : self.defaultNumDaysUntilPayment(),
       vatNr : self.vatNr(),
