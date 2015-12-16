@@ -434,13 +434,11 @@ module.exports.init = function(doneCb) {
                         {
                           uid: testUserId,
                           activeCompanyId: ObjectID(testCompany1._id),
-                          defaultNumDaysUntilPayment: 30,
                           license: "unlimited",
                         },
                         {
                           uid: machUserId,
                           activeCompanyId: ObjectID(machCompany1._id),
-                          defaultNumDaysUntilPayment: 25,
                           license: "demo",
                         }
                         ];
@@ -473,6 +471,7 @@ module.exports.init = function(doneCb) {
                           addr1: "TestStorgatan 1",
                           addr2: "414 62 Göteborg",
                           phone1: "0706-580222",
+                          defaultNumDaysUntilPayment: 25,
                           useReverseCharge: false,
                           isValid: true
                         },
@@ -492,6 +491,7 @@ module.exports.init = function(doneCb) {
                           addr2: "414 62 Göteborg",
                           phone1: "0706-580223",
                           vatNr: "SE401212567801",
+                          defaultNumDaysUntilPayment: 30,
                           useReverseCharge: true,
                           isValid: true
                         },
@@ -503,6 +503,7 @@ module.exports.init = function(doneCb) {
                           addr1: "2 TestNygata 2",
                           addr2: "2 414 62 Göteborg",
                           phone1: "2 0706-580223",
+                          defaultNumDaysUntilPayment: 30,
                           isValid: true
                         },
                         {

@@ -109,50 +109,51 @@
                   <p data-bind="i18n: 'app.home.greetingsText'"></p>
 
                   <p></p>
-
-                  <div class="col-md-4">
-                    <div class="panel" data-bind='css: {"panel-primary": numCompanies() == 0, "panel-success": numCompanies() > 0}'>
-                      <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.companiesHeader')}</h3></div>
-                      <div class="panel-body">
-                        <p><span data-bind="html: companiesTextTrans"></span></p>
-                        <div class="btn-group">
-                          <a href="#/page/company_new" type="button" class="btn btn-success">
-                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                            ${i18n.t('app.gettingStarted.companiesNewCompanyBtn')}
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-  
-                  <div class="col-md-4">
-                    <div data-bind="if: numCompanies() > 0">
-                      <div class="panel" data-bind='css: {"panel-primary": numCustomers() == 0, "panel-success": numCustomers() > 0}'>
-                        <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.customersHeader')}</h3></div>
+                  <div class="panel-group">
+                    <div class="col-md-4">
+                      <div class="panel" data-bind='css: {"panel-primary": numCompanies() == 0, "panel-success": numCompanies() > 0}'>
+                        <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.companiesHeader')}</h3></div>
                         <div class="panel-body">
-                          <p><span data-bind="html: customersTextTrans"></span></p>
+                          <p><span data-bind="html: companiesTextTrans"></span></p>
                           <div class="btn-group">
-                            <a href="#/page/customer_new" type="button" class="btn btn-success">
+                            <a href="#/page/company_new" type="button" class="btn btn-success">
                               <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                              ${i18n.t('app.gettingStarted.customersNewCustomerBtn')}
+                              ${i18n.t('app.gettingStarted.companiesNewCompanyBtn')}
                             </a>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div class="col-md-4">
-                    <div data-bind="if: numCustomers() > 0">
-                      <div class="panel" data-bind='css: {"panel-primary": numInvoices() == 0, "panel-success": numInvoices() > 0}'>
-                        <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.invoicesHeader')}</h3></div>
-                        <div class="panel-body">
-                          <p><span data-bind="html: invoicesTextTrans"></span></p>
-                          <div class="btn-group">
-                            <a href="#/page/invoice_new" type="button" class="btn btn-success">
-                              <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                              ${i18n.t('app.gettingStarted.invoicesNewInvoiceBtn')}
-                            </a>
+    
+                    <div class="col-md-4">
+                      <div data-bind="if: numCompanies() > 0">
+                        <div class="panel" data-bind='css: {"panel-primary": numCustomers() == 0, "panel-success": numCustomers() > 0}'>
+                          <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.customersHeader')}</h3></div>
+                          <div class="panel-body">
+                            <p><span data-bind="html: customersTextTrans"></span></p>
+                            <div class="btn-group">
+                              <a href="#/page/customer_new" type="button" class="btn btn-success">
+                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                ${i18n.t('app.gettingStarted.customersNewCustomerBtn')}
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <div data-bind="if: numCustomers() > 0">
+                        <div class="panel" data-bind='css: {"panel-primary": numInvoices() == 0, "panel-success": numInvoices() > 0}'>
+                          <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.invoicesHeader')}</h3></div>
+                          <div class="panel-body">
+                            <p><span data-bind="html: invoicesTextTrans"></span></p>
+                            <div class="btn-group">
+                              <a href="#/page/invoice_new" type="button" class="btn btn-success">
+                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                ${i18n.t('app.gettingStarted.invoicesNewInvoiceBtn')}
+                              </a>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -918,10 +919,6 @@
                       <div class="form-group">
                         <label for="regDate" class="control-label">${i18n.t('app.settings.regDateLbl')}</label>
                         <p class="form-control-static" id="regDate">$data.user.registrationDate</p>
-                      </div>
-                      <div class="form-group">
-                        <label for="defNumDaysUntilPayment" class="control-label">${i18n.t('app.settings.defNumDaysUntilPayLbl')}</label>
-                        <input type="number" class="form-control" id="defNumDaysUntilPayment" placeholder="30" data-bind="value: settings.defaultNumDaysUntilPayment">
                       </div>
                       <div class="btn-group">
                         <button type="button" class="btn btn-success" data-bind="click: saveSettings">

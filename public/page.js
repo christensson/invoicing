@@ -3,13 +3,11 @@ var SettingsDataModel = function() {
 
   self._id = ko.observable();
   self.activeCompanyId = ko.observable();
-  self.defaultNumDaysUntilPayment = ko.observable();
   self.license = ko.observable();
 
   self.setData = function(data) {
     self._id(data._id);
     self.activeCompanyId(data.activeCompanyId);
-    self.defaultNumDaysUntilPayment(data.defaultNumDaysUntilPayment);
     self.license(data.license);
 
     for (var prop in data) {
@@ -27,7 +25,6 @@ var SettingsDataModel = function() {
     var data = {
         _id: self._id(),
         activeCompanyId: self.activeCompanyId(),
-        defaultNumDaysUntilPayment: self.defaultNumDaysUntilPayment(),
         license: self.license(),
     };
     return data;
