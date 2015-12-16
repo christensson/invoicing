@@ -256,9 +256,9 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
   var finalsummary = function(x, r) {
     var company = invoice.company;
     var cust = invoice.customer;
-    var totalVat = invoice.totalInclVat - invoice.totalExclVat;
-    totalVat = parseFloat(totalVat.toFixed(2));
     var totalExclVat = invoice.totalExclVat;
+    var totalVat = invoice.totalInclVat - totalExclVat;
+    totalVat = parseFloat(totalVat.toFixed(2));
     totalExclVat = parseFloat(totalExclVat.toFixed(2));
     var useReverseCharge = cust.useReverseCharge === true;
     var amountToPay = useReverseCharge?invoice.totalExclVat:invoice.totalInclVat;

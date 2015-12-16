@@ -701,7 +701,7 @@ var InvoiceItemViewModel = function(data, currency) {
   self.isValid = ko.observable(data.isValid);
   self.total = ko.pureComputed(function() {
     var total = parseFloat(this.count()) * parseFloat(this.price())
-        * (1.0 - parseFloat(this.discount()));
+        * (1.0 - (parseFloat(this.discount()) / 100.0));
     return total;
   }, self);
 
@@ -834,8 +834,8 @@ var InvoiceDataViewModel = function() {
     var sum = 0;
     for ( var i = 0; i < this.invoiceItems().length; i++) {
       if (this.invoiceItems()[i].isValid()) {
-        sum += this.invoiceItems()[i].total()
-            * (1 + parseFloat(this.invoiceItems()[i].vat()));
+        var vat = parseFloat(this.invoiceItems()[i].vat()) / 100.0;
+        sum += this.invoiceItems()[i].total() * (1 + vat);
       }
     }
     if (self.isCredit()) {
@@ -871,7 +871,7 @@ var InvoiceDataViewModel = function() {
       description : "",
       price : 0.0,
       count : 1.0,
-      vat : 0.25,
+      vat : 25,
       discount : 0.0,
       isValid : true
     };
