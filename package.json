@@ -4,7 +4,8 @@
   "description": "Invoicing made easy",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "start": "node app.js"
   },
   "author": "Marcus Christensson",
   "license": "BSD-2-Clause",

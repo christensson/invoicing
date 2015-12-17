@@ -25,6 +25,7 @@ args.version('0.0.1')
   .option('-l, --login <username,password>', 'Login with username and password', list)
   .option('--sim_latency', 'Simulate network latency')
   .option('--ssl', 'Start server on https')
+  .option('--monitor', 'Monitor used resources')
   .parse(process.argv);
 
 explicitUser = null;
@@ -614,10 +615,10 @@ app.get('/auth/google/callback',
       res.redirect(401, '/signin');
     });
 
-//start listening on port 3000
+//start listening on port 8080
 var server = require('./server');
 var serverSettings = {
-    port: 3000,
+    port: 8080,
     ssl: {
       active: args.ssl,
       key: "keys/key.pem",
@@ -633,3 +634,11 @@ server.create(serverSettings, app, function() {
   console.log('Started ' + protocol + ' server listening on port ' +
       serverSettings.port);
 });
+
+if (args.monitor) {
+  var intervalMs = 15 * 60 * 1000; // Every 15 min
+  setInterval(function() {
+    var memUsage = process.memoryUsage();
+    console.log("Memory usage: " + JSON.stringify(memUsage));
+  }, intervalMs);
+}
