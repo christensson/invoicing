@@ -24,6 +24,7 @@ function list(val) {
 args.version('0.0.1')
   .option('-l, --login <username,password>', 'Login with username and password', list)
   .option('--sim_latency', 'Simulate network latency')
+  .option('--ssl', 'Start server on https')
   .parse(process.argv);
 
 explicitUser = null;
@@ -59,7 +60,7 @@ app.use(bodyParser.urlencoded({
 app.use(cookieParser());
 app.use(methodOverride('X-HTTP-Method-Override'));
 app.use(session({
-  secret : 'keyboard cat',
+  secret : '345jlfe9324jfsdl2093xc',
   resave : false,
   saveUninitialized : false
 }));
@@ -90,14 +91,8 @@ i18n.init({
   supportedLngs: ['en', 'sv'],
   saveMissing: true,
   debug: true,
-  ignoreRoutes: ['uploads/', 'public/img/', 'public/', 'views/']}
-/*, function(t) {
-  // after initialisation with preloading needed languages
-  // you could add localizable routes:
-  i18n.addRoute('/:lng/route.products/route.harddrives/route.overview', ['sv', 'en'], app, 'get', function(req, res) {
-    // res.send(...);
-  });
-}*/);
+  ignoreRoutes: ['uploads/', 'public/img/', 'public/', 'views/']
+});
 
 app.use(i18n.handle);
 i18n.registerAppHelper(app);
@@ -620,4 +615,21 @@ app.get('/auth/google/callback',
     });
 
 //start listening on port 3000
-app.listen(3000);
+var server = require('./server');
+var serverSettings = {
+    port: 3000,
+    ssl: {
+      active: args.ssl,
+      key: "keys/key.pem",
+      certificate: "keys/cert.pem",
+    }
+};
+
+server.create(serverSettings, app, function() {
+  var protocol = "HTTP";
+  if (serverSettings.ssl.active) {
+    protocol = "HTTPS";
+  }
+  console.log('Started ' + protocol + ' server listening on port ' +
+      serverSettings.port);
+});
