@@ -36,6 +36,7 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
   var detailsFontSize = 10;
   var detailsSummaryFontSize = 10;
   var detailsSummaryCustomTextFontSize = 9;
+  var detailsRowSpacing = 3;
   var margin = 30;
   var pageFooterYOffset = -85;
   
@@ -254,7 +255,7 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
       {data: r.discount + '%', width: detailsColSize[3], align: x.right},
       {data: r.vat + '%', width: detailsColSize[4], align: x.right},
       {data: util.formatCurrency(r.total, invoice.currency), width: detailsColSize[5], align: x.right}
-    ], {border:0, width: 0, wrap: 1} );
+    ], {border:0, addY: detailsRowSpacing, width: 0, wrap: 1} );
   };
 
   var finalsummary = function(x, r) {

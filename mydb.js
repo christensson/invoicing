@@ -376,9 +376,11 @@ module.exports.init = function(doneCb) {
                          payment1: "1234-5879",
                          payment2Caption: "Postgiro",
                          payment2: "345659879",
+                         payment3Caption: "Swish",
+                         payment3: "0763350669",
                          paymentCustomText: "Dröjsmålsränta 25%",
                          vatNr: "SE501212456701",
-                         vatNrCustomText: "",
+                         vatNrCustomText: "Innehar F-skattebevis",
                          reverseChargeText: "Moms på byggtjänster har inte debiterats enligt Mervärdesskattelagen 1 kap 2§.\nKöparens momsregistreringsnr: %c.vatNr%",
                          "logo" : { "mimetype" : "image/png", "path" : "uploads/pepsi-logo.png", "originalname" : "pepsi-logo.png" },
                          isValid: true,
@@ -595,26 +597,26 @@ module.exports.init = function(doneCb) {
                          currency: "SEK",
                          invoiceItems: [
                                         {
-                                          description: "First",
-                                          price: 10.0,
+                                          description: "En väldigt lång rad som kan beskriva något extremt väl. Den kan fortsätta långt långt långt och innehålla många många tecken.",
+                                          price: 11002,
                                           count: 1,
-                                          discount: 0.0,
-                                          vat: 0.25,
-                                          total: 10.0,
+                                          discount: 0,
+                                          vat: 25,
+                                          total: 11002,
                                           isValid: true
                                         },
                                         {
-                                          description: "Second",
-                                          price: 100.0,
-                                          count: 3,
-                                          discount: 0.0,
-                                          vat: 0.25,
-                                          total: 300.0,
+                                          description: "Honungsburk 100g",
+                                          price: 1010.0,
+                                          count: 5,
+                                          discount: 10,
+                                          vat: 12.5,
+                                          total: 4545.0,
                                           isValid: true
                                         },
                                         ],
-                                        totalExclVat: 310.0,
-                                        totalInclVat: 387.5
+                                        totalExclVat: 15547.25,
+                                        totalInclVat: 18865.625
                        },
                        {
                          iid: testCompany1Iid++,
