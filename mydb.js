@@ -671,6 +671,7 @@ module.exports.getStats = function(uid, companyId) {
         "numInvoices": 0,
       },
       "activeCompany": {
+        "isSet": false,
         "numCustomers": 0,
         "numInvoices": 0,
       }
@@ -690,6 +691,7 @@ module.exports.getStats = function(uid, companyId) {
     } else {
       console.log("getStats: Active company is " + companyId);
       var ocompanyId = new ObjectID(companyId);
+      res.activeCompany.isSet = true;
       countAllDocsPromise('customer', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId}).then(function(count) {
         res.activeCompany.numCustomers = count;
         return countAllDocsPromise('invoice', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId});

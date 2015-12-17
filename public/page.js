@@ -47,21 +47,21 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
     }
   });
 
-  self.populate = function() {
+  self.populate = function(isPopulatedCb) {
     Notify_showSpinner(true);
     $.getJSON(
         "/api/settings",
         function(settings) {
           self.settings.setData(settings);
           self.setActiveCompanyId(settings.activeCompanyId);
-          self.activeCompanyId
-          .subscribe(function(newValue) {
+          self.activeCompanyId.subscribe(function(newValue) {
             console.log("page.js - SettingsViewModel - Active company change detected: ID="
                   + newValue);
             self.settings.setActiveCompanyId(newValue);
             self.saveSettings();
           });
           Notify_showSpinner(false);
+          isPopulatedCb();
         }).fail(function() {
           console.log("page.js - SettingsViewModel - populate - failed");
           Notify_showSpinner(false);
@@ -1490,20 +1490,23 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
     }
   }, self);
 
-  self.currentView.subscribe(function(newValue) {
-    if (newValue == 'home') {
-      console.log("page.js - GettingStartedViewModel - activated");
-      self.populate();
-    }
-  });
-  
-  self.activeCompanyId.subscribe(function(newValue) {
-    console.log("GettingStartedViewModel - activeCompanyId.subscribe: value="
-        + newValue);
-    if (self.currentView() == 'home') {
-      self.populate();
-    }
-  });
+  self.enable = function() {
+    self.populate();
+    self.currentView.subscribe(function(newValue) {
+      if (newValue == 'home') {
+        console.log("page.js - GettingStartedViewModel - activated");
+        self.populate();
+      }
+    });
+
+    self.activeCompanyId.subscribe(function(newValue) {
+      console.log("GettingStartedViewModel - activeCompanyId.subscribe: value="
+          + newValue);
+      if (self.currentView() == 'home') {
+        self.populate();
+      }
+    });
+  };
 
   self.populate = function() {
     $.getJSON(
@@ -1515,7 +1518,6 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
           console.log("page.js - GettingStartedViewModel - populate - failed");
         });
   };
-
 };
 
 var setupKo = function() {
@@ -1564,6 +1566,14 @@ var setupKo = function() {
       navViewModel.activeCompanyId, navViewModel.activeCompany, navViewModel.companyList);
   var settingsViewModel = new SettingsViewModel(navViewModel.currentView,
       settings, navViewModel.activeCompanyId, companyViewModel.setActiveCompanyId);
+  var gettingStartedViewModel = new GettingStartedViewModel(navViewModel.currentView,
+      navViewModel.activeCompanyId);
+
+  settingsViewModel.populate(function() {
+    companyViewModel.populate();
+    gettingStartedViewModel.enable();
+  });
+  
   var companyNewViewModel = new CompanyNewViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId, navViewModel.activeCompany, companyViewModel.populate);
   var customerListViewModel = new CustomerListViewModel(
@@ -1575,12 +1585,7 @@ var setupKo = function() {
   var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId, navViewModel.activeCompany);
   var debugViewModel = new DebugViewModel(navViewModel.currentView);
-  var gettingStartedViewModel = new GettingStartedViewModel(navViewModel.currentView,
-      navViewModel.activeCompanyId);
 
-  settingsViewModel.populate();
-  companyViewModel.populate();
-  
   ko.applyBindings(navViewModel, document.getElementById("app-navbar"));
 
   ko.applyBindings(companyViewModel, document.getElementById("app-companies"));
