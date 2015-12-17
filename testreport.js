@@ -1,5 +1,6 @@
 var reporter = require('./reporter.js');
 var mydb = require('./mydb.js');
+var mongodb = require('mongodb');
 var ObjectID = mongodb.ObjectID;
 Q = require('q');
 

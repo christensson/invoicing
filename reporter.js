@@ -229,7 +229,7 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
         ], {border: 0});
   };
 
-  var detailsColSize = [230, 80, 100, 120];
+  var detailsColSize = [200, 40, 80, 50, 50, 110];
   var detailsWidth = detailsColSize.reduce(function(a, b) { return a + b; });
   var invoiceDetailsHeader = function ( x, r ) {
     x.fontSize(detailsFontSize);
@@ -237,8 +237,10 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
     x.band( [
       {data: "Beskrivning", width: detailsColSize[0], align: x.left},
       {data: "Antal", width: detailsColSize[1], align: x.right},
-      {data: "Pris", width: detailsColSize[2], align: x.right},
-      {data: "Totalt", width: detailsColSize[3], align: x.right}
+      {data: "Á-pris", width: detailsColSize[2], align: x.right},
+      {data: "Rabatt", width: detailsColSize[3], align: x.right},
+      {data: "Moms", width: detailsColSize[4], align: x.right},
+      {data: "Totalt", width: detailsColSize[5], align: x.right}
     ], {fontBold: 1, border:0, width: 0, wrap: 1} );
     x.bandLine(1);
   };
@@ -249,7 +251,9 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
       {data: r.description, width: detailsColSize[0], align: x.left},
       {data: r.count, width: detailsColSize[1], align: x.right},
       {data: r.price, width: detailsColSize[2], align: x.right},
-      {data: util.formatCurrency(r.total, invoice.currency), width: detailsColSize[3], align: x.right}
+      {data: r.discount + '%', width: detailsColSize[3], align: x.right},
+      {data: r.vat + '%', width: detailsColSize[4], align: x.right},
+      {data: util.formatCurrency(r.total, invoice.currency), width: detailsColSize[5], align: x.right}
     ], {border:0, width: 0, wrap: 1} );
   };
 
@@ -301,6 +305,10 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
 
   // You don't have to pass in a report name; it will default to "report.pdf"
   var reportName = i18n.t('app.invoiceReport.fileName', {'cid': invoice.customer.cid, 'iid': invoice.iid});
+  if (reportName === "") {
+    reportName = "report.pdf";
+  }
+  console.log("Report name: " + reportName);
 
   var rpt = new Report(reportName)
       .margins(margin)
@@ -316,15 +324,12 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
     .footer(finalsummary)
     .header(invoiceDetailsHeader);
   
-
-
   // Debug output is always nice (Optional, to help you see the structure)
   rpt.printStructure();
 
-
   // This does the MAGIC...  :-)
   console.time("Rendered");
-  var a = rpt.render(function(err, name) {
+  rpt.render(function(err, name) {
       console.timeEnd("Rendered");
       if (err) {
           console.error("Report had an error",err);
