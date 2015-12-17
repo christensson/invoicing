@@ -251,7 +251,7 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
     x.band( [
       {data: r.description, width: detailsColSize[0], align: x.left},
       {data: r.count, width: detailsColSize[1], align: x.right},
-      {data: r.price, width: detailsColSize[2], align: x.right},
+      {data: util.formatCurrency(r.price, invoice.currency), width: detailsColSize[2], align: x.right},
       {data: r.discount + '%', width: detailsColSize[3], align: x.right},
       {data: r.vat + '%', width: detailsColSize[4], align: x.right},
       {data: util.formatCurrency(r.total, invoice.currency), width: detailsColSize[5], align: x.right}
