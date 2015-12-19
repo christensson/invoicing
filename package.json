@@ -10,6 +10,7 @@
   "author": "Marcus Christensson",
   "license": "BSD-2-Clause",
   "dependencies": {
+    "bcryptjs": "^2.3.0",
     "body-parser": "^1.14.2",
     "bootstrap": "^3.3.6",
     "commander": "^2.9.0",
