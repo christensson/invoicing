@@ -17,13 +17,15 @@ var generate_mongo_url = function(obj){
   }
 };
 
-var mongo = {
+var mongoLocal = {
     "hostname":"localhost",
     "port":27017,
     "username":"",
     "password":"",
     "name":"",
     "db":"mydb"};
+
+var mongo = require('./db_auth.json');
 
 var mongourl = generate_mongo_url(mongo);
 
