@@ -265,7 +265,7 @@ function getNextIidPromise(uid, companyId) {
   });
 }
 
-module.exports.init = function(doneCb) {
+module.exports.init = function(devMode, doneCb) {
   var machUserId = undefined;
   var testUserId = undefined;
   var machCompany1 = undefined;
@@ -280,6 +280,8 @@ module.exports.init = function(doneCb) {
   var machCompanyCid100 = undefined;
   var testCompanyCid100 = undefined;
   var testCompanyCid101 = undefined;
+  
+  console.log("Init DB: devMode=" + devMode + " using mongourl: " + mongourl);
 
   // Users
   dropCollectionPromise("invite").fail(function() {
