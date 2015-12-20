@@ -49,7 +49,7 @@ if (explicitUser !== null) {
 var smallLag = undefined;
 if (args.sim_latency) {
   console.log("Server started in NW latency simulation mode.");
-  smallLag = simLatency({ min: 100, max: 600 });
+  smallLag = simLatency({ min: 500, max: 1000 });
 }
 
 app = express();
