@@ -1495,7 +1495,7 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
     self.currentView.subscribe(function(newValue) {
       if (newValue == 'home') {
         console.log("page.js - GettingStartedViewModel - activated");
-        self.populate(true);
+        self.populate();
       }
     });
 
@@ -1503,28 +1503,22 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
       console.log("GettingStartedViewModel - activeCompanyId.subscribe: value="
           + newValue);
       if (self.currentView() == 'home') {
-        self.populate(true);
+        self.populate();
       }
     });
   };
 
-  self.populate = function(useSpinner) {
-    if (useSpinner) {
-      Notify_showSpinner(true);
-    }
+  self.populate = function() {
+    Notify_showSpinner(true);
     $.getJSON(
         "/api/stats/" + self.activeCompanyId(),
         function(stats) {
           console.log("Got stats id=" + self.activeCompanyId() + ", stats=" + JSON.stringify(stats));
           self.stats(stats);
-          if (useSpinner) {
-            Notify_showSpinner(false);
-          }
+          Notify_showSpinner(false);
         }).fail(function() {
           console.log("page.js - GettingStartedViewModel - populate - failed");
-          if (useSpinner) {
-            Notify_showSpinner(false);
-          }
+          Notify_showSpinner(false);
         });
   };
 };

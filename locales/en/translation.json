@@ -1,6 +1,6 @@
 {
     "signin": {
-        "tickerText": "Loading...",
+        "tickerText": "Loading",
         "lngSvBtn": "Svenska",
         "lngEnBtn": "English",
         "pageTitle": "Signin",
