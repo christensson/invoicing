@@ -247,15 +247,17 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
   };
 
   var invoiceDetails = function ( x, r ) {
-    x.fontSize(detailsFontSize);
-    x.band( [
-      {data: r.description, width: detailsColSize[0], align: x.left},
-      {data: r.count, width: detailsColSize[1], align: x.right},
-      {data: util.formatCurrency(r.price, invoice.currency), width: detailsColSize[2], align: x.right},
-      {data: r.discount + '%', width: detailsColSize[3], align: x.right},
-      {data: r.vat + '%', width: detailsColSize[4], align: x.right},
-      {data: util.formatCurrency(r.total, invoice.currency), width: detailsColSize[5], align: x.right}
-    ], {border:0, addY: detailsRowSpacing, width: 0, wrap: 1} );
+    if (r.isValid) {
+      x.fontSize(detailsFontSize);
+      x.band( [
+        {data: r.description, width: detailsColSize[0], align: x.left},
+        {data: r.count, width: detailsColSize[1], align: x.right},
+        {data: util.formatCurrency(r.price, invoice.currency), width: detailsColSize[2], align: x.right},
+        {data: r.discount + '%', width: detailsColSize[3], align: x.right},
+        {data: r.vat + '%', width: detailsColSize[4], align: x.right},
+        {data: util.formatCurrency(r.total, invoice.currency), width: detailsColSize[5], align: x.right}
+      ], {border:0, addY: detailsRowSpacing, width: 0, wrap: 1} );
+    }
   };
 
   var finalsummary = function(x, r) {

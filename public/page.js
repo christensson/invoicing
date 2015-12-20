@@ -762,8 +762,12 @@ var InvoiceDataViewModel = function() {
     self.currency(newData.currency);
     self.invoiceItems.removeAll();
     for ( var i = 0; i < newData.invoiceItems.length; i++) {
-      console.log("Push item i=" + i + " desc=" + newData.invoiceItems[i].description);
-      self.invoiceItems.push(new InvoiceItemViewModel(newData.invoiceItems[i], self.currency));
+      if (newData.invoiceItems[i].isValid) {
+        console.log("Push item i=" + i + " desc=" + newData.invoiceItems[i].description);
+        self.invoiceItems.push(new InvoiceItemViewModel(newData.invoiceItems[i], self.currency));
+      } else {
+        console.log("Skip invalid item i=" + i + " desc=" + newData.invoiceItems[i].description);
+      }
     }
   };
 
@@ -1134,6 +1138,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
     if (viewArray[0] == 'invoice_new') {
       console.log("page.js - InvoiceNewViewModel - activated");
       self.data.init(self.activeCompany().defaultNumDaysUntilPayment());
+      self.data.newInvoiceItem();
       self.data.setCompanyId(self.activeCompanyId());
       self.numServerReqLeft = 1;
       self.populate();
