@@ -26,6 +26,7 @@ args.version('0.0.1')
   .option('--sim_latency', 'Simulate network latency')
   .option('--ssl', 'Start server on https')
   .option('--monitor', 'Monitor used resources')
+  .option('--local_db', 'Use DB on localhost')
   .parse(process.argv);
 
 explicitUser = null;
@@ -105,6 +106,10 @@ i18n.serveClientScript(app)      // grab i18next.js in browser
 
 // App modules
 var mydb = require('./mydb.js');
+if (args.local_db) {
+  mydb.setLocalDb();
+}
+
 var reporter = require('./reporter.js');
 var funct = require('./functions.js');
 var googleAuth = require('./google_auth.json');

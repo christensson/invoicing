@@ -17,17 +17,20 @@ var generate_mongo_url = function(obj){
   }
 };
 
-var mongoLocal = {
-    "hostname":"localhost",
-    "port":27017,
-    "username":"",
-    "password":"",
-    "name":"",
-    "db":"mydb"};
-
 var mongo = require('./db_auth.json');
 
 var mongourl = generate_mongo_url(mongo);
+
+module.exports.setLocalDb = function() {
+  var mongoLocal = {
+      "hostname":"localhost",
+      "port":27017,
+      "username":"",
+      "password":"",
+      "name":"",
+      "db":"mydb"};
+  mongourl = generate_mongo_url(mongoLocal);
+};
 
 function dbop(opfunc) {
   mongodb.connect(mongourl, function(err, db){
@@ -265,7 +268,55 @@ function getNextIidPromise(uid, companyId) {
   });
 }
 
-module.exports.init = function(devMode, doneCb) {
+dropAllCollections = function() {
+  var deferred = Q.defer();
+  dropCollectionPromise("invite").fail(function() {
+    console.log("Drop collection invite failed!");
+  })
+  .then(function() {
+    return dropCollectionPromise("users");
+  })
+  .fail(function() {
+    console.log("Drop collection users failed!");
+  })
+  .then(function () {
+    return dropCollectionPromise("company");
+  })
+  .fail(function() {
+    console.log("Drop collection company failed!");
+  })
+  .then(function () {
+    return dropCollectionPromise("settings");
+  })
+  .fail(function() {
+    console.log("Drop collection settings failed!");
+  })
+  .then(function() {
+    return dropCollectionPromise("customer");
+  })
+  .fail(function() {
+    console.log("Drop collection customer failed!");
+  })
+  .then(function () {
+    return dropCollectionPromise("invoice");
+  })
+  .fail(function() {
+    console.log("Drop collection invoice failed!");
+  })
+  .done(function() {
+    deferred.resolve();
+  });
+  
+  return deferred.promise;
+};
+
+initCollectionsRelease = function(inviteList) {
+  return insertDataPromise("invite", inviteList);
+};
+
+initCollectionsDevel = function(inviteList) {
+  var deferred = Q.defer();
+
   var machUserId = undefined;
   var testUserId = undefined;
   var machCompany1 = undefined;
@@ -276,43 +327,12 @@ module.exports.init = function(devMode, doneCb) {
   var testCompany2Cid = 100;
   var machCompany1Iid = 100;
   var testCompany1Iid = 100;
-  var testCompany2Iid = 100;
   var machCompanyCid100 = undefined;
   var testCompanyCid100 = undefined;
   var testCompanyCid101 = undefined;
-  
-  console.log("Init DB: devMode=" + devMode + " using mongourl: " + mongourl);
 
-  // Users
-  dropCollectionPromise("invite").fail(function() {
-    console.log("Drop collection invite failed!");
-  })
-  .then(function() {
-    var inviteList = [
-                    {
-                      "email": "marcus@domain.se",
-                      "license": "demo",
-                      "isAdmin": "false"
-                    },
-                    {
-                      "email": "test@test.se",
-                      "license": "demo",
-                      "isAdmin": "false"
-                    },
-                    {
-                      "email": "marcus.christensson@gmail.com",
-                      "license": "unlimited",
-                      "isAdmin": "true"
-                    },
-                    ];
-    return insertDataPromise("invite", inviteList);
-  })
-  .then(function() {
-    return dropCollectionPromise("users");
-  })
-  .fail(function() {
-    console.log("Drop collection users failed!");
-  })
+  // Invitation list
+  insertDataPromise("invite", inviteList)
   .then(function() {
     var userList = [
                     {
@@ -347,12 +367,6 @@ module.exports.init = function(devMode, doneCb) {
     return Q();
   })
   // Companies
-  .then(function () {
-    return dropCollectionPromise("company");
-  })
-  .fail(function() {
-    console.log("Drop collection company failed!");
-  })
   .then(function() {
     var companyList = [
                        {
@@ -429,12 +443,6 @@ module.exports.init = function(devMode, doneCb) {
     return Q();
   })
   // Settings
-  .then(function () {
-    return dropCollectionPromise("settings");
-  })
-  .fail(function() {
-    console.log("Drop collection settings failed!");
-  })
   .then(function() {
     var settingsList = [
                         {
@@ -451,12 +459,6 @@ module.exports.init = function(devMode, doneCb) {
     return insertDataPromise("settings", settingsList);
   })
   // Customers
-  .then(function() {
-    return dropCollectionPromise('customer');
-  })
-  .fail(function() {
-    console.log("Drop collection customer failed!");
-  })
   .then(function() {
     var customerList = [
                         {
@@ -544,12 +546,6 @@ module.exports.init = function(devMode, doneCb) {
     return Q();
   })
   // Invoices
-  .then(function () {
-    return dropCollectionPromise("invoice");
-  })
-  .fail(function() {
-    console.log("Drop collection invoice failed!");
-  })
   .then(function() {
     var invoiceList = [
                        {
@@ -660,6 +656,54 @@ module.exports.init = function(devMode, doneCb) {
                        }
                        ];
     return insertDataPromise("invoice", invoiceList);
+  })
+  .done(function() {
+    deferred.resolve();
+  });
+  
+  return deferred.promise;
+};
+
+module.exports.init = function(devMode, doneCb) {
+  console.log("Init DB: devMode=" + devMode + " using mongourl: " + mongourl);
+
+  var inviteList = [
+                    {
+                      "email": "marcus.christensson@gmail.com",
+                      "license": "unlimited",
+                      "isAdmin": "true"
+                    },
+                    {
+                      "email": "christian.askland@gmail.com",
+                      "license": "unlimited",
+                      "isAdmin": "false"
+                    },
+                    {
+                      "email": "martinsson.sorgarden@gmail.com",
+                      "license": "unlimited",
+                      "isAdmin": "false"
+                    },
+                    {
+                      "email": "david@osir.se",
+                      "license": "unlimited",
+                      "isAdmin": "false"
+                    },
+                    {
+                      "email": "davba@hotmail.com",
+                      "license": "unlimited",
+                      "isAdmin": "false"
+                    }
+                    ];
+
+  var initDb = initCollectionsRelease;
+  if (devMode) {
+    initDb = initCollectionsDevel;
+  }
+  
+  // Drop collections
+  dropAllCollections()
+  .then(function() {
+    return initDb(inviteList);
   })
   .done(doneCb);
 };
