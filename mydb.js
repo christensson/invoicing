@@ -949,7 +949,6 @@ module.exports.initUserContext = function(userQuery, license) {
     var defaultSettings = {
         "uid" : user._id,
         "activeCompanyId" : undefined,
-        "defaultNumDaysUntilPayment" : 30,
         "license" : license,
     };
     console.log("initUserContext: Set default settings: " + JSON.stringify(defaultSettings));
