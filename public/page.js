@@ -109,9 +109,7 @@ var CompanyViewModel = function() {
   self.payment1 = ko.observable();
   self.payment2 = ko.observable();
   self.payment3 = ko.observable();
-  self.payment1Focus = ko.observable();
-  self.payment2Focus = ko.observable();
-  self.payment3Focus = ko.observable();
+  self.paymentFocus = ko.observable();
   self.paymentCustomText = ko.observable();
   self.defaultNumDaysUntilPayment = ko.observable();
   self.vatNr = ko.observable();
@@ -146,9 +144,7 @@ var CompanyViewModel = function() {
     self.payment1(data.payment1);
     self.payment2(data.payment2);
     self.payment3(data.payment3);
-    self.payment1Focus(data.payment1Focus);
-    self.payment2Focus(data.payment2Focus);
-    self.payment3Focus(data.payment3Focus);
+    self.paymentFocus(data.paymentFocus);
     self.paymentCustomText(data.paymentCustomText);
     self.defaultNumDaysUntilPayment(data.defaultNumDaysUntilPayment);
     self.vatNr(data.vatNr);
@@ -180,9 +176,7 @@ var CompanyViewModel = function() {
         payment1 : "",
         payment2 : "",
         payment3 : "",
-        payment1Focus : true,
-        payment2Focus : false,
-        payment3Focus : false,
+        paymentFocus : "1",
         paymentCustomText : i18n.t("app.company.defaultPaymentCustomText"),
         defaultNumDaysUntilPayment : 30,
         vatNr : "",
@@ -258,9 +252,7 @@ var CompanyViewModel = function() {
       payment1 : self.payment1(),
       payment2 : self.payment2(),
       payment3 : self.payment3(),
-      payment1Focus : self.payment1Focus(),
-      payment2Focus : self.payment2Focus(),
-      payment3Focus : self.payment3Focus(),
+      paymentFocus : self.paymentFocus(),
       paymentCustomText : self.paymentCustomText(),
       defaultNumDaysUntilPayment : self.defaultNumDaysUntilPayment(),
       vatNr : self.vatNr(),

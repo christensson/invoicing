@@ -179,6 +179,9 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
     x.addY(3);
     var companyDetailsColSize = [150, 150, 150, 150];
     var c = invoice.company;
+    var pay1Focus = c.paymentFocus === "1";
+    var pay2Focus = c.paymentFocus === "2";
+    var pay3Focus = c.paymentFocus === "3";
     x.band( [
              {data: "Adress", width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsHeaderFontSize},
              {data: c.contact1Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
@@ -190,8 +193,8 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
              {data: c.contact1, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
              {data: c.vatNr, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsFontSize},
              {data: c.payment1, width: companyDetailsColSize[3], align: x.left,
-               fontSize: c.payment1Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
-               fontBold: c.payment1Focus}
+               fontSize: pay1Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
+               fontBold: pay1Focus}
              ], {border: 0});
     x.band( [
              {data: c.addr1, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
@@ -204,8 +207,8 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
              {data: c.contact2, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
              {data: c.vatNrCustomText, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsFontSize},
              {data: c.payment2, width: companyDetailsColSize[3], align: x.left,
-               fontSize: c.payment2Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
-               fontBold: c.payment2Focus}
+               fontSize: pay2Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
+               fontBold: pay2Focus}
              ], {border: 0});
     if (c.addr3 || c.contact3 || c.payment3) {
       x.band( [
@@ -219,8 +222,8 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
                {data: c.contact3, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
                {data: "", width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
                {data: c.payment3, width: companyDetailsColSize[1], align: x.left,
-                 fontSize: c.payment3Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
-                 fontBold: c.payment3Focus}
+                 fontSize: pay3Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
+                 fontBold: pay3Focus}
                ], {border: 0});
     }
     x.addY(6);

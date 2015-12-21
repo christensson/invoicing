@@ -280,10 +280,9 @@
                           <input type="text" id="pay${idx}" class="form-control" data-bind="value: data.payment${idx}"></input>
                         </div>
                         <div class="col-sm-3">
-                          <div class="checkbox">
-                            <label class="col-sm-offset-2 control-label">
-                              <input type="checkbox" data-bind="checked: data.payment${idx}Focus" aria-label="${i18n.t('app.company.paymentOptFocusLbl')}">
-                              ${i18n.t('app.company.paymentOptFocusLbl')}
+                          <div class="radio">
+                            <label>
+                              <input type="radio" data-bind="checked: data.paymentFocus" value="${idx}" name="paymentFocusRadios">
                             </label>
                           </div>
                         </div>
