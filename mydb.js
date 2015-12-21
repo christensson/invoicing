@@ -17,7 +17,7 @@ var generate_mongo_url = function(obj){
   }
 };
 
-var mongo = require('./db_auth.json');
+var mongo = require('./deployment.json').db;
 
 var mongourl = generate_mongo_url(mongo);
 

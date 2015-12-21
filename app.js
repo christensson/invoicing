@@ -26,7 +26,7 @@ args.version('0.0.1')
   .option('--sim_latency', 'Simulate network latency')
   .option('--ssl', 'Start server on https')
   .option('--monitor', 'Monitor used resources')
-  .option('--local_db', 'Use DB on localhost')
+  .option('--local', 'Run on localhost')
   .parse(process.argv);
 
 explicitUser = null;
@@ -105,9 +105,12 @@ i18n.serveClientScript(app)      // grab i18next.js in browser
   .serveRemoveKeyRoute(app);     // route to remove key/value
 
 // App modules
+var hostname = "";
 var mydb = require('./mydb.js');
-if (args.local_db) {
+if (args.local) {
   mydb.setLocalDb();
+} else {
+  hostname = require('./deployment.json').host;
 }
 
 var reporter = require('./reporter.js');
@@ -196,7 +199,7 @@ passport.use(new GoogleStrategy(
        */
       clientID: googleAuth.web.client_id,
       clientSecret: googleAuth.web.client_secret,
-      callbackURL: "/auth/google/callback"
+      callbackURL: hostname + "/auth/google/callback"
     },
     function(accessToken, refreshToken, profile, done) {
       process.nextTick(function () {
@@ -623,7 +626,7 @@ app.get('/auth/google/callback',
 //start listening on port 8080
 var server = require('./server');
 var serverSettings = {
-    port: 8080,
+    port: args.ssl?8080:443,
     ssl: {
       active: args.ssl,
       key: "keys/key.pem",
