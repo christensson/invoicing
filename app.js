@@ -626,7 +626,7 @@ app.get('/auth/google/callback',
 //start listening on port 8080
 var server = require('./server');
 var serverSettings = {
-    port: args.ssl?8080:443,
+    port: 8080,
     ssl: {
       active: args.ssl,
       key: "keys/key.pem",
