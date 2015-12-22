@@ -177,7 +177,7 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
     x.addY(5);
     x.line(margin, x.getCurrentY(), x.maxX(), x.getCurrentY(), {thickness: 0.5});
     x.addY(3);
-    var companyDetailsColSize = [150, 150, 150, 150];
+    var companyDetailsColSize = [150, 140, 120, 190];
     var c = invoice.company;
     var pay1Focus = c.paymentFocus === "1";
     var pay2Focus = c.paymentFocus === "2";
@@ -220,8 +220,8 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
       x.band( [
                {data: "", width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
                {data: c.contact3, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
-               {data: "", width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
-               {data: c.payment3, width: companyDetailsColSize[1], align: x.left,
+               {data: "", width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsFontSize},
+               {data: c.payment3, width: companyDetailsColSize[3], align: x.left,
                  fontSize: pay3Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
                  fontBold: pay3Focus}
                ], {border: 0});
