@@ -8,7 +8,8 @@ var NotifyViewModel = function() {
     self.spinnerVisible = ko.observable(cfg.showInitialTicker);
     self.spinnerNestingCount = ko.observable(0);
     self.spinnerMsg = ko.pureComputed(function() {
-      var dots = new Array(self.spinnerNestingCount() + 1).join('.');
+      var numDots = 3 * self.spinnerNestingCount();
+      var dots = new Array(numDots + 1).join('.');
       return '<span class="glyphicon glyphicon-refresh glyphicon-spin"></span>' +
         '<p>' + cfg.tickerText + dots + '</p>';
     }, self);

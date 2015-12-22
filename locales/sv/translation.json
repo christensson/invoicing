@@ -30,7 +30,7 @@
     },
     "app": {
         "pageTitle": "Fakturering",
-        "tickerText": "Laddar...",
+        "tickerText": "Laddar",
         "navBar": {
             "title": "Fakturering",
             "home": "Hem",

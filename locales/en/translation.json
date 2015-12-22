@@ -30,7 +30,7 @@
     },
     "app": {
         "pageTitle": "Invoicing",
-        "tickerText": "Loading...",
+        "tickerText": "Loading",
         "navBar": {
             "title": "Invoice",
             "home": "Home",
