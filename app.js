@@ -52,6 +52,8 @@ if (args.sim_latency) {
   smallLag = simLatency({ min: 500, max: 1000 });
 }
 
+var tmpDir = __dirname + "/tmp";
+
 app = express();
 
 app.use(logger('dev'));
@@ -522,7 +524,7 @@ app.get("/api/invoiceReport/:id", ensureAuthenticated, function(req, res) {
         ", isDemoMode=" + isDemoMode);
     return mydb.getInvoice(uid, id);
   }).then(function(invoice) {
-    reporter.doInvoiceReport(invoice, function(reportFilename) {
+    reporter.doInvoiceReport(invoice, tmpDir, function(reportFilename) {
         console.log("onCompletion: reportFilename=" + reportFilename);
         res.type('application/pdf');
         res.download(reportFilename, reportFilename, function(err) {

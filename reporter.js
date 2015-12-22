@@ -1,8 +1,9 @@
 var Report = require('fluentreports').Report;
+var fs = require('fs');
 var util = require('./public/util.js');
 var i18n = require('i18next');
 
-module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, debug) {
+module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemoMode, debug) {
   'use strict';
   isDemoMode = typeof isDemoMode !== 'undefined' ? isDemoMode : false;
   debug = typeof debug !== 'undefined' ? debug : false;
@@ -314,9 +315,18 @@ module.exports.doInvoiceReport = function (invoice, onCompletion, isDemoMode, de
   if (reportName === "") {
     reportName = "report.pdf";
   }
-  console.log("Report name: " + reportName);
-
-  var rpt = new Report(reportName)
+  
+  // companyId makes directory unique
+  var companyId = invoice.company._id;
+  var reportDir = tmpDir + "/" + companyId;
+  console.log("Report name: " + reportName + " (dir=" + reportDir + ")");
+  if (!fs.existsSync(reportDir)) {
+    console.log("Created dir: " + reportDir);
+    fs.mkdirSync(reportDir);
+  }
+  //TODO: Cleanup old reports 
+  var reportPath = reportDir + "/" + reportName;
+  var rpt = new Report(reportPath)
       .margins(margin)
       .paper('A4')
       .titleHeader(mytitleheader)
