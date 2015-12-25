@@ -79,6 +79,7 @@ app.use(express.static('node_modules/bootstrap/dist/css'));
 app.use(express.static('node_modules/bootstrap'));
 app.use(express.static('node_modules/director/build'));
 app.use(express.static('node_modules/jquery/dist'));
+app.use(express.static('node_modules/i18next-client'));
 
 if (smallLag != undefined) {
   app.use(smallLag);
