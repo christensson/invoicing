@@ -381,7 +381,7 @@ initCollectionsDevel = function(inviteList) {
                        },
                        {
                          uid: testUserId,
-                         name: "Test company 1",
+                         name: "Test company widht a long name 1",
                          addr1: "Nygatan 1",
                          addr2: "414 62 Göteborg",
                          contact1Caption: "Telefon",
@@ -392,10 +392,11 @@ initCollectionsDevel = function(inviteList) {
                          contact3: "test.company@somedomain.se",
                          payment1Caption: "Bankgiro",
                          payment1: "1234-5879",
-                         payment2Caption: "Postgiro",
+                         payment2Caption: "Swish",
                          payment2: "345659879",
-                         payment3Caption: "Swish",
-                         payment3: "0763350669",
+                         payment3Caption: "IBAN",
+                         payment3: "SE3550000000054910000003",
+                         paymentFocus: "3",
                          paymentCustomText: "Dröjsmålsränta 25%",
                          vatNr: "SE501212456701",
                          vatNrCustomText: "Innehar F-skattebevis",
@@ -427,7 +428,7 @@ initCollectionsDevel = function(inviteList) {
     return Q();
   })
   .then(function() {
-    return getOneDocPromise('company', {name: 'Test company 1'});
+    return getOneDocPromise('company', {name: 'Test company widht a long name 1'});
   })
   .then(function(c) {
     console.log("getCompany: Found: " + JSON.stringify(c));
@@ -494,9 +495,10 @@ initCollectionsDevel = function(inviteList) {
                           cid: testCompany1Cid++,
                           uid: testUserId,
                           companyId: ObjectID(testCompany1._id),
-                          name: "TestPära",
+                          name: "Svenska Kullagerfabriken Aktiebolag",
                           addr1: "TestNygata 2",
                           addr2: "414 62 Göteborg",
+                          addr3: "Referens Thomas Andersson",
                           phone1: "0706-580223",
                           vatNr: "SE401212567801",
                           defaultNumDaysUntilPayment: 30,
@@ -593,6 +595,9 @@ initCollectionsDevel = function(inviteList) {
                          date: new Date("2015-10-10").toISOString().split("T")[0],
                          daysUntilPayment: 30,
                          lastPaymentDate: util.dateAddDays(new Date("2015-10-10"), 30).toISOString().split("T")[0],
+                         yourRef: "Thomas Andersson",
+                         ourRef: "Marcus Christensson",
+                         projId: "1321321231",
                          customer: testCompanyCid101,
                          currency: "SEK",
                          invoiceItems: [

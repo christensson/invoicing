@@ -43,12 +43,14 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
   
   var headerStringX = 345;
   var headerStringY = 30;
+  var headerStringWidth = 200;
   
   var demoStringX = 345;
   var demoStringY = 60;
 
   var customerAddrX = 345;
   var customerAddrY = 100;
+  var customerAddrWidth = 200;
   
   var companyLogoX = 30;
   var companyLogoY = 30;
@@ -57,10 +59,12 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
 
   var companyNameX = 0;
   var companyNameY = 160;
+  var companyNameWidth = 330;
   
   var demoModeBgImg = "img/invoice_demo.png";
   var demoModeBgW = 442;
   var demoModeBgH = 442;
+  var debugBorderWidth = debug?0.5:0;
 
   var calcPaymentAdjustment = function(amount) {
     var amountRounded = Math.round(amount);
@@ -97,14 +101,15 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
     if (invoice.isCredit) {
       headerString = "KREDITFAKTURA";
     }
-    x.band([{data: headerString, width: 400, fontSize: titleFontSize, fontBold: true}], {x: headerStringX, y: headerStringY});
+    x.band([{data: headerString, width: headerStringWidth, fontSize: titleFontSize, fontBold: true}], {x: headerStringX, y: headerStringY, border: debugBorderWidth});
     
-    x.band([{data: "Kund", width: 150, fontSize: customerAddressCaptionFontSize}], {x: customerAddrX, y: customerAddrY});
+    x.band([{data: "Kund", width: customerAddrWidth, fontSize: customerAddressCaptionFontSize}], {x: customerAddrX, y: customerAddrY});
     x.fontSize(customerAddressFontSize);
-    x.band([{data: invoice.customer.name, width: 150}], {x: customerAddrX, y: customerAddrY + 20});
-    x.band([{data: invoice.customer.addr1, width: 150}], {x: customerAddrX});
-    x.band([{data: invoice.customer.addr2, width: 150}], {x: customerAddrX});
-    x.band([{data: invoice.customer.addr3, width: 150}], {x: customerAddrX});
+    x.band([{data: invoice.customer.name, width: customerAddrWidth}],
+        {x: customerAddrX, y: customerAddrY + 20, border: debugBorderWidth});
+    x.band([{data: invoice.customer.addr1, width: customerAddrWidth}], {x: customerAddrX, border: debugBorderWidth});
+    x.band([{data: invoice.customer.addr2, width: customerAddrWidth}], {x: customerAddrX, border: debugBorderWidth});
+    x.band([{data: invoice.customer.addr3, width: customerAddrWidth}], {x: customerAddrX, border: debugBorderWidth});
     
     if (invoice.company.logo !== undefined && invoice.company.logo.path !== undefined) {
       x.image(invoice.company.logo.path, {
@@ -118,7 +123,8 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
 
     x.setCurrentX(companyNameX);
     x.setCurrentY(companyNameY);
-    x.band([{data: invoice.company.name, width: 200, fontSize: companyNameFontSize, fontBold: true}]);
+    x.band([{data: invoice.company.name, width: companyNameWidth, fontSize: companyNameFontSize, fontBold: true}],
+        {border: debugBorderWidth});
 
     x.addY(10);
     
@@ -133,11 +139,14 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
        {cap: "Fakturanr", data: "" + invoice.iid, colSize: 40},
        {cap: "Kundnr", data: "" + invoice.customer.cid, colSize: 40}
        ];
+    if (invoice.projId !== undefined && invoice.projId.length > 0) {
+      headerList.push({cap: "Projektnr", data: invoice.projId, colSize: 100});
+    }
     if (invoice.ourRef !== undefined && invoice.ourRef.length > 0) {
-      headerList.push({cap: "Vår referens", data: invoice.ourRef, colSize: 80});
+      headerList.push({cap: "Vår referens", data: invoice.ourRef, colSize: 100});
     }
     if (invoice.yourRef !== undefined && invoice.yourRef.length > 0) {
-      headerList.push({cap: "Er referens", data: invoice.yourRef, colSize: 80});
+      headerList.push({cap: "Er referens", data: invoice.yourRef, colSize: 100});
     }
     
     var captionList = [];
@@ -148,14 +157,14 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
     }
     x.band(captionList, {
       fontBold : 0,
-      border : 0,
+      border : debugBorderWidth,
       width : 0,
       wrap : 1
     });
     x.fontSize(headerDetailsFontSize);
     x.band(dataList, {
       fontBold : 0,
-      border : 0,
+      border : debugBorderWidth,
       width : 0,
       wrap : 1
     });
@@ -178,7 +187,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
     x.addY(5);
     x.line(margin, x.getCurrentY(), x.maxX(), x.getCurrentY(), {thickness: 0.5});
     x.addY(3);
-    var companyDetailsColSize = [150, 140, 120, 190];
+    var companyDetailsColSize = [150, 140, 120, 150];
     var c = invoice.company;
     var pay1Focus = c.paymentFocus === "1";
     var pay2Focus = c.paymentFocus === "2";
@@ -188,7 +197,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
              {data: c.contact1Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
              {data: "Momsreg nr", width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize},
              {data: c.payment1Caption, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsHeaderFontSize}
-             ], {border: 0});
+             ], {border: debugBorderWidth});
     x.band( [
              {data: c.name, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
              {data: c.contact1, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
@@ -196,13 +205,13 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
              {data: c.payment1, width: companyDetailsColSize[3], align: x.left,
                fontSize: pay1Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
                fontBold: pay1Focus}
-             ], {border: 0});
+             ], {border: debugBorderWidth});
     x.band( [
              {data: c.addr1, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
              {data: c.contact2Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
              {data: "", width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize},
              {data: c.payment2Caption, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsHeaderFontSize}
-             ], {border: 0});
+             ], {border: debugBorderWidth});
     x.band( [
              {data: c.addr2, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
              {data: c.contact2, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
@@ -210,14 +219,14 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
              {data: c.payment2, width: companyDetailsColSize[3], align: x.left,
                fontSize: pay2Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
                fontBold: pay2Focus}
-             ], {border: 0});
+             ], {border: debugBorderWidth});
     if (c.addr3 || c.contact3 || c.payment3) {
       x.band( [
                {data: c.addr3, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
                {data: c.contact3Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
                {data: "", width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize},
                {data: c.payment3Caption, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsHeaderFontSize}
-               ], {border: 0});
+               ], {border: debugBorderWidth});
       x.band( [
                {data: "", width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
                {data: c.contact3, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
@@ -225,13 +234,13 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
                {data: c.payment3, width: companyDetailsColSize[3], align: x.left,
                  fontSize: pay3Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
                  fontBold: pay3Focus}
-               ], {border: 0});
+               ], {border: debugBorderWidth});
     }
     x.addY(6);
     x.band( [
         {data: "Lätt Fakturering", width: x.maxX()/2, align: x.left, fontSize: brandFontSize},
         {data: "Sida " + x.currentPage(), width: x.maxX()/2 - margin, align: x.right, fontSize: pageNumberFontSize}
-        ], {border: 0});
+        ], {border: debugBorderWidth});
   };
 
   var detailsColSize = [200, 40, 80, 50, 50, 110];
@@ -246,7 +255,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
       {data: "Rabatt", width: detailsColSize[3], align: x.right},
       {data: "Moms", width: detailsColSize[4], align: x.right},
       {data: "Totalt", width: detailsColSize[5], align: x.right}
-    ], {fontBold: 1, border:0, width: 0, wrap: 1} );
+    ], {fontBold: 1, border:debugBorderWidth, width: 0, wrap: 1} );
     x.bandLine(1);
   };
 
