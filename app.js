@@ -92,8 +92,9 @@ var upload = multer({
 
 // i18n
 i18n.init({
+  lng: 'sv',
   preload: ['sv', 'en'],
-  supportedLngs: ['en', 'sv'],
+  lngWhitelist: ['sv', 'en'],
   saveMissing: true,
   debug: true,
   ignoreRoutes: ['uploads/', 'public/img/', 'public/', 'views/']
