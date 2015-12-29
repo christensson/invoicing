@@ -113,6 +113,7 @@ var CompanyViewModel = function() {
   self.paymentCustomText = ko.observable();
   self.defaultNumDaysUntilPayment = ko.observable();
   self.vatNr = ko.observable();
+  self.orgNr = ko.observable();
   self.vatNrCustomText = ko.observable();
   self.reverseChargeText = ko.observable();
   self.isValid = ko.observable();
@@ -148,6 +149,7 @@ var CompanyViewModel = function() {
     self.paymentCustomText(data.paymentCustomText);
     self.defaultNumDaysUntilPayment(data.defaultNumDaysUntilPayment);
     self.vatNr(data.vatNr);
+    self.orgNr(data.orgNr);
     self.vatNrCustomText(data.vatNrCustomText);
     self.reverseChargeText(data.reverseChargeText);
     self.isValid(data.isValid);
@@ -180,6 +182,7 @@ var CompanyViewModel = function() {
         paymentCustomText : i18n.t("app.company.defaultPaymentCustomText"),
         defaultNumDaysUntilPayment : 30,
         vatNr : "",
+        orgNr : "",
         vatNrCustomText : i18n.t("app.company.defaultVatNrCustomText"),
         reverseChargeText : i18n.t("app.company.defaultReverseChargeCustomText"),
         isValid : true,
@@ -256,6 +259,7 @@ var CompanyViewModel = function() {
       paymentCustomText : self.paymentCustomText(),
       defaultNumDaysUntilPayment : self.defaultNumDaysUntilPayment(),
       vatNr : self.vatNr(),
+      orgNr : self.orgNr(),
       vatNrCustomText : self.vatNrCustomText(),
       reverseChargeText : self.reverseChargeText(),
       isValid : self.isValid(),

@@ -231,6 +231,19 @@
                           </div>
                         </div>
                       </div>
+                      <hr/>
+                      <div class="form-group">
+                        <label for="vatNr" class="col-sm-2 control-label">${i18n.t('app.company.vatNrLbl')}</label>
+                        <div class="col-sm-4">
+                          <input type="text" id="vatNr" class="form-control" data-bind="value: data.vatNr"></input>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="orgNr" class="col-sm-2 control-label">${i18n.t('app.company.orgNrLbl')}</label>
+                        <div class="col-sm-4">
+                          <input type="text" id="orgNr" class="form-control" data-bind="value: data.orgNr"></input>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div class="panel panel-default">
@@ -304,25 +317,6 @@
                   </div>
                   <div class="panel panel-default">
                     <div class="panel-heading">
-                      <h3 class="panel-title">${i18n.t('app.company.vatInfoPaneHeader')}</h3>
-                    </div>
-                    <div class="panel-body">
-                      <div class="form-group">
-                        <label for="vatNr" class="col-sm-2 control-label">${i18n.t('app.company.vatInfoVatNrLbl')}</label>
-                        <div class="col-sm-4">
-                          <input type="text" id="vatNr" class="form-control" data-bind="value: data.vatNr"></input>
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label for="vatNrCustomText" class="col-sm-2 control-label">${i18n.t('app.company.vatInfoCustomTextLbl')}</label>
-                        <div class="col-sm-4">
-                          <input type="text" id="vatNrCustomText" class="form-control" data-bind="value: data.vatNrCustomText"></input>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="panel panel-default">
-                    <div class="panel-heading">
                       <h3 class="panel-title">${i18n.t('app.company.customTextFieldsPaneHeader')}</h3>
                     </div>
                     <div class="panel-body">
@@ -332,6 +326,13 @@
                           <textarea rows="4" id="reverseChargeText" class="form-control" data-bind="value: data.reverseChargeText" aria-describedby="reverseChargeTextHelp"></textarea>
                           <span id="reverseChargeTextHelp" class="help-block">${i18n.t('app.company.customTextFieldsReverseChargeHelpText')}</span>
                           <button class="btn btn-default btn-sm" data-bind="click: setDefaultReverseChargeText">${i18n.t('app.company.customTextFieldsReverseChargeSetDefaultBtn')}</button>
+                        </div>
+                      </div>
+                      <hr/>
+                      <div class="form-group">
+                        <label for="footerText" class="col-sm-2 control-label">${i18n.t('app.company.customTextFieldsFooterTextLbl')}</label>
+                        <div class="col-sm-4">
+                          <input type="text" id="footerText" class="form-control" data-bind="value: data.vatNrCustomText"></input>
                         </div>
                       </div>
                     </div>
@@ -790,7 +791,8 @@
                                 <address>
                                     <strong><span data-bind="text: data.customer().name"></span></strong><br/>
                                     <span data-bind="text: data.customer().addr1"></span><br/>
-                                    <span data-bind="text: data.customer().addr2"></span>
+                                    <span data-bind="text: data.customer().addr2"></span><br/>
+                                    <span data-bind="text: data.customer().addr3"></span>
                                 </address>
                             </form>
                         </div>

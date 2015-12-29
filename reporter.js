@@ -189,51 +189,80 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
     x.addY(3);
     var companyDetailsColSize = [150, 140, 120, 150];
     var c = invoice.company;
-    var pay1Focus = c.paymentFocus === "1";
-    var pay2Focus = c.paymentFocus === "2";
-    var pay3Focus = c.paymentFocus === "3";
+    var hasExtraBand = false;
+    var col1 = {
+        cap: "Adress",
+        text: [c.name, c.addr1, c.addr2, c.addr3]
+    };
+    if (c.addr3 !== undefined && c.addr3.length > 0) {
+      hasExtraBand = true;
+    }
+
+    var col2 = [{cap: c.contact1Caption, text: c.contact1},
+                {cap: c.contact2Caption, text: c.contact2},
+                {cap: c.contact3Caption, text: c.contact3}];
+    if (c.contact3 !== undefined && c.contact3.length > 0) {
+      hasExtraBand = true;
+    }
+
+    var col3 = [{cap: "Momsreg nr", text: c.vatNr}];
+    if (c.orgNr !== undefined && c.orgNr.length > 0) {
+      col3.push({cap: "Organisationsnr", text: c.orgNr});
+      hasExtraBand = true;
+    }
+    col3.push({cap: "", text: c.vatNrCustomText});
+    // Add dummy to always have at least three items
+    col3.push({cap: "", text: ""});
+
+    var col4 = [{cap: c.payment1Caption, text: c.payment1, focus: c.paymentFocus === "1"},
+                {cap: c.payment2Caption, text: c.payment2, focus: c.paymentFocus === "2"},
+                {cap: c.payment3Caption, text: c.payment3, focus: c.paymentFocus === "3"}];
+    if (c.payment3 !== undefined && c.payment3.length > 0) {
+      hasExtraBand = true;
+    }
+
     x.band( [
-             {data: "Adress", width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsHeaderFontSize},
-             {data: c.contact1Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
-             {data: "Momsreg nr", width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize},
-             {data: c.payment1Caption, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsHeaderFontSize}
+             {data: col1.cap, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsHeaderFontSize},
+             {data: col2[0].cap, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
+             {data: col3[0].cap, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize},
+             {data: col4[0].cap, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsHeaderFontSize}
              ], {border: debugBorderWidth});
     x.band( [
-             {data: c.name, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
-             {data: c.contact1, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
-             {data: c.vatNr, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsFontSize},
-             {data: c.payment1, width: companyDetailsColSize[3], align: x.left,
-               fontSize: pay1Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
-               fontBold: pay1Focus}
+             {data: col1.text[0], width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
+             {data: col2[0].text, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
+             {data: col3[0].text, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsFontSize},
+             {data: col4[0].text, width: companyDetailsColSize[3], align: x.left,
+               fontSize: col4[0].focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
+               fontBold: col4[0].focus}
              ], {border: debugBorderWidth});
     x.band( [
-             {data: c.addr1, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
-             {data: c.contact2Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
-             {data: "", width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize},
-             {data: c.payment2Caption, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsHeaderFontSize}
+             {data: col1.text[1], width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
+             {data: col2[1].cap, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
+             {data: col3[1].cap, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize},
+             {data: col4[1].cap, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsHeaderFontSize}
              ], {border: debugBorderWidth});
     x.band( [
-             {data: c.addr2, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
-             {data: c.contact2, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
-             {data: c.vatNrCustomText, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsFontSize},
-             {data: c.payment2, width: companyDetailsColSize[3], align: x.left,
-               fontSize: pay2Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
-               fontBold: pay2Focus}
+             {data: col1.text[2], width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
+             {data: col2[1].text, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
+             {data: col3[1].text, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsFontSize},
+             {data: col4[1].text, width: companyDetailsColSize[3], align: x.left,
+               fontSize: col4[1].focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
+               fontBold: col4[1].focus}
              ], {border: debugBorderWidth});
-    if (c.addr3 || c.contact3 || c.payment3) {
+    if (hasExtraBand) {
       x.band( [
-               {data: c.addr3, width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
-               {data: c.contact3Caption, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
-               {data: "", width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize},
-               {data: c.payment3Caption, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsHeaderFontSize}
+               {data: col1.text[3], width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
+               {data: col2[2].cap, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsHeaderFontSize},
+               {data: col3[2].cap, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsHeaderFontSize},
+               {data: col4[2].cap, width: companyDetailsColSize[3], align: x.left, fontSize: companyDetailsHeaderFontSize}
                ], {border: debugBorderWidth});
       x.band( [
                {data: "", width: companyDetailsColSize[0], align: x.left, fontSize: companyDetailsFontSize},
-               {data: c.contact3, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
-               {data: "", width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsFontSize},
-               {data: c.payment3, width: companyDetailsColSize[3], align: x.left,
-                 fontSize: pay3Focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
-                 fontBold: pay3Focus}
+               {data: col2[2].text, width: companyDetailsColSize[1], align: x.left, fontSize: companyDetailsFontSize},
+               {data: col3[2].text, width: companyDetailsColSize[2], align: x.left, fontSize: companyDetailsFontSize},
+               {data: col4[2].text, width: companyDetailsColSize[3], align: x.left,
+                 fontSize: col4[2].focus?companyDetailsPaymentFocusFontSize:companyDetailsPaymentFontSize,
+                 fontBold: col4[2].focus}
                ], {border: debugBorderWidth});
     }
     x.addY(6);
