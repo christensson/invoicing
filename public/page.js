@@ -312,12 +312,6 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompany,
     });
   };
 
-  self.deleteCompany = function(c) {
-    console.log("Delete: " + JSON.stringify(c));
-    c.isValid(false);
-    self.companyList.destroy(c);
-  };
-
   self.activateCompany = function(c) {
     console.log("Activate company: name=" + c.name() + ", _id=" + c._id());
     self.activeCompanyId(c._id());
