@@ -1,6 +1,8 @@
 {
     "signin": {
         "tickerText": "Laddar",
+        "tickerTextUpload": "Uppdaterar data",
+        "tickerTextDownload": "Hämtar data",
         "lngSvBtn": "Svenska",
         "lngEnBtn": "English",
         "pageTitle": "Inloggning",
@@ -31,6 +33,8 @@
     "app": {
         "pageTitle": "Fakturering",
         "tickerText": "Laddar",
+        "tickerTextUpload": "Uppdaterar data",
+        "tickerTextDownload": "Hämtar data",
         "navBar": {
             "title": "Fakturering",
             "home": "Hem",
@@ -89,6 +93,7 @@
             "defNumDaysUntilPayLbl": "Betalningsvillkor (dagar)",
             "saveSettingsBtn": "Spara",
             "getNok": "Misslyckades med att hämta inställningar!",
+            "saveTicker": "Sparar inställningar",
             "saveOk": "Inställningar sparade."
         },
         "company": {
@@ -133,6 +138,7 @@
                 "Skapa företaget genom att spara det. Därefter kan du välja en logotyp."],
             "companySaveBtn": "Spara",
             "getNok": "Misslyckades att hämta företag!",
+            "saveTicker": "Sparar företag",
             "saveOk": "Företag <strong>__name__</strong> skapat.",
             "saveOk_update": "Företag <strong>__name__</strong> uppdaterat.",
             "saveOk_delete": "Företag <strong>__name__</strong> raderat.",
@@ -160,6 +166,7 @@
             "optionUseReverseChargeLbl": "Använd omvänd skattskylldighet",
             "saveBtn": "Spara",
             "getNok": "Misslyckades med att hämta kund!",
+            "saveTicker": "Sparar kund",
             "saveOk": "Kund <strong>__name__</strong> med kundnr __cid__ skapad.",
             "saveOk_update": "Kund <strong>__name__</strong> med kundnr __cid__ uppdaterad.",
             "saveOk_delete": "Kund <strong>__name__</strong> med kundnr __cid__ raderad.",
@@ -209,6 +216,7 @@
             "getCustomersNok": "Misslyckades med att hämta kunder!",
             "getCustomersNok_noCompany": "Misslyckades med att hämta kunder! Företag ej valt eller ogiltigt.",
             "getNok": "Misslyckades med att hämta faktura!",
+            "saveTicker": "Sparar faktura",
             "saveOk": "Faktura <strong>__iid__</strong> skapad.",
             "saveOk_update": "Faktura <strong>__iid__</strong> uppdaterad.",
             "saveOk_delete": "Faktura <strong>__iid__</strong> raderad.",

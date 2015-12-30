@@ -6,13 +6,7 @@ var NotifyViewModel = function() {
     var self = this;
     self.notificationArray = ko.observableArray();
     self.spinnerVisible = ko.observable(cfg.showInitialTicker);
-    self.spinnerNestingCount = ko.observable(0);
-    self.spinnerMsg = ko.pureComputed(function() {
-      var numDots = 3 * self.spinnerNestingCount();
-      var dots = new Array(numDots + 1).join('.');
-      return '<span class="glyphicon glyphicon-refresh glyphicon-spin"></span>' +
-        '<p>' + cfg.tickerText + dots + '</p>';
-    }, self);
+    self.spinnerMsg = ko.observable(cfg.tickerText);
     self.notificationPlacement = ko.observable(cfg.notificationAreaPlacement);
     self.notificationCss = ko.pureComputed(function() {
       return "notification-area-" + self.notificationPlacement();
@@ -135,7 +129,8 @@ var Notify_showMsg = function(kind, msg, hideDelayMs) {
 
 var spinnerShowCount = 0;
 
-var Notify_showSpinner = function(show) {
+var Notify_showSpinner = function(show, msg) {
+  msg = typeof msg !== 'undefined' ? msg : cfg.tickerText;
   spinnerShowCount = spinnerShowCount + (show?1:-1);
   if (spinnerShowCount < 0) {
     spinnerShowCount = 0;
@@ -144,7 +139,7 @@ var Notify_showSpinner = function(show) {
   console.log("Notify_showSpinner: show=" + show +
       ", spinnerShowCount=" + spinnerShowCount +
       ", visible=" + spinnerVisible);
-  notifyViewModel.spinnerNestingCount(spinnerShowCount);
+  notifyViewModel.spinnerMsg(msg);
   notifyViewModel.spinnerVisible(spinnerVisible);
 };
 

@@ -1,6 +1,8 @@
 {
     "signin": {
         "tickerText": "Loading",
+        "tickerTextUpload": "Updating data",
+        "tickerTextDownload": "Fetching data",
         "lngSvBtn": "Svenska",
         "lngEnBtn": "English",
         "pageTitle": "Signin",
@@ -31,6 +33,8 @@
     "app": {
         "pageTitle": "Invoicing",
         "tickerText": "Loading",
+        "tickerTextUpload": "Updating data",
+        "tickerTextDownload": "Fetching data",
         "navBar": {
             "title": "Invoice",
             "home": "Home",
@@ -89,6 +93,7 @@
             "defNumDaysUntilPayLbl": "Number of days until payment",
             "saveSettingsBtn": "Save",
             "getNok": "Failed to get settings!",
+            "saveTicker": "Saving settings",
             "saveOk": "Settings saved."
         },
         "company": {
@@ -133,6 +138,7 @@
                 "First, create the company by clicking save. Then select a logo."],
             "companySaveBtn": "Save",
             "getNok": "Failed to get company!",
+            "saveTicker": "Saving company",
             "saveOk": "Company <strong>__name__</strong> created.",
             "saveOk_update": "Company <strong>__name__</strong> updated.",
             "saveOk_delete": "Company <strong>__name__</strong> removed.",
@@ -160,6 +166,7 @@
             "optionUseReverseChargeLbl": "Use reverse charge",
             "saveBtn": "Save",
             "getNok": "Failed to get customer!",
+            "saveTicker": "Saving customer",
             "saveOk": "Customer <strong>__name__</strong> with customer id __cid__ created.",
             "saveOk_update": "Customer <strong>__name__</strong> with customer id __cid__ updated.",
             "saveOk_delete": "Customer <strong>__name__</strong> with customer id __cid__ deleted.",
@@ -209,6 +216,7 @@
             "getCustomersNok": "Failed to get customers!",
             "getCustomersNok_noCompany": "Cannot get customers! Company not selected or doesn't exist.",
             "getNok": "Failed to get invoice!",
+            "saveTicker": "Saving invoice",
             "saveOk": "Invoice <strong>__iid__</strong> created.",
             "saveOk_update": "Invoice <strong>__iid__</strong> updated.",
             "saveOk_delete": "Invoice <strong>__iid__</strong> deleted.",

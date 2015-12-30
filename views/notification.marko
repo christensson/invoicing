@@ -1,6 +1,9 @@
 <div id="notification-area">
   <div class="notification-area-center">
-    <div class="alert alert-info" role="alert" data-bind="html: spinnerMsg, visible: spinnerVisible"></div>
+    <div class="alert alert-info" role="alert" data-bind="visible: spinnerVisible" style="display: none">
+      <span class="glyphicon glyphicon-refresh glyphicon-spin"></span>
+      <p data-bind="text: spinnerMsg"></p>
+    </div>
   </div>
 
   <div data-bind="css: notificationCss">

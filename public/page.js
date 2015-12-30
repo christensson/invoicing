@@ -74,6 +74,7 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
     var ajaxUrl = "/api/settings";
     console.log("saveSettings: AJAX PUT (url=" + ajaxUrl + "): JSON="
         + JSON.stringify(ajaxData));
+    Notify_showSpinner(true, i18n.t("app.settings.saveTicker"));
     return $.ajax({
       url : ajaxUrl,
       type : "PUT",
@@ -82,6 +83,7 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
       dataType : "json",
       success : function(data) {
         console.log("saveSettings: response: " + JSON.stringify(data));
+        Notify_showSpinner(false);
         Notify_showMsg('success', i18n.t("app.settings.saveOk"));
       },
     });
@@ -210,6 +212,7 @@ var CompanyViewModel = function() {
     }
     self.nameError(false);
     var isNew = (self._id() == undefined) ? true : false;
+    Notify_showSpinner(true, i18n.t("app.company.saveTicker"));
     return $.ajax({
       url : "/api/company/" + self._id(),
       type : "PUT",
@@ -222,6 +225,7 @@ var CompanyViewModel = function() {
         if (!isNew) {
           tContext = (data.company.isValid) ? 'update' : 'delete';
         }
+        Notify_showSpinner(false);
         Notify_showMsg('success', i18n.t("app.company.saveOk",
             {context: tContext, name: data.company.name}));
         self.uid(data.company.uid);
@@ -538,6 +542,7 @@ var CustomerViewModel = function() {
     }
     self.nameError(false);
     var isNewCustomer = (self._id() == undefined) ? true : false;
+    Notify_showSpinner(true, i18n.t("app.customer.saveTicker"));
     return $.ajax({
       url : "/api/customer/" + self._id(),
       type : "PUT",
@@ -550,6 +555,7 @@ var CustomerViewModel = function() {
         if (!isNewCustomer) {
           tContext = (data.customer.isValid) ? 'update' : 'delete';
         }
+        Notify_showSpinner(false);
         Notify_showMsg('success', i18n.t("app.customer.saveOk",
             {context: tContext, cid: ""+data.customer.cid, name: data.customer.name}));
         self.cid(data.customer.cid);
@@ -1242,6 +1248,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
     var ajaxUrl = "/api/invoice/" + self.data._id();
     console.log("saveInvoice: AJAX PUT (url=" + ajaxUrl + "): JSON="
         + ajaxData);
+    Notify_showSpinner(true, i18n.t("app.invoice.saveTicker"));
     return $.ajax({
       url : ajaxUrl,
       type : "PUT",
@@ -1254,9 +1261,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
         if (!isNewInvoice) {
           tContext = (data.invoice.isValid) ? 'update' : 'delete';
         }
-        /*Notify_showMsg('success', 'Invoice <strong>#' + data.invoice.iid
-            + '</strong> to customer id ' + data.invoice.customer.cid + ' '
-            + opStr + '.'); */
+        Notify_showSpinner(false);
         Notify_showMsg('success',
             i18n.t("app.invoice.saveOk",
                    {context: tContext, iid: data.invoice.iid}));
