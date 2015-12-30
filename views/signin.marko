@@ -71,7 +71,7 @@
                   </div>
                 </form>
 
-                <form id="local-sign-in" data-bind="visible: isSignInVisible" action="/login" method="post">
+                <form id="local-sign-in" data-bind="visible: isSignInVisible" action="/login" method="post" style="display: none">
                   <div class="row form-group">
                     <div class="col-sm-4">
                       <label for="username" class="control-label">${i18n.t('signin.usernameLbl')}</label>
@@ -94,7 +94,7 @@
                   </div>
                 </form>
     
-                <form id="local-reg" data-bind="visible: isLocalRegVisible" action="/local-reg" method="post">
+                <form id="local-reg" data-bind="visible: isLocalRegVisible" action="/local-reg" method="post" style="display: none">
                     <div class="row form-group">
                         <div class="col-sm-4">
                           <label for="username" class="control-label">${i18n.t('signin.usernameLbl')}</label>
