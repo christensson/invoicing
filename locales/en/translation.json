@@ -37,7 +37,7 @@
         "tickerTextDownload": "Fetching data",
         "navBar": {
             "title": "Invoice",
-            "home": "Home",
+            "home": "Overview",
             "companyAdmin": "Administer Companies",
             "noCompanyName": "<No company>",
             "customerNew": "New Customer",

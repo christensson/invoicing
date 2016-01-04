@@ -37,7 +37,7 @@
         "tickerTextDownload": "Hämtar data",
         "navBar": {
             "title": "Fakturering",
-            "home": "Hem",
+            "home": "Översikt",
             "companyAdmin": "Hantera Företag",
             "noCompanyName": "<Inget företag>",
             "customerNew": "Ny Kund",
