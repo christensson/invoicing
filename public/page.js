@@ -728,6 +728,7 @@ var InvoiceDataViewModel = function() {
   self.company = ko.observable();
   self.isValid = ko.observable();
   self.isPaid = ko.observable();
+  self.isCanceled = ko.observable();
   self.isCredit = ko.observable();
   self.isLocked = ko.observable();
   self.customer = ko.observable();
@@ -746,6 +747,7 @@ var InvoiceDataViewModel = function() {
     self.companyId(newData.companyId);
     self.company(newData.company);
     self.isValid(newData.isValid);
+    self.isCanceled(newData.isCanceled);
     self.isPaid(newData.isPaid);
     self.isCredit(newData.isCredit);
     self.isLocked(newData.isLocked);
@@ -797,6 +799,7 @@ var InvoiceDataViewModel = function() {
       projId : "",
       currency : "SEK",
       isLocked : false,
+      isCanceled : false,
       isPaid : false,
       isCredit : false,
       isValid : true,
@@ -896,6 +899,7 @@ var InvoiceDataViewModel = function() {
       companyId : self.companyId(),
       company: self.company(),
       isLocked : self.isLocked(),
+      isCanceled : self.isCanceled(),
       isPaid : self.isPaid(),
       isCredit : self.isCredit(),
       isValid : self.isValid(),
@@ -922,6 +926,7 @@ var InvoiceListDataViewModel = function(data) {
   self.uid = ko.observable(data.uid);
   self.companyId = ko.observable(data.companyId);
   self.isValid = ko.observable(data.isValid);
+  self.isCanceled = ko.observable(data.isCanceled);
   self.isPaid = ko.observable(data.isPaid);
   self.isCredit = ko.observable(data.isCredit);
   self.isLocked = ko.observable(data.isLocked);
@@ -981,6 +986,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   self.activeCompanyId = activeCompanyId;
   self.showPaid = ko.observable(true);
   self.showCredit = ko.observable(true);
+  self.showCanceled = ko.observable(true);
   self.invoiceListSort = ko.observable('iidAsc');
 
   self.currentView.subscribe(function(newValue) {
@@ -1022,6 +1028,12 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   self.doToggleShowCredit = function() {
     self.showCredit(!self.showCredit());
     console.log("page.js - InvoiceListViewModel - showCredit=" + self.showCredit()
+        + " (new state)");
+  };
+
+  self.doToggleShowCanceled = function() {
+    self.showCanceled(!self.showCanceled());
+    console.log("page.js - InvoiceListViewModel - showCanceled=" + self.showCanceled()
         + " (new state)");
   };
 
@@ -1086,6 +1098,14 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
 
   self.paidDescCompare = function(aRow, bRow) {
     return self.paidAscCompare(bRow, aRow);
+  };
+
+  self.canceledAscCompare = function(aRow, bRow) {
+    return aRow.isCanceled() - bRow.isCanceled();
+  };
+
+  self.canceledDescCompare = function(aRow, bRow) {
+    return self.canceledAscCompare(bRow, aRow);
   };
 
   self.creditAscCompare = function(aRow, bRow) {

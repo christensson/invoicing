@@ -23,7 +23,8 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
    */
   
   var brandFontSize = 6;
-  var titleFontSize = 22;
+  var headerFontSize = 22;
+  var subHeaderFontSize = 20;
   var companyNameFontSize = 14;
   var customerAddressFontSize = 12;
   var customerAddressCaptionFontSize = 8;
@@ -44,6 +45,9 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
   var headerStringX = 345;
   var headerStringY = 30;
   var headerStringWidth = 200;
+  var subHeaderStringX = 345;
+  var subHeaderStringY = 55;
+  var subHeaderStringWidth = 200;
   
   var demoStringX = 345;
   var demoStringY = 60;
@@ -101,7 +105,14 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
     if (invoice.isCredit) {
       headerString = "KREDITFAKTURA";
     }
-    x.band([{data: headerString, width: headerStringWidth, fontSize: titleFontSize, fontBold: true}], {x: headerStringX, y: headerStringY, border: debugBorderWidth});
+    var subHeaderString = "";
+    if (invoice.isCanceled) {
+      subHeaderString = "*** MAKULERAD ***";
+    }
+    x.band([{data: headerString, width: headerStringWidth, fontSize: headerFontSize, fontBold: true}], {x: headerStringX, y: headerStringY, border: debugBorderWidth});
+    if (subHeaderString.length > 0) {
+      x.band([{data: subHeaderString, width: subHeaderStringWidth, fontSize: subHeaderFontSize, fontBold: true, fontItalic: true}], {x: subHeaderStringX, y: subHeaderStringY, border: debugBorderWidth});
+    }
     
     x.band([{data: "Kund", width: customerAddrWidth, fontSize: customerAddressCaptionFontSize}], {x: customerAddrX, y: customerAddrY});
     x.fontSize(customerAddressFontSize);
@@ -333,6 +344,12 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
              {data: "Att betala", width: 410, align: x.right},
              {data: util.formatCurrency(amountToPay, invoice.currency), width: 120, align: x.right}
              ], {fontBold: 1, border:0, width: 0, wrap: 1} );
+    if (invoice.isCanceled) {
+      x.band( [
+               {data: "", width: 410, align: x.right},
+               {data: "*** MAKULERAD ***", width: 120, align: x.right}
+               ], {fontBold: 1, border:0, width: 0, wrap: 1} );
+    }
     if (useReverseCharge) {
       x.newLine();
       x.fontSize(detailsSummaryCustomTextFontSize);

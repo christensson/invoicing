@@ -592,6 +592,7 @@ initCollectionsDevel = function(inviteList) {
                          isLocked: false,
                          isValid: true,
                          isPaid: false,
+                         isCanceled: true,
                          date: new Date("2015-10-10").toISOString().split("T")[0],
                          daysUntilPayment: 30,
                          lastPaymentDate: util.dateAddDays(new Date("2015-10-10"), 30).toISOString().split("T")[0],
