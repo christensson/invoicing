@@ -964,6 +964,7 @@
             </div>
 
             <div id="app-debug" data-bind="visible: currentView() == 'debug'" style="display: none">
+              <div if="data.user.isAdmin === true">
                 <div class="page-header">
                     <h1>${i18n.t('app.debugAndTest.pageHeader')}</h1>
                 </div>
@@ -1000,6 +1001,7 @@
                         </div>
                     </form>
                 </div>
+              </div>
             </div>
         </div>
     </div>
@@ -1018,6 +1020,7 @@
             showInitialTicker: true,
             tickerText: "${i18n.t('app.tickerText')}",
             notificationAreaPlacement: "right",
+            isAdmin: $data.user.isAdmin,
         };
         var serverMsg = {
             error: "$data.msg.error",

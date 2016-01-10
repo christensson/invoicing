@@ -1360,53 +1360,63 @@ var DebugViewModel = function(currentView) {
 var NavViewModel = function() {
   var self = this;
   
-  self.mainViews = [ {
+  self.mainViews = [];
+  self.mainViews.push({
     name : '/page/home',
     title : i18n.t("app.navBar.home"),
     icon : 'glyphicon glyphicon-home',
     location : 'main'
-  }, {
+  });
+  self.mainViews.push({
     name : '/page/companies',
     title : i18n.t("app.navBar.companyAdmin"),
     icon : 'glyphicon glyphicon-wrench',
     location : 'companyMenu'
-  }, {
+  });
+  self.mainViews.push({
     name : '/page/customer_new',
     title : i18n.t("app.navBar.customerNew"),
     icon : 'glyphicon glyphicon-user',
     location : 'main'
-  }, {
-  }, {
+  });
+  self.mainViews.push({
     name : '/page/customers',
     title : i18n.t("app.navBar.customerList"),
     icon : 'glyphicon glyphicon-user',
     location : 'main'
-  }, {
+  });
+  self.mainViews.push({
     name : '/page/invoice_new',
     title : i18n.t("app.navBar.invoiceNew"),
     icon : 'glyphicon glyphicon-file',
     location : 'main'
-  }, {
+  });
+  self.mainViews.push({
     name : '/page/invoices',
     title : i18n.t("app.navBar.invoiceList"),
     icon : 'glyphicon glyphicon-list',
     location : 'main'
-  }, {
+  });
+  self.mainViews.push({
     name : '/page/settings',
     title : i18n.t("app.navBar.settings"),
     icon : 'glyphicon glyphicon-wrench',
     location : 'userMenu'
-  }, {
-    name : '/page/debug',
-    title : i18n.t("app.navBar.debug"),
-    icon : 'glyphicon glyphicon-eye-open',
-    location : 'userMenu'
-  }, {
+  });
+  if (cfg.isAdmin) {
+    self.mainViews.push({
+      name : '/page/debug',
+      title : i18n.t("app.navBar.debug"),
+      icon : 'glyphicon glyphicon-eye-open',
+      location : 'userMenu'
+    });
+  }
+  self.mainViews.push({
     name : '/logout',
     title : i18n.t("app.navBar.logout"),
     icon : 'glyphicon glyphicon-log-out',
     location : 'userMenuNoRoute'
-  } ];
+  });
 
   self.currentView = ko.observable("");
   self.activeCompanyId = ko.observable();
