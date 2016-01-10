@@ -74,17 +74,20 @@ function countAllDocsPromise(collectionName, filter) {
   });
 }
 
-function getAllDocsPromise(collectionName, filter) {
+function getAllDocsPromise(collectionName, filter, projection) {
+  projection = typeof projection !== 'undefined' ? projection : {};
   return dbopPromise().then(function(db) {
     var deferred = Q.defer();
     var custColl = db.collection(collectionName);
-    custColl.find(filter).toArray(function(err, docs) {
+    custColl.find(filter, projection).toArray(function(err, docs) {
       if (err) {
         deferred.reject(
             new Error("Error: getAllDocs(" + collectionName + "): " + err));
       } else {
         console.log("getAllDocs(" + collectionName +
-            ", filter=" + JSON.stringify(filter) + "): docs: " + JSON.stringify(docs));
+            ", filter=" + JSON.stringify(filter) +
+            ", projection=" + JSON.stringify(projection) +
+            "): docs: " + JSON.stringify(docs));
         deferred.resolve(docs);
       }
     });
@@ -905,13 +908,48 @@ module.exports.updateCompany = function(company) {
   return updateDataPromise('company', company, false);
 };
 
-module.exports.getUser = function(query) {
+module.exports.getUsers = function() {
+  // Projection excludes password...
+  var deferred = Q.defer();
+  Q.all([getAllDocsPromise('users', {}, {"password": 0}),
+         getAllDocsPromise('settings', {})
+         ])
+  .then(function(results) {
+    // Perform join
+    var users = results[0];
+    var settings = results[1];
+    var usersAndSettings = [];
+    users.forEach(function(u) {
+      var data = u;
+      var ouid = new ObjectID(u._id);
+      data.settings = settings.find(function(s) {
+        return ouid.equals(new ObjectID(s.uid));
+      });
+      usersAndSettings.push(data);
+    });
+    deferred.resolve(usersAndSettings);
+  })
+  .fail(function(err) {
+    deferred.reject(err);
+  });
+  return deferred.promise;
+};
+
+module.exports.getInvites = function() {
+  return getAllDocsPromise('invite', {});
+};
+
+module.exports.getUser = function(query, includePassword) {
+  includePassword = typeof includePassword !== 'undefined' ? includePassword : "false";
   var deferred = Q.defer();
   getOneDocPromise('users', query).then(function(user) {
     if (!user) {
       console.log("getUser: No user found");
       deferred.reject(new Error("The requested items could not be found."));
     } else {
+      if (!includePassword) {
+        delete user.password; // Do not expose password unless explicitly wanted!
+      }
       console.log("getUser: User found: " + user);
       deferred.resolve(user);
     }

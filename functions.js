@@ -10,8 +10,9 @@ var bcrypt = require('bcryptjs'),
 exports.localAuth = function (username, password) {
   var deferred = Q.defer();
 
-  mydb.getUser({"username-local": username}).then(function (result){
+  mydb.getUser({"username-local": username}, true).then(function (result){
     var hash = result.password;
+    delete result.password; // Do not expose password!
     console.log("Found local user=" + result.info.name);
     if (bcrypt.compareSync(password, hash)) {
       deferred.resolve(result);
@@ -43,8 +44,7 @@ exports.findOrCreate = function(idField, userData, inviteInfo) {
   query[idField] = userid;
   
   console.log("findOrCreate: idField=" + idField + ", userid=" + userid +
-      ", userData=" + JSON.stringify(userData) +
-      
+      ", userData=" + JSON.stringify(userData) +      
       ", query=" + JSON.stringify(query));
 
   mydb.getUser(query).then(function (existingUser) {

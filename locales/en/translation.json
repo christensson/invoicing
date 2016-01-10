@@ -47,6 +47,8 @@
             "adminUserLbl" : "Admin",
             "settings": "Settings",
             "debug": "Debug",
+            "users": "Users",
+            "invites": "Invitations",
             "logout": "Log out"
         },
         "home": {
@@ -251,6 +253,21 @@
             "showSuccessMsgBtn": "Show success",
             "showWarningMsgBtn": "Show warning",
             "showErrorMsgBtn": "Show error"
+        },
+        "userList": {
+            "nameCol": "Name",
+            "emailCol": "E-mail",
+            "typeCol": "User type",
+            "licenseCol": "License type",
+            "regDateCol": "Registered",
+            "isAdminCol": "Admin",
+            "getNok": "Failed to get users!"
+        },
+        "inviteList": {
+            "emailCol": "E-mail",
+            "licenseCol": "License type",
+            "isAdminCol": "Admin",
+            "getNok": "Failed to get invitations!"
         }
     }
 }

@@ -554,6 +554,40 @@ app.get("/api/stats/:cid", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
+app.get("/api/users", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var isAdmin = req.user.info.isAdmin;
+  var userName = req.user.info.name;
+  console.log("Get users: user=" + userName + ", uid=" + uid, ", isAdmin=" + isAdmin);
+  if (isAdmin) {
+    mydb.getUsers().then(function(docs) {
+      res.status(200).json(docs);
+      res.end();
+    }).fail(myFailureHandler.bind(null, res));
+  } else {
+    console.error('ERROR: Non-admin user uid=' + uid + ', name=' + userName + ' requested user list!');
+    res.status(500);
+    res.end();
+  }
+});
+
+app.get("/api/invites", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var isAdmin = req.user.info.isAdmin;
+  var userName = req.user.info.name;
+  console.log("Get invites: user=" + userName + ", uid=" + uid, ", isAdmin=" + isAdmin);
+  if (isAdmin) {
+    mydb.getInvites().then(function(docs) {
+      res.status(200).json(docs);
+      res.end();
+    }).fail(myFailureHandler.bind(null, res));
+  } else {
+    console.error('ERROR: Non-admin user uid=' + uid + ', name=' + userName + ' requested invite list!');
+    res.status(500);
+    res.end();
+  }
+});
+
 // sends the request through our local signup strategy, and if successful takes
 // user to homepage, otherwise returns then to signin page
 app.post('/local-reg', passport.authenticate('local-signup', {

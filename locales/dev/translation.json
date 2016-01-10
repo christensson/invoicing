@@ -37,7 +37,8 @@
             "invoiceList": "app.navBarInvoiceList",
             "settings": "app.navBarSettings",
             "debug": "app.navBarDebug",
-            "logout": "app.navBarLogout"
+            "logout": "app.navBarLogout",
+            "invites": "app.navBar.invites"
         },
         "settings": {
             "getNok": "app.settings.getNok",
@@ -94,6 +95,9 @@
             "getNok": "app.invoiceList.getNok",
             "getNok_noCompany": "app.invoiceList.getNok_noCompany",
             "printNok_noId": "app.invoiceList.printNok_noId"
+        },
+        "userList": {
+            "typeCol": "app.userList.typeCol"
         }
     }
 }

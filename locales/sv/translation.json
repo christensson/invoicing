@@ -47,6 +47,8 @@
             "adminUserLbl" : "Admin",
             "settings": "Inställningar",
             "debug": "Debug",
+            "users": "Användare",
+            "invites": "Inbjudningar",
             "logout": "Logga ut"
         },
         "home": {
@@ -251,6 +253,21 @@
             "showSuccessMsgBtn": "Visa succeemeddelande",
             "showWarningMsgBtn": "Visa varningsmeddelande",
             "showErrorMsgBtn": "Visa felmeddelande"
+        },
+        "userList": {
+            "nameCol": "Namn",
+            "emailCol": "E-post",
+            "typeCol": "Användartyp",
+            "licenseCol": "Licenstyp",
+            "regDateCol": "Registrerad",
+            "isAdminCol": "Administratör",
+            "getNok": "Misslyckades med att hämta användare!"
+        },
+        "inviteList": {
+            "emailCol": "E-post",
+            "licenseCol": "Licenstyp",
+            "isAdminCol": "Administratör",
+            "getNok": "Misslyckades med att hämta inbjudningar!"
         }
     }
 }

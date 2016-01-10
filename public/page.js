@@ -1357,6 +1357,120 @@ var DebugViewModel = function(currentView) {
   };
 };
 
+var UserViewModel = function() {
+  var self = this;
+
+  self.googleId = ko.observable();
+  self.type = ko.pureComputed(function() {
+    var typeStr = "";
+    if (self.googleId() !== undefined &&
+        self.googleId() !== null && 
+        self.googleId() !== "")
+    {
+      typeStr = "Google";
+    } else {
+      typeStr = "Local";
+    }
+    return typeStr;
+  }, self);
+  self.info = {
+      "name": ko.observable(),
+      "email": ko.observable(),
+      "registrationDate": ko.observable(),
+      "isAdmin": ko.observable()
+  };
+  self.settings = ko.observable();
+  
+  self.setData = function(data) {
+    self.googleId(data.googleId);
+    self.info.name(data.info.name);
+    self.info.email(data.info.email);
+    self.info.registrationDate(data.info.registrationDate);
+    self.info.isAdmin(data.info.isAdmin);
+    self.settings(data.settings);
+  };
+};
+
+var UserListViewModel = function(currentView) {
+  var self = this;
+
+  self.currentView = currentView;
+
+  self.currentView.subscribe(function(newValue) {
+    if (newValue == 'users') {
+      console.log("page.js - UserListViewModel - activated");
+      self.populate();
+    }
+  });
+
+  self.userList = ko.observableArray();
+
+  self.populate = function() {
+    Notify_showSpinner(true);
+    $.getJSON("/api/users", function(allData) {
+      console.log("Got users: " + JSON.stringify(allData));
+      var mappedUsers = $.map(allData, function(item) {
+        var user = new UserViewModel();
+        user.setData(item);
+        return user;
+      });
+      self.userList(mappedUsers);
+      Notify_showSpinner(false);
+    }).fail(function() {
+      console.log("page.js - UserListViewModel - populate - failed");
+      Notify_showSpinner(false);
+      Notify_showMsg('error', i18n.t("app.userList.getNok"));
+    });
+  };
+};
+
+var InviteViewModel = function() {
+  var self = this;
+
+  self.email = ko.observable();
+  self.license = ko.observable();
+  self.isAdmin = ko.observable();
+  
+  self.setData = function(data) {
+    self.email(data.email);
+    self.license(data.license);
+    self.isAdmin(data.isAdmin);
+  };
+};
+
+var InviteListViewModel = function(currentView) {
+  var self = this;
+
+  self.currentView = currentView;
+
+  self.currentView.subscribe(function(newValue) {
+    if (newValue == 'invites') {
+      console.log("page.js - InviteListViewModel - activated");
+      self.populate();
+    }
+  });
+
+  self.inviteList = ko.observableArray();
+
+  self.populate = function() {
+    Notify_showSpinner(true);
+    $.getJSON("/api/invites", function(allData) {
+      console.log("Got invites: " + JSON.stringify(allData));
+      var mappedInvites = $.map(allData, function(item) {
+        var invite = new InviteViewModel();
+        invite.setData(item);
+        return invite;
+      });
+      self.inviteList(mappedInvites);
+      Notify_showSpinner(false);
+    }).fail(function() {
+      console.log("page.js - InviteListViewModel - populate - failed");
+      Notify_showSpinner(false);
+      Notify_showMsg('error', i18n.t("app.inviteList.getNok"));
+    });
+  };
+};
+
 var NavViewModel = function() {
   var self = this;
   
@@ -1408,6 +1522,18 @@ var NavViewModel = function() {
       name : '/page/debug',
       title : i18n.t("app.navBar.debug"),
       icon : 'glyphicon glyphicon-eye-open',
+      location : 'userMenu'
+    });
+    self.mainViews.push({
+      name : '/page/users',
+      title : i18n.t("app.navBar.users"),
+      icon : 'glyphicon glyphicon-user',
+      location : 'userMenu'
+    });
+    self.mainViews.push({
+      name : '/page/invites',
+      title : i18n.t("app.navBar.invites"),
+      icon : 'glyphicon glyphicon-user',
       location : 'userMenu'
     });
   }
@@ -1617,7 +1743,6 @@ var setupKo = function() {
       navViewModel.activeCompanyId);
   var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId, navViewModel.activeCompany);
-  var debugViewModel = new DebugViewModel(navViewModel.currentView);
 
   ko.applyBindings(navViewModel, document.getElementById("app-navbar"));
 
@@ -1642,7 +1767,14 @@ var setupKo = function() {
 
   ko.applyBindings(settingsViewModel, document.getElementById("app-settings"));
 
-  ko.applyBindings(debugViewModel, document.getElementById("app-debug"));
+  if (cfg.isAdmin) {
+    var debugViewModel = new DebugViewModel(navViewModel.currentView);
+    var userListViewModel = new UserListViewModel(navViewModel.currentView);
+    var inviteListViewModel = new InviteListViewModel(navViewModel.currentView);
+    ko.applyBindings(debugViewModel, document.getElementById("app-debug"));
+    ko.applyBindings(userListViewModel, document.getElementById("app-users"));
+    ko.applyBindings(inviteListViewModel, document.getElementById("app-invites"));
+  }
   
   Notify_showSpinner(false);
 };

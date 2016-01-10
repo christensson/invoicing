@@ -963,8 +963,8 @@
                 </div>
             </div>
 
-            <div id="app-debug" data-bind="visible: currentView() == 'debug'" style="display: none">
-              <div if="data.user.isAdmin === true">
+            <div if="data.user.isAdmin === true">
+              <div id="app-debug" data-bind="visible: currentView() == 'debug'" style="display: none">
                 <div class="page-header">
                     <h1>${i18n.t('app.debugAndTest.pageHeader')}</h1>
                 </div>
@@ -1002,7 +1002,67 @@
                     </form>
                 </div>
               </div>
-            </div>
+            
+              <div id="app-users" data-bind="visible: currentView() == 'users'" style="display: none">
+                <form>
+                    <p>
+                        <table class="table table-striped table-condensed">
+                            <thead>
+                                <tr>
+                                    <th>${i18n.t('app.userList.nameCol')}</th>
+                                    <th>${i18n.t('app.userList.emailCol')}</th>
+                                    <th>${i18n.t('app.userList.typeCol')}</th>
+                                    <th>${i18n.t('app.userList.licenseCol')}</th>
+                                    <th>${i18n.t('app.userList.regDateCol')}</th>
+                                    <th>${i18n.t('app.userList.isAdminCol')}</th>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: userList">
+                                <tr>
+                                    <td><p class="form-control-static" data-bind="text: info.name"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: info.email"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: type"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: settings().license"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: info.registrationDate"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: info.isAdmin"></p></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </p>
+                </form>
+              </div>
+
+              <div id="app-invites" data-bind="visible: currentView() == 'invites'" style="display: none">
+                <form>
+                    <p>
+                        <table class="table table-striped table-condensed">
+                            <thead>
+                                <tr>
+                                    <th>${i18n.t('app.inviteList.emailCol')}</th>
+                                    <th>${i18n.t('app.inviteList.licenseCol')}</th>
+                                    <th>${i18n.t('app.inviteList.isAdminCol')}</th>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: inviteList">
+                                <tr>
+                                    <td><p class="form-control-static" data-bind="text: email"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: license"></p></td>
+                                    <td><p class="form-control-static" data-bind="text: isAdmin"></p></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </p>
+
+                    <!-- <div class="btn-group">
+                        <a href="#/page/customer_new" type="button" class="btn btn-success">
+                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                            ${i18n.t('app.customerList.newCustomerBtn')}
+                        </a>
+                    </div> -->
+                </form>
+              </div>
+            </div> <!-- End isAdmin -->
+            
         </div>
     </div>
     </body>
