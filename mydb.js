@@ -734,31 +734,35 @@ module.exports.getStats = function(uid, companyId) {
       }
   };
   
-  countAllDocsPromise('company', {'isValid': true, 'uid': ouid}).then(function(count) {
-    res.total.numCompanies = count;
-    return countAllDocsPromise('customer', {'isValid': true, 'uid': ouid});
-  }).then(function(count) {
-    res.total.numCustomers = count;
-    return countAllDocsPromise('invoice', {'isValid': true, 'uid': ouid});
-  }).then(function(count) {
-    res.total.numInvoices = count;
-    if (companyId === "undefined" || companyId === "null") {
-      console.log("getStats: No active company, stats=" + JSON.stringify(res));
-      deferred.resolve(res);
-    } else {
-      console.log("getStats: Active company is " + companyId);
-      var ocompanyId = new ObjectID(companyId);
-      res.activeCompany.isSet = true;
-      countAllDocsPromise('customer', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId}).then(function(count) {
-        res.activeCompany.numCustomers = count;
-        return countAllDocsPromise('invoice', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId});
-      }).then(function(count) {
-        res.activeCompany.numInvoices = count;
-        deferred.resolve(res);
-      });
-    }
-  });
+  var jobs = [
+    countAllDocsPromise('company', {'isValid': true, 'uid': ouid}),
+    countAllDocsPromise('customer', {'isValid': true, 'uid': ouid}),
+    countAllDocsPromise('invoice', {'isValid': true, 'uid': ouid})
+  ];
   
+  if (companyId !== "undefined" && companyId !== "null") {
+    console.log("getStats: Active company is " + companyId);
+    var ocompanyId = new ObjectID(companyId);
+    jobs.push(countAllDocsPromise('customer', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId}));
+    jobs.push(countAllDocsPromise('invoice', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId}));
+  }
+  
+  Q.all(jobs).then(function(results) {
+    res.total.numCompanies = results[0];
+    res.total.numCustomers = results[1];
+    res.total.numInvoices = results[2];
+    
+    if (results.length > 3) {
+      res.activeCompany.numCustomers = results[3];
+      res.activeCompany.numInvoices = results[4];
+    }
+
+    deferred.resolve(res);
+  })
+  .fail(function(err) {
+    deferred.reject(err);
+  });
+
   return deferred.promise;
 };
 
