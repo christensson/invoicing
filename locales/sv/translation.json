@@ -6,7 +6,7 @@
         "lngSvBtn": "Svenska",
         "lngEnBtn": "English",
         "pageTitle": "Inloggning",
-        "header": "Fakturering",
+        "header": "Lätt Fakturering",
         "welcomeText": "Välkommen till nästa generations fakturering!",
         "cloudAccountTitle": "Molnkonto",
         "localAccountTitle": "Lokalt konto",
@@ -31,12 +31,12 @@
         "authNokMsg": "Var god logga in!"
     },
     "app": {
-        "pageTitle": "Fakturering",
+        "pageTitle": "Lätt Fakturering",
         "tickerText": "Laddar",
         "tickerTextUpload": "Uppdaterar data",
         "tickerTextDownload": "Hämtar data",
         "navBar": {
-            "title": "Fakturering",
+            "title": "Lätt Fakturering",
             "home": "Översikt",
             "companyAdmin": "Hantera Företag",
             "noCompanyName": "<Inget företag>",
@@ -50,7 +50,7 @@
             "logout": "Logga ut"
         },
         "home": {
-            "pageHeader": "Fakturering",
+            "pageHeader": "Lätt Fakturering",
             "greetingsText": "Ett faktureringsprogram som är <strong>enkelt</strong> att använda."
         },
         "gettingStarted": {

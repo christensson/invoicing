@@ -6,7 +6,7 @@
         "lngSvBtn": "Svenska",
         "lngEnBtn": "English",
         "pageTitle": "Signin",
-        "header": "Invoicing",
+        "header": "Easy Invoicing",
         "welcomeText": "Welcome to the next generation Invoicing!",
         "cloudAccountTitle": "Cloud account",
         "localAccountTitle": "Local account",
@@ -31,12 +31,12 @@
         "authNokMsg": "Please sign in!"
     },
     "app": {
-        "pageTitle": "Invoicing",
+        "pageTitle": "Easy Invoicing",
         "tickerText": "Loading",
         "tickerTextUpload": "Updating data",
         "tickerTextDownload": "Fetching data",
         "navBar": {
-            "title": "Invoice",
+            "title": "Easy Invoicing",
             "home": "Overview",
             "companyAdmin": "Administer Companies",
             "noCompanyName": "<No company>",
@@ -50,7 +50,7 @@
             "logout": "Log out"
         },
         "home": {
-            "pageHeader": "Invoicing",
+            "pageHeader": "Easy Invoicing",
             "greetingsText": "An invoicing application that is <strong>easy</strong> to use."
         },
         "gettingStarted": {
