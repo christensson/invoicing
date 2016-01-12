@@ -59,7 +59,7 @@ exports.findOrCreate = function(idField, userData, inviteInfo) {
       console.log("User with " + idField + "=" + userid + " doesn't exist! " +
           "Creating new user=" + JSON.stringify(userData) +
           ", inviteInfo=" + JSON.stringify(inviteInfo));
-      if (inviteInfo.isAdmin == "true") {
+      if (inviteInfo.isAdmin) {
         userData.info.isAdmin = true;
       }
       mydb.addUser(userData).then(function() {
@@ -87,7 +87,7 @@ exports.findOrCreate = function(idField, userData, inviteInfo) {
 
 exports.createUserInfo = function(name, email, isAdmin, regDate) {
   var todaysDate = new Date().toISOString().split("T")[0];
-  isAdmin = typeof isAdmin !== 'undefined' ? isAdmin : "false";
+  isAdmin = typeof isAdmin !== 'undefined' ? isAdmin : false;
   regDate = typeof regDate !== 'undefined' ? regDate : todaysDate;
   var info = {
       "name": name,

@@ -680,27 +680,27 @@ module.exports.init = function(devMode, doneCb) {
                     {
                       "email": "marcus.christensson@gmail.com",
                       "license": "unlimited",
-                      "isAdmin": "true"
+                      "isAdmin": true
                     },
                     {
                       "email": "christian.askland@gmail.com",
                       "license": "unlimited",
-                      "isAdmin": "false"
+                      "isAdmin": false
                     },
                     {
                       "email": "martinsson.sorgarden@gmail.com",
                       "license": "unlimited",
-                      "isAdmin": "false"
+                      "isAdmin": false
                     },
                     {
                       "email": "david@osir.se",
                       "license": "unlimited",
-                      "isAdmin": "false"
+                      "isAdmin": false
                     },
                     {
                       "email": "davba@hotmail.com",
                       "license": "unlimited",
-                      "isAdmin": "false"
+                      "isAdmin": false
                     }
                     ];
 
@@ -944,7 +944,7 @@ module.exports.getInvites = function() {
 };
 
 module.exports.getUser = function(query, includePassword) {
-  includePassword = typeof includePassword !== 'undefined' ? includePassword : "false";
+  includePassword = typeof includePassword !== 'undefined' ? includePassword : false;
   var deferred = Q.defer();
   getOneDocPromise('users', query).then(function(user) {
     if (!user) {
