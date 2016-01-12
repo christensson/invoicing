@@ -718,6 +718,7 @@ module.exports.init = function(devMode, doneCb) {
 };
 
 module.exports.getStats = function(uid, companyId) {
+  companyId = typeof companyId !== 'undefined' ? companyId : "undefined";
   var ouid = new ObjectID(uid);
   var deferred = Q.defer();
   

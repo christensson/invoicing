@@ -261,6 +261,9 @@
             "licenseCol": "License type",
             "regDateCol": "Registered",
             "isAdminCol": "Admin",
+            "numCompaniesLbl": "Companies",
+            "numCustomersLbl": "Customers",
+            "numInvoicesLbl": "Invoices",
             "getNok": "Failed to get users!"
         },
         "inviteList": {

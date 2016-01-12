@@ -261,6 +261,9 @@
             "licenseCol": "Licenstyp",
             "regDateCol": "Registrerad",
             "isAdminCol": "Administratör",
+            "numCompaniesLbl": "Företag",
+            "numCustomersLbl": "Kunder",
+            "numInvoicesLbl": "Fakturor",
             "getNok": "Misslyckades med att hämta användare!"
         },
         "inviteList": {

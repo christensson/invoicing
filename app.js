@@ -554,6 +554,25 @@ app.get("/api/stats/:cid", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
+app.get("/api/userStats/:uid", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var isAdmin = req.user.info.isAdmin;
+  var reqForUid = req.params.uid;
+  console.log("User statistics: user=" + req.user.info.name + ", requested for user uid=" + reqForUid + ", isAdmin=" + isAdmin);
+  if (isAdmin) {
+    mydb.getStats(reqForUid).then(function(stats) {
+      console.log("User statistics: user=" + req.user.info.name + ", requested for user uid=" + reqForUid + ", stats=" + JSON.stringify(stats));
+      res.status(200).json(stats);
+      res.end();
+    }).fail(myFailureHandler.bind(null, res));
+  } else {
+    console.error('ERROR: Non-admin user uid=' + uid + ', name=' + userName + ' requested user stats!');
+    res.status(500);
+    res.end();
+  }
+  
+});
+
 app.get("/api/users", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var isAdmin = req.user.info.isAdmin;

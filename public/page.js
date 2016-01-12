@@ -1360,6 +1360,7 @@ var DebugViewModel = function(currentView) {
 var UserViewModel = function() {
   var self = this;
 
+  self._id = ko.observable();
   self.googleId = ko.observable();
   self.type = ko.pureComputed(function() {
     var typeStr = "";
@@ -1380,14 +1381,45 @@ var UserViewModel = function() {
       "isAdmin": ko.observable()
   };
   self.settings = ko.observable();
+  self.isDetailsVisible = ko.observable(false);
+  self.totalStats = ko.observable();
   
   self.setData = function(data) {
+    self._id(data._id);
     self.googleId(data.googleId);
     self.info.name(data.info.name);
     self.info.email(data.info.email);
     self.info.registrationDate(data.info.registrationDate);
     self.info.isAdmin(data.info.isAdmin);
     self.settings(data.settings);
+    self.isDetailsVisible(false);
+    self.totalStats({
+      "numCompanies": 0,
+      "numCustomers": 0,
+      "numInvoices": 0
+    });
+  };
+  
+  self.toggleDetailedInfo = function(user) {
+    var newIsDetailsVisible = !self.isDetailsVisible();
+    console.log("page.js - UserViewModel - toggleDetailedInfo: visible=" + newIsDetailsVisible + " (new value)");
+    
+    if (newIsDetailsVisible) {
+      Notify_showSpinner(true);
+      $.getJSON(
+          "/api/userStats/" + self._id(),
+          function(stats) {
+            console.log("Got stats for uid=" + self._id() + ", stats=" + JSON.stringify(stats));
+            self.totalStats(stats.total);
+            Notify_showSpinner(false);
+            self.isDetailsVisible(newIsDetailsVisible);
+          }).fail(function() {
+            console.log("page.js - UserViewModel - toggleDetailedInfo - failed");
+            Notify_showSpinner(false);
+          });      
+    } else {
+      self.isDetailsVisible(false);
+    }    
   };
 };
 
