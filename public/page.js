@@ -1,18 +1,46 @@
-function CacheKey(){};
-CacheKey.CURR_USER_STATS = function() {
+function Cache(){};
+Cache.CURR_USER_STATS = function() {
   return 'current_user_stats';
 };
 
-CacheKey.USER_STATS = function(uid) {
+Cache.USER_STATS = function(uid) {
   return 'user_stats_' + uid;
 };
 
-CacheKey.INVITES = function() {
+Cache.INVITES = function() {
   return 'invites';
 };
   
-CacheKey.USERS = function() {
+Cache.USERS = function() {
   return 'users';
+};
+
+Cache.CUSTOMERS = function() {
+  return 'customers';
+};
+
+Cache.INVOICES = function() {
+  return 'invoices';
+};
+
+Cache.fetchCustomers = function(companyId) {
+  return $.getJSON("/api/customers/" + companyId, function(data) {
+    cache.set(Cache.CUSTOMERS(), data);
+  });
+};
+
+Cache.invalidateCustomers = function() {
+  cache.del(Cache.CUSTOMERS());
+};
+
+Cache.fetchInvoices = function(companyId) {
+  return $.getJSON("/api/invoices/" + companyId, function(data) {
+    cache.set(Cache.INVOICES(), data);
+  });
+};
+
+Cache.invalidateInvoices = function() {
+  cache.del(Cache.INVOICES());
 };
 
 var SettingsDataModel = function() {
@@ -432,7 +460,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany, 
         self.activeCompany(c);
       } else if (isNew) {
         console.log("page.js - CompanyNewViewModel - New company added - id=" + c._id);
-        cache.del(CacheKey.CURR_USER_STATS());
+        cache.del(Cache.CURR_USER_STATS());
       }
       self.onCompanyChange();
     });
@@ -577,7 +605,8 @@ var CustomerViewModel = function() {
         self._id(data.customer._id);
         self.isValid(data.customer.isValid);
         if (isNewCustomer) {
-          cache.del(CacheKey.CURR_USER_STATS());
+          cache.del(Cache.CURR_USER_STATS());
+          Cache.invalidateCustomers();
         }
       },
     });
@@ -618,26 +647,62 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
     }
   });
 
+  self.activeCompanyId.subscribe(function(newValue) {
+    console.log("page.js - CustomerListViewModel - activeCompanyId.subscribe: value="
+        + newValue);
+    if (self.currentView() == 'customers') {
+      self.populate(true);
+    } else {
+      Cache.invalidateCustomers();
+    }
+  });
+
   // Customer part
   self.customerList = ko.observableArray();
 
-  self.populate = function() {
+  cache.on('set:' + Cache.CUSTOMERS(), function(customers, ttl) {
+    console.log("page.js - CustomerListViewModel - event - set:" + Cache.CUSTOMERS());
+    var mappedCustomers = $.map(customers, function(item) {
+      var customer = new CustomerViewModel();
+      customer.setData(item);
+      return customer;
+    });
+    self.customerList(mappedCustomers);
+  });
+
+  cache.on('update:' + Cache.CUSTOMERS(), function(customers, ttl) {
+    console.log("page.js - CustomerListViewModel - event - update:" + Cache.CUSTOMERS());
+    var mappedCustomers = $.map(customers, function(item) {
+      var customer = new CustomerViewModel();
+      customer.setData(item);
+      return customer;
+    });
+    self.customerList(mappedCustomers);
+  });
+
+  cache.on('del:' + Cache.CUSTOMERS(), function() {
+    console.log("page.js - CustomerListViewModel - event - del:" + Cache.CUSTOMERS());
+    self.customerList.removeAll();
+  });
+
+  self.populate = function(force) {
+    force = typeof force !== 'undefined' ? force : false;
     var companyId = self.activeCompanyId();
     if (companyId != null) {
-      Notify_showSpinner(true);
-      $.getJSON("/api/customers/" + companyId, function(allData) {
-        var mappedCustomers = $.map(allData, function(item) {
-          var customer = new CustomerViewModel();
-          customer.setData(item);
-          return customer;
+      // Do nothing if object exists in cache
+      if (force || !cache.get(Cache.CUSTOMERS())) {
+        Notify_showSpinner(true);
+        Cache.fetchCustomers(companyId).success(function() {
+          console.log("page.js - CustomerListViewModel - populate - success");
+          Notify_showSpinner(false);
+        }).fail(function() {
+          console.log("page.js - CustomerListViewModel - populate - failed");
+          Notify_showSpinner(false);
+          Notify_showMsg('error', i18n.t("app.customerList.getNok"));
         });
-        self.customerList(mappedCustomers);
-        Notify_showSpinner(false);
-      }).fail(function() {
-        console.log("page.js - CustomerListViewModel - populate - failed");
-        Notify_showSpinner(false);
-        Notify_showMsg('error', i18n.t("app.customerList.getNok"));
-      });
+      } else {
+        console.log("page.js - CustomerListViewModel - populate - data is cached!");
+      }
     } else {
       Notify_showMsg('info', i18n.t("app.customerList.getNok", {context: "noCompany"}));
     }
@@ -1019,24 +1084,58 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     }
   });
 
+  self.activeCompanyId.subscribe(function(newValue) {
+    console.log("page.js - InvoiceListViewModel - activeCompanyId.subscribe: value="
+        + newValue);
+    if (self.currentView() == 'invoices') {
+      self.populate(true);
+    } else {
+      Cache.invalidateInvoices();
+    }
+  });
+
   // Invoice part
   self.invoiceList = ko.observableArray();
 
-  self.populate = function() {
+  cache.on('set:' + Cache.INVOICES(), function(invoices, ttl) {
+    console.log("page.js - InvoiceListViewModel - event - set:" + Cache.INVOICES());
+    var mappedInvoices = $.map(invoices, function(item) {
+      return new InvoiceListDataViewModel(item);
+    });
+    self.invoiceList(mappedInvoices);
+  });
+
+  cache.on('update:' + Cache.INVOICES(), function(invoices, ttl) {
+    console.log("page.js - InvoiceListViewModel - event - update:" + Cache.INVOICES());
+    var mappedInvoices = $.map(invoices, function(item) {
+      return new InvoiceListDataViewModel(item);
+    });
+    self.invoiceList(mappedInvoices);
+  });
+
+  cache.on('del:' + Cache.INVOICES(), function() {
+    console.log("page.js - InvoiceListViewModel - event - del:" + Cache.INVOICES());
+    self.invoiceList.removeAll();
+  });
+
+  self.populate = function(force) {
+    force = typeof force !== 'undefined' ? force : false;
     var companyId = self.activeCompanyId();
     if (companyId != null) {
-      Notify_showSpinner(true);
-      $.getJSON("/api/invoices/" + companyId, function(allData) {
-        var mappedInvoices = $.map(allData, function(item) {
-          return new InvoiceListDataViewModel(item);
+      // Do nothing if object exists in cache
+      if (force || !cache.get(Cache.INVOICES())) {
+        Notify_showSpinner(true);
+        Cache.fetchInvoices(companyId).success(function() {
+          console.log("page.js - InvoiceListViewModel - populate - success");
+          Notify_showSpinner(false);
+        }).fail(function() {
+          console.log("page.js - InvoiceListViewModel - populate - failed");
+          Notify_showSpinner(false);
+          Notify_showMsg('error', i18n.t("app.invoiceList.getNok"));
         });
-        self.invoiceList(mappedInvoices);
-        Notify_showSpinner(false);
-      }).fail(function() {
-        console.log("page.js - InvoiceListViewModel - populate - failed");
-        Notify_showSpinner(false);
-        Notify_showMsg('error', i18n.t("app.invoiceList.getNok"));
-      });
+      } else {
+        console.log("page.js - InvoiceListViewModel - populate - data is cached!");
+      }
     } else {
       Notify_showMsg('info', i18n.t("app.invoiceList.getNok", {context: "noCompany"}));
     }
@@ -1108,7 +1207,6 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     } else {
       return 0;
     }
-;
   };
 
   self.customerDescCompare = function(aRow, bRow) {
@@ -1206,24 +1304,49 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
     }
   });
 
-  self.populate = function() {
+  cache.on('set:' + Cache.CUSTOMERS(), function(customers, ttl) {
+    console.log("page.js - InvoiceNewViewModel - event - set:" + Cache.CUSTOMERS());
+    var mappedCustomers = $.map(customers, function(item) {
+      return new InvoiceCustomerModel(item);
+    });
+    self.customerList(mappedCustomers);
+  });
+
+  cache.on('update:' + Cache.CUSTOMERS(), function(customers, ttl) {
+    console.log("page.js - InvoiceNewViewModel - event - update:" + Cache.CUSTOMERS());
+    var mappedCustomers = $.map(customers, function(item) {
+      return new InvoiceCustomerModel(item);
+    });
+    self.customerList(mappedCustomers);
+  });
+
+  cache.on('del:' + Cache.CUSTOMERS(), function() {
+    console.log("page.js - InvoiceNewViewModel - event - del:" + Cache.CUSTOMERS());
+    self.customerList.removeAll();
+  });
+
+  self.populate = function(force) {
+    force = typeof force !== 'undefined' ? force : false;
     var companyId = self.activeCompanyId();
     if (companyId != null) {
-      Notify_showSpinner(true);
-      self.customerList.removeAll();
-      $.getJSON("/api/customers/" + companyId, function(allData) {
-        for (var i = 0; i < allData.length; i++) {
-          self.customerList.push(new InvoiceCustomerModel(allData[i]));
-        }
+      // Do nothing if object exists in cache
+      if (force || !cache.get(Cache.CUSTOMERS())) {
+        Notify_showSpinner(true);
+        self.customerList.removeAll();
+        Cache.fetchCustomers(companyId).success(function() {
+          self.numServerReqLeft--;
+          self.syncCustomerIdInput();
+          Notify_showSpinner(false);
+        }).fail(function() {
+          console.log("page.js - InvoiceNewViewModel - populate - failed");
+          self.numServerReqLeft--;
+          Notify_showSpinner(false);
+          Notify_showMsg('error', i18n.t("app.invoice.getCustomersNok"));
+        });
+      } else {
+        console.log("page.js - InvoiceNewViewModel - populate - data is cached!");
         self.numServerReqLeft--;
-        self.syncCustomerIdInput();
-        Notify_showSpinner(false);
-      }).fail(function() {
-        console.log("page.js - InvoiceNewViewModel - populate - failed");
-        self.numServerReqLeft--;
-        Notify_showSpinner(false);
-        Notify_showMsg('error', i18n.t("app.invoice.getCustomersNok"));
-      });
+      }
     } else {
       Notify_showMsg('info', i18n.t("app.invoice.getCustomersNok", {context: "noCompany"}));
     }
@@ -1310,7 +1433,8 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
         self.data.company(data.invoice.company);
         self.data.isValid(data.invoice.isValid);
         if (isNewInvoice) {
-          cache.del(CacheKey.CURR_USER_STATS());
+          cache.del(Cache.CURR_USER_STATS());
+          Cache.invalidateInvoices();
         }
       },
     });
@@ -1386,7 +1510,7 @@ var DebugViewModel = function(currentView) {
 var UserViewModel = function() {
   var self = this;
   var USER_STATS_KEY = function() {
-    return CacheKey.USER_STATS(self._id());
+    return Cache.USER_STATS(self._id());
   };
 
   self._id = ko.observable();
@@ -1492,8 +1616,8 @@ var UserListViewModel = function(currentView) {
 
   self.userList = ko.observableArray();
 
-  cache.on('set:' + CacheKey.USERS(), function(users, ttl) {
-    console.log("page.js - UserListViewModel - event - set:" + CacheKey.USERS());
+  cache.on('set:' + Cache.USERS(), function(users, ttl) {
+    console.log("page.js - UserListViewModel - event - set:" + Cache.USERS());
     var mappedUsers = $.map(users, function(item) {
       var user = new UserViewModel();
       user.setData(item);
@@ -1502,18 +1626,18 @@ var UserListViewModel = function(currentView) {
     self.userList(mappedUsers);
   });
 
-  cache.on('del:' + CacheKey.USERS(), function() {
-    console.log("page.js - UserListViewModel - event - del:" + CacheKey.USERS());
+  cache.on('del:' + Cache.USERS(), function() {
+    console.log("page.js - UserListViewModel - event - del:" + Cache.USERS());
     self.populate();
   });
 
   self.populate = function() {
     // Do nothing if object exists in cache
-    if (!cache.get(CacheKey.USERS())) {
+    if (!cache.get(Cache.USERS())) {
       Notify_showSpinner(true);
       $.getJSON("/api/users", function(allData) {
         console.log("Got users: " + JSON.stringify(allData));
-        cache.set(CacheKey.USERS(), allData);
+        cache.set(Cache.USERS(), allData);
         Notify_showSpinner(false);
       }).fail(function() {
         console.log("page.js - UserListViewModel - populate - failed");
@@ -1530,7 +1654,7 @@ var UserListViewModel = function(currentView) {
     self.userList().forEach(function(user) {
       user.invalidateCache();
     });
-    cache.del(CacheKey.USERS());
+    cache.del(Cache.USERS());
   };
 };
 
@@ -1562,8 +1686,8 @@ var InviteListViewModel = function(currentView) {
 
   self.inviteList = ko.observableArray();
 
-  cache.on('set:' + CacheKey.INVITES(), function(invites, ttl) {
-    console.log("page.js - InviteViewModel - event - set:" + CacheKey.INVITES());
+  cache.on('set:' + Cache.INVITES(), function(invites, ttl) {
+    console.log("page.js - InviteViewModel - event - set:" + Cache.INVITES());
     var mappedInvites = $.map(invites, function(item) {
       var invite = new InviteViewModel();
       invite.setData(item);
@@ -1572,18 +1696,18 @@ var InviteListViewModel = function(currentView) {
     self.inviteList(mappedInvites);
   });
 
-  cache.on('del:' + CacheKey.INVITES(), function() {
-    console.log("page.js - InviteViewModel - event - del:" + CacheKey.INVITES());
+  cache.on('del:' + Cache.INVITES(), function() {
+    console.log("page.js - InviteViewModel - event - del:" + Cache.INVITES());
     self.populate();
   });
 
   self.populate = function() {
     // Do nothing if object exists in cache
-    if (!cache.get(CacheKey.INVITES())) {
+    if (!cache.get(Cache.INVITES())) {
       Notify_showSpinner(true);
       $.getJSON("/api/invites", function(allData) {
         console.log("Got invites: " + JSON.stringify(allData));
-        cache.set(CacheKey.INVITES(), allData);
+        cache.set(Cache.INVITES(), allData);
         Notify_showSpinner(false);
       }).fail(function() {
         console.log("page.js - InviteListViewModel - populate - failed");
@@ -1597,7 +1721,7 @@ var InviteListViewModel = function(currentView) {
   
   self.refresh = function() {
     console.log("page.js - InviteListViewModel - refresh");
-    cache.del(CacheKey.INVITES());
+    cache.del(Cache.INVITES());
   };
 };
 
@@ -1776,18 +1900,18 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
     }
   }, self);
 
-  cache.on('set:' + CacheKey.CURR_USER_STATS(), function(stats, ttl) {
-    console.log("page.js - GettingStartedViewModel - event - set:" + CacheKey.CURR_USER_STATS());
+  cache.on('set:' + Cache.CURR_USER_STATS(), function(stats, ttl) {
+    console.log("page.js - GettingStartedViewModel - event - set:" + Cache.CURR_USER_STATS());
     self.stats(stats);
   });
 
-  cache.on('update:' + CacheKey.CURR_USER_STATS(), function(stats, ttl) {
-    console.log("page.js - GettingStartedViewModel - event - update:" + CacheKey.CURR_USER_STATS());
+  cache.on('update:' + Cache.CURR_USER_STATS(), function(stats, ttl) {
+    console.log("page.js - GettingStartedViewModel - event - update:" + Cache.CURR_USER_STATS());
     self.stats(stats);
   });
 
-  cache.on('del:' + CacheKey.CURR_USER_STATS(), function() {
-    console.log("page.js - GettingStartedViewModel - event - del:" + CacheKey.CURR_USER_STATS());
+  cache.on('del:' + Cache.CURR_USER_STATS(), function() {
+    console.log("page.js - GettingStartedViewModel - event - del:" + Cache.CURR_USER_STATS());
   });
 
   self.enable = function() {
@@ -1805,7 +1929,7 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
       if (self.currentView() == 'home') {
         self.populate(true);
       } else {
-        cache.del(CacheKey.CURR_USER_STATS());
+        cache.del(Cache.CURR_USER_STATS());
       }
     });
   };
@@ -1813,13 +1937,13 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
   self.populate = function(force) {
     force = typeof force !== 'undefined' ? force : false;
     // Do nothing if object exists in cache
-    if (force || !cache.get(CacheKey.CURR_USER_STATS())) {
+    if (force || !cache.get(Cache.CURR_USER_STATS())) {
       Notify_showSpinner(true);
       $.getJSON(
           "/api/stats/" + self.activeCompanyId(),
           function(stats) {
             console.log("Got stats id=" + self.activeCompanyId() + ", stats=" + JSON.stringify(stats));
-            cache.set(CacheKey.CURR_USER_STATS(), stats);
+            cache.set(Cache.CURR_USER_STATS(), stats);
             Notify_showSpinner(false);
           }).fail(function() {
             console.log("page.js - GettingStartedViewModel - populate - failed");
