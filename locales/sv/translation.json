@@ -264,13 +264,15 @@
             "numCompaniesLbl": "Företag",
             "numCustomersLbl": "Kunder",
             "numInvoicesLbl": "Fakturor",
+            "refreshBtn": "Uppdatera",
             "getNok": "Misslyckades med att hämta användare!"
         },
         "inviteList": {
             "emailCol": "E-post",
             "licenseCol": "Licenstyp",
             "isAdminCol": "Administratör",
-            "getNok": "Misslyckades med att hämta inbjudningar!"
+            "refreshBtn": "Uppdatera",
+            "getNok": "Misslyckades med att hämta inbjudningar!"            
         }
     }
 }

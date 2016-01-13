@@ -264,12 +264,14 @@
             "numCompaniesLbl": "Companies",
             "numCustomersLbl": "Customers",
             "numInvoicesLbl": "Invoices",
+            "refreshBtn": "Refresh",
             "getNok": "Failed to get users!"
         },
         "inviteList": {
             "emailCol": "E-mail",
             "licenseCol": "License type",
             "isAdminCol": "Admin",
+            "refreshBtn": "Refresh",
             "getNok": "Failed to get invitations!"
         }
     }

@@ -1359,6 +1359,9 @@ var DebugViewModel = function(currentView) {
 
 var UserViewModel = function() {
   var self = this;
+  var USER_STATS_KEY = function() {
+    return 'user_stats_' + self._id();
+  };
 
   self._id = ko.observable();
   self.googleId = ko.observable();
@@ -1398,6 +1401,37 @@ var UserViewModel = function() {
       "numCustomers": 0,
       "numInvoices": 0
     });
+
+    cache.on('set:' + USER_STATS_KEY(), function(stats, ttl) {
+      console.log("page.js - UserViewModel - event - set:" + USER_STATS_KEY());
+      self.totalStats(stats.total);
+      self.isDetailsVisible(true);
+    });
+
+    cache.on('del:' + USER_STATS_KEY(), function() {
+      console.log("page.js - UserViewModel - event - del:" + USER_STATS_KEY());
+    });
+  };
+  
+  self.populate = function() {
+    // Do nothing if object exists in cache
+    if (!cache.get(USER_STATS_KEY())) {
+      Notify_showSpinner(true);
+      $.getJSON(
+          "/api/userStats/" + self._id(),
+          function(stats) {
+            console.log("Got stats for uid=" + self._id() + ", stats=" + JSON.stringify(stats));
+            cache.set(USER_STATS_KEY(), stats);
+            Notify_showSpinner(false);
+          }).fail(function() {
+            console.log("page.js - UserViewModel - toggleDetailedInfo - failed");
+            Notify_showSpinner(false);
+            Notify_showMsg('error', i18n.t("app.userList.getNok"));
+          });      
+    } else {
+      console.log("page.js - UserViewModel - populate - data is cached!");
+      self.isDetailsVisible(true);
+    }
   };
   
   self.toggleDetailedInfo = function(user) {
@@ -1405,26 +1439,22 @@ var UserViewModel = function() {
     console.log("page.js - UserViewModel - toggleDetailedInfo: visible=" + newIsDetailsVisible + " (new value)");
     
     if (newIsDetailsVisible) {
-      Notify_showSpinner(true);
-      $.getJSON(
-          "/api/userStats/" + self._id(),
-          function(stats) {
-            console.log("Got stats for uid=" + self._id() + ", stats=" + JSON.stringify(stats));
-            self.totalStats(stats.total);
-            Notify_showSpinner(false);
-            self.isDetailsVisible(newIsDetailsVisible);
-          }).fail(function() {
-            console.log("page.js - UserViewModel - toggleDetailedInfo - failed");
-            Notify_showSpinner(false);
-          });      
+      self.populate();
     } else {
       self.isDetailsVisible(false);
     }    
+  };
+  
+  self.invalidateCache = function() {
+    // Hide before cache deletion
+    self.isDetailsVisible(false);
+    cache.del(USER_STATS_KEY());
   };
 };
 
 var UserListViewModel = function(currentView) {
   var self = this;
+  var USERS_KEY = 'users';
 
   self.currentView = currentView;
 
@@ -1437,22 +1467,45 @@ var UserListViewModel = function(currentView) {
 
   self.userList = ko.observableArray();
 
-  self.populate = function() {
-    Notify_showSpinner(true);
-    $.getJSON("/api/users", function(allData) {
-      console.log("Got users: " + JSON.stringify(allData));
-      var mappedUsers = $.map(allData, function(item) {
-        var user = new UserViewModel();
-        user.setData(item);
-        return user;
-      });
-      self.userList(mappedUsers);
-      Notify_showSpinner(false);
-    }).fail(function() {
-      console.log("page.js - UserListViewModel - populate - failed");
-      Notify_showSpinner(false);
-      Notify_showMsg('error', i18n.t("app.userList.getNok"));
+  cache.on('set:' + USERS_KEY, function(users, ttl) {
+    console.log("page.js - UserListViewModel - event - set:" + USERS_KEY);
+    var mappedUsers = $.map(users, function(item) {
+      var user = new UserViewModel();
+      user.setData(item);
+      return user;
     });
+    self.userList(mappedUsers);
+  });
+
+  cache.on('del:' + USERS_KEY, function() {
+    console.log("page.js - UserListViewModel - event - del:" + USERS_KEY);
+    self.populate();
+  });
+
+  self.populate = function() {
+    // Do nothing if object exists in cache
+    if (!cache.get(USERS_KEY)) {
+      Notify_showSpinner(true);
+      $.getJSON("/api/users", function(allData) {
+        console.log("Got users: " + JSON.stringify(allData));
+        cache.set(USERS_KEY, allData);
+        Notify_showSpinner(false);
+      }).fail(function() {
+        console.log("page.js - UserListViewModel - populate - failed");
+        Notify_showSpinner(false);
+        Notify_showMsg('error', i18n.t("app.userList.getNok"));
+      });
+    } else {
+      console.log("page.js - UserListViewModel - populate - data is cached!");
+    }
+  };
+
+  self.refresh = function() {
+    console.log("page.js - UserListViewModel - refresh");
+    self.userList().forEach(function(user) {
+      user.invalidateCache();
+    });
+    cache.del(USERS_KEY);
   };
 };
 
@@ -1467,11 +1520,12 @@ var InviteViewModel = function() {
     self.email(data.email);
     self.license(data.license);
     self.isAdmin(data.isAdmin);
-  };
+  };  
 };
 
 var InviteListViewModel = function(currentView) {
   var self = this;
+  var INVITES_KEY = 'invites';
 
   self.currentView = currentView;
 
@@ -1484,22 +1538,42 @@ var InviteListViewModel = function(currentView) {
 
   self.inviteList = ko.observableArray();
 
-  self.populate = function() {
-    Notify_showSpinner(true);
-    $.getJSON("/api/invites", function(allData) {
-      console.log("Got invites: " + JSON.stringify(allData));
-      var mappedInvites = $.map(allData, function(item) {
-        var invite = new InviteViewModel();
-        invite.setData(item);
-        return invite;
-      });
-      self.inviteList(mappedInvites);
-      Notify_showSpinner(false);
-    }).fail(function() {
-      console.log("page.js - InviteListViewModel - populate - failed");
-      Notify_showSpinner(false);
-      Notify_showMsg('error', i18n.t("app.inviteList.getNok"));
+  cache.on('set:' + INVITES_KEY, function(invites, ttl) {
+    console.log("page.js - InviteViewModel - event - set:" + INVITES_KEY);
+    var mappedInvites = $.map(invites, function(item) {
+      var invite = new InviteViewModel();
+      invite.setData(item);
+      return invite;
     });
+    self.inviteList(mappedInvites);
+  });
+
+  cache.on('del:' + INVITES_KEY, function() {
+    console.log("page.js - InviteViewModel - event - del:" + INVITES_KEY);
+    self.populate();
+  });
+
+  self.populate = function() {
+    // Do nothing if object exists in cache
+    if (!cache.get(INVITES_KEY)) {
+      Notify_showSpinner(true);
+      $.getJSON("/api/invites", function(allData) {
+        console.log("Got invites: " + JSON.stringify(allData));
+        cache.set(INVITES_KEY, allData);
+        Notify_showSpinner(false);
+      }).fail(function() {
+        console.log("page.js - InviteListViewModel - populate - failed");
+        Notify_showSpinner(false);
+        Notify_showMsg('error', i18n.t("app.inviteList.getNok"));
+      });
+    } else {
+      console.log("page.js - InviteListViewModel - populate - data is cached!");
+    }
+  };
+  
+  self.refresh = function() {
+    console.log("page.js - InviteListViewModel - refresh");
+    cache.del(INVITES_KEY);
   };
 };
 
