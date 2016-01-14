@@ -37,6 +37,10 @@ var CacheOp = function() {
     return 'users';
   };
 
+  self.COMPANIES = function() {
+    return 'companies';
+  };
+
   self.CUSTOMERS = function() {
     return 'customers';
   };
@@ -55,16 +59,6 @@ var CacheOp = function() {
     return -1;    
   };
 
-  self.fetchCustomers = function(companyId) {
-    return $.getJSON("/api/customers/" + companyId, function(data) {
-      cache.set(self.CUSTOMERS(), data);
-    });
-  };
-
-  self.invalidateCustomers = function() {
-    cache.del(self.CUSTOMERS());
-  };
-  
   self._arrayAddItem = function(arrayCacheKey, item) {
     cache.get(arrayCacheKey, function(items) {
       items.push(item);
@@ -87,6 +81,34 @@ var CacheOp = function() {
     });
   };
 
+  self.fetchCompanies = function() {
+    return $.getJSON("/api/companies", function(data) {
+      cache.set(self.COMPANIES(), data);
+    });
+  };
+
+  self.invalidateCompanies = function() {
+    cache.del(self.COMPANIES());
+  };
+  
+  self.updateCompany = function(company) {
+    self._arrayUpdateItem(self.COMPANIES(), company);
+  };
+
+  self.addCompany = function(company) {
+    self._arrayAddItem(self.COMPANIES(), company);
+  };
+
+  self.fetchCustomers = function(companyId) {
+    return $.getJSON("/api/customers/" + companyId, function(data) {
+      cache.set(self.CUSTOMERS(), data);
+    });
+  };
+
+  self.invalidateCustomers = function() {
+    cache.del(self.CUSTOMERS());
+  };
+  
   self.updateCustomer = function(customer) {
     self._arrayUpdateItem(self.CUSTOMERS(), customer);
   };
@@ -409,25 +431,47 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompany,
   self.activeCompany = activeCompany;
   self.companyList = companyList;
 
-  self.populate = function() {
-    Notify_showSpinner(true);
-    $.getJSON(
-        "/api/companies",
-        function(allData) {
-          Log.info("CompanyListViewModel - populate: Got " + allData.length
-              + " companies");
-          var mappedCompanies = $.map(allData, function(item) {
-            var company = new CompanyViewModel();
-            company.setData(item);
-            return company;
-          });
-          self.companyList(mappedCompanies);
-          Notify_showSpinner(false);
-        }).fail(function() {
-      Log.info("CompanyListViewModel - populate - failed");
-      Notify_showSpinner(false);
-      Notify_showMsg('error', i18n.t("app.customerList.getNok"));
+  cache.on('set:' + Cache.COMPANIES(), function(companies, ttl) {
+    Log.info("CompanyListViewModel - event - set:" + Cache.COMPANIES());
+    Log.info("CompanyListViewModel - populate: Got " + companies.length
+        + " companies");
+    var mappedCompanies = $.map(companies, function(item) {
+      var company = new CompanyViewModel();
+      company.setData(item);
+      return company;
     });
+    self.companyList(mappedCompanies);
+  });
+
+  cache.on('update:' + Cache.COMPANIES(), function(companies, ttl) {
+    Log.info("CompanyListViewModel - event - update:" + Cache.COMPANIES());
+    var mappedCompanies = $.map(companies, function(item) {
+      var company = new CompanyViewModel();
+      company.setData(item);
+      return company;
+    });
+    self.companyList(mappedCompanies);
+  });
+
+  cache.on('del:' + Cache.COMPANIES(), function() {
+    Log.info("CompanyListViewModel - event - del:" + Cache.COMPANIES());
+    self.companyList.removeAll();
+  });
+
+  self.populate = function(force) {
+    force = typeof force !== 'undefined' ? force : false;
+    if (force || !cache.get(Cache.COMPANIES())) {
+      Notify_showSpinner(true);
+      Cache.fetchCompanies().success(function() {
+        Notify_showSpinner(false);
+      }).fail(function() {
+        Log.info("CompanyListViewModel - populate - failed");
+        Notify_showSpinner(false);
+        Notify_showMsg('error', i18n.t("app.customerList.getNok"));
+      });
+    } else {
+      Log.info("CompanyListViewModel - populate - data is cached!");
+    }
   };
 
   self.activateCompany = function(c) {
@@ -453,8 +497,7 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompany,
   });
 
   self.updateActiveCompany = function(id, companyList) {
-    console
-        .log("CompanyListViewModel - updateActiveCompany: companyList.length="
+    Log.info("CompanyListViewModel - updateActiveCompany: companyList.length="
             + companyList.length + ", id=" + id);
     for ( var i = 0; i < companyList.length; i++) {
       var c = companyList[i];
@@ -470,7 +513,7 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompany,
   };
 };
 
-var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany, onCompanyChange) {
+var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) {
   var self = this;
 
   self.data = new CompanyViewModel();
@@ -479,7 +522,6 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany, 
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
   self.activeCompany = activeCompany;
-  self.onCompanyChange = onCompanyChange;
   
   self.logoPath = ko.pureComputed(function() {
     var path = "";
@@ -526,16 +568,21 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany, 
       var prevActiveCompanyId = self.activeCompanyId();
       if (prevActiveCompanyId == null) {
         Log.info("CompanyNewViewModel - No previosly active company, setting to new one - id=" + c._id);
+        cache.del(Cache.CURR_USER_STATS());
+        Cache.addCompany(c);
         self.activeCompanyId(c._id);
       } else if (c._id == self.activeCompanyId()) {
         Log.info("CompanyNewViewModel - active company updated - id=" + self.activeCompanyId());
         // c.name in this case is not a function. Fix done in activeCompany.subscribe()
+        Cache.updateCompany(c);
         self.activeCompany(c);
       } else if (isNew) {
         Log.info("CompanyNewViewModel - New company added - id=" + c._id);
         cache.del(Cache.CURR_USER_STATS());
+        Cache.addCompany(c);
+      } else {
+        Cache.updateCompany(c);
       }
-      self.onCompanyChange();
     });
   };
   
@@ -2087,7 +2134,7 @@ var setupKo = function() {
   });
   
   var companyNewViewModel = new CompanyNewViewModel(navViewModel.currentView,
-      navViewModel.activeCompanyId, navViewModel.activeCompany, companyViewModel.populate);
+      navViewModel.activeCompanyId, navViewModel.activeCompany);
   var customerListViewModel = new CustomerListViewModel(
       navViewModel.currentView, navViewModel.activeCompanyId);
   var customerNewViewModel = new CustomerNewViewModel(navViewModel.currentView,
