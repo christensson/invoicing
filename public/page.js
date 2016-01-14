@@ -80,11 +80,36 @@ var CacheOp = function() {
       };
     });
   };
+  
+  self._arrayGetItem = function(arrayCacheKey, keyField, key, callback) {
+    var items = cache.get(arrayCacheKey);
+    if (items) {
+      var matchItem = {};
+      matchItem[keyField] = key;
+      var i = self._findArrayFieldIndex(items, matchItem, keyField);
+      if (i != -1) {
+        var item = items[i];
+        Log.info("array item at index=" + i + " in cacheKey=" + arrayCacheKey +
+            " found " + JSON.stringify(item));
+        callback(item);
+      } else {
+        Log.info("array item not found in cacheKey=" + arrayCacheKey);
+        callback(undefined);
+      }
+    } else {
+      Log.info("array items not cached for cacheKey=" + arrayCacheKey);
+      callback(undefined);
+    }
+  };
 
   self.fetchCompanies = function() {
     return $.getJSON("/api/companies", function(data) {
       cache.set(self.COMPANIES(), data);
     });
+  };
+
+  self.getCompany = function(id, callback) {
+    self._arrayGetItem(self.COMPANIES(), '_id', id, callback);
   };
 
   self.invalidateCompanies = function() {
@@ -548,18 +573,24 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   });
   
   self.getCompany = function(_id) {
-    Notify_showSpinner(true);
-    $.getJSON(
-        "/api/company/" + _id,
-        function(company) {
-          Log.info("Got company id=" + _id + ", data=" + JSON.stringify(company));
-          self.data.setData(company);
-          Notify_showSpinner(false);
-        }).fail(function() {
-          Log.info("CompanyNewViewModel - getCompany - failed");
-          Notify_showSpinner(false);
-          Notify_showMsg('error', i18n.t("app.company.getNok"));
-        });
+    Cache.getCompany(_id, function(c) {
+      if (c === undefined) {
+        Notify_showSpinner(true);
+        $.getJSON(
+            "/api/company/" + _id,
+            function(company) {
+              Log.info("Got company id=" + _id + ", data=" + JSON.stringify(company));
+              self.data.setData(company);
+              Notify_showSpinner(false);
+            }).fail(function() {
+              Log.info("CompanyNewViewModel - getCompany - failed");
+              Notify_showSpinner(false);
+              Notify_showMsg('error', i18n.t("app.company.getNok"));
+            });
+      } else {
+        self.data.setData(c);
+      }
+    });
   };
   
   self.saveCompany = function() {
