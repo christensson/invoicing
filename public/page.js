@@ -1,47 +1,120 @@
-function Cache(){};
-Cache.CURR_USER_STATS = function() {
-  return 'current_user_stats';
+function Log(){};
+
+Log._getCallerInfo = function() {
+  var err = undefined;
+  try { throw Error(''); } catch(e) { err = e; }
+  var callerLine = err.stack.split("\n")[4];
+  var callerFuncStart = callerLine.indexOf("at ") + 3;
+  return callerLine.slice(callerFuncStart, callerLine.length);
 };
 
-Cache.USER_STATS = function(uid) {
-  return 'user_stats_' + uid;
+Log.info = function(msg) {
+  var functionName = Log._getCallerInfo();
+  console.log("INFO - " + functionName + " - " + msg);
 };
 
-Cache.INVITES = function() {
-  return 'invites';
+Log.warn = function(msg) {
+  var functionName = Log._getCallerInfo();
+  console.log("WARN - " + functionName + " - " + msg);
 };
+
+var CacheOp = function() {
+  var self = this;
+
+  self.CURR_USER_STATS = function() {
+    return 'current_user_stats';
+  };
+
+  self.USER_STATS = function(uid) {
+    return 'user_stats_' + uid;
+  };
+
+  self.INVITES = function() {
+    return 'invites';
+  };
+    
+  self.USERS = function() {
+    return 'users';
+  };
+
+  self.CUSTOMERS = function() {
+    return 'customers';
+  };
+
+  self.INVOICES = function() {
+    return 'invoices';
+  };
+
+  self._findArrayFieldIndex = function(arr, item, field) {
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i][field] === item[field]) {
+        return i;
+        break;
+      };
+    };
+    return -1;    
+  };
+
+  self.fetchCustomers = function(companyId) {
+    return $.getJSON("/api/customers/" + companyId, function(data) {
+      cache.set(self.CUSTOMERS(), data);
+    });
+  };
+
+  self.invalidateCustomers = function() {
+    cache.del(self.CUSTOMERS());
+  };
   
-Cache.USERS = function() {
-  return 'users';
+  self._arrayAddItem = function(arrayCacheKey, item) {
+    cache.get(arrayCacheKey, function(items) {
+      items.push(item);
+      cache.set(arrayCacheKey, items);
+    });
+  };
+
+  self._arrayUpdateItem = function(arrayCacheKey, item) {
+    cache.get(arrayCacheKey, function(items) {
+      var updateIndex = self._findArrayFieldIndex(items, item, '_id');
+      if (updateIndex != -1) {
+        items[updateIndex] = item;
+        Log.info("array item at index=" + updateIndex + " in cacheKey=" + arrayCacheKey +
+            " updated to " + JSON.stringify(item));
+        cache.set(arrayCacheKey, items);
+      } else {
+        Log.warn("array item in cacheKey=" + arrayCacheKey +
+            " not found matching " + JSON.stringify(item));
+      };
+    });
+  };
+
+  self.updateCustomer = function(customer) {
+    self._arrayUpdateItem(self.CUSTOMERS(), customer);
+  };
+
+  self.addCustomer = function(customer) {
+    self._arrayAddItem(self.CUSTOMERS(), customer);
+  };
+
+  self.fetchInvoices = function(companyId) {
+    return $.getJSON("/api/invoices/" + companyId, function(data) {
+      cache.set(self.INVOICES(), data);
+    });
+  };
+
+  self.invalidateInvoices = function() {
+    cache.del(self.INVOICES());
+  };
+
+  self.updateInvoice = function(invoice) {
+    self._arrayUpdateItem(self.INVOICES(), invoice);
+  };
+
+  self.addInvoice = function(invoice) {
+    self._arrayAddItem(self.INVOICES(), invoice);
+  };
 };
 
-Cache.CUSTOMERS = function() {
-  return 'customers';
-};
-
-Cache.INVOICES = function() {
-  return 'invoices';
-};
-
-Cache.fetchCustomers = function(companyId) {
-  return $.getJSON("/api/customers/" + companyId, function(data) {
-    cache.set(Cache.CUSTOMERS(), data);
-  });
-};
-
-Cache.invalidateCustomers = function() {
-  cache.del(Cache.CUSTOMERS());
-};
-
-Cache.fetchInvoices = function(companyId) {
-  return $.getJSON("/api/invoices/" + companyId, function(data) {
-    cache.set(Cache.INVOICES(), data);
-  });
-};
-
-Cache.invalidateInvoices = function() {
-  cache.del(Cache.INVOICES());
-};
+var Cache = new CacheOp();
 
 var SettingsDataModel = function() {
   var self = this;
@@ -606,7 +679,9 @@ var CustomerViewModel = function() {
         self.isValid(data.customer.isValid);
         if (isNewCustomer) {
           cache.del(Cache.CURR_USER_STATS());
-          Cache.invalidateCustomers();
+          Cache.addCustomer(data.customer);
+        } else {
+          Cache.updateCustomer(data.customer);
         }
       },
     });
@@ -1434,8 +1509,10 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
         self.data.isValid(data.invoice.isValid);
         if (isNewInvoice) {
           cache.del(Cache.CURR_USER_STATS());
-          Cache.invalidateInvoices();
-        }
+          Cache.addInvoice(data.invoice);
+        } else {
+          Cache.updateInvoice(data.invoice);
+        };
       },
     });
   };
