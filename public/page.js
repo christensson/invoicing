@@ -130,6 +130,10 @@ var CacheOp = function() {
     });
   };
 
+  self.getCustomer = function(id, callback) {
+    self._arrayGetItem(self.CUSTOMERS(), '_id', id, callback);
+  };
+
   self.invalidateCustomers = function() {
     cache.del(self.CUSTOMERS());
   };
@@ -146,6 +150,10 @@ var CacheOp = function() {
     return $.getJSON("/api/invoices/" + companyId, function(data) {
       cache.set(self.INVOICES(), data);
     });
+  };
+
+  self.getInvoice = function(id, callback) {
+    self._arrayGetItem(self.INVOICES(), '_id', id, callback);
   };
 
   self.invalidateInvoices = function() {
@@ -574,7 +582,9 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   
   self.getCompany = function(_id) {
     Cache.getCompany(_id, function(c) {
-      if (c === undefined) {
+      if (c !== undefined) {
+        self.data.setData(c);
+      } else {
         Notify_showSpinner(true);
         $.getJSON(
             "/api/company/" + _id,
@@ -587,8 +597,6 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
               Notify_showSpinner(false);
               Notify_showMsg('error', i18n.t("app.company.getNok"));
             });
-      } else {
-        self.data.setData(c);
       }
     });
   };
@@ -885,18 +893,24 @@ var CustomerNewViewModel = function(currentView, activeCompanyId) {
   });
   
   self.getCustomer = function(_id) {
-    Notify_showSpinner(true);
-    $.getJSON(
-        "/api/customer/" + _id,
-        function(customer) {
-          Log.info("Got customer id=" + _id + ", data=" + JSON.stringify(customer));
-          self.data.setData(customer);
-          Notify_showSpinner(false);
-        }).fail(function() {
-          Log.info("CustomerNewViewModel - getCustomer - failed");
-          Notify_showSpinner(false);
-          Notify_showMsg('error', i18n.t("app.customer.getNok"));
-        });
+    Cache.getCustomer(_id, function(c) {
+      if (c !== undefined) {
+        self.data.setData(c);
+      } else {
+        Notify_showSpinner(true);
+        $.getJSON(
+            "/api/customer/" + _id,
+            function(customer) {
+              Log.info("Got customer id=" + _id + ", data=" + JSON.stringify(customer));
+              self.data.setData(customer);
+              Notify_showSpinner(false);
+            }).fail(function() {
+              Log.info("CustomerNewViewModel - getCustomer - failed");
+              Notify_showSpinner(false);
+              Notify_showMsg('error', i18n.t("app.customer.getNok"));
+            });
+      }
+    });
   };
   
   self.saveCustomer = function() {
@@ -1485,7 +1499,6 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       // Do nothing if object exists in cache
       if (force || !cache.get(Cache.CUSTOMERS())) {
         Notify_showSpinner(true);
-        self.customerList.removeAll();
         Cache.fetchCustomers(companyId).success(function() {
           self.numServerReqLeft--;
           self.syncCustomerIdInput();
@@ -1499,6 +1512,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       } else {
         Log.info("InvoiceNewViewModel - populate - data is cached!");
         self.numServerReqLeft--;
+        self.syncCustomerIdInput();
       }
     } else {
       Notify_showMsg('info', i18n.t("app.invoice.getCustomersNok", {context: "noCompany"}));
@@ -1506,23 +1520,33 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   };
 
   self.getInvoice = function(_id) {
-    Notify_showSpinner(true);
-    $.getJSON(
-        "/api/invoice/" + _id,
-        function(invoice) {
-          Log.info("Got invoice id=" + _id + ", data=" + JSON.stringify(invoice));
-          self.data.setData(invoice);
-          self.selectedCustomer(self.data.customer());
-          self.selectedCurrency(self.data.currency());
-          self.numServerReqLeft--;
-          self.syncCustomerIdInput();
-          Notify_showSpinner(false);
-        }).fail(function() {
-          Log.info("InvoiceNewViewModel - getInvoice - failed");
-          self.numServerReqLeft--;
-          Notify_showSpinner(false);
-          Notify_showMsg('error', i18n.t("app.invoice.getNok"));
-        });
+    Cache.getInvoice(_id, function(cachedInvoice) {
+      var doOnInvoice = function(invoice) {
+        self.data.setData(invoice);
+        self.selectedCustomer(self.data.customer());
+        self.selectedCurrency(self.data.currency());
+        self.numServerReqLeft--;
+        self.syncCustomerIdInput();
+      };
+
+      if (cachedInvoice !== undefined) {
+        doOnInvoice(cachedInvoice);
+      } else {
+        Notify_showSpinner(true);
+        $.getJSON(
+            "/api/invoice/" + _id,
+            function(invoice) {
+              Log.info("Got invoice id=" + _id + ", data=" + JSON.stringify(invoice));
+              doOnInvoice(invoice);
+              Notify_showSpinner(false);
+            }).fail(function() {
+              Log.info("InvoiceNewViewModel - getInvoice - failed");
+              self.numServerReqLeft--;
+              Notify_showSpinner(false);
+              Notify_showMsg('error', i18n.t("app.invoice.getNok"));
+            });
+      }
+    });
   };
   
   self.syncCustomerIdInput = function() {
