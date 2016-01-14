@@ -130,7 +130,7 @@ var SettingsDataModel = function() {
 
     for (var prop in data) {
       if (data.hasOwnProperty(prop)) {
-        console.log("Property " + prop + " = " + data[prop]);
+        Log.info("Property " + prop + " = " + data[prop]);
       }
     }
   };
@@ -161,7 +161,7 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'settings') {
-      console.log("page.js - SettingsViewModel - activated");
+      Log.info("SettingsViewModel - activated");
     }
   });
 
@@ -173,7 +173,7 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
           self.settings.setData(settings);
           self.setActiveCompanyId(settings.activeCompanyId);
           self.activeCompanyId.subscribe(function(newValue) {
-            console.log("page.js - SettingsViewModel - Active company change detected: ID="
+            Log.info("SettingsViewModel - Active company change detected: ID="
                   + newValue);
             self.settings.setActiveCompanyId(newValue);
             self.saveSettings();
@@ -181,7 +181,7 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
           Notify_showSpinner(false);
           isPopulatedCb();
         }).fail(function() {
-          console.log("page.js - SettingsViewModel - populate - failed");
+          Log.info("SettingsViewModel - populate - failed");
           Notify_showSpinner(false);
           Notify_showMsg('error', i18n.t("app.settings.getNok"));
         });
@@ -190,7 +190,7 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
   self.saveSettings = function() {
     var ajaxData = self.settings.getJson();
     var ajaxUrl = "/api/settings";
-    console.log("saveSettings: AJAX PUT (url=" + ajaxUrl + "): JSON="
+    Log.info("saveSettings: AJAX PUT (url=" + ajaxUrl + "): JSON="
         + JSON.stringify(ajaxData));
     Notify_showSpinner(true, i18n.t("app.settings.saveTicker"));
     return $.ajax({
@@ -200,7 +200,7 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
       data : JSON.stringify(ajaxData),
       dataType : "json",
       success : function(data) {
-        console.log("saveSettings: response: " + JSON.stringify(data));
+        Log.info("saveSettings: response: " + JSON.stringify(data));
         Notify_showSpinner(false);
         Notify_showMsg('success', i18n.t("app.settings.saveOk"));
       },
@@ -338,7 +338,7 @@ var CompanyViewModel = function() {
       data : JSON.stringify(self.toJSON()),
       dataType : "json",
       success : function(data) {
-        console.log("updateServer: response: " + JSON.stringify(data));
+        Log.info("updateServer: response: " + JSON.stringify(data));
         var tContext = "";
         if (!isNew) {
           tContext = (data.company.isValid) ? 'update' : 'delete';
@@ -400,7 +400,7 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompany,
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'companies') {
-      console.log("page.js - CompanyListViewModel - activated");
+      Log.info("CompanyListViewModel - activated");
       self.populate();
     }
   });
@@ -414,7 +414,7 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompany,
     $.getJSON(
         "/api/companies",
         function(allData) {
-          console.log("CompanyListViewModel - populate: Got " + allData.length
+          Log.info("CompanyListViewModel - populate: Got " + allData.length
               + " companies");
           var mappedCompanies = $.map(allData, function(item) {
             var company = new CompanyViewModel();
@@ -424,30 +424,30 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompany,
           self.companyList(mappedCompanies);
           Notify_showSpinner(false);
         }).fail(function() {
-      console.log("page.js - CompanyListViewModel - populate - failed");
+      Log.info("CompanyListViewModel - populate - failed");
       Notify_showSpinner(false);
       Notify_showMsg('error', i18n.t("app.customerList.getNok"));
     });
   };
 
   self.activateCompany = function(c) {
-    console.log("Activate company: name=" + c.name() + ", _id=" + c._id());
+    Log.info("Activate company: name=" + c.name() + ", _id=" + c._id());
     self.activeCompanyId(c._id());
   };
 
   self.setActiveCompanyId = function(id) {
-    console.log("CompanyListViewModel - setActiveCompanyId: new id=" + id);
+    Log.info("CompanyListViewModel - setActiveCompanyId: new id=" + id);
     self.activeCompanyId(id);
   };
 
   self.activeCompanyId.subscribe(function(newValue) {
-    console.log("CompanyListViewModel - activeCompanyId.subscribe: value="
+    Log.info("CompanyListViewModel - activeCompanyId.subscribe: value="
         + newValue);
     self.updateActiveCompany(newValue, self.companyList());
   });
 
   self.companyList.subscribe(function(changes) {
-    console.log("CompanyListViewModel - companyList.subscribe changes="
+    Log.info("CompanyListViewModel - companyList.subscribe changes="
         + JSON.stringify(changes));
     self.updateActiveCompany(self.activeCompanyId(), changes);
   });
@@ -458,10 +458,10 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompany,
             + companyList.length + ", id=" + id);
     for ( var i = 0; i < companyList.length; i++) {
       var c = companyList[i];
-      console.log("CompanyListViewModel - updateActiveCompany: i=" + i
+      Log.info("CompanyListViewModel - updateActiveCompany: i=" + i
           + ", name=" + c.name() + ", id=" + c._id());
       if (c._id() == id) {
-        console.log("CompanyListViewModel - updateActiveCompany: found "
+        Log.info("CompanyListViewModel - updateActiveCompany: found "
             + name + " for id=" + id);
         self.activeCompany(c);
         break;
@@ -493,14 +493,14 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany, 
     self.data.init();
     var viewArray = newValue.split("/");
     if (viewArray[0] == 'company_new') {
-      console.log("page.js - CompanyNewViewModel - activated");
+      Log.info("CompanyNewViewModel - activated");
       self.companyLogoInput("");
       document.getElementById("companyLogoImg").src = "";
       self.data.init();
     } else if (viewArray[0] == 'company_show' && viewArray.length > 1) {
       var _id = viewArray[1];
       self.companyLogoInput("");
-      console.log("page.js - CompanyNewViewModel - activated - show #" + _id);
+      Log.info("CompanyNewViewModel - activated - show #" + _id);
       self.getCompany(_id);
     }
   });
@@ -510,11 +510,11 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany, 
     $.getJSON(
         "/api/company/" + _id,
         function(company) {
-          console.log("Got company id=" + _id + ", data=" + JSON.stringify(company));
+          Log.info("Got company id=" + _id + ", data=" + JSON.stringify(company));
           self.data.setData(company);
           Notify_showSpinner(false);
         }).fail(function() {
-          console.log("page.js - CompanyNewViewModel - getCompany - failed");
+          Log.info("CompanyNewViewModel - getCompany - failed");
           Notify_showSpinner(false);
           Notify_showMsg('error', i18n.t("app.company.getNok"));
         });
@@ -522,17 +522,17 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany, 
   
   self.saveCompany = function() {
     self.data.updateServer(function(c, isNew) {
-      console.log("page.js - CompanyNewViewModel - saveCompany onCompletion: " + JSON.stringify(c) + ", activeId=" + self.activeCompanyId());
+      Log.info("CompanyNewViewModel - saveCompany onCompletion: " + JSON.stringify(c) + ", activeId=" + self.activeCompanyId());
       var prevActiveCompanyId = self.activeCompanyId();
       if (prevActiveCompanyId == null) {
-        console.log("page.js - CompanyNewViewModel - No previosly active company, setting to new one - id=" + c._id);
+        Log.info("CompanyNewViewModel - No previosly active company, setting to new one - id=" + c._id);
         self.activeCompanyId(c._id);
       } else if (c._id == self.activeCompanyId()) {
-        console.log("page.js - CompanyNewViewModel - active company updated - id=" + self.activeCompanyId());
+        Log.info("CompanyNewViewModel - active company updated - id=" + self.activeCompanyId());
         // c.name in this case is not a function. Fix done in activeCompany.subscribe()
         self.activeCompany(c);
       } else if (isNew) {
-        console.log("page.js - CompanyNewViewModel - New company added - id=" + c._id);
+        Log.info("CompanyNewViewModel - New company added - id=" + c._id);
         cache.del(Cache.CURR_USER_STATS());
       }
       self.onCompanyChange();
@@ -541,8 +541,8 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany, 
   
   self.uploadLogo = function(formElement) {
     var _id = self.data._id();
-    console.log("page.js - CompanyNewViewModel - uploadLogo: companyId=" + _id + ", logo=" + formElement.elements.logo.value);
-    console.log("form data: " + JSON.stringify(formElement));
+    Log.info("CompanyNewViewModel - uploadLogo: companyId=" + _id + ", logo=" + formElement.elements.logo.value);
+    Log.info("form data: " + JSON.stringify(formElement));
     var submitForm = false;
     if (_id === undefined) {
       Notify_showMsg('error', i18n.t("app.company.uploadLogoNok", {context: "noId"}));
@@ -647,7 +647,7 @@ var CustomerViewModel = function() {
       Notify_showMsg('error', i18n.t("app.customer.saveNok", {context: "noCompany"}));
       return;
     } else if ((self._id() == undefined) && !self.isValid()) {
-      console.log("updateServer: Nothing to do (invalid entry without _id)");
+      Log.info("updateServer: Nothing to do (invalid entry without _id)");
       Notify_showMsg('error', i18n.t("app.customer.saveNok"));
       return;
     } else if (self.name().length == 0) {
@@ -665,7 +665,7 @@ var CustomerViewModel = function() {
       data : JSON.stringify(self.toJSON()),
       dataType : "json",
       success : function(data) {
-        console.log("updateServer: response: " + JSON.stringify(data));
+        Log.info("updateServer: response: " + JSON.stringify(data));
         var tContext = "";
         if (!isNewCustomer) {
           tContext = (data.customer.isValid) ? 'update' : 'delete';
@@ -717,13 +717,13 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'customers') {
-      console.log("page.js - CustomerListViewModel - activated");
+      Log.info("CustomerListViewModel - activated");
       self.populate();
     }
   });
 
   self.activeCompanyId.subscribe(function(newValue) {
-    console.log("page.js - CustomerListViewModel - activeCompanyId.subscribe: value="
+    Log.info("CustomerListViewModel - activeCompanyId.subscribe: value="
         + newValue);
     if (self.currentView() == 'customers') {
       self.populate(true);
@@ -736,7 +736,7 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
   self.customerList = ko.observableArray();
 
   cache.on('set:' + Cache.CUSTOMERS(), function(customers, ttl) {
-    console.log("page.js - CustomerListViewModel - event - set:" + Cache.CUSTOMERS());
+    Log.info("CustomerListViewModel - event - set:" + Cache.CUSTOMERS());
     var mappedCustomers = $.map(customers, function(item) {
       var customer = new CustomerViewModel();
       customer.setData(item);
@@ -746,7 +746,7 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
   });
 
   cache.on('update:' + Cache.CUSTOMERS(), function(customers, ttl) {
-    console.log("page.js - CustomerListViewModel - event - update:" + Cache.CUSTOMERS());
+    Log.info("CustomerListViewModel - event - update:" + Cache.CUSTOMERS());
     var mappedCustomers = $.map(customers, function(item) {
       var customer = new CustomerViewModel();
       customer.setData(item);
@@ -756,7 +756,7 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
   });
 
   cache.on('del:' + Cache.CUSTOMERS(), function() {
-    console.log("page.js - CustomerListViewModel - event - del:" + Cache.CUSTOMERS());
+    Log.info("CustomerListViewModel - event - del:" + Cache.CUSTOMERS());
     self.customerList.removeAll();
   });
 
@@ -768,15 +768,15 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
       if (force || !cache.get(Cache.CUSTOMERS())) {
         Notify_showSpinner(true);
         Cache.fetchCustomers(companyId).success(function() {
-          console.log("page.js - CustomerListViewModel - populate - success");
+          Log.info("CustomerListViewModel - populate - success");
           Notify_showSpinner(false);
         }).fail(function() {
-          console.log("page.js - CustomerListViewModel - populate - failed");
+          Log.info("CustomerListViewModel - populate - failed");
           Notify_showSpinner(false);
           Notify_showMsg('error', i18n.t("app.customerList.getNok"));
         });
       } else {
-        console.log("page.js - CustomerListViewModel - populate - data is cached!");
+        Log.info("CustomerListViewModel - populate - data is cached!");
       }
     } else {
       Notify_showMsg('info', i18n.t("app.customerList.getNok", {context: "noCompany"}));
@@ -796,12 +796,12 @@ var CustomerNewViewModel = function(currentView, activeCompanyId) {
     self.data.init();
     var viewArray = newValue.split("/");
     if (viewArray[0] == 'customer_new') {
-      console.log("page.js - CustomerNewViewModel - activated");
+      Log.info("CustomerNewViewModel - activated");
       self.data.init();
       self.data.setActiveCompanyId(self.activeCompanyId());
     } else if (viewArray[0] == 'customer_show' && viewArray.length > 1) {
       var _id = viewArray[1];
-      console.log("page.js - CustomerNewViewModel - activated - show #" + _id);
+      Log.info("CustomerNewViewModel - activated - show #" + _id);
       self.getCustomer(_id);
     }
   });
@@ -811,11 +811,11 @@ var CustomerNewViewModel = function(currentView, activeCompanyId) {
     $.getJSON(
         "/api/customer/" + _id,
         function(customer) {
-          console.log("Got customer id=" + _id + ", data=" + JSON.stringify(customer));
+          Log.info("Got customer id=" + _id + ", data=" + JSON.stringify(customer));
           self.data.setData(customer);
           Notify_showSpinner(false);
         }).fail(function() {
-          console.log("page.js - CustomerNewViewModel - getCustomer - failed");
+          Log.info("CustomerNewViewModel - getCustomer - failed");
           Notify_showSpinner(false);
           Notify_showMsg('error', i18n.t("app.customer.getNok"));
         });
@@ -829,22 +829,22 @@ var CustomerNewViewModel = function(currentView, activeCompanyId) {
 // Trick for doing classmethods...
 function InvoiceOps(){};
 InvoiceOps.printInvoice = function(id) {
-  console.log("page.js - printInvoice - id=" + id);
+  Log.info("printInvoice - id=" + id);
   if (id !== undefined) {
     Notify_showSpinner(true);
     try {
       var child = window.open("/api/invoiceReport/" + id);
       $(child).ready(function() {
-        console.log("page.js - printInvoice - Report done!");
+        Log.info("printInvoice - Report done!");
         Notify_showSpinner(false);
       });
       child.focus();
     } catch (e) {
-      console.log("page.js - printInvoice - Failed!");
+      Log.info("printInvoice - Failed!");
       Notify_showSpinner(false);
     }
   } else {
-    console.log("page.js - printInvoice - failure, undefined id");
+    Log.info("printInvoice - failure, undefined id");
   }
 };
 
@@ -924,10 +924,10 @@ var InvoiceDataViewModel = function() {
     self.invoiceItems.removeAll();
     for ( var i = 0; i < newData.invoiceItems.length; i++) {
       if (newData.invoiceItems[i].isValid) {
-        console.log("Push item i=" + i + " desc=" + newData.invoiceItems[i].description);
+        Log.info("Push item i=" + i + " desc=" + newData.invoiceItems[i].description);
         self.invoiceItems.push(new InvoiceItemViewModel(newData.invoiceItems[i], self.currency));
       } else {
-        console.log("Skip invalid item i=" + i + " desc=" + newData.invoiceItems[i].description);
+        Log.info("Skip invalid item i=" + i + " desc=" + newData.invoiceItems[i].description);
       }
     }
   };
@@ -1042,7 +1042,7 @@ var InvoiceDataViewModel = function() {
       isValid : true
     };
     self.invoiceItems.push(new InvoiceItemViewModel(data, self.currency));
-    console.log("Added new invoice item. #items=" + self.invoiceItems().length + ", data=" + JSON.stringify(data));
+    Log.info("Added new invoice item. #items=" + self.invoiceItems().length + ", data=" + JSON.stringify(data));
   };
 
   self.deleteInvoiceItem = function(item) {
@@ -1115,29 +1115,29 @@ var InvoiceListDataViewModel = function(data) {
       var invoiceDate = new Date(self.date());
       var invoiceAgeMs = Date.now() - invoiceDate.valueOf();
       var invoiceAgeDays = invoiceAgeMs / (1000 * 3600 * 24);
-      console.log("Invoice isOverdue: iid=" + self.iid() + ", date="
+      Log.info("Invoice isOverdue: iid=" + self.iid() + ", date="
           + invoiceDate + ", ageInDays=" + invoiceAgeDays + ", daysUntilPayment="
           + self.daysUntilPayment());
       if (invoiceAgeDays > parseInt(self.daysUntilPayment())) {
-        console.log("Invoice " + self.iid() + " is overdue!");
+        Log.info("Invoice " + self.iid() + " is overdue!");
         overdue = true;
       }
     }
     else
     {
-      console.log("Invoice isOverdue: iid=" + self.iid() + ", not valid daysUntilPayment="
+      Log.info("Invoice isOverdue: iid=" + self.iid() + ", not valid daysUntilPayment="
           + self.daysUntilPayment());
     }
     return overdue;
   });
 
   self.printInvoice = function() {
-    console.log("page.js - InvoiceListDataViewModel - Report requested");
+    Log.info("InvoiceListDataViewModel - Report requested");
     if (self._id() !== undefined) {
       InvoiceOps.printInvoice(self._id());
     } else {
       Notify_showMsg('error', i18n.t("app.invoiceList.printNok", {context: "noId"}));
-      console.log("page.js - InvoiceListDataViewModel - Invoice has no id.");
+      Log.info("InvoiceListDataViewModel - Invoice has no id.");
     }
   };
 };
@@ -1154,13 +1154,13 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'invoices') {
-      console.log("page.js - InvoiceListViewModel - activated");
+      Log.info("InvoiceListViewModel - activated");
       self.populate();
     }
   });
 
   self.activeCompanyId.subscribe(function(newValue) {
-    console.log("page.js - InvoiceListViewModel - activeCompanyId.subscribe: value="
+    Log.info("InvoiceListViewModel - activeCompanyId.subscribe: value="
         + newValue);
     if (self.currentView() == 'invoices') {
       self.populate(true);
@@ -1173,7 +1173,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   self.invoiceList = ko.observableArray();
 
   cache.on('set:' + Cache.INVOICES(), function(invoices, ttl) {
-    console.log("page.js - InvoiceListViewModel - event - set:" + Cache.INVOICES());
+    Log.info("InvoiceListViewModel - event - set:" + Cache.INVOICES());
     var mappedInvoices = $.map(invoices, function(item) {
       return new InvoiceListDataViewModel(item);
     });
@@ -1181,7 +1181,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   });
 
   cache.on('update:' + Cache.INVOICES(), function(invoices, ttl) {
-    console.log("page.js - InvoiceListViewModel - event - update:" + Cache.INVOICES());
+    Log.info("InvoiceListViewModel - event - update:" + Cache.INVOICES());
     var mappedInvoices = $.map(invoices, function(item) {
       return new InvoiceListDataViewModel(item);
     });
@@ -1189,7 +1189,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   });
 
   cache.on('del:' + Cache.INVOICES(), function() {
-    console.log("page.js - InvoiceListViewModel - event - del:" + Cache.INVOICES());
+    Log.info("InvoiceListViewModel - event - del:" + Cache.INVOICES());
     self.invoiceList.removeAll();
   });
 
@@ -1201,15 +1201,15 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
       if (force || !cache.get(Cache.INVOICES())) {
         Notify_showSpinner(true);
         Cache.fetchInvoices(companyId).success(function() {
-          console.log("page.js - InvoiceListViewModel - populate - success");
+          Log.info("InvoiceListViewModel - populate - success");
           Notify_showSpinner(false);
         }).fail(function() {
-          console.log("page.js - InvoiceListViewModel - populate - failed");
+          Log.info("InvoiceListViewModel - populate - failed");
           Notify_showSpinner(false);
           Notify_showMsg('error', i18n.t("app.invoiceList.getNok"));
         });
       } else {
-        console.log("page.js - InvoiceListViewModel - populate - data is cached!");
+        Log.info("InvoiceListViewModel - populate - data is cached!");
       }
     } else {
       Notify_showMsg('info', i18n.t("app.invoiceList.getNok", {context: "noCompany"}));
@@ -1218,19 +1218,19 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   
   self.doToggleShowPaid = function() {
     self.showPaid(!self.showPaid());
-    console.log("page.js - InvoiceListViewModel - showPaid=" + self.showPaid()
+    Log.info("InvoiceListViewModel - showPaid=" + self.showPaid()
         + " (new state)");
   };
   
   self.doToggleShowCredit = function() {
     self.showCredit(!self.showCredit());
-    console.log("page.js - InvoiceListViewModel - showCredit=" + self.showCredit()
+    Log.info("InvoiceListViewModel - showCredit=" + self.showCredit()
         + " (new state)");
   };
 
   self.doToggleShowCanceled = function() {
     self.showCanceled(!self.showCanceled());
-    console.log("page.js - InvoiceListViewModel - showCanceled=" + self.showCanceled()
+    Log.info("InvoiceListViewModel - showCanceled=" + self.showCanceled()
         + " (new state)");
   };
 
@@ -1243,7 +1243,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   };
 
   self.invoiceListSort.subscribe(function(newVal) {
-    console.log("page.js - InvoiceListViewModel - invoiceListSort.subscribe=" + JSON.stringify(newVal));
+    Log.info("InvoiceListViewModel - invoiceListSort.subscribe=" + JSON.stringify(newVal));
     // Sort according to compare method.
     self.invoiceList.sort(self[newVal + 'Compare']);
   });
@@ -1348,7 +1348,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
     self.selectedCustomer(undefined);
     var viewArray = newValue.split("/");
     if (viewArray[0] == 'invoice_new') {
-      console.log("page.js - InvoiceNewViewModel - activated");
+      Log.info("InvoiceNewViewModel - activated");
       self.data.init(self.activeCompany().defaultNumDaysUntilPayment());
       self.data.newInvoiceItem();
       self.data.setCompanyId(self.activeCompanyId());
@@ -1356,7 +1356,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       self.populate();
     } else if (viewArray[0] == 'invoice_show' && viewArray.length > 1) {
       var _id = viewArray[1];
-      console.log("page.js - InvoiceNewViewModel - activated - show #" + _id);
+      Log.info("InvoiceNewViewModel - activated - show #" + _id);
       self.numServerReqLeft = 2;
       self.getInvoice(_id);
       self.populate();
@@ -1365,7 +1365,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   
   self.selectedCustomer.subscribe(function(newValue) {
     if (newValue !== undefined && newValue.data !== undefined) {
-      console.log("page.js - InvoiceNewViewModel - Customer selected - "
+      Log.info("InvoiceNewViewModel - Customer selected - "
           + JSON.stringify(newValue.data));
       self.data.setCustomer(newValue.data);
     }
@@ -1373,14 +1373,14 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
 
   self.selectedCurrency.subscribe(function(newValue) {
     if (newValue !== undefined) {
-      console.log("page.js - InvoiceNewViewModel - Currency selected - "
+      Log.info("InvoiceNewViewModel - Currency selected - "
           + newValue);
       self.data.setCurrency(newValue);
     }
   });
 
   cache.on('set:' + Cache.CUSTOMERS(), function(customers, ttl) {
-    console.log("page.js - InvoiceNewViewModel - event - set:" + Cache.CUSTOMERS());
+    Log.info("InvoiceNewViewModel - event - set:" + Cache.CUSTOMERS());
     var mappedCustomers = $.map(customers, function(item) {
       return new InvoiceCustomerModel(item);
     });
@@ -1388,7 +1388,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   });
 
   cache.on('update:' + Cache.CUSTOMERS(), function(customers, ttl) {
-    console.log("page.js - InvoiceNewViewModel - event - update:" + Cache.CUSTOMERS());
+    Log.info("InvoiceNewViewModel - event - update:" + Cache.CUSTOMERS());
     var mappedCustomers = $.map(customers, function(item) {
       return new InvoiceCustomerModel(item);
     });
@@ -1396,7 +1396,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   });
 
   cache.on('del:' + Cache.CUSTOMERS(), function() {
-    console.log("page.js - InvoiceNewViewModel - event - del:" + Cache.CUSTOMERS());
+    Log.info("InvoiceNewViewModel - event - del:" + Cache.CUSTOMERS());
     self.customerList.removeAll();
   });
 
@@ -1413,13 +1413,13 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
           self.syncCustomerIdInput();
           Notify_showSpinner(false);
         }).fail(function() {
-          console.log("page.js - InvoiceNewViewModel - populate - failed");
+          Log.info("InvoiceNewViewModel - populate - failed");
           self.numServerReqLeft--;
           Notify_showSpinner(false);
           Notify_showMsg('error', i18n.t("app.invoice.getCustomersNok"));
         });
       } else {
-        console.log("page.js - InvoiceNewViewModel - populate - data is cached!");
+        Log.info("InvoiceNewViewModel - populate - data is cached!");
         self.numServerReqLeft--;
       }
     } else {
@@ -1432,7 +1432,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
     $.getJSON(
         "/api/invoice/" + _id,
         function(invoice) {
-          console.log("Got invoice id=" + _id + ", data=" + JSON.stringify(invoice));
+          Log.info("Got invoice id=" + _id + ", data=" + JSON.stringify(invoice));
           self.data.setData(invoice);
           self.selectedCustomer(self.data.customer());
           self.selectedCurrency(self.data.currency());
@@ -1440,7 +1440,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
           self.syncCustomerIdInput();
           Notify_showSpinner(false);
         }).fail(function() {
-          console.log("page.js - InvoiceNewViewModel - getInvoice - failed");
+          Log.info("InvoiceNewViewModel - getInvoice - failed");
           self.numServerReqLeft--;
           Notify_showSpinner(false);
           Notify_showMsg('error', i18n.t("app.invoice.getNok"));
@@ -1449,18 +1449,18 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   
   self.syncCustomerIdInput = function() {
     if (self.numServerReqLeft === 0) {
-      console.log("page.js - InvoiceNewViewModel - syncCustomerIdInput");
+      Log.info("InvoiceNewViewModel - syncCustomerIdInput");
       var cid = self.data.customer().cid;
       if (cid !== undefined) {
         for (var i = 0; i < self.customerList().length; i++) {
           if (cid === self.customerList()[i].data.cid) {
-            console.log("page.js - InvoiceNewViewModel - syncCustomerIdInput: cid=" + cid + " found");
+            Log.info("InvoiceNewViewModel - syncCustomerIdInput: cid=" + cid + " found");
             self.selectedCustomer(self.customerList()[i]);
             break;
           }
         }
       } else {
-        console.log("page.js - InvoiceNewViewModel - syncCustomerIdInput: customer.cid is undefined");        
+        Log.info("InvoiceNewViewModel - syncCustomerIdInput: customer.cid is undefined");        
       }
     }
   };
@@ -1468,11 +1468,11 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   self.saveInvoice = function() {
     if ((self.data._id() === undefined) && !self.data.isValid()) {
       Notify_showMsg('error', i18n.t("app.invoice.saveNok"));
-      console.log("saveInvoice: Nothing to do (invalid entry without _id)");
+      Log.info("saveInvoice: Nothing to do (invalid entry without _id)");
       return;
     } else if (self.data.customer()._id === undefined) {
       Notify_showMsg('error', i18n.t("app.invoice.saveNok", {context: 'invalidCustomer'}));
-      console.log("No customer selected: " + JSON.stringify(self.data.customer()));
+      Log.info("No customer selected: " + JSON.stringify(self.data.customer()));
       return;
     } else if (self.data.date() === undefined) {
       Notify_showMsg('error', i18n.t("app.invoice.saveNok", {context: 'invalidDate'}));
@@ -1481,7 +1481,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
     var isNewInvoice = (self.data._id() == undefined) ? true : false;
     var ajaxData = JSON.stringify(self.data.getJson());
     var ajaxUrl = "/api/invoice/" + self.data._id();
-    console.log("saveInvoice: AJAX PUT (url=" + ajaxUrl + "): JSON="
+    Log.info("saveInvoice: AJAX PUT (url=" + ajaxUrl + "): JSON="
         + ajaxData);
     Notify_showSpinner(true, i18n.t("app.invoice.saveTicker"));
     return $.ajax({
@@ -1491,7 +1491,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       data : ajaxData,
       dataType : "json",
       success : function(data) {
-        console.log("saveInvoice: response: " + JSON.stringify(data));
+        Log.info("saveInvoice: response: " + JSON.stringify(data));
         var tContext = "";
         if (!isNewInvoice) {
           tContext = (data.invoice.isValid) ? 'update' : 'delete';
@@ -1518,17 +1518,17 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   };
   
   self.doInvoicePrint = function() {
-    console.log("page.js - InvoiceNewViewModel - Print requested");
+    Log.info("InvoiceNewViewModel - Print requested");
     if (self.data._id() !== undefined) {
       InvoiceOps.printInvoice(self.data._id());
     } else {
       Notify_showMsg('info', i18n.t("app.invoice.printNok", {context: 'noId'}));
-      console.log("page.js - InvoiceNewViewModel - Invoice not saved.");
+      Log.info("InvoiceNewViewModel - Invoice not saved.");
     }
   };
   
   self.doCopyInvoice = function() {
-    console.log("page.js - InvoiceNewViewModel - Copy invoice requested");
+    Log.info("InvoiceNewViewModel - Copy invoice requested");
     /* Mark datafields so that the next save will allocate new invoice ids */
     self.data.forceMarkAsNew();
   };
@@ -1538,7 +1538,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   };
 
   self.deleteItem = function(item) {
-    console.log("page.js - InvoiceNewViewModel - delete: "
+    Log.info("InvoiceNewViewModel - delete: "
         + JSON.stringify(item));
     self.data.deleteInvoiceItem(item);
   };
@@ -1558,12 +1558,12 @@ var DebugViewModel = function(currentView) {
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'debug') {
-      console.log("page.js - DebugViewModel - activated");
+      Log.info("DebugViewModel - activated");
     }
   });
 
   self.spinnerVisible.subscribe(function(showSpinner) {
-    console.log("page.js - DebugViewModel - showSpinner: " + showSpinner);
+    Log.info("DebugViewModel - showSpinner: " + showSpinner);
     Notify_showSpinner(showSpinner);
   });
 
@@ -1630,13 +1630,13 @@ var UserViewModel = function() {
     });
 
     cache.on('set:' + USER_STATS_KEY(), function(stats, ttl) {
-      console.log("page.js - UserViewModel - event - set:" + USER_STATS_KEY());
+      Log.info("UserViewModel - event - set:" + USER_STATS_KEY());
       self.totalStats(stats.total);
       self.isDetailsVisible(true);
     });
 
     cache.on('del:' + USER_STATS_KEY(), function() {
-      console.log("page.js - UserViewModel - event - del:" + USER_STATS_KEY());
+      Log.info("UserViewModel - event - del:" + USER_STATS_KEY());
     });
   };
   
@@ -1647,23 +1647,23 @@ var UserViewModel = function() {
       $.getJSON(
           "/api/userStats/" + self._id(),
           function(stats) {
-            console.log("Got stats for uid=" + self._id() + ", stats=" + JSON.stringify(stats));
+            Log.info("Got stats for uid=" + self._id() + ", stats=" + JSON.stringify(stats));
             cache.set(USER_STATS_KEY(), stats);
             Notify_showSpinner(false);
           }).fail(function() {
-            console.log("page.js - UserViewModel - toggleDetailedInfo - failed");
+            Log.info("UserViewModel - toggleDetailedInfo - failed");
             Notify_showSpinner(false);
             Notify_showMsg('error', i18n.t("app.userList.getNok"));
           });      
     } else {
-      console.log("page.js - UserViewModel - populate - data is cached!");
+      Log.info("UserViewModel - populate - data is cached!");
       self.isDetailsVisible(true);
     }
   };
   
   self.toggleDetailedInfo = function(user) {
     var newIsDetailsVisible = !self.isDetailsVisible();
-    console.log("page.js - UserViewModel - toggleDetailedInfo: visible=" + newIsDetailsVisible + " (new value)");
+    Log.info("UserViewModel - toggleDetailedInfo: visible=" + newIsDetailsVisible + " (new value)");
     
     if (newIsDetailsVisible) {
       self.populate();
@@ -1686,7 +1686,7 @@ var UserListViewModel = function(currentView) {
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'users') {
-      console.log("page.js - UserListViewModel - activated");
+      Log.info("UserListViewModel - activated");
       self.populate();
     }
   });
@@ -1694,7 +1694,7 @@ var UserListViewModel = function(currentView) {
   self.userList = ko.observableArray();
 
   cache.on('set:' + Cache.USERS(), function(users, ttl) {
-    console.log("page.js - UserListViewModel - event - set:" + Cache.USERS());
+    Log.info("UserListViewModel - event - set:" + Cache.USERS());
     var mappedUsers = $.map(users, function(item) {
       var user = new UserViewModel();
       user.setData(item);
@@ -1704,7 +1704,7 @@ var UserListViewModel = function(currentView) {
   });
 
   cache.on('del:' + Cache.USERS(), function() {
-    console.log("page.js - UserListViewModel - event - del:" + Cache.USERS());
+    Log.info("UserListViewModel - event - del:" + Cache.USERS());
     self.populate();
   });
 
@@ -1713,21 +1713,21 @@ var UserListViewModel = function(currentView) {
     if (!cache.get(Cache.USERS())) {
       Notify_showSpinner(true);
       $.getJSON("/api/users", function(allData) {
-        console.log("Got users: " + JSON.stringify(allData));
+        Log.info("Got users: " + JSON.stringify(allData));
         cache.set(Cache.USERS(), allData);
         Notify_showSpinner(false);
       }).fail(function() {
-        console.log("page.js - UserListViewModel - populate - failed");
+        Log.info("UserListViewModel - populate - failed");
         Notify_showSpinner(false);
         Notify_showMsg('error', i18n.t("app.userList.getNok"));
       });
     } else {
-      console.log("page.js - UserListViewModel - populate - data is cached!");
+      Log.info("UserListViewModel - populate - data is cached!");
     }
   };
 
   self.refresh = function() {
-    console.log("page.js - UserListViewModel - refresh");
+    Log.info("UserListViewModel - refresh");
     self.userList().forEach(function(user) {
       user.invalidateCache();
     });
@@ -1756,7 +1756,7 @@ var InviteListViewModel = function(currentView) {
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'invites') {
-      console.log("page.js - InviteListViewModel - activated");
+      Log.info("InviteListViewModel - activated");
       self.populate();
     }
   });
@@ -1764,7 +1764,7 @@ var InviteListViewModel = function(currentView) {
   self.inviteList = ko.observableArray();
 
   cache.on('set:' + Cache.INVITES(), function(invites, ttl) {
-    console.log("page.js - InviteViewModel - event - set:" + Cache.INVITES());
+    Log.info("InviteViewModel - event - set:" + Cache.INVITES());
     var mappedInvites = $.map(invites, function(item) {
       var invite = new InviteViewModel();
       invite.setData(item);
@@ -1774,7 +1774,7 @@ var InviteListViewModel = function(currentView) {
   });
 
   cache.on('del:' + Cache.INVITES(), function() {
-    console.log("page.js - InviteViewModel - event - del:" + Cache.INVITES());
+    Log.info("InviteViewModel - event - del:" + Cache.INVITES());
     self.populate();
   });
 
@@ -1783,21 +1783,21 @@ var InviteListViewModel = function(currentView) {
     if (!cache.get(Cache.INVITES())) {
       Notify_showSpinner(true);
       $.getJSON("/api/invites", function(allData) {
-        console.log("Got invites: " + JSON.stringify(allData));
+        Log.info("Got invites: " + JSON.stringify(allData));
         cache.set(Cache.INVITES(), allData);
         Notify_showSpinner(false);
       }).fail(function() {
-        console.log("page.js - InviteListViewModel - populate - failed");
+        Log.info("InviteListViewModel - populate - failed");
         Notify_showSpinner(false);
         Notify_showMsg('error', i18n.t("app.inviteList.getNok"));
       });
     } else {
-      console.log("page.js - InviteListViewModel - populate - data is cached!");
+      Log.info("InviteListViewModel - populate - data is cached!");
     }
   };
   
   self.refresh = function() {
-    console.log("page.js - InviteListViewModel - refresh");
+    Log.info("InviteListViewModel - refresh");
     cache.del(Cache.INVITES());
   };
 };
@@ -1887,7 +1887,7 @@ var NavViewModel = function() {
   
   self.activeCompany.subscribe(function(c) {
     if (c != undefined) {
-      console.log("Active company change detected: new=" + JSON.stringify(c) + ", c.name type is " + typeof c.name);
+      Log.info("Active company change detected: new=" + JSON.stringify(c) + ", c.name type is " + typeof c.name);
       // Fix for problem when c.name is not a function in case activeCompany()
       // is set when updating currently active company
       if (typeof c.name === "function") {
@@ -1899,7 +1899,7 @@ var NavViewModel = function() {
   });
   
   self.selectCompany = function(company) {
-    console.log("page.js - navigation - selectCompany: " + JSON.stringify(company));
+    Log.info("navigation - selectCompany: " + JSON.stringify(company));
     self.activeCompanyId(company._id());
     
     // Work-around: Navigate to home instead of making sure that all views updates when company is changed
@@ -1909,11 +1909,11 @@ var NavViewModel = function() {
   self.routes = {
     '/page/:view' : function(view) {
       self.currentView(view);
-      console.log("page.js - navigation - view: " + view);
+      Log.info("navigation - view: " + view);
     },
     '/page/:view/:param' : function(view, param) {
       self.currentView(view + "/" + param);
-      console.log("page.js - navigation - view: " + view + ", param=" + param);
+      Log.info("navigation - view: " + view + ", param=" + param);
     }
   };
   self.router = Router(self.routes);
@@ -1978,30 +1978,30 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
   }, self);
 
   cache.on('set:' + Cache.CURR_USER_STATS(), function(stats, ttl) {
-    console.log("page.js - GettingStartedViewModel - event - set:" + Cache.CURR_USER_STATS());
+    Log.info("GettingStartedViewModel - event - set:" + Cache.CURR_USER_STATS());
     self.stats(stats);
   });
 
   cache.on('update:' + Cache.CURR_USER_STATS(), function(stats, ttl) {
-    console.log("page.js - GettingStartedViewModel - event - update:" + Cache.CURR_USER_STATS());
+    Log.info("GettingStartedViewModel - event - update:" + Cache.CURR_USER_STATS());
     self.stats(stats);
   });
 
   cache.on('del:' + Cache.CURR_USER_STATS(), function() {
-    console.log("page.js - GettingStartedViewModel - event - del:" + Cache.CURR_USER_STATS());
+    Log.info("GettingStartedViewModel - event - del:" + Cache.CURR_USER_STATS());
   });
 
   self.enable = function() {
     self.populate();
     self.currentView.subscribe(function(newValue) {
       if (newValue == 'home') {
-        console.log("page.js - GettingStartedViewModel - activated");
+        Log.info("GettingStartedViewModel - activated");
         self.populate();
       }
     });
 
     self.activeCompanyId.subscribe(function(newValue) {
-      console.log("page.js - GettingStartedViewModel - activeCompanyId.subscribe: value="
+      Log.info("GettingStartedViewModel - activeCompanyId.subscribe: value="
           + newValue);
       if (self.currentView() == 'home') {
         self.populate(true);
@@ -2019,15 +2019,15 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
       $.getJSON(
           "/api/stats/" + self.activeCompanyId(),
           function(stats) {
-            console.log("Got stats id=" + self.activeCompanyId() + ", stats=" + JSON.stringify(stats));
+            Log.info("Got stats id=" + self.activeCompanyId() + ", stats=" + JSON.stringify(stats));
             cache.set(Cache.CURR_USER_STATS(), stats);
             Notify_showSpinner(false);
           }).fail(function() {
-            console.log("page.js - GettingStartedViewModel - populate - failed");
+            Log.info("GettingStartedViewModel - populate - failed");
             Notify_showSpinner(false);
           });
     } else {
-      console.log("page.js - GettingStartedViewModel - populate - data is cached!");
+      Log.info("GettingStartedViewModel - populate - data is cached!");
     }
   };
 };
@@ -2133,7 +2133,7 @@ var setupKo = function() {
 };
 
 $(function() {
-  console.log("page.js - init - load translations");
+  Log.info("init - load translations");
   $.i18n.init({
     //lng: 'en-US',
     useLocalStorage: false,
@@ -2143,9 +2143,9 @@ $(function() {
     dynamicLoad: true,
     debug: true
     }, function() {
-    console.log("page.js - init - load translations - done");
-    console.log("page.js - init - setupKo");
+    Log.info("init - load translations - done");
+    Log.info("init - setupKo");
     setupKo();
-    console.log("page.js - init - setupKo - done");
+    Log.info("init - setupKo - done");
   });  
 });
