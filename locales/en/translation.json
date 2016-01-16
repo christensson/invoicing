@@ -209,6 +209,8 @@
             "detailsTotalCol": "Total",
             "totalExclVatLbl": "Total excluding VAT:",
             "totalInclVatLbl": "Total including VAT:",
+            "datailsTypeTextOnly": "Custom text",
+            "datailsTypeDefault": "Default",
             "optIsLockedLbl": "Locked",
             "optIsPaidLbl": "Paid",
             "optIsCreditLbl": "Credit invoice",

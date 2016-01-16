@@ -125,7 +125,7 @@
                         <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.companiesHeader')}</h3></div>
                         <div class="panel-body">
                           <p><span data-bind="html: companiesTextTrans"></span></p>
-                          <div class="btn-group">
+                          <div class="btn-group" role="group">
                             <a href="#/page/company_new" type="button" class="btn btn-success">
                               <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                               ${i18n.t('app.gettingStarted.companiesNewCompanyBtn')}
@@ -141,7 +141,7 @@
                           <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.customersHeader')}</h3></div>
                           <div class="panel-body">
                             <p><span data-bind="html: customersTextTrans"></span></p>
-                            <div class="btn-group">
+                            <div class="btn-group" role="group">
                               <a href="#/page/customer_new" type="button" class="btn btn-success">
                                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                                 ${i18n.t('app.gettingStarted.customersNewCustomerBtn')}
@@ -158,7 +158,7 @@
                           <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.invoicesHeader')}</h3></div>
                           <div class="panel-body">
                             <p><span data-bind="html: invoicesTextTrans"></span></p>
-                            <div class="btn-group">
+                            <div class="btn-group" role="group">
                               <a href="#/page/invoice_new" type="button" class="btn btn-success">
                                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                                 ${i18n.t('app.gettingStarted.invoicesNewInvoiceBtn')}
@@ -189,7 +189,7 @@
                             <tbody data-bind="foreach: companyList">
                                 <tr data-bind="css: { info: _id() == \$parent.activeCompanyId() }">
                                     <td>
-                                      <div class="btn-group">
+                                      <div class="btn-group" role="group">
                                         <a class="btn btn-info" data-bind="attr: { href: '#/page/company_show/' + _id() }">
                                             <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
                                         </a>
@@ -207,7 +207,7 @@
                         </table>
                     </p>
 
-                    <div class="btn-group">
+                    <div class="btn-group" role="group">
                       <a href="#/page/company_new" type="button" class="btn btn-success">
                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                         ${i18n.t('app.companyList.newCompanyBtn')}
@@ -399,7 +399,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="btn-group">
+                <div class="btn-group" role="group">
                   <button type="button" class="btn btn-success" data-bind="click: saveCompany">
                     <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
                     ${i18n.t('app.company.companySaveBtn')}
@@ -427,7 +427,7 @@
                             <tbody data-bind="foreach: customerList">
                                 <tr>
                                     <td>
-                                      <div class="btn-group">
+                                      <div class="btn-group" role="group">
                                         <a class="btn btn-info" data-bind="attr: { href: '#/page/customer_show/' + _id() }">
                                             <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
                                         </a>
@@ -445,7 +445,7 @@
                         </table>
                     </p>
 
-                    <div class="btn-group">
+                    <div class="btn-group" role="group">
                         <a href="#/page/customer_new" type="button" class="btn btn-success">
                             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                             ${i18n.t('app.customerList.newCustomerBtn')}
@@ -527,7 +527,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="btn-group">
+                <div class="btn-group" role="group">
                   <button type="button" class="btn btn-success" data-bind="click: saveCustomer">
                     <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
                     ${i18n.t('app.customer.saveBtn')}
@@ -674,7 +674,7 @@
                                                    (!isCanceled() || (\$root.showCanceled() && isCanceled())),
                                                css: { danger: (!isPaid() && isOverdue()) }">
                                     <td>
-                                      <div class="btn-group">
+                                      <div class="btn-group" role="group">
                                         <a class="btn btn-info" data-bind="attr: { href: '#/page/invoice_show/' + _id() }">
                                             <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
                                         </a>
@@ -713,7 +713,7 @@
                         </table>
                     </p>
 
-                    <div class="btn-group">
+                    <div class="btn-group" role="group">
                         <a href="#/page/invoice_new" type="button" class="btn btn-success">
                             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                             ${i18n.t('app.invoiceList.newInvoiceBtn')}
@@ -811,7 +811,7 @@
                                 <div>
                                     <p class="form-control-static">
                                         ${i18n.t('app.invoice.customerDetailsCustomerNrLbl')}
-                                        <span data-bind="text: data.customer().cid"></span>
+                                        &nbsp;<span data-bind="text: data.customer().cid"></span>
                                     </p>
                                 </div>
                                 <address>
@@ -832,8 +832,8 @@
                         <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.invoice.detailsPaneHeader')} (<span data-bind="text: data.numInvoiceItems"></span>)</h3></div>
                         <table class="table table-striped table-condensed">
                             <colgroup>
-                              <col class="col-md-1">
-                              <col class="col-md-4">
+                              <col class="col-md-2">
+                              <col class="col-md-3">
                               <col class="col-md-2">
                               <col class="col-md-1">
                               <col class="col-md-1">
@@ -854,27 +854,61 @@
                             <tbody data-bind="foreach: data.invoiceItems">
                                 <tr>
                                     <td>
+                                      <div class="btn-group" role="group">
                                         <button class="btn btn-danger" data-bind="click: \$parent.deleteItem, disable: \$parent.data.isLocked">
                                             <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                                         </button>
+                                        <select class="form-control" style="width: auto;"
+                                          data-bind="options: typeList, optionsText: 'desc', value: currentType, disable: \$parent.data.isLocked">
+                                        </select>
+                                      </div>
                                     </td>
-                                    <td><input type="text" class="form-control" data-bind="textInput: description, disable: \$parent.data.isLocked"></input></td>
-                                    <td><input type="number" class="form-control" data-bind="textInput: price, disable: \$parent.data.isLocked"></input></td>
-                                    <td><input type="number" class="form-control" data-bind="textInput: count, disable: \$parent.data.isLocked"></input></td>
-                                    <td><input type="number" class="form-control" data-bind="textInput: discount, disable: \$parent.data.isLocked"></input></td>
-                                    <td><input type="number" class="form-control" data-bind="textInput: vat, disable: \$parent.data.isLocked"></input></td>
-                                    <td><p class="form-control-static" data-bind="text: totalStr"></p></td>
+                                    <td data-bind="attr: {colspan: descriptionColspan}">
+                                      <textarea class="form-control" data-bind="textInput: description, disable: \$parent.data.isLocked, attr: {rows: descriptionNumRows}"></textarea>
+                                    </td>
+                                    <html-comment> ko if: descriptionColspan() < 2 </html-comment>
+                                      <td>
+                                        <html-comment> ko if: hasPrice </html-comment>
+                                          <input type="number" class="form-control" data-bind="textInput: price, disable: \$parent.data.isLocked"></input>
+                                        <html-comment> /ko </html-comment>
+                                      </td>
+                                    <html-comment> /ko </html-comment>
+                                    <html-comment> ko if: descriptionColspan() < 3 </html-comment>
+                                      <td>
+                                        <html-comment> ko if: hasCount </html-comment>
+                                          <input type="number" class="form-control" data-bind="textInput: count, disable: \$parent.data.isLocked"></input>
+                                        <html-comment> /ko </html-comment>
+                                      </td>
+                                    <html-comment> /ko </html-comment>
+                                    <html-comment> ko if: descriptionColspan() < 4 </html-comment>
+                                      <td>
+                                        <html-comment> ko if: hasDiscount </html-comment>
+                                          <input type="number" class="form-control" data-bind="textInput: discount, disable: \$parent.data.isLocked"></input>
+                                        <html-comment> /ko </html-comment>
+                                      </td>
+                                    <html-comment> /ko </html-comment>
+                                    <html-comment> ko if: descriptionColspan() < 5 </html-comment>
+                                      <td>
+                                        <html-comment> ko if: hasVat </html-comment>
+                                          <input type="number" class="form-control" data-bind="textInput: vat, disable: \$parent.data.isLocked"></input>
+                                        <html-comment> /ko </html-comment>
+                                      </td>
+                                    <html-comment> /ko </html-comment>
+                                    <html-comment> ko if: descriptionColspan() < 6 </html-comment>
+                                      <td>
+                                        <html-comment> ko if: hasTotal </html-comment>
+                                          <p class="form-control-static" data-bind="text: totalStr"></p>
+                                        <html-comment> /ko </html-comment>
+                                      </td>
+                                    <html-comment> /ko </html-comment>
                                 </tr>
                             </tbody>
                             <tfoot>
-                                <td>
+                                <td colspan="4">
                                     <button class="btn btn-success" data-bind="click: newItem, disable: data.isLocked">
                                         <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                                     </button>
                                 </td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
                                 <td colspan="2">
                                     <p class="form-control-static">
                                         ${i18n.t('app.invoice.totalExclVatLbl')}<br/>
@@ -918,7 +952,7 @@
                   </label>
                 </div>
 
-                <div class="btn-group">
+                <div class="btn-group" role="group">
                   <button type="button" class="btn btn-success" data-bind="click: saveInvoice">
                       <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
                       ${i18n.t('app.invoice.saveInvoiceBtn')}
@@ -953,7 +987,7 @@
                         <label for="regDate" class="control-label">${i18n.t('app.settings.regDateLbl')}</label>
                         <p class="form-control-static" id="regDate">$data.user.registrationDate</p>
                       </div>
-                      <div class="btn-group">
+                      <div class="btn-group" role="group">
                         <button type="button" class="btn btn-success" data-bind="click: saveSettings">
                           <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
                           ${i18n.t('app.settings.saveSettingsBtn')}
@@ -1087,7 +1121,7 @@
                         <html-comment> /ko </html-comment>
                       </ul>
                     </p>
-                    <div class="btn-group">
+                    <div class="btn-group" role="group">
                       <button type="button" class="btn btn-default" data-bind="click: refresh">
                         <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
                         ${i18n.t('app.userList.refreshBtn')}
@@ -1117,7 +1151,7 @@
                         </table>
                     </p>
 
-                    <div class="btn-group">
+                    <div class="btn-group" role="group">
                       <button type="button" class="btn btn-default" data-bind="click: refresh">
                         <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
                         ${i18n.t('app.inviteList.refreshBtn')}

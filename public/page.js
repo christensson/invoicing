@@ -8,6 +8,12 @@ Log._getCallerInfo = function() {
   return callerLine.slice(callerFuncStart, callerLine.length);
 };
 
+Log.backtrace = function(msg) {
+  try { throw Error(''); } catch(e) { err = e; }
+  var backtrace = err.stack.split("\n").slice(4).join("\n");
+  console.log("BACKTRACE - msg\n" + backtrace);
+};
+
 Log.info = function(msg) {
   var functionName = Log._getCallerInfo();
   console.log("INFO - " + functionName + " - " + msg);
@@ -940,10 +946,18 @@ InvoiceOps.printInvoice = function(id) {
   }
 };
 
+var InvoiceItemTypeModel = function(id, desc) {
+  var self = this;
+  self.id = id;
+  self.desc = desc;
+  self.getId = function() {
+    return self.id;
+  };
+};
+
 var InvoiceItemViewModel = function(data, currency) {
   var self = this;
   self.activeCurrency = currency;
-
   self.description = ko.observable(data.description);
   self.price = ko.observable(data.price);
   self.count = ko.observable(data.count);
@@ -951,13 +965,81 @@ var InvoiceItemViewModel = function(data, currency) {
   self.discount = ko.observable(data.discount);
   self.isValid = ko.observable(data.isValid);
   self.total = ko.pureComputed(function() {
-    var total = parseFloat(this.count()) * parseFloat(this.price())
-        * (1.0 - (parseFloat(this.discount()) / 100.0));
+    var total = 0;
+    if (self.hasTotal() && self.hasPrice() && self.hasCount()) {
+      total = parseFloat(this.count()) * parseFloat(this.price());
+      if (self.hasDiscount()) {
+        total = total * (1.0 - (parseFloat(this.discount()) / 100.0));
+      }
+    }    
     return total;
   }, self);
 
   self.totalStr = ko.pureComputed(function() {
-    return Util.formatCurrency(self.total(), self.activeCurrency());
+    var str = "";
+    if (self.hasTotal()) {
+      str = Util.formatCurrency(self.total(), self.activeCurrency());
+    }
+    return str;
+  }, self);
+  
+  self.typeList = ko.observableArray();
+  self.typeList.push(
+      new InvoiceItemTypeModel("default", i18n.t('app.invoice.datailsTypeDefault')));
+  self.typeList.push(
+      new InvoiceItemTypeModel("text_only", i18n.t('app.invoice.datailsTypeTextOnly')));
+  self.currentType = ko.observable(self.typeList()[0]);
+  self.currentType.subscribe(function(type) {
+    var typeId = type.getId();
+    switch(typeId) {
+    case 'text_only':
+      self.hasPrice(false);
+      self.hasCount(false);
+      self.hasDiscount(false);
+      self.hasVat(false);
+      self.hasTotal(false);
+      self.descriptionNumRows(3);
+      break;
+    default:
+    case 'default':
+      self.hasPrice(true);
+      self.hasCount(true);
+      self.hasDiscount(true);
+      self.hasVat(true);
+      self.hasTotal(true);
+      self.descriptionNumRows(1);
+      break;
+  }
+  Log.info("Type set to " + typeId + " - hasPrice=" + self.hasPrice() +
+      ", hasCount=" + self.hasCount() + ", hasVat=" + self.hasVat() +
+      ", hasDiscount=" + self.hasDiscount() + ", hasTotal=" + self.hasTotal());
+  });
+
+  self.hasPrice = ko.observable(true);
+  self.hasCount = ko.observable(true);
+  self.hasDiscount = ko.observable(true);
+  self.hasVat = ko.observable(true);
+  self.hasTotal = ko.observable(true);
+  self.descriptionNumRows = ko.observable(1);
+  
+  self.descriptionColspan = ko.pureComputed(function() {
+    var n = 1;
+    if (!self.hasPrice()) {
+      n++;
+      if (!self.hasCount()) {
+        n++;
+        if (!self.hasDiscount()) {
+          n++;
+          if (!self.hasVat()) {
+            n++;
+            if (!self.hasTotal()) {
+              n++;
+            }      
+          }      
+        }      
+      }      
+    }
+    return n;
   }, self);
 
   self.getJson = function() {
@@ -968,6 +1050,12 @@ var InvoiceItemViewModel = function(data, currency) {
       vat : self.vat(),
       discount : self.discount(),
       total : self.total(),
+      type : self.currentType().getId(),
+      hasPrice : self.hasPrice(),
+      hasCount : self.hasCount(),
+      hasVat : self.hasVat(),
+      hasDiscount : self.hasDiscount(),
+      hasTotal : self.hasTotal(),
       isValid : self.isValid()
     };
     return res;

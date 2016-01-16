@@ -209,6 +209,8 @@
             "detailsTotalCol": "Summa",
             "totalExclVatLbl": "Summa exklusive moms:",
             "totalInclVatLbl": "Summa inklusive moms:",
+            "datailsTypeTextOnly": "Fritext",
+            "datailsTypeDefault": "Standard",
             "optIsLockedLbl": "Låst",
             "optIsPaidLbl": "Betald",
             "optIsCreditLbl": "Kreditfaktura",
