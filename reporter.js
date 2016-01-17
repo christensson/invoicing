@@ -36,6 +36,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
   var headerDetailsCaptionFontSize = 7;
   var headerDetailsFontSize = 8;
   var detailsFontSize = 10;
+  var detailsSeparatorLineColor = '#686868';
   var detailsSummaryFontSize = 10;
   var detailsSummaryCustomTextFontSize = 9;
   var detailsRowSpacing = 3;
@@ -295,27 +296,39 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
       {data: "Rabatt", width: detailsColSize[3], align: x.right},
       {data: "Moms", width: detailsColSize[4], align: x.right},
       {data: "Totalt", width: detailsColSize[5], align: x.right}
-    ], {fontBold: 1, border:debugBorderWidth, width: 0, wrap: 1} );
+    ], {fontBold: 1, border: debugBorderWidth, width: 0, wrap: 1} );
     x.bandLine(1);
   };
 
   var invoiceDetails = function ( x, r ) {
     if (r.isValid) {
       x.fontSize(detailsFontSize);
+      var styleColData = function(desc, width, align) {
+        return {
+          data: desc,
+          width: width,
+          align: align
+        };
+      };
+      var bandOpts = {border: 0, addY: detailsRowSpacing, wrap: 1};
       if (r.type === "text_only") {
         x.band( [
-          {data: r.description, width: detailsWidth, align: x.left},
-        ], {border:0, addY: detailsRowSpacing, width: 0, wrap: 1} );
+          styleColData(r.description, detailsWidth, x.left),
+        ], bandOpts);
       } else {
         x.band( [
-          {data: r.description, width: detailsColSize[0], align: x.left},
-          {data: r.count, width: detailsColSize[1], align: x.right},
-          {data: util.formatCurrency(r.price, invoice.currency), width: detailsColSize[2], align: x.right},
-          {data: r.discount + '%', width: detailsColSize[3], align: x.right},
-          {data: r.vat + '%', width: detailsColSize[4], align: x.right},
-          {data: util.formatCurrency(r.total, invoice.currency), width: detailsColSize[5], align: x.right}
-        ], {border:0, addY: detailsRowSpacing, width: 0, wrap: 1} );
+          styleColData(r.description, detailsColSize[0], x.left),
+          styleColData(r.count, detailsColSize[1], x.right),
+          styleColData(util.formatCurrency(r.price, invoice.currency), detailsColSize[2], x.right),
+          styleColData(r.discount + '%', detailsColSize[3], x.right),
+          styleColData(r.vat + '%', detailsColSize[4], x.right),
+          styleColData(util.formatCurrency(r.total, invoice.currency), detailsColSize[5], x.right),
+        ], bandOpts);
       }
+      var oldStrokeColor = x.strokeColor();
+      x.strokeColor(detailsSeparatorLineColor);
+      x.bandLine(0.5);
+      x.strokeColor(oldStrokeColor);
     }
   };
 
