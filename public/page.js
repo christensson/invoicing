@@ -1273,20 +1273,6 @@ var InvoiceDataViewModel = function() {
         Log.info("Skip invalid item group i=" + i + " name=" + newData.invoiceItemGroups[i].name);
       };
     };
-
-    // BEGIN: remove
-    /*
-    self.invoiceItems.removeAll();
-    for ( var i = 0; i < newData.invoiceItems.length; i++) {
-      if (newData.invoiceItems[i].isValid) {
-        Log.info("Push item i=" + i + " desc=" + newData.invoiceItems[i].description);
-        self.invoiceItems.push(new InvoiceItemViewModel(newData.invoiceItems[i], self.currency));
-      } else {
-        Log.info("Skip invalid item i=" + i + " desc=" + newData.invoiceItems[i].description);
-      };
-    };
-    */
-    // END: remove
   };
 
   self.setCompanyId = function(companyId) {
@@ -1991,17 +1977,6 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
     self.data.forceMarkAsNew();
   };
 
-  /*
-  self.newItem = function() {
-    self.data.newInvoiceItem();
-  };
-
-  self.deleteItem = function(item) {
-    Log.info("InvoiceNewViewModel - delete: "
-        + JSON.stringify(item));
-    self.data.deleteInvoiceItem(item);
-  };
-  */
   self.doToggleLocked = function(item) {
     self.data.doToggleLocked();
   };

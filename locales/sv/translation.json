@@ -209,7 +209,7 @@
             "detailsTotalCol": "Summa",
             "detailsNewRowBtn": "Ny rad",
             "groupEditColActiveCheckLbl": "Aktiv",
-            "groupEditNegateDiscountCheckLbl" : "Negera rabatt",
+            "groupEditNegateDiscountCheckLbl" : "Använd som påslag",
             "groupEditIsQuickButtonCheckLbl": "Tillgänglig som snabbval",
             "groupEditUpdateExistingBtn": "Uppdatera gruppmall",
             "groupEditSaveAsNewBtn": "Spara som ny gruppmall",

@@ -35,10 +35,15 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
   var pageNumberFontSize = 8;
   var headerDetailsCaptionFontSize = 7;
   var headerDetailsFontSize = 8;
+  var detailsGroupTitleTopPadding = 15;
+  var detailsGroupTitleFontSize = 12;
+  var detailsGroupHeaderTopPadding = 5;
+  var detailsGroupSummaryFontSize = 10;
+  var detailsGroupSummaryTopPadding = 3;
   var detailsFontSize = 10;
   var detailsSeparatorLineColor = '#686868';
-  var detailsSummaryFontSize = 10;
-  var detailsSummaryCustomTextFontSize = 9;
+  var summaryFontSize = 10;
+  var summaryCustomTextFontSize = 9;
   var detailsRowSpacing = 3;
   var margin = 30;
   var pageFooterYOffset = -85;
@@ -70,6 +75,14 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
   var demoModeBgW = 442;
   var demoModeBgH = 442;
   var debugBorderWidth = debug?0.5:0;
+
+  var detailsColSize = [200, 40, 80, 50, 50, 110];
+  var detailsWidth = detailsColSize.reduce(function(a, b) { return a + b; });
+
+  var summaryValueColWidth = detailsColSize[detailsColSize.length - 1];
+  var summaryCaptionColWidth =
+    detailsWidth - summaryValueColWidth;
+
 
   var calcPaymentAdjustment = function(amount) {
     var amountRounded = Math.round(amount);
@@ -284,8 +297,15 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
         ], {border: debugBorderWidth});
   };
 
-  var detailsColSize = [200, 40, 80, 50, 50, 110];
-  var detailsWidth = detailsColSize.reduce(function(a, b) { return a + b; });
+
+  var drawGroupHLine = function(x, thickness) {
+    x.line(margin - 1, x.getCurrentY(), margin + detailsWidth - 1, x.getCurrentY(), {thickness: thickness});
+  };
+
+  var drawGroupBox = function(x, startY, endY, thickness) {
+    x.box(margin - 1, startY, detailsWidth, endY - startY, {thickness: thickness});
+  };
+
   var invoiceDetailsHeader = function ( x, r ) {
     x.fontSize(detailsFontSize);
     //x.line(x.getCurrentX(), x.getCurrentY(), x.getCurrentX() + detailsWidth, x.getCurrentY());
@@ -327,8 +347,61 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
       }
       var oldStrokeColor = x.strokeColor();
       x.strokeColor(detailsSeparatorLineColor);
-      x.bandLine(0.5);
+      drawGroupHLine(x, 0.5);
+      x.addY(1);
       x.strokeColor(oldStrokeColor);
+    }
+  };
+
+  var invoiceGroups = function ( x, r ) {
+    if (r.isValid) {
+      // Group header
+      var descColLbl = r.hasDesc ? r.descColLbl : "";
+      var countColLbl = r.hasCount ? r.countColLbl : "";
+      var priceColLbl = r.hasPrice ? r.priceColLbl : "";
+      var discountColLbl = r.hasDiscount ? r.discountColLbl : "";
+      var vatColLbl = r.hasVat ? r.vatColLbl : "";
+      var totalColLbl = r.hasTotal ? r.totalColLbl : "";
+
+      x.addY(detailsGroupTitleTopPadding);
+      x.fontSize(detailsGroupTitleFontSize);
+      x.print(r.name, {fontBold: 1, border: 0, wrap: 1});
+      var groupHeaderTopY = x.getCurrentY();
+      x.addY(detailsGroupHeaderTopPadding);
+      x.fontSize(detailsFontSize);
+      x.band( [
+        {data: descColLbl, width: detailsColSize[0], align: x.left},
+        {data: countColLbl, width: detailsColSize[1], align: x.right},
+        {data: priceColLbl, width: detailsColSize[2], align: x.right},
+        {data: discountColLbl, width: detailsColSize[3], align: x.right},
+        {data: vatColLbl, width: detailsColSize[4], align: x.right},
+        {data: totalColLbl, width: detailsColSize[5], align: x.right}
+      ], {fontBold: 1, border: debugBorderWidth, width: 0, wrap: 1} );
+
+      drawGroupHLine(x, 0.5);
+
+      for (var i = 0; i < r.invoiceItems.length; i++) {
+        invoiceDetails(x, r.invoiceItems[i]);
+      }
+
+      if (r.hasTotal && r.totalExclVat) {
+        var totalExclVatStr = 
+          util.formatCurrency(parseFloat(r.totalExclVat.toFixed(2)), invoice.currency);
+        x.addY(detailsGroupSummaryTopPadding);
+        x.fontSize(detailsGroupSummaryFontSize);
+        x.band( [
+          {data: "", width: detailsColSize[0], align: x.left},
+          {data: "", width: detailsColSize[1], align: x.right},
+          {data: "", width: detailsColSize[2], align: x.right},
+          {data: "", width: detailsColSize[3], align: x.right},
+          {data: "Summa:", width: detailsColSize[4], align: x.right, fontBold: 0},
+          {data: totalExclVatStr, width: detailsColSize[5], align: x.right}
+        ], {fontBold: 0, border: debugBorderWidth, width: 0, wrap: 1} );
+      }
+
+      var groupHeaderBottomY = x.getCurrentY();
+
+      drawGroupBox(x, groupHeaderTopY, groupHeaderBottomY, 0.5);
     }
   };
 
@@ -343,42 +416,42 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
     var amountToPay = useReverseCharge?invoice.totalExclVat:invoice.totalInclVat;
     var amountToPayAdjustment = calcPaymentAdjustment(amountToPay);
     amountToPay = amountToPay + amountToPayAdjustment;
-    x.fontSize(detailsSummaryFontSize);
+    x.fontSize(summaryFontSize);
     x.newLine();
     x.band( [
-             {data: "Netto", width: 410, align: x.right},
-             {data: util.formatCurrency(invoice.totalExclVat, invoice.currency), width: 120, align: x.right}
+             {data: "Netto:", width: summaryCaptionColWidth, align: x.right},
+             {data: util.formatCurrency(invoice.totalExclVat, invoice.currency), width: summaryValueColWidth, align: x.right}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     if (!useReverseCharge) {
       x.band( [
-               {data: "Moms", width: 410, align: x.right},
-               {data: util.formatCurrency(totalVat, invoice.currency), width: 120, align: x.right}
+               {data: "Moms:", width: summaryCaptionColWidth, align: x.right},
+               {data: util.formatCurrency(totalVat, invoice.currency), width: summaryValueColWidth, align: x.right}
              ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     }
     x.band( [
-             {data: "Öresutjämning", width: 410, align: x.right},
-             {data: util.formatCurrency(amountToPayAdjustment, invoice.currency), width: 120, align: x.right}
+             {data: "Öresutjämning:", width: summaryCaptionColWidth, align: x.right},
+             {data: util.formatCurrency(amountToPayAdjustment, invoice.currency), width: summaryValueColWidth, align: x.right}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     x.band( [
-             {data: "Att betala", width: 410, align: x.right},
-             {data: util.formatCurrency(amountToPay, invoice.currency), width: 120, align: x.right}
+             {data: "Att betala:", width: summaryCaptionColWidth, align: x.right},
+             {data: util.formatCurrency(amountToPay, invoice.currency), width: summaryValueColWidth, align: x.right}
              ], {fontBold: 1, border:0, width: 0, wrap: 1} );
     if (invoice.isCanceled) {
       x.band( [
-               {data: "", width: 410, align: x.right},
-               {data: "*** MAKULERAD ***", width: 120, align: x.right}
+               {data: "", width: summaryCaptionColWidth, align: x.right},
+               {data: "*** MAKULERAD ***", width: summaryValueColWidth, align: x.right}
                ], {fontBold: 1, border:0, width: 0, wrap: 1} );
     }
     if (useReverseCharge) {
       x.newLine();
-      x.fontSize(detailsSummaryCustomTextFontSize);
+      x.fontSize(summaryCustomTextFontSize);
     
       var reverseChargeText = formatTextTemplate(company.reverseChargeText, cust);
       x.print(reverseChargeText, {fontBold: 0, border: 0, wrap: 1});
     }
     if (company.paymentCustomText) {
       x.newLine();
-      x.fontSize(detailsSummaryCustomTextFontSize);
+      x.fontSize(summaryCustomTextFontSize);
       x.print(company.paymentCustomText, {fontBold: 0, border: 0, wrap: 1});
     }
   };
@@ -388,6 +461,34 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
   var reportName = i18n.t('app.invoiceReport.fileName', {'cid': invoice.customer.cid, 'iid': invoice.iid});
   if (reportName === "") {
     reportName = "report.pdf";
+  }
+
+  // Support old invoices without groups
+  if (!invoice.invoiceItemGroups && invoice.invoiceItems) {
+    var groupToUse = {
+      _id: 1,
+      name: "Detaljer",
+      isValid: true,
+      isQuickButton: true,
+      descColLbl: "Beskrivning",
+      priceColLbl: "Á-pris",
+      countColLbl: "Antal",
+      discountColLbl: "Rabatt",
+      vatColLbl: "Moms",
+      totalColLbl: "Belopp",
+      hasDesc: true,
+      hasPrice: true,
+      hasCount: true,
+      hasDiscount: true,
+      negateDiscount: false,
+      hasVat: true,
+      hasTotal: true
+    };
+    console.log("Detected old format of invoice id=" + invoice._id +
+      " format without item groups. Converting invoice using group " + JSON.stringify(groupToUse));
+    var newGroup = JSON.parse(JSON.stringify(groupToUse));
+    newGroup.invoiceItems = invoice.invoiceItems;
+    invoice.invoiceItemGroups = [newGroup];
   }
   
   // companyId makes directory unique
@@ -406,13 +507,12 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
       .titleHeader(mytitleheader)
       .pageHeader(mypageheader)
       .pageFooter(mypagefooter)
-      .data(invoice.invoiceItems)   // REQUIRED
-      .detail(invoiceDetails) // Optional
+      .data(invoice.invoiceItemGroups)   // REQUIRED
+      .detail(invoiceGroups) // Optional
       .fontSize(10); // Optional
 
   rpt.groupBy('', {runHeader: rpt.newPageOnly})
-    .footer(finalsummary)
-    .header(invoiceDetailsHeader);
+    .footer(finalsummary);
   
   // Debug output is always nice (Optional, to help you see the structure)
   rpt.printStructure();
