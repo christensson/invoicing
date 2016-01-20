@@ -955,9 +955,187 @@ var InvoiceItemTypeModel = function(id, desc) {
   };
 };
 
-var InvoiceItemViewModel = function(data, currency) {
+var InvoiceItemGroupViewModel = function(currency, isLocked) {
   var self = this;
   self.activeCurrency = currency;
+  self.isEditMode = ko.observable(false);
+
+  self._id = ko.observable();
+  self.name = ko.observable();
+  self.isValid = ko.observable();
+  self.isQuickButton = ko.observable();
+
+  self.descColLbl = ko.observable();
+  self.priceColLbl = ko.observable();
+  self.countColLbl = ko.observable();
+  self.discountColLbl = ko.observable();
+  self.vatColLbl = ko.observable();
+  self.totalColLbl = ko.observable();
+
+  self.hasDesc = ko.observable();
+  self.hasPrice = ko.observable();
+  self.hasCount = ko.observable();
+  self.hasDiscount = ko.observable();
+  self.negateDiscount = ko.observable();
+  self.hasVat = ko.observable();
+  self.hasTotal = ko.observable();
+
+  self.invoiceItems = ko.observableArray();
+
+  isLocked.subscribe(function(goingToLock) {
+    if (goingToLock && self.isEditMode()) {
+      Log.info("item group name=" + self.name() +
+        " detected invoice lock when in edit mode. Disabling edit mode.");
+      self.isEditMode(false);
+    }
+  });
+  
+  self.setData = function(data) {
+    self.isEditMode(false);
+    self._id(data._id);
+    self.name(data.name);
+    self.isValid(data.isValid);
+    self.isQuickButton(data.isQuickButton);
+
+    self.descColLbl(data.descColLbl);
+    self.priceColLbl(data.priceColLbl);
+    self.countColLbl(data.countColLbl);
+    self.discountColLbl(data.discountColLbl);
+    self.vatColLbl(data.vatColLbl);
+    self.totalColLbl(data.totalColLbl);
+
+    self.hasDesc(data.hasDesc);
+    self.hasPrice(data.hasPrice);
+    self.hasCount(data.hasCount);
+    self.hasDiscount(data.hasDiscount);
+    self.negateDiscount(data.negateDiscount);
+    self.hasVat(data.hasVat);
+    self.hasTotal(data.hasTotal);
+
+    self.invoiceItems.removeAll();
+    if (data.invoiceItems) {
+      for ( var i = 0; i < data.invoiceItems.length; i++) {
+        if (data.invoiceItems[i].isValid) {
+          Log.info("Push item i=" + i + " desc=" + data.invoiceItems[i].description);
+          self.invoiceItems.push(new InvoiceItemViewModel(data.invoiceItems[i], self));
+        } else {
+          Log.info("Skip invalid item i=" + i + " desc=" + data.invoiceItems[i].description);
+        };
+      };
+    } else {
+      Log.info("No invoice items in group name=" + data.name);
+    }
+  };
+
+  self.numInvoiceItems = ko.pureComputed(function() {
+    var sum = 0;
+    for ( var i = 0; i < this.invoiceItems().length; i++) {
+      if (this.invoiceItems()[i].isValid()) {
+        sum += 1;
+      };
+    }
+    return sum;
+  }, this);
+
+  self.totalExclVat = ko.pureComputed(function() {
+    var sum = 0;
+    for ( var i = 0; i < this.invoiceItems().length; i++) {
+      if (this.invoiceItems()[i].isValid()) {
+        sum += this.invoiceItems()[i].total();
+      }
+    }
+    return sum;
+  }, this);
+  
+  self.totalInclVat = ko.pureComputed(function() {
+    var sum = 0;
+    for ( var i = 0; i < this.invoiceItems().length; i++) {
+      if (this.invoiceItems()[i].isValid()) {
+        var vat = parseFloat(this.invoiceItems()[i].vat()) / 100.0;
+        sum += this.invoiceItems()[i].total() * (1 + vat);
+      }
+    }
+    return sum;
+  }, this);
+
+  self.totalExclVatStr = ko.pureComputed(function() {
+    return Util.formatCurrency(self.totalExclVat(), self.activeCurrency());
+  }, self);
+
+  self.totalInclVatStr = ko.pureComputed(function() {
+    return Util.formatCurrency(self.totalInclVat(), self.activeCurrency());
+  }, self);
+  
+  self.newInvoiceItem = function() {
+    var data = {
+        description : "",
+        price : 0.0,
+        count : 1.0,
+        vat : 25,
+        discount : 0.0,
+        isValid : true
+      };
+    self.invoiceItems.push(new InvoiceItemViewModel(data, self));
+    Log.info("Added new invoice item to group=" + self.name() +
+        ". #items=" + self.invoiceItems().length + " (after)");
+  };
+  
+  self.deleteInvoiceItem = function(item) {
+    item.isValid(false);
+    self.invoiceItems.destroy(item);
+  };
+
+  self.toggleEditMode = function() {
+    var newEditMode = !self.isEditMode();
+    Log.info("Edit toggled for group=" + self.name() + ", isEditMode=" +
+        newEditMode + " (new)");
+    self.isEditMode(newEditMode);
+  };
+
+  self.getJson = function() {
+    var items = [];
+    for ( var i = 0; i < self.invoiceItems().length; i++) {
+      items.push(self.invoiceItems()[i].getJson());
+    }
+    var res = {
+        _id : self._id(),
+        name : self.name(),
+        isValid : self.isValid(),
+        isQuickButton : self.isQuickButton(),
+        descColLbl : self.descColLbl(),
+        priceColLbl : self.priceColLbl(),
+        countColLbl : self.countColLbl(),
+        discountColLbl : self.discountColLbl(),
+        vatColLbl : self.vatColLbl(),
+        totalColLbl : self.totalColLbl(),
+        hasDesc : self.hasDesc(),
+        hasPrice : self.hasPrice(),
+        hasCount : self.hasCount(),
+        hasDiscount : self.hasDiscount(),
+        negateDiscount : self.negateDiscount(),
+        hasVat : self.hasVat(),
+        hasTotal : self.hasTotal(),
+        invoiceItems : items,
+        totalExclVat : self.totalExclVat(),
+        totalInclVat : self.totalInclVat()
+      };
+    return res;
+  };
+};
+
+var InvoiceItemViewModel = function(data, parent) {
+  var self = this;
+  self.activeCurrency = parent.activeCurrency;
+  self.hasDesc = parent.hasDesc;
+  self.hasPrice = parent.hasPrice;
+  self.hasCount = parent.hasCount;
+  self.hasDiscount = parent.hasDiscount;
+  self.negateDiscount = parent.negateDiscount;
+  self.hasVat = parent.hasVat;
+  self.hasTotal = parent.hasTotal;
+  self.descriptionNumRows = ko.observable(1);
+  self.descriptionColspan = ko.observable(1);
+
   self.description = ko.observable(data.description);
   self.price = ko.observable(data.price);
   self.count = ko.observable(data.count);
@@ -966,11 +1144,14 @@ var InvoiceItemViewModel = function(data, currency) {
   self.isValid = ko.observable(data.isValid);
   self.total = ko.pureComputed(function() {
     var total = 0;
-    if (self.hasTotal() && self.hasPrice() && self.hasCount()) {
-      total = parseFloat(this.count()) * parseFloat(this.price());
-      if (self.hasDiscount()) {
-        total = total * (1.0 - (parseFloat(this.discount()) / 100.0));
+    if (this.hasTotal() && this.currentType().getId() === 'default') {
+      var count = this.hasCount()?parseFloat(this.count()):1.0;
+      var price = this.hasPrice()?parseFloat(this.price()):1.0;
+      var discount = (this.hasDiscount()?parseFloat(this.discount()):0.0) / 100.0;
+      if (this.negateDiscount()) {
+        discount = -discount;
       }
+      total = count * price * (1.0 - discount);
     }    
     return total;
   }, self);
@@ -988,59 +1169,35 @@ var InvoiceItemViewModel = function(data, currency) {
       new InvoiceItemTypeModel("default", i18n.t('app.invoice.datailsTypeDefault')));
   self.typeList.push(
       new InvoiceItemTypeModel("text_only", i18n.t('app.invoice.datailsTypeTextOnly')));
-  self.currentType = ko.observable(self.typeList()[0]);
+  self.currentType = ko.observable();
+  if (data.type) {
+    for (var i = 0; i < self.typeList().length; i++) {
+      if (data.type === self.typeList()[i].getId()) {
+        self.currentType(self.typeList()[i]);
+        break;
+      }
+    }
+  } else {
+    self.currentType(self.typeList()[0]);
+  }
+
   self.currentType.subscribe(function(type) {
     var typeId = type.getId();
     switch(typeId) {
     case 'text_only':
-      self.hasPrice(false);
-      self.hasCount(false);
-      self.hasDiscount(false);
-      self.hasVat(false);
-      self.hasTotal(false);
       self.descriptionNumRows(3);
+      self.descriptionColspan(6);
       break;
     default:
     case 'default':
-      self.hasPrice(true);
-      self.hasCount(true);
-      self.hasDiscount(true);
-      self.hasVat(true);
-      self.hasTotal(true);
       self.descriptionNumRows(1);
+      self.descriptionColspan(1);
       break;
   }
   Log.info("Type set to " + typeId + " - hasPrice=" + self.hasPrice() +
       ", hasCount=" + self.hasCount() + ", hasVat=" + self.hasVat() +
       ", hasDiscount=" + self.hasDiscount() + ", hasTotal=" + self.hasTotal());
   });
-
-  self.hasPrice = ko.observable(true);
-  self.hasCount = ko.observable(true);
-  self.hasDiscount = ko.observable(true);
-  self.hasVat = ko.observable(true);
-  self.hasTotal = ko.observable(true);
-  self.descriptionNumRows = ko.observable(1);
-  
-  self.descriptionColspan = ko.pureComputed(function() {
-    var n = 1;
-    if (!self.hasPrice()) {
-      n++;
-      if (!self.hasCount()) {
-        n++;
-        if (!self.hasDiscount()) {
-          n++;
-          if (!self.hasVat()) {
-            n++;
-            if (!self.hasTotal()) {
-              n++;
-            }      
-          }      
-        }      
-      }      
-    }
-    return n;
-  }, self);
 
   self.getJson = function() {
     var res = {
@@ -1051,6 +1208,7 @@ var InvoiceItemViewModel = function(data, currency) {
       discount : self.discount(),
       total : self.total(),
       type : self.currentType().getId(),
+      hasDesc : self.hasDesc(),
       hasPrice : self.hasPrice(),
       hasCount : self.hasCount(),
       hasVat : self.hasVat(),
@@ -1081,6 +1239,7 @@ var InvoiceDataViewModel = function() {
   self.daysUntilPayment = ko.observable();
   self.projId = ko.observable();
   self.currency = ko.observable();
+  self.invoiceItemGroups = ko.observableArray();
   self.invoiceItems = ko.observableArray();
 
   self.setData = function(newData) {
@@ -1101,6 +1260,22 @@ var InvoiceDataViewModel = function() {
     self.daysUntilPayment(newData.daysUntilPayment);
     self.projId(newData.projId);
     self.currency(newData.currency);
+
+    self.invoiceItemGroups.removeAll();
+
+    for ( var i = 0; i < newData.invoiceItemGroups.length; i++) {
+      if (newData.invoiceItemGroups[i].isValid) {
+        Log.info("Push item group i=" + i + " name=" + newData.invoiceItemGroups[i].name);
+        var group = new InvoiceItemGroupViewModel(self.currency, self.isLocked);
+        group.setData(newData.invoiceItemGroups[i]);
+        self.invoiceItemGroups.push(group);
+      } else {
+        Log.info("Skip invalid item group i=" + i + " name=" + newData.invoiceItemGroups[i].name);
+      };
+    };
+
+    // BEGIN: remove
+    /*
     self.invoiceItems.removeAll();
     for ( var i = 0; i < newData.invoiceItems.length; i++) {
       if (newData.invoiceItems[i].isValid) {
@@ -1108,8 +1283,10 @@ var InvoiceDataViewModel = function() {
         self.invoiceItems.push(new InvoiceItemViewModel(newData.invoiceItems[i], self.currency));
       } else {
         Log.info("Skip invalid item i=" + i + " desc=" + newData.invoiceItems[i].description);
-      }
-    }
+      };
+    };
+    */
+    // END: remove
   };
 
   self.setCompanyId = function(companyId) {
@@ -1146,28 +1323,18 @@ var InvoiceDataViewModel = function() {
       isPaid : false,
       isCredit : false,
       isValid : true,
-      invoiceItems : []
+      invoiceItemGroups : []
     };
     self.setData(data);
   };
 
   self.init();
-
-  self.numInvoiceItems = ko.pureComputed(function() {
-    var sum = 0;
-    for ( var i = 0; i < this.invoiceItems().length; i++) {
-      if (this.invoiceItems()[i].isValid()) {
-        sum += 1;
-      }
-    }
-    return sum;
-  }, this);
-
+  
   self.totalExclVat = ko.pureComputed(function() {
     var sum = 0;
-    for ( var i = 0; i < this.invoiceItems().length; i++) {
-      if (this.invoiceItems()[i].isValid()) {
-        sum += this.invoiceItems()[i].total();
+    for ( var i = 0; i < this.invoiceItemGroups().length; i++) {
+      if (this.invoiceItemGroups()[i].isValid()) {
+        sum += this.invoiceItemGroups()[i].totalExclVat();
       }
     }
     if (self.isCredit()) {
@@ -1178,10 +1345,9 @@ var InvoiceDataViewModel = function() {
   
   self.totalInclVat = ko.pureComputed(function() {
     var sum = 0;
-    for ( var i = 0; i < this.invoiceItems().length; i++) {
-      if (this.invoiceItems()[i].isValid()) {
-        var vat = parseFloat(this.invoiceItems()[i].vat()) / 100.0;
-        sum += this.invoiceItems()[i].total() * (1 + vat);
+    for ( var i = 0; i < this.invoiceItemGroups().length; i++) {
+      if (this.invoiceItemGroups()[i].isValid()) {
+        sum += this.invoiceItemGroups()[i].totalInclVat();
       }
     }
     if (self.isCredit()) {
@@ -1212,28 +1378,23 @@ var InvoiceDataViewModel = function() {
     self.iid(undefined);
   };
 
-  self.newInvoiceItem = function() {
-    var data = {
-      description : "",
-      price : 0.0,
-      count : 1.0,
-      vat : 25,
-      discount : 0.0,
-      isValid : true
-    };
-    self.invoiceItems.push(new InvoiceItemViewModel(data, self.currency));
-    Log.info("Added new invoice item. #items=" + self.invoiceItems().length + ", data=" + JSON.stringify(data));
+  self.addGroup = function(g) {
+    var groupToAdd = new InvoiceItemGroupViewModel(self.currency, self.isLocked);
+    groupToAdd.setData(g);
+    groupToAdd.newInvoiceItem();
+    self.invoiceItemGroups.push(groupToAdd);
   };
 
-  self.deleteInvoiceItem = function(item) {
-    item.isValid(false);
-    self.invoiceItems.destroy(item);
+  self.deleteGroup = function(group) {
+    Log.info("Delete group name=" + group.name());
+    group.isValid(false);
+    self.invoiceItemGroups.destroy(group);
   };
 
   self.getJson = function() {
-    var items = [];
-    for ( var i = 0; i < self.invoiceItems().length; i++) {
-      items.push(self.invoiceItems()[i].getJson());
+    var groups = [];
+    for ( var i = 0; i < self.invoiceItemGroups().length; i++) {
+      groups.push(self.invoiceItemGroups()[i].getJson());
     }
     var res = {
       _id : self._id(),
@@ -1254,7 +1415,8 @@ var InvoiceDataViewModel = function() {
       lastPaymentDate : self.lastPaymentDate(),
       projId : self.projId(),
       currency : self.currency(),
-      invoiceItems : items,
+      //invoiceItems : items,
+      invoiceItemGroups : groups,
       totalExclVat : self.totalExclVat(),
       totalInclVat : self.totalInclVat()
     };
@@ -1523,6 +1685,103 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   self.selectedCurrency = ko.observable();
   self.numServerReqLeft = 0;
 
+  self.itemGroupList = [
+    {
+      _id: 1,
+      name: "Detaljer",
+      isValid: true,
+      isQuickButton: true,
+      descColLbl: "Beskrivning",
+      priceColLbl: "Á-pris",
+      countColLbl: "Antal",
+      discountColLbl: "Rabatt",
+      vatColLbl: "Moms",
+      totalColLbl: "Belopp",
+      hasDesc: true,
+      hasPrice: true,
+      hasCount: true,
+      hasDiscount: true,
+      negateDiscount: false,
+      hasVat: true,
+      hasTotal: true
+    },
+    {
+      _id: 2,
+      name: "Arbetstimmar",
+      isValid: true,
+      isQuickButton: true,
+      descColLbl: "Beskrivning",
+      priceColLbl: "Kr/timme",
+      countColLbl: "Timmar",
+      discountColLbl: "Pålägg",
+      vatColLbl: "Moms",
+      totalColLbl: "Belopp",
+      hasDesc: true,
+      hasPrice: true,
+      hasCount: true,
+      hasDiscount: true,
+      negateDiscount: true,
+      hasVat: true,
+      hasTotal: true
+    },
+    {
+      _id: 3,
+      name: "Resor",
+      isValid: true,
+      isQuickButton: false,
+      descColLbl: "Beskrivning",
+      priceColLbl: "Kr/mil",
+      countColLbl: "Mil",
+      discountColLbl: "Rabatt",
+      vatColLbl: "Moms",
+      totalColLbl: "Belopp",
+      hasDesc: true,
+      hasPrice: true,
+      hasCount: true,
+      hasDiscount: false,
+      negateDiscount: false,
+      hasVat: true,
+      hasTotal: true
+    },
+    {
+      _id: 4,
+      name: "Material",
+      isValid: true,
+      isQuickButton: false,
+      descColLbl: "Beskrivning",
+      priceColLbl: "Belopp",
+      countColLbl: "Antal",
+      discountColLbl: "Pålägg",
+      vatColLbl: "Moms",
+      totalColLbl: "Belopp",
+      hasDesc: true,
+      hasPrice: true,
+      hasCount: false,
+      hasDiscount: true,
+      negateDiscount: true,
+      hasVat: true,
+      hasTotal: true
+    }
+  ];
+  
+  self.newGroup = function(g) {
+    Log.info("New group name=" + g.name + ", id=" + g._id);
+    self.data.addGroup(g);
+  };
+  
+  self.newDetailsGroupQuickBtnLbl = ko.pureComputed(function() {
+    var typeStr = "";
+    if (self.googleId() !== undefined &&
+        self.googleId() !== null && 
+        self.googleId() !== "")
+    {
+      typeStr = "Google";
+    } else {
+      typeStr = "Local";
+    }
+    return typeStr;
+  }, self);
+
   self.currentView.subscribe(function(newValue) {
     self.data.init();
     self.selectedCustomer(undefined);
@@ -1530,7 +1789,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
     if (viewArray[0] == 'invoice_new') {
       Log.info("InvoiceNewViewModel - activated");
       self.data.init(self.activeCompany().defaultNumDaysUntilPayment());
-      self.data.newInvoiceItem();
+      //self.data.newInvoiceItem();
       self.data.setCompanyId(self.activeCompanyId());
       self.numServerReqLeft = 1;
       self.populate();
@@ -1610,6 +1869,15 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   self.getInvoice = function(_id) {
     Cache.getInvoice(_id, function(cachedInvoice) {
       var doOnInvoice = function(invoice) {
+        // Support old invoices without groups
+        if (!invoice.invoiceItemGroups && invoice.invoiceItems) {
+          var groupToUse = self.itemGroupList[0];
+          Log.info("Detected old invoice id=" + invoice._id +
+            " format without item groups. Converting invoice using group name=" + groupToUse.name);
+          var newGroup = JSON.parse(JSON.stringify(groupToUse));
+          newGroup.invoiceItems = invoice.invoiceItems;
+          invoice.invoiceItemGroups = [newGroup];
+        }
         self.data.setData(invoice);
         self.selectedCustomer(self.data.customer());
         self.selectedCurrency(self.data.currency());
@@ -1723,6 +1991,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
     self.data.forceMarkAsNew();
   };
 
+  /*
   self.newItem = function() {
     self.data.newInvoiceItem();
   };
@@ -1732,6 +2001,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
         + JSON.stringify(item));
     self.data.deleteInvoiceItem(item);
   };
+  */
   self.doToggleLocked = function(item) {
     self.data.doToggleLocked();
   };
