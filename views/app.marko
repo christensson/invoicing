@@ -836,10 +836,17 @@
                                   <div class="row">
                                     <span data-bind="ifnot: isEditMode">
                                       <span class="col-md-5">
-                                        <p class="form-control-static panel-title">
-                                          <span data-bind="text: name"></span>
-                                          (<span data-bind="text: numInvoiceItems"></span>)
-                                        </p>
+                                        <div class="form-inline">
+                                          <div class="form-group">
+                                            <p class="form-control-static panel-title">
+                                              <span data-bind="text: name"></span>
+                                            </p>
+                                            <span data-bind="if: hasHeaderExtraField">
+                                              &nbsp;
+                                              <input type="text" class="form-control" data-bind="value: headerExtraField"></input>
+                                            </span>
+                                          </div>
+                                        </div>
                                       </span>
                                     </span>
                                     <span data-bind="if: isEditMode">
@@ -883,6 +890,12 @@
                                           <label>
                                             <input type="checkbox" data-bind="checked: isQuickButton">
                                             ${i18n.t('app.invoice.groupEditIsQuickButtonCheckLbl')}
+                                          </label>
+                                        </div>
+                                        <div class="checkbox">
+                                          <label>
+                                            <input type="checkbox" data-bind="checked: hasHeaderExtraField">
+                                            ${i18n.t('app.invoice.groupEditHasHeaderExtraFieldCheckLbl')}
                                           </label>
                                         </div>
                                       </div>

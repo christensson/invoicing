@@ -211,6 +211,7 @@
             "groupEditColActiveCheckLbl": "Aktiv",
             "groupEditNegateDiscountCheckLbl" : "Använd som påslag",
             "groupEditIsQuickButtonCheckLbl": "Tillgänglig som snabbval",
+            "groupEditHasHeaderExtraFieldCheckLbl": "Använd extra fritext i grupptitel",
             "groupEditUpdateExistingBtn": "Uppdatera gruppmall",
             "groupEditSaveAsNewBtn": "Spara som ny gruppmall",
             "groupTotalExclVatLbl": "Summa exkl moms:",

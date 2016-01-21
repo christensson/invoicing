@@ -365,7 +365,11 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
 
       x.addY(detailsGroupTitleTopPadding);
       x.fontSize(detailsGroupTitleFontSize);
-      x.print(r.name, {fontBold: 1, border: 0, wrap: 1});
+      var groupTitle = r.name;
+      if (r.hasHeaderExtraField) {
+        groupTitle = groupTitle + " " + r.headerExtraField;
+      }
+      x.print(groupTitle, {fontBold: 1, border: 0, wrap: 1});
       var groupHeaderTopY = x.getCurrentY();
       x.addY(detailsGroupHeaderTopPadding);
       x.fontSize(detailsFontSize);

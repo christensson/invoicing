@@ -965,6 +965,7 @@ var InvoiceItemGroupViewModel = function(currency, isLocked) {
   self.isValid = ko.observable();
   self.isQuickButton = ko.observable();
 
+  self.headerExtraField = ko.observable("");
   self.descColLbl = ko.observable();
   self.priceColLbl = ko.observable();
   self.countColLbl = ko.observable();
@@ -972,6 +973,7 @@ var InvoiceItemGroupViewModel = function(currency, isLocked) {
   self.vatColLbl = ko.observable();
   self.totalColLbl = ko.observable();
 
+  self.hasHeaderExtraField = ko.observable();
   self.hasDesc = ko.observable();
   self.hasPrice = ko.observable();
   self.hasCount = ko.observable();
@@ -996,6 +998,9 @@ var InvoiceItemGroupViewModel = function(currency, isLocked) {
     self.name(data.name);
     self.isValid(data.isValid);
     self.isQuickButton(data.isQuickButton);
+
+    self.headerExtraField(data.headerExtraField);
+    self.hasHeaderExtraField(data.hasHeaderExtraField);
 
     self.descColLbl(data.descColLbl);
     self.priceColLbl(data.priceColLbl);
@@ -1102,6 +1107,8 @@ var InvoiceItemGroupViewModel = function(currency, isLocked) {
         name : self.name(),
         isValid : self.isValid(),
         isQuickButton : self.isQuickButton(),
+        headerExtraField : self.headerExtraField(),
+        hasHeaderExtraField : self.hasHeaderExtraField(),
         descColLbl : self.descColLbl(),
         priceColLbl : self.priceColLbl(),
         countColLbl : self.countColLbl(),
@@ -1677,6 +1684,8 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       name: "Detaljer",
       isValid: true,
       isQuickButton: true,
+      hasHeaderExtraField: false,
+      headerExtraField: "",
       descColLbl: "Beskrivning",
       priceColLbl: "Á-pris",
       countColLbl: "Antal",
@@ -1696,6 +1705,8 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       name: "Arbetstimmar",
       isValid: true,
       isQuickButton: true,
+      hasHeaderExtraField: false,
+      headerExtraField: "",
       descColLbl: "Beskrivning",
       priceColLbl: "Kr/timme",
       countColLbl: "Timmar",
@@ -1715,6 +1726,8 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       name: "Resor",
       isValid: true,
       isQuickButton: false,
+      hasHeaderExtraField: false,
+      headerExtraField: "",
       descColLbl: "Beskrivning",
       priceColLbl: "Kr/mil",
       countColLbl: "Mil",
@@ -1734,6 +1747,8 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       name: "Material",
       isValid: true,
       isQuickButton: false,
+      hasHeaderExtraField: true,
+      headerExtraField: "",
       descColLbl: "Beskrivning",
       priceColLbl: "Belopp",
       countColLbl: "Antal",
