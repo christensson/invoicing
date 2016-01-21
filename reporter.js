@@ -331,7 +331,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
         };
       };
       var bandOpts = {border: 0, addY: detailsRowSpacing, wrap: 1};
-      if (r.type === "text_only") {
+      if (r.isTextOnly) {
         x.band( [
           styleColData(r.description, detailsWidth, x.left),
         ], bandOpts);

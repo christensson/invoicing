@@ -1171,40 +1171,37 @@ var InvoiceItemViewModel = function(data, parent) {
     return str;
   }, self);
   
-  self.typeList = ko.observableArray();
-  self.typeList.push(
-      new InvoiceItemTypeModel("default", i18n.t('app.invoice.datailsTypeDefault')));
-  self.typeList.push(
-      new InvoiceItemTypeModel("text_only", i18n.t('app.invoice.datailsTypeTextOnly')));
+  self.isTextOnly = ko.observable();
+  self.typeList = ko.observableArray([
+    new InvoiceItemTypeModel("default", i18n.t('app.invoice.datailsTypeDefault')),
+    new InvoiceItemTypeModel("text_only", i18n.t('app.invoice.datailsTypeTextOnly'))
+  ]);
   self.currentType = ko.observable();
-  if (data.type) {
-    for (var i = 0; i < self.typeList().length; i++) {
-      if (data.type === self.typeList()[i].getId()) {
-        self.currentType(self.typeList()[i]);
-        break;
-      }
-    }
-  } else {
-    self.currentType(self.typeList()[0]);
-  }
-
   self.currentType.subscribe(function(type) {
     var typeId = type.getId();
     switch(typeId) {
     case 'text_only':
+      self.isTextOnly(true);
       self.descriptionNumRows(3);
       self.descriptionColspan(6);
       break;
     default:
     case 'default':
+      self.isTextOnly(false);
       self.descriptionNumRows(1);
       self.descriptionColspan(1);
       break;
-  }
-  Log.info("Type set to " + typeId + " - hasPrice=" + self.hasPrice() +
-      ", hasCount=" + self.hasCount() + ", hasVat=" + self.hasVat() +
-      ", hasDiscount=" + self.hasDiscount() + ", hasTotal=" + self.hasTotal());
+    }
+    Log.info("Item type set to " + typeId + " - isTextOnly=" + self.isTextOnly() +
+      ", descriptionNumRows=" + self.descriptionNumRows() +
+      ", descriptionColspan=" + self.descriptionColspan());
   });
+
+  if (data.isTextOnly) {
+    self.currentType(self.typeList()[1]);
+  } else {
+    self.currentType(self.typeList()[0]);
+  }
 
   self.getJson = function() {
     var res = {
@@ -1214,7 +1211,7 @@ var InvoiceItemViewModel = function(data, parent) {
       vat : self.vat(),
       discount : self.discount(),
       total : self.total(),
-      type : self.currentType().getId(),
+      isTextOnly : self.isTextOnly(),
       hasDesc : self.hasDesc(),
       hasPrice : self.hasPrice(),
       hasCount : self.hasCount(),
