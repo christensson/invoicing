@@ -356,12 +356,16 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
   var invoiceGroups = function ( x, r ) {
     if (r.isValid) {
       // Group header
-      var descColLbl = r.hasDesc ? r.descColLbl : "";
-      var countColLbl = r.hasCount ? r.countColLbl : "";
-      var priceColLbl = r.hasPrice ? r.priceColLbl : "";
-      var discountColLbl = r.hasDiscount ? r.discountColLbl : "";
-      var vatColLbl = r.hasVat ? r.vatColLbl : "";
-      var totalColLbl = r.hasTotal ? r.totalColLbl : "";
+      var detailsColLbl = [
+        r.hasDesc ? r.descColLbl : "",
+        r.hasCount ? r.countColLbl : "",
+        r.hasPrice ? r.priceColLbl : "",
+        r.hasDiscount ? r.discountColLbl : "",
+        r.hasVat ? r.vatColLbl : "",
+        r.hasTotal ? r.totalColLbl : ""
+      ];
+
+      var anyDetailHeader = detailsColLbl.join("").length > 0;
 
       x.addY(detailsGroupTitleTopPadding);
       x.fontSize(detailsGroupTitleFontSize);
@@ -369,20 +373,24 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
       if (r.hasHeaderExtraField) {
         groupTitle = groupTitle + " " + r.headerExtraField;
       }
-      x.print(groupTitle, {fontBold: 1, border: 0, wrap: 1});
+      if (groupTitle && groupTitle !== "") {
+        x.print(groupTitle, {fontBold: 1, border: 0, wrap: 1});
+      }
       var groupHeaderTopY = x.getCurrentY();
-      x.addY(detailsGroupHeaderTopPadding);
-      x.fontSize(detailsFontSize);
-      x.band( [
-        {data: descColLbl, width: detailsColSize[0], align: x.left},
-        {data: countColLbl, width: detailsColSize[1], align: x.right},
-        {data: priceColLbl, width: detailsColSize[2], align: x.right},
-        {data: discountColLbl, width: detailsColSize[3], align: x.right},
-        {data: vatColLbl, width: detailsColSize[4], align: x.right},
-        {data: totalColLbl, width: detailsColSize[5], align: x.right}
-      ], {fontBold: 1, border: debugBorderWidth, width: 0, wrap: 1} );
+      if (anyDetailHeader) {
+        x.addY(detailsGroupHeaderTopPadding);
+        x.fontSize(detailsFontSize);
+        x.band( [
+          {data: detailsColLbl[0], width: detailsColSize[0], align: x.left},
+          {data: detailsColLbl[1], width: detailsColSize[1], align: x.right},
+          {data: detailsColLbl[2], width: detailsColSize[2], align: x.right},
+          {data: detailsColLbl[3], width: detailsColSize[3], align: x.right},
+          {data: detailsColLbl[4], width: detailsColSize[4], align: x.right},
+          {data: detailsColLbl[5], width: detailsColSize[5], align: x.right}
+        ], {fontBold: 1, border: debugBorderWidth, width: 0, wrap: 1} );
 
-      drawGroupHLine(x, 0.5);
+        drawGroupHLine(x, 0.5);
+      }
 
       for (var i = 0; i < r.invoiceItems.length; i++) {
         invoiceDetails(x, r.invoiceItems[i]);
