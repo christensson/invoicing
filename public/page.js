@@ -267,6 +267,11 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
       },
     });
   };
+
+  self.invalidateCache = function() {
+    var cacheRecords = cache.clear();
+    Log.info("Cache cleared. Had " + cacheRecords + " records.");
+  };
 };
 
 var CompanyViewModel = function() {
@@ -2286,7 +2291,7 @@ var NavViewModel = function() {
   self.mainViews.push({
     name : '/page/invoices',
     title : i18n.t("app.navBar.invoiceList"),
-    icon : 'glyphicon glyphicon-list',
+    icon : 'glyphicon glyphicon-th-list',
     location : 'main'
   });
   self.mainViews.push({

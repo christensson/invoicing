@@ -89,11 +89,13 @@
         },
         "settings": {
             "pageHeader": "Inställningar",
+            "userInfoPanelTitle": "Användarinfo",
             "licenseLbl": "Licens",
             "emailLbl": "E-post",
             "regDateLbl": "Registreringsdatum",
             "defNumDaysUntilPayLbl": "Betalningsvillkor (dagar)",
             "saveSettingsBtn": "Spara",
+            "invalidateCacheBtn" : "Rensa lokal cache",
             "getNok": "Misslyckades med att hämta inställningar!",
             "saveTicker": "Sparar inställningar",
             "saveOk": "Inställningar sparade."
