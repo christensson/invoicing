@@ -159,7 +159,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
   var mypageheader = function(x) {
     x.fontSize(headerDetailsCaptionFontSize);
     var headerList =
-      [{cap: "Oss tillhandha senast", data: formatDate(invoice.lastPaymentDate), isBold : true, colSize: 80},
+      [{cap: "Oss tillhanda senast", data: formatDate(invoice.lastPaymentDate), isBold : true, colSize: 80},
        {cap: "Fakturadatum", data: formatDate(invoice.date), colSize: 60},
        {cap: "Fakturanr", data: "" + invoice.iid, colSize: 40},
        {cap: "Kundnr", data: "" + invoice.customer.cid, colSize: 40}
@@ -338,11 +338,11 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
       } else {
         x.band( [
           styleColData(r.description, detailsColSize[0], x.left),
-          styleColData(r.count, detailsColSize[1], x.right),
-          styleColData(util.formatCurrency(r.price, invoice.currency), detailsColSize[2], x.right),
+          styleColData(util.formatNumber(r.count), detailsColSize[1], x.right),
+          styleColData(util.formatCurrency(r.price, {currencyStr: invoice.currency}), detailsColSize[2], x.right),
           styleColData(r.discount + '%', detailsColSize[3], x.right),
           styleColData(r.vat + '%', detailsColSize[4], x.right),
-          styleColData(util.formatCurrency(r.total, invoice.currency), detailsColSize[5], x.right),
+          styleColData(util.formatCurrency(r.total, {currencyStr: invoice.currency}), detailsColSize[5], x.right),
         ], bandOpts);
       }
       var oldStrokeColor = x.strokeColor();
@@ -386,7 +386,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
 
       if (r.hasTotal && r.totalExclVat) {
         var totalExclVatStr = 
-          util.formatCurrency(parseFloat(r.totalExclVat.toFixed(2)), invoice.currency);
+          util.formatCurrency(parseFloat(r.totalExclVat.toFixed(2)), {currencyStr: invoice.currency});
         x.addY(detailsGroupSummaryTopPadding);
         x.fontSize(detailsGroupSummaryFontSize);
         x.band( [
@@ -420,21 +420,21 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
     x.newLine();
     x.band( [
              {data: "Netto:", width: summaryCaptionColWidth, align: x.right},
-             {data: util.formatCurrency(invoice.totalExclVat, invoice.currency), width: summaryValueColWidth, align: x.right}
+             {data: util.formatCurrency(invoice.totalExclVat, {currencyStr: invoice.currency}), width: summaryValueColWidth, align: x.right}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     if (!useReverseCharge) {
       x.band( [
                {data: "Moms:", width: summaryCaptionColWidth, align: x.right},
-               {data: util.formatCurrency(totalVat, invoice.currency), width: summaryValueColWidth, align: x.right}
+               {data: util.formatCurrency(totalVat, {currencyStr: invoice.currency}), width: summaryValueColWidth, align: x.right}
              ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     }
     x.band( [
              {data: "Öresutjämning:", width: summaryCaptionColWidth, align: x.right},
-             {data: util.formatCurrency(amountToPayAdjustment, invoice.currency), width: summaryValueColWidth, align: x.right}
+             {data: util.formatCurrency(amountToPayAdjustment, {currencyStr: invoice.currency}), width: summaryValueColWidth, align: x.right}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     x.band( [
              {data: "Att betala:", width: summaryCaptionColWidth, align: x.right},
-             {data: util.formatCurrency(amountToPay, invoice.currency), width: summaryValueColWidth, align: x.right}
+             {data: util.formatCurrency(amountToPay, {currencyStr: invoice.currency}), width: summaryValueColWidth, align: x.right}
              ], {fontBold: 1, border:0, width: 0, wrap: 1} );
     if (invoice.isCanceled) {
       x.band( [

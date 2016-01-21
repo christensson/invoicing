@@ -1059,11 +1059,11 @@ var InvoiceItemGroupViewModel = function(currency, isLocked) {
   }, this);
 
   self.totalExclVatStr = ko.pureComputed(function() {
-    return Util.formatCurrency(self.totalExclVat(), self.activeCurrency());
+    return Util.formatCurrency(self.totalExclVat(), {currencyStr: self.activeCurrency()});
   }, self);
 
   self.totalInclVatStr = ko.pureComputed(function() {
-    return Util.formatCurrency(self.totalInclVat(), self.activeCurrency());
+    return Util.formatCurrency(self.totalInclVat(), {currencyStr: self.activeCurrency()});
   }, self);
   
   self.newInvoiceItem = function() {
@@ -1159,7 +1159,7 @@ var InvoiceItemViewModel = function(data, parent) {
   self.totalStr = ko.pureComputed(function() {
     var str = "";
     if (self.hasTotal()) {
-      str = Util.formatCurrency(self.total(), self.activeCurrency());
+      str = Util.formatCurrency(self.total(), {currencyStr: self.activeCurrency()});
     }
     return str;
   }, self);
@@ -1343,11 +1343,11 @@ var InvoiceDataViewModel = function() {
   }, this);
   
   self.totalExclVatStr = ko.pureComputed(function() {
-    return Util.formatCurrency(self.totalExclVat(), self.currency());
+    return Util.formatCurrency(self.totalExclVat(), {currencyStr: self.currency()});
   }, self);
 
   self.totalInclVatStr = ko.pureComputed(function() {
-    return Util.formatCurrency(self.totalInclVat(), self.currency());
+    return Util.formatCurrency(self.totalInclVat(), {currencyStr: self.currency()});
   }, self);
 
   self.lastPaymentDate = ko.pureComputed(function() {
@@ -1431,10 +1431,10 @@ var InvoiceListDataViewModel = function(data) {
   self.totalExclVat = ko.observable(data.totalExclVat);
   self.totalInclVat = ko.observable(data.totalInclVat);
   self.totalExclVatStr = ko.pureComputed(function() {
-    return Util.formatCurrency(self.totalExclVat(), self.currency());
+    return Util.formatCurrency(self.totalExclVat(), {currencyStr: self.currency()});
   }, self);
   self.totalInclVatStr = ko.pureComputed(function() {
-    return Util.formatCurrency(self.totalInclVat(), self.currency());
+    return Util.formatCurrency(self.totalInclVat(), {currencyStr: self.currency()});
   }, self);
   self.isOverdue = ko.pureComputed(function() {
     var overdue = false;

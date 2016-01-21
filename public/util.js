@@ -1,22 +1,19 @@
-var formatCurrency = function(value, currencyString) {
-  currencyString = typeof currencyString !== 'undefined' ? currencyString : "kr";
+/** Format a number to a string
+ * @param opts.decimalSep (Default: ',')
+ * @param opts.thousandSep (Default: ' ')
+ * @param opts.numDecimalTrunc (Default: no decimal truncation)
+ * @param opts.zeroFill (Default: false)
+ */
+var formatNumber = function(value, opts) {
+  opts = typeof opts !== 'undefined' ? opts : {};
+  // Set default parameters
+  if (!opts.decimalSeparator) {
+    opts.decimalSeparator = ',';
+  }
+  if (!opts.thousandSep) {
+    opts.thousandSep = ' ';
+  }
 
-  var suffix = "";
-  var prefix = "";
-  if (currencyString === "USD") {
-    prefix = "$";
-  } else if (currencyString === "EUR") {
-    prefix = "€";
-  } else if (currencyString === "GBP") {
-    prefix = "£";
-  } else if (currencyString === "SEK") {
-    suffix = " kr";
-  } else {
-    suffix = " " + currencyString;
-  } 
-
-  var decimalSeparator = ',';
-  var thousandSeparator = ' ';
   var valueString = value.toString();
   var valIntAndDec = valueString.split('.');
   if (valIntAndDec.length == 1) {
@@ -30,21 +27,78 @@ var formatCurrency = function(value, currencyString) {
   }
 
   // Fix decimals
-  var decPart = "00";
+  var decPartNumZeroPad = 0;
+  var decPart = "";
+  if (opts.zeroFill && opts.numDecimalTrunc) {
+    decPartNumZeroPad = opts.numDecimalTrunc;
+  }
+
   if (valIntAndDec.length > 1) {
+    // There are decimals
     decPart = valIntAndDec[1];
-    if (decPart.length == 1) {
-      decPart = decPart + "0";
-    } else {
-      // Extract only 2 decimals
-      decPart = decPart.substr(0, 2);
+    if (opts.zeroFill && decPart.length < opts.numDecimalTrunc) {
+      decPartNumZeroPad = opts.numDecimalTrunc - decPart.length;
+      decPart = decPart + Array(opts.numDecimalTrunc + 1).join("0");;
+    } else if (opts.numDecimalTrunc) {
+      // Extract only specified number of decimals
+      decPart = decPart.substr(0, opts.numDecimalTrunc);
+      decPartNumZeroPad = 0;
+    }
+  }
+
+  if (decPartNumZeroPad > 0) {
+    for (var i = 0; i < decPartNumZeroPad; i++) {
+      decPart += '0';
     }
   }
 
   // Add thousand separator
-  intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator);
+  if (opts.thousandSep) {
+    intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, opts.thousandSep);
+  }
   
-  return prefix + intPart + decimalSeparator + decPart + suffix;
+  var resultStr = intPart;
+  if (decPart !== "") {
+    resultStr = resultStr + opts.decimalSeparator + decPart;
+  }
+  return resultStr;
+};
+
+/** Format a number to a string
+ * @param opts.currencyStr (Default: "kr")
+ * @param opts.decimalSep (Default: ',')
+ * @param opts.thousandSep (Default: ' ')
+ * @param opts.numDecimalTrunc (Default: 2)
+ * @param opts.zeroFill (Default: true)
+ */
+var formatCurrency = function(value, opts) {
+  opts = typeof opts !== 'undefined' ? opts : {};
+  // Set default parameters
+  if (!opts.currencyStr) {
+    opts.currencyStr = 'kr';
+  }
+  if (!opts.numDecimalTrunc) {
+    opts.numDecimalTrunc = '2';
+  }
+  if (!opts.zeroFill) {
+    opts.zeroFill = true;
+  }
+
+  var suffix = "";
+  var prefix = "";
+  if (opts.currencyStr === "USD") {
+    prefix = "$";
+  } else if (opts.currencyStr === "EUR") {
+    prefix = "€";
+  } else if (opts.currencyStr === "GBP") {
+    prefix = "£";
+  } else if (opts.currencyStr === "SEK") {
+    suffix = " kr";
+  } else {
+    suffix = " " + opts.currencyStr;
+  }
+
+  return prefix + formatNumber(value, opts) + suffix;
 };
 
 var dateAddDays = function(date, numDaysToAdd) {
@@ -55,6 +109,7 @@ var dateAddDays = function(date, numDaysToAdd) {
 // Hack to get module.exports working on server side and namespace Util working on client side
 (typeof module !== "undefined" && module !== null ? module : {}).exports = this.Util = {
   formatCurrency: formatCurrency,
+  formatNumber: formatNumber,
   dateAddDays: dateAddDays,
 };
 
