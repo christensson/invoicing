@@ -7,9 +7,20 @@ body { padding-top: 70px; }
 .top15 { margin-top:15px; }
 .top20 { margin-top:20px; }
 
+.right5 { margin-right:5px; }
+.right7 { margin-right:7px; }
+.right10 { margin-right:10px; }
+.right15 { margin-right:15px; }
+.right20 { margin-right:20px; }
+
 .highlighterror {
     background: rgb(202, 60, 60);
     color: white;
+}
+
+.label-fix {
+  display: inline-block;
+  margin: 2px;
 }
 
 .button-signin-google {

@@ -306,6 +306,12 @@ dropAllCollections = function() {
   .fail(function() {
     console.log("Drop collection invoice failed!");
   })
+  .then(function () {
+    return dropCollectionPromise("itemGroupTempl");
+  })
+  .fail(function() {
+    console.log("Drop collection itemGroupTempl failed!");
+  })
   .done(function() {
     deferred.resolve();
   });
@@ -446,21 +452,14 @@ initCollectionsDevel = function(inviteList) {
     testCompany2 = c;
     return Q();
   })
-  // Settings
+  // Init user contexts
   .then(function() {
-    var settingsList = [
-                        {
-                          uid: testUserId,
-                          activeCompanyId: ObjectID(testCompany1._id),
-                          license: "unlimited",
-                        },
-                        {
-                          uid: machUserId,
-                          activeCompanyId: ObjectID(machCompany1._id),
-                          license: "demo",
-                        }
-                        ];
-    return insertDataPromise("settings", settingsList);
+    var userQuery = {'username-local': 'test'};
+    return initUserContext(userQuery, 'unlimited');
+  })
+  .then(function() {
+    var userQuery = {'username-local': 'mach'};
+    return initUserContext(userQuery, 'demo');
   })
   // Customers
   .then(function() {
@@ -823,6 +822,11 @@ module.exports.getCompany = function(uid, companyId) {
   return getOneDocPromise('company', {'isValid': true, 'uid': ouid, '_id': ocompanyId});
 };
 
+module.exports.getItemGroupTemplates = function(uid) {
+  var ouid = new ObjectID(uid);
+  return getAllDocsPromise('itemGroupTempl', {'isValid': true, 'uid': ouid});
+};
+
 module.exports.addInvoice = function(uid, companyId, invoice) {
   var deferred = Q.defer();
   var ouid = new ObjectID(uid);
@@ -913,6 +917,22 @@ module.exports.updateCompany = function(company) {
   return updateDataPromise('company', company, false);
 };
 
+module.exports.addItemGroupTemplate = function(uid, groupTempl) {
+  var deferred = Q.defer();
+  groupTempl.uid = new ObjectID(uid);
+  insertDataPromise('itemGroupTempl', groupTempl).then(function() {
+    deferred.resolve(groupTempl);
+  }).fail(function(err) {
+    deferred.reject(err);
+  });
+  return deferred.promise;
+};
+
+module.exports.updateItemGroupTemplate = function(groupTempl) {
+  groupTempl.uid = new ObjectID(groupTempl.uid);
+  return updateDataPromise('itemGroupTempl', groupTempl, false);
+};
+
 module.exports.getUsers = function() {
   // Projection excludes password...
   var deferred = Q.defer();
@@ -980,12 +1000,129 @@ module.exports.isEmailInvited = function(email) {
   return deferred.promise;
 };
 
+var initUserItemGroupTemplates = function(uid) {
+  var initialList = [
+    {
+      uid: uid,
+      name: "Detaljer",
+      title: "Detaljer",
+      isValid: true,
+      isQuickButton: true,
+      hasTitleExtraField: false,
+      titleExtraField: "",
+      descColLbl: "Beskrivning",
+      priceColLbl: "Á-pris",
+      countColLbl: "Antal",
+      discountColLbl: "Rabatt",
+      vatColLbl: "Moms",
+      totalColLbl: "Belopp",
+      hasDesc: true,
+      hasPrice: true,
+      hasCount: true,
+      hasDiscount: false,
+      negateDiscount: false,
+      hasVat: true,
+      hasTotal: true
+    },
+    {
+      uid: uid,
+      name: "Detaljer (med rabatt)",
+      title: "Detaljer",
+      isValid: true,
+      isQuickButton: false,
+      hasTitleExtraField: false,
+      titleExtraField: "",
+      descColLbl: "Beskrivning",
+      priceColLbl: "Á-pris",
+      countColLbl: "Antal",
+      discountColLbl: "Rabatt",
+      vatColLbl: "Moms",
+      totalColLbl: "Belopp",
+      hasDesc: true,
+      hasPrice: true,
+      hasCount: true,
+      hasDiscount: true,
+      negateDiscount: false,
+      hasVat: true,
+      hasTotal: true
+    },
+    {
+      uid: uid,
+      name: "Arbetstimmar",
+      title: "Arbetstimmar",
+      isValid: true,
+      isQuickButton: true,
+      hasTitleExtraField: false,
+      titleExtraField: "",
+      descColLbl: "Beskrivning",
+      priceColLbl: "Kr/timme",
+      countColLbl: "Timmar",
+      discountColLbl: "Rabatt",
+      vatColLbl: "Moms",
+      totalColLbl: "Belopp",
+      hasDesc: true,
+      hasPrice: true,
+      hasCount: true,
+      hasDiscount: false,
+      negateDiscount: false,
+      hasVat: true,
+      hasTotal: true
+    },
+    {
+      uid: uid,
+      name: "Resor",
+      title: "Resor",
+      isValid: true,
+      isQuickButton: true,
+      hasTitleExtraField: false,
+      titleExtraField: "",
+      descColLbl: "Beskrivning",
+      priceColLbl: "Kr/mil",
+      countColLbl: "Mil",
+      discountColLbl: "Rabatt",
+      vatColLbl: "Moms",
+      totalColLbl: "Belopp",
+      hasDesc: true,
+      hasPrice: true,
+      hasCount: true,
+      hasDiscount: false,
+      negateDiscount: false,
+      hasVat: true,
+      hasTotal: true
+    },
+    {
+      uid: uid,
+      name: "Material (med pålägg)",
+      title: "Material",
+      isValid: true,
+      isQuickButton: false,
+      hasTitleExtraField: false,
+      titleExtraField: "",
+      descColLbl: "Beskrivning",
+      priceColLbl: "Belopp",
+      countColLbl: "Antal",
+      discountColLbl: "Pålägg",
+      vatColLbl: "Moms",
+      totalColLbl: "Belopp",
+      hasDesc: true,
+      hasPrice: true,
+      hasCount: false,
+      hasDiscount: true,
+      negateDiscount: true,
+      hasVat: true,
+      hasTotal: true
+    }
+  ];
+  return insertDataPromise('itemGroupTempl', initialList);
+};
+
 /** Inits all collections for user.
  * - settings
+ * - itemGroupTemplates
  * @param userQuery query for 
  * @return promise of user
  */
-module.exports.initUserContext = function(userQuery, license) {
+var initUserContext = function(userQuery, license) {
   license = typeof license !== 'undefined' ? license : "demo";
   var deferred = Q.defer();
   console.log("initUserContext: query=" + JSON.stringify(userQuery));
@@ -1003,6 +1140,9 @@ module.exports.initUserContext = function(userQuery, license) {
     console.log("initUserContext: Set default settings: " + JSON.stringify(defaultSettings));
     return insertDataPromise("settings", defaultSettings);
   }).then(function() {
+    console.log("initUserContext: Set default group templates, uid=" + user._id);
+    return initUserItemGroupTemplates(user._id);
+  }).then(function() {
     deferred.resolve(user);
   }).fail(function(err) {
     deferred.reject(err);
@@ -1010,3 +1150,5 @@ module.exports.initUserContext = function(userQuery, license) {
   
   return deferred.promise;
 };
+
+module.exports.initUserContext = initUserContext;

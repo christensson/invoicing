@@ -83,6 +83,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
   var summaryCaptionColWidth =
     detailsWidth - summaryValueColWidth;
 
+  var headerBottomY = 0;
 
   var calcPaymentAdjustment = function(amount) {
     var amountRounded = Math.round(amount);
@@ -194,6 +195,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
       wrap : 1
     });
     x.newLine();
+    headerBottomY = x.getCurrentY();
 
     if (isDemoMode) {
       x.image(demoModeBgImg, {
@@ -302,22 +304,59 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
     x.line(margin - 1, x.getCurrentY(), margin + detailsWidth - 1, x.getCurrentY(), {thickness: thickness});
   };
 
+  var drawGroupDetailBars = function(x, y1, y2, thickness) {
+    if (y1 > y2) {
+      y1 = headerBottomY;
+    }
+    x.line(margin - 1, y1, margin - 1, y2, {thickness: thickness});
+    x.line(margin + detailsWidth - 1, y1, margin + detailsWidth - 1, y2, {thickness: thickness});
+  };
+
   var drawGroupBox = function(x, startY, endY, thickness) {
     x.box(margin - 1, startY, detailsWidth, endY - startY, {thickness: thickness});
   };
 
-  var invoiceDetailsHeader = function ( x, r ) {
-    x.fontSize(detailsFontSize);
-    //x.line(x.getCurrentX(), x.getCurrentY(), x.getCurrentX() + detailsWidth, x.getCurrentY());
-    x.band( [
-      {data: "Beskrivning", width: detailsColSize[0], align: x.left},
-      {data: "Antal", width: detailsColSize[1], align: x.right},
-      {data: "Á-pris", width: detailsColSize[2], align: x.right},
-      {data: "Rabatt", width: detailsColSize[3], align: x.right},
-      {data: "Moms", width: detailsColSize[4], align: x.right},
-      {data: "Totalt", width: detailsColSize[5], align: x.right}
-    ], {fontBold: 1, border: debugBorderWidth, width: 0, wrap: 1} );
-    x.bandLine(1);
+  var groupHeader = function(x, r, withTitle) {
+    // Group header
+    var detailsColLbl = [
+      r.hasDesc ? r.descColLbl : "",
+      r.hasCount ? r.countColLbl : "",
+      r.hasPrice ? r.priceColLbl : "",
+      r.hasDiscount ? r.discountColLbl : "",
+      r.hasVat ? r.vatColLbl : "",
+      r.hasTotal ? r.totalColLbl : ""
+    ];
+
+    var anyDetailHeader = detailsColLbl.join("").length > 0;
+
+    if (withTitle) {
+      x.addY(detailsGroupTitleTopPadding);
+      x.fontSize(detailsGroupTitleFontSize);
+      var groupTitle = r.title;
+      if (r.hasTitleExtraField) {
+        groupTitle = groupTitle + " " + r.titleExtraField;
+      }
+      if (groupTitle && groupTitle !== "") {
+        x.print(groupTitle, {fontBold: 1, border: 0, wrap: 1});
+      }
+    }
+    if (anyDetailHeader) {
+      var groupHeaderTopY = x.getCurrentY();
+      drawGroupHLine(x, 0.5);
+      x.addY(detailsGroupHeaderTopPadding);
+      x.fontSize(detailsFontSize);
+      x.band( [
+        {data: detailsColLbl[0], width: detailsColSize[0], align: x.left},
+        {data: detailsColLbl[1], width: detailsColSize[1], align: x.right},
+        {data: detailsColLbl[2], width: detailsColSize[2], align: x.right},
+        {data: detailsColLbl[3], width: detailsColSize[3], align: x.right},
+        {data: detailsColLbl[4], width: detailsColSize[4], align: x.right},
+        {data: detailsColLbl[5], width: detailsColSize[5], align: x.right}
+      ], {fontBold: 1, border: debugBorderWidth, width: 0, wrap: 1} );
+
+      drawGroupHLine(x, 0.5);
+      drawGroupDetailBars(x, groupHeaderTopY, x.getCurrentY(), 0.5);
+    }
   };
 
   var invoiceDetails = function ( x, r ) {
@@ -331,6 +370,8 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
         };
       };
       var bandOpts = {border: 0, addY: detailsRowSpacing, wrap: 1};
+      var y1 = x.getCurrentY();
+      x.addY(1);
       if (r.isTextOnly) {
         x.band( [
           styleColData(r.description, detailsWidth, x.left),
@@ -340,63 +381,29 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
           styleColData(r.description, detailsColSize[0], x.left),
           styleColData(util.formatNumber(r.count), detailsColSize[1], x.right),
           styleColData(util.formatCurrency(r.price, {currencyStr: invoice.currency}), detailsColSize[2], x.right),
-          styleColData(r.discount + '%', detailsColSize[3], x.right),
-          styleColData(r.vat + '%', detailsColSize[4], x.right),
+          styleColData(r.hasDiscount?util.formatNumber(r.discount) + '%':'', detailsColSize[3], x.right),
+          styleColData(util.formatNumber(r.vat) + '%', detailsColSize[4], x.right),
           styleColData(util.formatCurrency(r.total, {currencyStr: invoice.currency}), detailsColSize[5], x.right),
         ], bandOpts);
+        console.log("Row: has=" + r.hasDiscount + ", col=" + r.discount, ", fmt=" + util.formatNumber(r.discount));
       }
       var oldStrokeColor = x.strokeColor();
       x.strokeColor(detailsSeparatorLineColor);
       drawGroupHLine(x, 0.5);
-      x.addY(1);
       x.strokeColor(oldStrokeColor);
+      drawGroupDetailBars(x, y1, x.getCurrentY(), 0.5);
     }
   };
 
   var invoiceGroups = function ( x, r ) {
     if (r.isValid) {
-      // Group header
-      var detailsColLbl = [
-        r.hasDesc ? r.descColLbl : "",
-        r.hasCount ? r.countColLbl : "",
-        r.hasPrice ? r.priceColLbl : "",
-        r.hasDiscount ? r.discountColLbl : "",
-        r.hasVat ? r.vatColLbl : "",
-        r.hasTotal ? r.totalColLbl : ""
-      ];
-
-      var anyDetailHeader = detailsColLbl.join("").length > 0;
-
-      x.addY(detailsGroupTitleTopPadding);
-      x.fontSize(detailsGroupTitleFontSize);
-      var groupTitle = r.name;
-      if (r.hasHeaderExtraField) {
-        groupTitle = groupTitle + " " + r.headerExtraField;
-      }
-      if (groupTitle && groupTitle !== "") {
-        x.print(groupTitle, {fontBold: 1, border: 0, wrap: 1});
-      }
-      var groupHeaderTopY = x.getCurrentY();
-      if (anyDetailHeader) {
-        x.addY(detailsGroupHeaderTopPadding);
-        x.fontSize(detailsFontSize);
-        x.band( [
-          {data: detailsColLbl[0], width: detailsColSize[0], align: x.left},
-          {data: detailsColLbl[1], width: detailsColSize[1], align: x.right},
-          {data: detailsColLbl[2], width: detailsColSize[2], align: x.right},
-          {data: detailsColLbl[3], width: detailsColSize[3], align: x.right},
-          {data: detailsColLbl[4], width: detailsColSize[4], align: x.right},
-          {data: detailsColLbl[5], width: detailsColSize[5], align: x.right}
-        ], {fontBold: 1, border: debugBorderWidth, width: 0, wrap: 1} );
-
-        drawGroupHLine(x, 0.5);
-      }
-
+      groupHeader(x, r, true);
       for (var i = 0; i < r.invoiceItems.length; i++) {
         invoiceDetails(x, r.invoiceItems[i]);
       }
 
       if (r.hasTotal && r.totalExclVat) {
+        var groupSummaryTopY = x.getCurrentY();
         var totalExclVatStr = 
           util.formatCurrency(parseFloat(r.totalExclVat.toFixed(2)), {currencyStr: invoice.currency});
         x.addY(detailsGroupSummaryTopPadding);
@@ -409,11 +416,9 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
           {data: "Summa:", width: detailsColSize[4], align: x.right, fontBold: 0},
           {data: totalExclVatStr, width: detailsColSize[5], align: x.right}
         ], {fontBold: 0, border: debugBorderWidth, width: 0, wrap: 1} );
+        drawGroupHLine(x, 0.5);
+        drawGroupDetailBars(x, groupSummaryTopY, x.getCurrentY(), 0.5);
       }
-
-      var groupHeaderBottomY = x.getCurrentY();
-
-      drawGroupBox(x, groupHeaderTopY, groupHeaderBottomY, 0.5);
     }
   };
 
@@ -478,10 +483,11 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
   // Support old invoices without groups
   if (!invoice.invoiceItemGroups && invoice.invoiceItems) {
     var groupToUse = {
-      _id: 1,
-      name: "Detaljer",
+      _id: undefined,
+      name: "Detaljer konverterad",
+      title: "Detaljer",
       isValid: true,
-      isQuickButton: true,
+      isQuickButton: false,
       descColLbl: "Beskrivning",
       priceColLbl: "Á-pris",
       countColLbl: "Antal",
@@ -500,6 +506,15 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
       " format without item groups. Converting invoice using group " + JSON.stringify(groupToUse));
     var newGroup = JSON.parse(JSON.stringify(groupToUse));
     newGroup.invoiceItems = invoice.invoiceItems;
+    for (var i = 0; i < newGroup.invoiceItems.length; i++) {
+      newGroup.invoiceItems[i].hasDesc = groupToUse.hasDesc;
+      newGroup.invoiceItems[i].hasPrice = groupToUse.hasPrice;
+      newGroup.invoiceItems[i].hasCount = groupToUse.hasCount;
+      newGroup.invoiceItems[i].hasDiscount = groupToUse.hasDiscount;
+      newGroup.invoiceItems[i].negateDiscount = groupToUse.negateDiscount;
+      newGroup.invoiceItems[i].hasVat = groupToUse.hasVat;
+      newGroup.invoiceItems[i].hasTotal = groupToUse.hasTotal;
+    }
     invoice.invoiceItemGroups = [newGroup];
   }
   

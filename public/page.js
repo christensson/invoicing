@@ -55,6 +55,10 @@ var CacheOp = function() {
     return 'invoices';
   };
 
+  self.ITEM_GROUP_TEMPLATES = function() {
+    return 'item_group_templates';
+  };
+
   self._findArrayFieldIndex = function(arr, item, field) {
     for (var i = 0; i < arr.length; i++) {
       if (arr[i][field] === item[field]) {
@@ -87,6 +91,21 @@ var CacheOp = function() {
     });
   };
   
+  self._arrayRemoveItem = function(arrayCacheKey, item) {
+    cache.get(arrayCacheKey, function(items) {
+      var updateIndex = self._findArrayFieldIndex(items, item, '_id');
+      if (updateIndex != -1) {
+        items.splice(updateIndex, 1);
+        Log.info("array item at index=" + updateIndex + " in cacheKey=" + arrayCacheKey +
+            " removed");
+        cache.set(arrayCacheKey, items);
+      } else {
+        Log.warn("array item in cacheKey=" + arrayCacheKey +
+            " not found matching " + JSON.stringify(item));
+      };
+    });
+  };
+
   self._arrayGetItem = function(arrayCacheKey, keyField, key, callback) {
     var items = cache.get(arrayCacheKey);
     if (items) {
@@ -130,10 +149,36 @@ var CacheOp = function() {
     self._arrayAddItem(self.COMPANIES(), company);
   };
 
+  self.fetchItemGroupTemplates = function() {
+    return $.getJSON("/api/itemGroupTemplates", function(data) {
+      cache.set(self.ITEM_GROUP_TEMPLATES(), data);
+    });
+  };
+
+  self.getItemGroupTemplate = function(id, callback) {
+    self._arrayGetItem(self.ITEM_GROUP_TEMPLATES(), '_id', id, callback);
+  };
+
+  self.invalidateItemGroupTemplates = function() {
+    cache.del(self.ITEM_GROUP_TEMPLATES());
+  };
+  
+  self.updateItemGroupTemplate = function(groupTempl) {
+    self._arrayUpdateItem(self.ITEM_GROUP_TEMPLATES(), groupTempl);
+  };
+
+  self.addItemGroupTemplate = function(groupTempl) {
+    self._arrayAddItem(self.ITEM_GROUP_TEMPLATES(), groupTempl);
+  };
+
+  self.deleteItemGroupTemplate = function(groupTempl) {
+    self._arrayRemoveItem(self.ITEM_GROUP_TEMPLATES(), groupTempl);
+  };
+
   self.fetchCustomers = function(companyId) {
     return $.getJSON("/api/customers/" + companyId, function(data) {
       cache.set(self.CUSTOMERS(), data);
-    });
+    });undoNavigation
   };
 
   self.getCustomer = function(id, callback) {
@@ -176,6 +221,11 @@ var CacheOp = function() {
 };
 
 var Cache = new CacheOp();
+
+var browserNavigateBack = function() {
+  Log.info("Forced backward navigation");
+  history.go(-1);
+};
 
 var SettingsDataModel = function() {
   var self = this;
@@ -511,7 +561,7 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompany,
       }).fail(function() {
         Log.info("CompanyListViewModel - populate - failed");
         Notify_showSpinner(false);
-        Notify_showMsg('error', i18n.t("app.customerList.getNok"));
+        Notify_showMsg('error', i18n.t("app.companyList.getNok"));
       });
     } else {
       Log.info("CompanyListViewModel - populate - data is cached!");
@@ -877,6 +927,7 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
       }
     } else {
       Notify_showMsg('info', i18n.t("app.customerList.getNok", {context: "noCompany"}));
+      browserNavigateBack();
     }
   };
 };
@@ -894,8 +945,13 @@ var CustomerNewViewModel = function(currentView, activeCompanyId) {
     var viewArray = newValue.split("/");
     if (viewArray[0] == 'customer_new') {
       Log.info("CustomerNewViewModel - activated");
-      self.data.init();
-      self.data.setActiveCompanyId(self.activeCompanyId());
+      if (self.activeCompanyId() != null) {
+        self.data.init();
+        self.data.setActiveCompanyId(self.activeCompanyId());
+      } else {
+        Notify_showMsg('info', i18n.t("app.customer.newNok", {context: "noCompany"}));
+        browserNavigateBack();
+      }
     } else if (viewArray[0] == 'customer_show' && viewArray.length > 1) {
       var _id = viewArray[1];
       Log.info("CustomerNewViewModel - activated - show #" + _id);
@@ -926,6 +982,70 @@ var CustomerNewViewModel = function(currentView, activeCompanyId) {
   
   self.saveCustomer = function() {
     self.data.updateServer();
+  };
+};
+
+var InvoiceItemGroupTemplatesViewModel = function(currentView) {
+  var self = this;
+
+  self.currentView = currentView;
+
+  self.currentView.subscribe(function(newValue) {
+    if (newValue == 'invoice_item_group_templates') {
+      Log.info("InvoiceItemGroupTemplatesViewModel - activated");
+      self.populate();
+    }
+  });
+
+  self.groupList = ko.observableArray();
+  self.isLockedDummy = ko.observable(false);
+
+  cache.on('set:' + Cache.ITEM_GROUP_TEMPLATES(), function(groupTemplates, ttl) {
+    Log.info("InvoiceItemGroupTemplatesViewModel - event - set:" + Cache.ITEM_GROUP_TEMPLATES());
+    Log.info("InvoiceItemGroupTemplatesViewModel - populate: Got " + groupTemplates.length
+        + " group templates");
+    var mappedGroupTemplates = $.map(groupTemplates, function(item) {
+      var group = new InvoiceItemGroupViewModel(false, undefined, self.isLockedDummy);
+      group.setData(item);
+      return group;
+    });
+    self.groupList(mappedGroupTemplates);
+  });
+
+  cache.on('update:' + Cache.ITEM_GROUP_TEMPLATES(), function(groupTemplates, ttl) {
+    Log.info("InvoiceItemGroupTemplatesViewModel - event - update:" + Cache.ITEM_GROUP_TEMPLATES());
+    var mappedGroupTemplates = $.map(groupTemplates, function(item) {
+      var group = new InvoiceItemGroupViewModel(false, undefined, self.isLockedDummy);
+      group.setData(item);
+      return group;
+    });
+    self.groupList(mappedGroupTemplates);
+  });
+
+  cache.on('del:' + Cache.ITEM_GROUP_TEMPLATES(), function() {
+    Log.info("InvoiceItemGroupTemplatesViewModel - event - del:" + Cache.ITEM_GROUP_TEMPLATES());
+    self.groupList.removeAll();
+  });
+
+  self.populate = function(force) {
+    force = typeof force !== 'undefined' ? force : false;
+    if (force || !cache.get(Cache.ITEM_GROUP_TEMPLATES())) {
+      Notify_showSpinner(true);
+      Cache.fetchItemGroupTemplates().success(function() {
+        Notify_showSpinner(false);
+      }).fail(function() {
+        Log.info("InvoiceItemGroupTemplatesViewModel - populate - failed");
+        Notify_showSpinner(false);
+        Notify_showMsg('error', i18n.t("app.groupTemplates.getNok"));
+      });
+    } else {
+      Log.info("InvoiceItemGroupTemplatesViewModel - populate - data is cached!");
+    }
+  };
+
+  self.deleteGroup = function(group) {
+    group.updateServerDelete();
+    self.groupList.destroy(group);
   };
 };
 
@@ -960,17 +1080,20 @@ var InvoiceItemTypeModel = function(id, desc) {
   };
 };
 
-var InvoiceItemGroupViewModel = function(currency, isLocked) {
+var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked) {
   var self = this;
-  self.activeCurrency = currency;
+  self.mayHaveInvoiceItems = mayHaveInvoiceItems;
+  self.nameError = ko.observable(false);
   self.isEditMode = ko.observable(false);
 
   self._id = ko.observable();
+  self.uid = ko.observable();
   self.name = ko.observable();
+  self.title = ko.observable();
   self.isValid = ko.observable();
   self.isQuickButton = ko.observable();
 
-  self.headerExtraField = ko.observable("");
+  self.titleExtraField = ko.observable("");
   self.descColLbl = ko.observable();
   self.priceColLbl = ko.observable();
   self.countColLbl = ko.observable();
@@ -978,7 +1101,7 @@ var InvoiceItemGroupViewModel = function(currency, isLocked) {
   self.vatColLbl = ko.observable();
   self.totalColLbl = ko.observable();
 
-  self.hasHeaderExtraField = ko.observable();
+  self.hasTitleExtraField = ko.observable();
   self.hasDesc = ko.observable();
   self.hasPrice = ko.observable();
   self.hasCount = ko.observable();
@@ -987,7 +1110,10 @@ var InvoiceItemGroupViewModel = function(currency, isLocked) {
   self.hasVat = ko.observable();
   self.hasTotal = ko.observable();
 
-  self.invoiceItems = ko.observableArray();
+  if (self.mayHaveInvoiceItems) {
+    self.activeCurrency = currency;
+    self.invoiceItems = ko.observableArray();
+  }
 
   isLocked.subscribe(function(goingToLock) {
     if (goingToLock && self.isEditMode()) {
@@ -1000,12 +1126,14 @@ var InvoiceItemGroupViewModel = function(currency, isLocked) {
   self.setData = function(data) {
     self.isEditMode(false);
     self._id(data._id);
+    self.uid(data.uid);
     self.name(data.name);
+    self.title(data.title);
     self.isValid(data.isValid);
     self.isQuickButton(data.isQuickButton);
 
-    self.headerExtraField(data.headerExtraField);
-    self.hasHeaderExtraField(data.hasHeaderExtraField);
+    self.titleExtraField(data.titleExtraField);
+    self.hasTitleExtraField(data.hasTitleExtraField);
 
     self.descColLbl(data.descColLbl);
     self.priceColLbl(data.priceColLbl);
@@ -1022,78 +1150,86 @@ var InvoiceItemGroupViewModel = function(currency, isLocked) {
     self.hasVat(data.hasVat);
     self.hasTotal(data.hasTotal);
 
-    self.invoiceItems.removeAll();
-    if (data.invoiceItems) {
-      for ( var i = 0; i < data.invoiceItems.length; i++) {
-        if (data.invoiceItems[i].isValid) {
-          Log.info("Push item i=" + i + " desc=" + data.invoiceItems[i].description);
-          self.invoiceItems.push(new InvoiceItemViewModel(data.invoiceItems[i], self));
-        } else {
-          Log.info("Skip invalid item i=" + i + " desc=" + data.invoiceItems[i].description);
+    if (self.mayHaveInvoiceItems) {
+      self.invoiceItems.removeAll();
+      if (data.invoiceItems) {
+        for ( var i = 0; i < data.invoiceItems.length; i++) {
+          if (data.invoiceItems[i].isValid) {
+            Log.info("Push item i=" + i + " desc=" + data.invoiceItems[i].description);
+            self.invoiceItems.push(new InvoiceItemViewModel(data.invoiceItems[i], self));
+          } else {
+            Log.info("Skip invalid item i=" + i + " desc=" + data.invoiceItems[i].description);
+          };
         };
-      };
-    } else {
-      Log.info("No invoice items in group name=" + data.name);
-    }
-  };
-
-  self.numInvoiceItems = ko.pureComputed(function() {
-    var sum = 0;
-    for ( var i = 0; i < this.invoiceItems().length; i++) {
-      if (this.invoiceItems()[i].isValid()) {
-        sum += 1;
-      };
-    }
-    return sum;
-  }, this);
-
-  self.totalExclVat = ko.pureComputed(function() {
-    var sum = 0;
-    for ( var i = 0; i < this.invoiceItems().length; i++) {
-      if (this.invoiceItems()[i].isValid()) {
-        sum += this.invoiceItems()[i].total();
+      } else {
+        Log.info("No invoice items in group name=" + data.name);
       }
     }
-    return sum;
-  }, this);
-  
-  self.totalInclVat = ko.pureComputed(function() {
-    var sum = 0;
-    for ( var i = 0; i < this.invoiceItems().length; i++) {
-      if (this.invoiceItems()[i].isValid()) {
-        var vat = parseFloat(this.invoiceItems()[i].vat()) / 100.0;
-        sum += this.invoiceItems()[i].total() * (1 + vat);
+  };
+
+  if (self.mayHaveInvoiceItems) {
+    self.numInvoiceItems = ko.pureComputed(function() {
+      var sum = 0;
+      for ( var i = 0; i < this.invoiceItems().length; i++) {
+        if (this.invoiceItems()[i].isValid()) {
+          sum += 1;
+        };
       }
-    }
-    return sum;
-  }, this);
+      return sum;
+    }, this);
 
-  self.totalExclVatStr = ko.pureComputed(function() {
-    return Util.formatCurrency(self.totalExclVat(), {currencyStr: self.activeCurrency()});
-  }, self);
+    self.numInvoiceItemsText = ko.pureComputed(function() {
+      return i18n.t("app.invoice.groupNumInvoiceItemsText", {count: self.numInvoiceItems()});
+    }, this);
 
-  self.totalInclVatStr = ko.pureComputed(function() {
-    return Util.formatCurrency(self.totalInclVat(), {currencyStr: self.activeCurrency()});
-  }, self);
-  
-  self.newInvoiceItem = function() {
-    var data = {
-        description : "",
-        price : 0.0,
-        count : 1.0,
-        vat : 25,
-        discount : 0.0,
-        isValid : true
-      };
-    self.invoiceItems.push(new InvoiceItemViewModel(data, self));
-    Log.info("Added new invoice item to group=" + self.name() +
-        ". #items=" + self.invoiceItems().length + " (after)");
-  };
-  
-  self.deleteInvoiceItem = function(item) {
-    item.isValid(false);
-    self.invoiceItems.destroy(item);
-  };
+    self.totalExclVat = ko.pureComputed(function() {
+      var sum = 0;
+      for ( var i = 0; i < this.invoiceItems().length; i++) {
+        if (this.invoiceItems()[i].isValid()) {
+          sum += this.invoiceItems()[i].total();
+        }
+      }
+      return sum;
+    }, this);
+    
+    self.totalInclVat = ko.pureComputed(function() {
+      var sum = 0;
+      for ( var i = 0; i < this.invoiceItems().length; i++) {
+        if (this.invoiceItems()[i].isValid()) {
+          var vat = parseFloat(this.invoiceItems()[i].vat()) / 100.0;
+          sum += this.invoiceItems()[i].total() * (1 + vat);
+        }
+      }
+      return sum;
+    }, this);
+
+    self.totalExclVatStr = ko.pureComputed(function() {
+      return Util.formatCurrency(self.totalExclVat(), {currencyStr: self.activeCurrency()});
+    }, self);
+
+    self.totalInclVatStr = ko.pureComputed(function() {
+      return Util.formatCurrency(self.totalInclVat(), {currencyStr: self.activeCurrency()});
+    }, self);
+
+    self.newInvoiceItem = function() {
+      var data = {
+          description : "",
+          price : 0.0,
+          count : 1.0,
+          vat : 25,
+          discount : 0.0,
+          isValid : true
+        };
+      self.invoiceItems.push(new InvoiceItemViewModel(data, self));
+      Log.info("Added new invoice item to group=" + self.name() +
+          ". #items=" + self.invoiceItems().length + " (after)");
+    };
+    
+    self.deleteInvoiceItem = function(item) {
+      item.isValid(false);
+      self.invoiceItems.destroy(item);
+    };
+  }
 
   self.toggleEditMode = function() {
     var newEditMode = !self.isEditMode();
@@ -1102,35 +1238,91 @@ var InvoiceItemGroupViewModel = function(currency, isLocked) {
     self.isEditMode(newEditMode);
   };
 
-  self.getJson = function() {
-    var items = [];
-    for ( var i = 0; i < self.invoiceItems().length; i++) {
-      items.push(self.invoiceItems()[i].getJson());
+  self.updateServer = function() {
+    if ((self._id() == undefined) && !self.isValid()) {
+      Notify_showMsg('error', i18n.t("app.groupTemplates.saveNok"));
+      return;
+    } else if (self.name().length == 0) {
+      Notify_showMsg('error', i18n.t("app.groupTemplates.saveNok", {context: "noName"}));
+      self.nameError(true);
+      return;
     }
+    self.nameError(false);
+    var isNew = (self._id() == undefined) ? true : false;
+    Notify_showSpinner(true, i18n.t("app.groupTemplates.saveTicker"));
+    return $.ajax({
+      url : "/api/itemGroupTemplate/" + self._id(),
+      type : "PUT",
+      contentType : "application/json",
+      data : JSON.stringify(self.getJson()),
+      dataType : "json",
+      success : function(data) {
+        Log.info("updateServer: response: " + JSON.stringify(data));
+        var tContext = "";
+        var isDelete = !isNew && !data.groupTempl.isValid;
+        if (!isNew) {
+          tContext = isDelete ? 'delete' : 'update';
+        }
+        Notify_showSpinner(false);
+        Notify_showMsg('success', i18n.t("app.groupTemplates.saveOk",
+            {context: tContext, name: data.groupTempl.name}));
+        self.uid(data.groupTempl.uid);
+        self._id(data.groupTempl._id);
+        self.isValid(data.groupTempl.isValid);
+        if (isNew) {
+          Cache.addItemGroupTemplate(data.groupTempl);
+        } else if (isDelete) {
+          Cache.deleteItemGroupTemplate(data.groupTempl);
+        } else {
+          Cache.updateItemGroupTemplate(data.groupTempl);
+        };
+      },
+    });
+  };
+
+  self.updateServerForceNew = function() {
+    self._id(undefined);
+    self.updateServer();
+  };
+
+  self.updateServerDelete = function() {
+    self.isValid(false);
+    self.updateServer();
+  };
+
+  self.getJson = function() {
     var res = {
-        _id : self._id(),
-        name : self.name(),
-        isValid : self.isValid(),
-        isQuickButton : self.isQuickButton(),
-        headerExtraField : self.headerExtraField(),
-        hasHeaderExtraField : self.hasHeaderExtraField(),
-        descColLbl : self.descColLbl(),
-        priceColLbl : self.priceColLbl(),
-        countColLbl : self.countColLbl(),
-        discountColLbl : self.discountColLbl(),
-        vatColLbl : self.vatColLbl(),
-        totalColLbl : self.totalColLbl(),
-        hasDesc : self.hasDesc(),
-        hasPrice : self.hasPrice(),
-        hasCount : self.hasCount(),
-        hasDiscount : self.hasDiscount(),
-        negateDiscount : self.negateDiscount(),
-        hasVat : self.hasVat(),
-        hasTotal : self.hasTotal(),
-        invoiceItems : items,
-        totalExclVat : self.totalExclVat(),
-        totalInclVat : self.totalInclVat()
-      };
+      _id : self._id(),
+      uid : self.uid(),
+      name : self.name(),
+      title : self.title(),
+      isValid : self.isValid(),
+      isQuickButton : self.isQuickButton(),
+      titleExtraField : self.titleExtraField(),
+      hasTitleExtraField : self.hasTitleExtraField(),
+      descColLbl : self.descColLbl(),
+      priceColLbl : self.priceColLbl(),
+      countColLbl : self.countColLbl(),
+      discountColLbl : self.discountColLbl(),
+      vatColLbl : self.vatColLbl(),
+      totalColLbl : self.totalColLbl(),
+      hasDesc : self.hasDesc(),
+      hasPrice : self.hasPrice(),
+      hasCount : self.hasCount(),
+      hasDiscount : self.hasDiscount(),
+      negateDiscount : self.negateDiscount(),
+      hasVat : self.hasVat(),
+      hasTotal : self.hasTotal(),
+    };
+    if (self.mayHaveInvoiceItems) {
+      var items = [];
+      for ( var i = 0; i < self.invoiceItems().length; i++) {
+        items.push(self.invoiceItems()[i].getJson());
+      }
+      res.invoiceItems = items;
+      res.totalExclVat = self.totalExclVat();
+      res.totalInclVat = self.totalInclVat();
+    }
     return res;
   };
 };
@@ -1275,7 +1467,7 @@ var InvoiceDataViewModel = function() {
     for ( var i = 0; i < newData.invoiceItemGroups.length; i++) {
       if (newData.invoiceItemGroups[i].isValid) {
         Log.info("Push item group i=" + i + " name=" + newData.invoiceItemGroups[i].name);
-        var group = new InvoiceItemGroupViewModel(self.currency, self.isLocked);
+        var group = new InvoiceItemGroupViewModel(true, self.currency, self.isLocked);
         group.setData(newData.invoiceItemGroups[i]);
         self.invoiceItemGroups.push(group);
       } else {
@@ -1374,7 +1566,7 @@ var InvoiceDataViewModel = function() {
   };
 
   self.addGroup = function(g) {
-    var groupToAdd = new InvoiceItemGroupViewModel(self.currency, self.isLocked);
+    var groupToAdd = new InvoiceItemGroupViewModel(true, self.currency, self.isLocked);
     groupToAdd.setData(g);
     groupToAdd.newInvoiceItem();
     self.invoiceItemGroups.push(groupToAdd);
@@ -1550,6 +1742,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
       }
     } else {
       Notify_showMsg('info', i18n.t("app.invoiceList.getNok", {context: "noCompany"}));
+      browserNavigateBack();
     }
   };
   
@@ -1678,124 +1871,32 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   self.selectedCustomer = ko.observable();
   self.currencyList = ko.observableArray(["SEK", "EUR", "USD", "GBP"]);
   self.selectedCurrency = ko.observable();
+  self.getJobs = [];
   self.numServerReqLeft = 0;
 
-  self.itemGroupList = [
-    {
-      _id: 1,
-      name: "Detaljer",
-      isValid: true,
-      isQuickButton: true,
-      hasHeaderExtraField: false,
-      headerExtraField: "",
-      descColLbl: "Beskrivning",
-      priceColLbl: "Á-pris",
-      countColLbl: "Antal",
-      discountColLbl: "Rabatt",
-      vatColLbl: "Moms",
-      totalColLbl: "Belopp",
-      hasDesc: true,
-      hasPrice: true,
-      hasCount: true,
-      hasDiscount: true,
-      negateDiscount: false,
-      hasVat: true,
-      hasTotal: true
-    },
-    {
-      _id: 2,
-      name: "Arbetstimmar",
-      isValid: true,
-      isQuickButton: true,
-      hasHeaderExtraField: false,
-      headerExtraField: "",
-      descColLbl: "Beskrivning",
-      priceColLbl: "Kr/timme",
-      countColLbl: "Timmar",
-      discountColLbl: "Pålägg",
-      vatColLbl: "Moms",
-      totalColLbl: "Belopp",
-      hasDesc: true,
-      hasPrice: true,
-      hasCount: true,
-      hasDiscount: true,
-      negateDiscount: true,
-      hasVat: true,
-      hasTotal: true
-    },
-    {
-      _id: 3,
-      name: "Resor",
-      isValid: true,
-      isQuickButton: false,
-      hasHeaderExtraField: false,
-      headerExtraField: "",
-      descColLbl: "Beskrivning",
-      priceColLbl: "Kr/mil",
-      countColLbl: "Mil",
-      discountColLbl: "Rabatt",
-      vatColLbl: "Moms",
-      totalColLbl: "Belopp",
-      hasDesc: true,
-      hasPrice: true,
-      hasCount: true,
-      hasDiscount: false,
-      negateDiscount: false,
-      hasVat: true,
-      hasTotal: true
-    },
-    {
-      _id: 4,
-      name: "Material",
-      isValid: true,
-      isQuickButton: false,
-      hasHeaderExtraField: true,
-      headerExtraField: "",
-      descColLbl: "Beskrivning",
-      priceColLbl: "Belopp",
-      countColLbl: "Antal",
-      discountColLbl: "Pålägg",
-      vatColLbl: "Moms",
-      totalColLbl: "Belopp",
-      hasDesc: true,
-      hasPrice: true,
-      hasCount: false,
-      hasDiscount: true,
-      negateDiscount: true,
-      hasVat: true,
-      hasTotal: true
-    }
-  ];
+  self.itemGroupList = ko.observableArray();
   
   self.newGroup = function(g) {
-    Log.info("New group name=" + g.name + ", id=" + g._id);
-    self.data.addGroup(g);
+    var group = ko.toJS(g)
+    Log.info("New group name=" + group.name + ", id=" + group._id);
+    self.data.addGroup(group);
   };
   
-  self.newDetailsGroupQuickBtnLbl = ko.pureComputed(function() {
-    var typeStr = "";
-    if (self.googleId() !== undefined &&
-        self.googleId() !== null && 
-        self.googleId() !== "")
-    {
-      typeStr = "Google";
-    } else {
-      typeStr = "Local";
-    }
-    return typeStr;
-  }, self);
-
   self.currentView.subscribe(function(newValue) {
     self.data.init();
     self.selectedCustomer(undefined);
     var viewArray = newValue.split("/");
     if (viewArray[0] == 'invoice_new') {
       Log.info("InvoiceNewViewModel - activated");
-      self.data.init(self.activeCompany().defaultNumDaysUntilPayment());
-      //self.data.newInvoiceItem();
-      self.data.setCompanyId(self.activeCompanyId());
-      self.numServerReqLeft = 1;
-      self.populate();
+      if (self.activeCompany() !== undefined) {
+        self.data.init(self.activeCompany().defaultNumDaysUntilPayment());
+        self.data.setCompanyId(self.activeCompanyId());
+        self.numServerReqLeft = 1;
+        self.populate();
+      } else {
+        Notify_showMsg('info', i18n.t("app.invoice.newNok", {context: "noCompany"}));
+        browserNavigateBack();
+      }
     } else if (viewArray[0] == 'invoice_show' && viewArray.length > 1) {
       var _id = viewArray[1];
       Log.info("InvoiceNewViewModel - activated - show #" + _id);
@@ -1842,30 +1943,68 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
     self.customerList.removeAll();
   });
 
+  cache.on('set:' + Cache.ITEM_GROUP_TEMPLATES(), function(groupTemplates, ttl) {
+    Log.info("InvoiceNewViewModel - event - set:" + Cache.ITEM_GROUP_TEMPLATES());
+    var mappedGroupTemplates = $.map(groupTemplates, function(item) {
+      var group = new InvoiceItemGroupViewModel(false, self.data.currency, self.data.isLocked);
+      group.setData(item);
+      return group;
+    });
+    self.itemGroupList(mappedGroupTemplates);
+  });
+
+  cache.on('update:' + Cache.ITEM_GROUP_TEMPLATES(), function(groupTemplates, ttl) {
+    Log.info("InvoiceNewViewModel - event - update:" + Cache.ITEM_GROUP_TEMPLATES());
+    var mappedGroupTemplates = $.map(groupTemplates, function(item) {
+      var group = new InvoiceItemGroupViewModel(false, self.data.currency, self.data.isLocked);
+      group.setData(item);
+      return group;
+    });
+    self.itemGroupList(mappedGroupTemplates);
+  });
+
+  cache.on('del:' + Cache.ITEM_GROUP_TEMPLATES(), function() {
+    Log.info("InvoiceNewViewModel - event - del:" + Cache.ITEM_GROUP_TEMPLATES());
+    self.itemGroupList.removeAll();
+  });
+
   self.populate = function(force) {
     force = typeof force !== 'undefined' ? force : false;
     var companyId = self.activeCompanyId();
     if (companyId != null) {
+      var customersJob = undefined;
+      var groupTemplatesJob = undefined;
       // Do nothing if object exists in cache
       if (force || !cache.get(Cache.CUSTOMERS())) {
-        Notify_showSpinner(true);
-        Cache.fetchCustomers(companyId).success(function() {
-          self.numServerReqLeft--;
-          self.syncCustomerIdInput();
-          Notify_showSpinner(false);
-        }).fail(function() {
-          Log.info("InvoiceNewViewModel - populate - failed");
-          self.numServerReqLeft--;
-          Notify_showSpinner(false);
-          Notify_showMsg('error', i18n.t("app.invoice.getCustomersNok"));
-        });
+        customersJob = Cache.fetchCustomers(companyId);
       } else {
-        Log.info("InvoiceNewViewModel - populate - data is cached!");
+        Log.info("InvoiceNewViewModel - populate - customer data is cached!");
+        customersJob = $.Deferred();
+        customersJob.resolve();
+      }
+
+      if (force || !cache.get(Cache.ITEM_GROUP_TEMPLATES())) {
+        groupTemplatesJob = Cache.fetchItemGroupTemplates();
+      } else {
+        Log.info("InvoiceNewViewModel - populate - groupTemplate data is cached!");
+        groupTemplatesJob = $.Deferred();
+        groupTemplatesJob.resolve();
+      }
+
+      Notify_showSpinner(true);
+      $.when(customersJob, groupTemplatesJob).then(function(customersRes, groupTemplatesRes) {
         self.numServerReqLeft--;
         self.syncCustomerIdInput();
-      }
+        Notify_showSpinner(false);
+      }).fail(function() {
+         Log.info("InvoiceNewViewModel - populate - failed");
+         Notify_showSpinner(false);
+         Notify_showMsg('error', i18n.t("app.invoice.getGroupTemplatesNok"));
+         Notify_showMsg('error', i18n.t("app.invoice.getCustomersNok"));
+      });
     } else {
       Notify_showMsg('info', i18n.t("app.invoice.getCustomersNok", {context: "noCompany"}));
+      browserNavigateBack();
     }
   };
 
@@ -1874,7 +2013,26 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       var doOnInvoice = function(invoice) {
         // Support old invoices without groups
         if (!invoice.invoiceItemGroups && invoice.invoiceItems) {
-          var groupToUse = self.itemGroupList[0];
+          var groupToUse = {
+            _id: undefined,
+            name: "Detaljer konverterad",
+            title: "Detaljer",
+            isValid: true,
+            isQuickButton: false,
+            descColLbl: "Beskrivning",
+            priceColLbl: "Á-pris",
+            countColLbl: "Antal",
+            discountColLbl: "Rabatt",
+            vatColLbl: "Moms",
+            totalColLbl: "Belopp",
+            hasDesc: true,
+            hasPrice: true,
+            hasCount: true,
+            hasDiscount: true,
+            negateDiscount: false,
+            hasVat: true,
+            hasTotal: true
+          };
           Log.info("Detected old invoice id=" + invoice._id +
             " format without item groups. Converting invoice using group name=" + groupToUse.name);
           var newGroup = JSON.parse(JSON.stringify(groupToUse));
@@ -2295,6 +2453,12 @@ var NavViewModel = function() {
     location : 'main'
   });
   self.mainViews.push({
+    name : '/page/invoice_item_group_templates',
+    title : i18n.t("app.navBar.invoiceItemGroupTemplates"),
+    icon : 'glyphicon glyphicon-list-alt',
+    location : 'userMenu'
+  });
+  self.mainViews.push({
     name : '/page/settings',
     title : i18n.t("app.navBar.settings"),
     icon : 'glyphicon glyphicon-wrench',
@@ -2548,6 +2712,8 @@ var setupKo = function() {
       navViewModel.activeCompanyId);
   var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId, navViewModel.activeCompany);
+  var invoiceItemGroupTemplatesViewModel = new InvoiceItemGroupTemplatesViewModel(
+      navViewModel.currentView);
 
   ko.applyBindings(navViewModel, document.getElementById("app-navbar"));
 
@@ -2569,6 +2735,8 @@ var setupKo = function() {
 
   ko.applyBindings(invoiceNewViewModel, document
       .getElementById("app-invoice_new"));
+
+  ko.applyBindings(invoiceItemGroupTemplatesViewModel, document.getElementById("app-invoice_item_group_templates"));
 
   ko.applyBindings(settingsViewModel, document.getElementById("app-settings"));
 

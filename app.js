@@ -166,7 +166,7 @@ passport.use(
           passReqToCallback : true
         }, // allows us to pass back the request to the callback
         function(req, username, password, done) {
-          console.log("signup: user=" + username + ", pw=" + password);
+          console.log("signup: user=" + username);
           var hash = bcrypt.hashSync(password, 8);
           var userData = {
             "username-local": username, // username is e-mail for local users!
@@ -506,6 +506,41 @@ app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
         + ", data=" + JSON.stringify(req.body, null, 4));
     mydb.updateInvoice(req.body).then(
         okHandler.bind(null, 'updateInvoice', res)).fail(
+        myFailureHandler.bind(null, res));
+  }
+});
+
+app.get("/api/itemGroupTemplates", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  console.log("Get invoice item group templates: user=" + req.user.info.name + ", uid=" + uid);
+  mydb.getItemGroupTemplates(uid).then(function(docs) {
+    res.status(200).json(docs);
+    res.end();
+  }).fail(myFailureHandler.bind(null, res));
+});
+
+app.put("/api/itemGroupTemplate/:id", ensureAuthenticated, function(req, res) {
+  var okHandler = function(logText, res, groupTempl) {
+    console.log(logText + ": OK, obj=" + JSON.stringify(groupTempl));
+    resData = {
+      'groupTempl' : groupTempl
+    };
+    res.status(200).json(resData);
+    res.end();
+  };
+  var uid = req.user._id;
+  if (req.params.id === "undefined") {
+    console.log("New invoice item group template: user=" + req.user.info.name +
+      ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 4));
+    mydb.addItemGroupTemplate(uid, req.body)
+        .then(okHandler.bind(null, 'addItemGroupTemplate', res)).fail(
+            myFailureHandler.bind(null, res));
+  } else {
+    console.log("Update invoice item group template: user=" + req.user.info.name +
+      ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 4));
+
+    mydb.updateItemGroupTemplate(req.body).then(
+        okHandler.bind(null, 'updateItemGroupTemplate', res)).fail(
         myFailureHandler.bind(null, res));
   }
 });
