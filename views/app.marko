@@ -1399,7 +1399,7 @@
                             <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
                             ${i18n.t('app.groupTemplates.saveGroupBtn')}
                           </button>
-                          <button type="button" class="btn btn-info" data-bind="visible: isEditMode">
+                          <button type="button" class="btn btn-info" data-bind="visible: isEditMode, disable: true">
                             <span class="glyphicon glyphicon-duplicate" aria-hidden="true"></span>
                             ${i18n.t('app.groupTemplates.copyGroupBtn')}
                           </button>
@@ -1413,10 +1413,10 @@
             </p>
 
             <div class="btn-group" role="group">
-                <a href="#/page/invoice_item_group_template_new" type="button" class="btn btn-success">
-                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                    ${i18n.t('app.groupTemplates.newTemplateBtn')}
-                </a>
+                <button type="button" class="btn btn-success" data-bind="disable: true">
+                  <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                  ${i18n.t('app.groupTemplates.newTemplateBtn')}
+                </button>
             </div>
           </form>
         </div>
