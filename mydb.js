@@ -1111,6 +1111,28 @@ var initUserItemGroupTemplates = function(uid) {
       negateDiscount: true,
       hasVat: true,
       hasTotal: true
+    },
+    {
+      uid: uid,
+      name: "Textruta",
+      title: "",
+      isValid: true,
+      isQuickButton: false,
+      hasTitleExtraField: false,
+      titleExtraField: "",
+      descColLbl: "",
+      priceColLbl: "Belopp",
+      countColLbl: "Antal",
+      discountColLbl: "Pålägg",
+      vatColLbl: "Moms",
+      totalColLbl: "Belopp",
+      hasDesc: true,
+      hasPrice: false,
+      hasCount: false,
+      hasDiscount: false,
+      negateDiscount: false,
+      hasVat: false,
+      hasTotal: false
     }
   ];
   return insertDataPromise('itemGroupTempl', initialList);

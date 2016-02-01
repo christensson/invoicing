@@ -354,9 +354,9 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
         {data: detailsColLbl[5], width: detailsColSize[5], align: x.right}
       ], {fontBold: 1, border: debugBorderWidth, width: 0, wrap: 1} );
 
-      drawGroupHLine(x, 0.5);
       drawGroupDetailBars(x, groupHeaderTopY, x.getCurrentY(), 0.5);
     }
+    drawGroupHLine(x, 0.5);
   };
 
   var invoiceDetails = function ( x, r ) {
