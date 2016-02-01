@@ -1071,15 +1071,6 @@ InvoiceOps.printInvoice = function(id) {
   }
 };
 
-var InvoiceItemTypeModel = function(id, desc) {
-  var self = this;
-  self.id = id;
-  self.desc = desc;
-  self.getId = function() {
-    return self.id;
-  };
-};
-
 var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked) {
   var self = this;
   self.mayHaveInvoiceItems = mayHaveInvoiceItems;
@@ -1218,7 +1209,8 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
           count : 1.0,
           vat : 25,
           discount : 0.0,
-          isValid : true
+          isValid : true,
+          isTextOnly: false,
         };
       self.invoiceItems.push(new InvoiceItemViewModel(data, self));
       Log.info("Added new invoice item to group=" + self.name() +
@@ -1337,8 +1329,6 @@ var InvoiceItemViewModel = function(data, parent) {
   self.negateDiscount = parent.negateDiscount;
   self.hasVat = parent.hasVat;
   self.hasTotal = parent.hasTotal;
-  self.descriptionNumRows = ko.observable(1);
-  self.descriptionColspan = ko.observable(1);
 
   self.description = ko.observable(data.description);
   self.price = ko.observable(data.price);
@@ -1346,9 +1336,10 @@ var InvoiceItemViewModel = function(data, parent) {
   self.vat = ko.observable(data.vat);
   self.discount = ko.observable(data.discount);
   self.isValid = ko.observable(data.isValid);
+  self.isTextOnly = ko.observable(data.isTextOnly);
   self.total = ko.pureComputed(function() {
     var total = 0;
-    if (this.hasTotal() && this.currentType().getId() === 'default') {
+    if (this.hasTotal() && !this.isTextOnly()) {
       var count = this.hasCount()?parseFloat(this.count()):1.0;
       var price = this.hasPrice()?parseFloat(this.price()):1.0;
       var discount = (this.hasDiscount()?parseFloat(this.discount()):0.0) / 100.0;
@@ -1368,37 +1359,21 @@ var InvoiceItemViewModel = function(data, parent) {
     return str;
   }, self);
   
-  self.isTextOnly = ko.observable();
-  self.typeList = ko.observableArray([
-    new InvoiceItemTypeModel("default", i18n.t('app.invoice.datailsTypeDefault')),
-    new InvoiceItemTypeModel("text_only", i18n.t('app.invoice.datailsTypeTextOnly'))
-  ]);
-  self.currentType = ko.observable();
-  self.currentType.subscribe(function(type) {
-    var typeId = type.getId();
-    switch(typeId) {
-    case 'text_only':
-      self.isTextOnly(true);
-      self.descriptionNumRows(3);
-      self.descriptionColspan(6);
-      break;
-    default:
-    case 'default':
-      self.isTextOnly(false);
-      self.descriptionNumRows(1);
-      self.descriptionColspan(1);
-      break;
+  self.descriptionNumRows = ko.pureComputed(function() {
+    var numRows = 1;
+    if (this.isTextOnly()) {
+      numRows = 3;
     }
-    Log.info("Item type set to " + typeId + " - isTextOnly=" + self.isTextOnly() +
-      ", descriptionNumRows=" + self.descriptionNumRows() +
-      ", descriptionColspan=" + self.descriptionColspan());
-  });
+    return numRows;
+  }, self);
 
-  if (data.isTextOnly) {
-    self.currentType(self.typeList()[1]);
-  } else {
-    self.currentType(self.typeList()[0]);
-  }
+  self.descriptionColspan = ko.pureComputed(function() {
+    var colspan = 1;
+    if (this.isTextOnly()) {
+      colspan = 6;
+    }
+    return colspan;
+  }, self);
 
   self.getJson = function() {
     var res = {
@@ -1602,7 +1577,6 @@ var InvoiceDataViewModel = function() {
       lastPaymentDate : self.lastPaymentDate(),
       projId : self.projId(),
       currency : self.currency(),
-      //invoiceItems : items,
       invoiceItemGroups : groups,
       totalExclVat : self.totalExclVat(),
       totalInclVat : self.totalInclVat()

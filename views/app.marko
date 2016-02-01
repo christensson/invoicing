@@ -1036,12 +1036,15 @@
                                         <td>
                                           <div class="form-inline">
                                             <div class="form-group">
-                                              <button class="btn btn-danger" data-bind="click: \$parent.deleteInvoiceItem, disable: \$parents[1].data.isLocked">
+                                              <button class="btn btn-danger btn-sm" data-bind="click: \$parent.deleteInvoiceItem, disable: \$parents[1].data.isLocked">
                                                   <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                                               </button>
-                                              <select class="form-control" style="width: auto;"
-                                                data-bind="options: typeList, optionsText: 'desc', value: currentType, disable: \$parents[1].data.isLocked">
-                                              </select>
+                                              <div class="checkbox input-sm">
+                                                <label>
+                                                  <input type="checkbox" data-bind="checked: isTextOnly">
+                                                  ${i18n.t('app.invoice.detailsIsTextOnlyCheckLbl')}
+                                                </label>
+                                              </div>
                                             </div>
                                           </div>
                                         </td>
