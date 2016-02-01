@@ -377,15 +377,22 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
           styleColData(r.description, detailsWidth, x.left),
         ], bandOpts);
       } else {
+        var detailsColLbl = [
+          r.hasDesc ? r.description : "",
+          r.hasCount ? util.formatNumber(r.count) : "",
+          r.hasPrice ? util.formatCurrency(r.price, {currencyStr: invoice.currency}) : "",
+          r.hasDiscount ? util.formatNumber(r.discount) + '%' : "",
+          r.hasVat ? util.formatNumber(r.vat) + '%' : "",
+          r.hasTotal ? util.formatCurrency(r.total, {currencyStr: invoice.currency}) : ""
+        ];
         x.band( [
-          styleColData(r.description, detailsColSize[0], x.left),
-          styleColData(util.formatNumber(r.count), detailsColSize[1], x.right),
-          styleColData(util.formatCurrency(r.price, {currencyStr: invoice.currency}), detailsColSize[2], x.right),
-          styleColData(r.hasDiscount?util.formatNumber(r.discount) + '%':'', detailsColSize[3], x.right),
-          styleColData(util.formatNumber(r.vat) + '%', detailsColSize[4], x.right),
-          styleColData(util.formatCurrency(r.total, {currencyStr: invoice.currency}), detailsColSize[5], x.right),
+          styleColData(detailsColLbl[0], detailsColSize[0], x.left),
+          styleColData(detailsColLbl[1], detailsColSize[1], x.right),
+          styleColData(detailsColLbl[2], detailsColSize[2], x.right),
+          styleColData(detailsColLbl[3], detailsColSize[3], x.right),
+          styleColData(detailsColLbl[4], detailsColSize[4], x.right),
+          styleColData(detailsColLbl[5], detailsColSize[5], x.right),
         ], bandOpts);
-        console.log("Row: has=" + r.hasDiscount + ", col=" + r.discount, ", fmt=" + util.formatNumber(r.discount));
       }
       var oldStrokeColor = x.strokeColor();
       x.strokeColor(detailsSeparatorLineColor);
