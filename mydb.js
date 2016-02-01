@@ -1122,8 +1122,12 @@ var initUserItemGroupTemplates = function(uid) {
  * @param userQuery query for 
  * @return promise of user
  */
-var initUserContext = function(userQuery, license) {
+var initUserContext = function(userQuery, license, opts) {
   license = typeof license !== 'undefined' ? license : "demo";
+  opts = typeof opts !== 'undefined' ? opts : {
+    initSettings: true,
+    initTemplates: true
+  };
   var deferred = Q.defer();
   console.log("initUserContext: query=" + JSON.stringify(userQuery));
   var user = undefined;
@@ -1137,11 +1141,21 @@ var initUserContext = function(userQuery, license) {
         "activeCompanyId" : undefined,
         "license" : license,
     };
-    console.log("initUserContext: Set default settings: " + JSON.stringify(defaultSettings));
-    return insertDataPromise("settings", defaultSettings);
+    if (opts.initSettings) {
+      console.log("initUserContext: Set default settings: " + JSON.stringify(defaultSettings));
+      return insertDataPromise("settings", defaultSettings);
+    } else {
+      console.log("initUserContext: Skipped default settings!");
+      return Q();
+    }
   }).then(function() {
-    console.log("initUserContext: Set default group templates, uid=" + user._id);
-    return initUserItemGroupTemplates(user._id);
+    if (opts.initTemplates) {
+      console.log("initUserContext: Set default group templates, uid=" + user._id);
+      return initUserItemGroupTemplates(user._id);
+    } else {
+      console.log("initUserContext: Skipped default group templates!");
+      return Q();
+    }
   }).then(function() {
     deferred.resolve(user);
   }).fail(function(err) {
