@@ -1472,6 +1472,7 @@ var InvoiceDataViewModel = function() {
         name : "",
         addr1 : "",
         addr2 : "",
+        addr3 : "",
       },
       yourRef : "",
       ourRef : "",

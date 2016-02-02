@@ -895,6 +895,10 @@ module.exports.addCustomer = function(uid, companyId, customer) {
   return deferred.promise;
 };
 
+module.exports.addCustomerRaw = function(customer) {
+  return insertDataPromise('customer', customer);
+};
+
 module.exports.updateCustomer = function(customer) {
   customer.uid = new ObjectID(customer.uid);
   customer.companyId = new ObjectID(customer.companyId);
