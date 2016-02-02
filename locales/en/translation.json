@@ -196,6 +196,7 @@
             "addrLbl": "Address __nr__",
             "vatNrLbl": "VAT-nr",
             "contactInfoPaneHeader": "Contact info",
+            "contactLbl": "Contact person",
             "phoneLbl": "Phone __nr__",
             "emailLbl": "E-mail",
             "optionPaneHeader": "Options",

@@ -196,6 +196,7 @@
             "addrLbl": "Adressrad __nr__",
             "vatNrLbl": "Momsregnr",
             "contactInfoPaneHeader": "Kontaktinfo",
+            "contactLbl": "Kontaktperson",
             "phoneLbl": "Telefon __nr__",
             "emailLbl": "E-post",
             "optionPaneHeader": "Alternativ",

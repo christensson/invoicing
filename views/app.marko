@@ -497,6 +497,12 @@
                   <h3 class="panel-title">${i18n.t('app.customer.contactInfoPaneHeader')}</h3>
                 </div>
                 <div class="panel-body">
+                  <div class="form-group">
+                    <label for="contact" class="col-sm-2 control-label">${i18n.t('app.customer.contactLbl')}</label>
+                    <div class="col-sm-4">
+                      <input type="text" id="contact" class="form-control" data-bind="value: data.contact"></input>
+                    </div>
+                  </div>
                   <div for="idx in [1,2,3]">
                     <div class="form-group">
                       <label for="phone${idx}" class="col-sm-2 control-label">${i18n.t('app.customer.phoneLbl', {nr: "${idx}"})}</label>
