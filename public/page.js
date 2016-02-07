@@ -1558,6 +1558,90 @@ var InvoiceDataViewModel = function() {
     self.invoiceItemGroups.destroy(group);
   };
 
+  var printGroupArray = function(prefix, array, idx) {
+      var itemStr = "";
+      for (var i = 0; i < array.length; i++) {
+        if (idx !== undefined && i == idx) {
+          itemStr = itemStr + "[";
+        }
+        itemStr = itemStr + array[i].name();
+        if (idx !== undefined && i == idx) {
+          itemStr = itemStr + "]";
+        }
+
+        itemStr = itemStr + ", ";
+      }
+      console.log(prefix + ': ' + itemStr);
+    };
+
+  self.moveGroupInArray = function(idx, moveLeft) {
+    printGroupArray("Before move", self.invoiceItemGroups(), idx);
+
+    var maxIdx = self.invoiceItemGroups().length - 1;
+    var newLeftItem = undefined;
+    var newRightItem = undefined;
+    if (moveLeft) {
+      newLeftItem = self.invoiceItemGroups()[idx];
+      if (idx - 1 >= 0) {
+        newRightItem = self.invoiceItemGroups()[idx - 1];
+      }
+    } else {
+      newRightItem = self.invoiceItemGroups()[idx];
+      if (idx + 1 <= maxIdx) {
+        newLeftItem = self.invoiceItemGroups()[idx + 1];
+      }
+    }
+
+    // Extract all elements before item
+    var before = [];
+    var beforeLastItemIdx = moveLeft?idx - 2:idx - 1;
+    if (beforeLastItemIdx >= 0) {
+      before = self.invoiceItemGroups.slice(0, beforeLastItemIdx + 1);
+    }
+    printGroupArray("  before", before);
+
+    // Extract all elements after item
+    var after = [];
+    var afterFirstItemIdx = moveLeft?idx + 1:idx + 2;
+    if (afterFirstItemIdx <= maxIdx) {
+      after = self.invoiceItemGroups.slice(afterFirstItemIdx);
+    }
+
+    printGroupArray("  after", after);
+
+    var newArray = before;
+    if (newLeftItem !== undefined) {
+      newArray.push(newLeftItem);
+    }
+    if (newRightItem !== undefined) {
+      newArray.push(newRightItem);
+    }
+    newArray = newArray.concat(after);
+
+    self.invoiceItemGroups(newArray);
+    printGroupArray("After move", self.invoiceItemGroups());
+  };
+
+  self.moveGroupUp = function(group) {
+    var currentIndex = self.invoiceItemGroups.indexOf(group);
+    if (currentIndex > 0) {
+      Log.info("Move group name=" + group.name() + " up from index=" + currentIndex);
+      self.moveGroupInArray(currentIndex, true);
+    } else {
+      Log.info("Cannot move group name=" + group.name() + " up from index=" + currentIndex);
+    }
+  };
+
+  self.moveGroupDown = function(group) {
+    var currentIndex = self.invoiceItemGroups.indexOf(group);
+    if (currentIndex < self.invoiceItemGroups().length - 1) {
+      Log.info("Move group name=" + group.name() + " down from index=" + currentIndex);
+      self.moveGroupInArray(currentIndex, false);
+    } else {
+      Log.info("Cannot move group name=" + group.name() + " down from index=" + currentIndex);
+    }
+  };
+
   self.getJson = function() {
     var groups = [];
     for ( var i = 0; i < self.invoiceItemGroups().length; i++) {

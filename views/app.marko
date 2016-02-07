@@ -838,7 +838,7 @@
                       <div class="row">
                         <div class="col-md-12">
                           <div class="panel" data-bind="css: {'panel-default': !isEditMode(), 'panel-warning': isEditMode}">
-                            <div class="panel-heading">
+                            <div class="panel-heading invoice-item-group-panel-heading">
                               <div class="row">
                                 <span data-bind="ifnot: isEditMode">
                                   <span class="col-md-7">
@@ -889,7 +889,7 @@
                                         </ul>
                                       </div>
                                     </span>
-                                    <button class="btn btn-sm"
+                                    <button class="btn right3"
                                             data-bind="click: toggleEditMode,
                                                        css: {'btn-default': !isEditMode(), 'btn-success': isEditMode},
                                                        disable: \$parent.data.isLocked">
@@ -900,9 +900,17 @@
                                         <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
                                       </div>
                                     </button>
-                                    <button class="btn btn-danger btn-sm" data-bind="click: \$parent.data.deleteGroup, disable: \$parent.data.isLocked">
+                                    <button class="btn btn-danger right5" data-bind="click: \$parent.data.deleteGroup, disable: \$parent.data.isLocked">
                                       <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                                     </button>
+                                    <div class="btn-group-vertical top0 bottom0" role="group">
+                                      <button class="btn btn-default btn-xs" data-bind="click: \$parent.data.moveGroupUp, disable: \$parent.data.isLocked">
+                                        <span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>
+                                      </button>
+                                      <button class="btn btn-default btn-xs" data-bind="click: \$parent.data.moveGroupDown, disable: \$parent.data.isLocked">
+                                        <span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>
+                                      </button>
+                                    </div>
                                   </span>
                                 </span>
                               </div>
