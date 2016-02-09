@@ -30,7 +30,7 @@
     "knockout-bootstrap": "^0.2.0",
     "marko": "^2.8.2",
     "method-override": "^2.3.5",
-    "mongodb": "^2.1.4",
+    "mongodb": "^2.1.7",
     "morgan": "^1.6.1",
     "multer": "^1.1.0",
     "passport": "^0.3.2",
