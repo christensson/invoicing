@@ -1004,6 +1004,10 @@ module.exports.addItemGroupTemplate = function(uid, groupTempl) {
   return deferred.promise;
 };
 
+module.exports.addItemGroupTemplateRaw = function(groupTempl) {
+  return insertDataPromise('itemGroupTempl', groupTempl);
+};
+
 module.exports.updateItemGroupTemplate = function(groupTempl) {
   groupTempl.uid = new ObjectID(groupTempl.uid);
   return updateDataPromise('itemGroupTempl', groupTempl, false);
