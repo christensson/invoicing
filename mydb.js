@@ -142,15 +142,37 @@ function dropCollectionPromise(collectionName) {
   });
 }
 
-function insertData(collectionName, data, handleInsertResponse) {
-  dbop(function (db) {
-    db.collection(collectionName, function(err, coll) {
+function createCollectionPromise(collectionName) {
+  return dbopPromise().then(function (db) {
+    var deferred = Q.defer();
+    db.createCollection(collectionName, function(err, coll) {
       if (err) {
-        return console.error("insertData(" + collectionName + "): " + err);
+        deferred.reject(
+            new Error("Error: createCollection(" + collectionName + "): " + err));
+      } else {
+        console.log(
+                "createCollection(" + collectionName + "): success");
+        deferred.resolve(true);
       }
-      console.log("insertData(" + collectionName + "): " + JSON.stringify(data, null, 4));
-      coll.insert(data, {}, handleInsertResponse);
     });
+    return deferred.promise;
+  });
+}
+
+function createIndexPromise(collectionName, fieldOrSpec, opts) {
+  return dbopPromise().then(function (db) {
+    var deferred = Q.defer();
+    db.createIndex(collectionName, fieldOrSpec, opts, function(err, coll) {
+      if (err) {
+        deferred.reject(
+            new Error("Error: createIndex(" + collectionName + ", " + fieldOrSpec + "): " + err));
+      } else {
+        console.log(
+                "createIndex(" + collectionName + ", " + JSON.stringify(fieldOrSpec)  + "): success");
+        deferred.resolve(true);
+      }
+    });
+    return deferred.promise;
   });
 }
 
@@ -223,7 +245,7 @@ function getNextCidPromise(uid, companyId) {
     var coll = db.collection("company");
     var ouid = new ObjectID(uid);
     var ocompanyId = new ObjectID(companyId);
-    var query = { uid: ouid, _id: ocompanyId };
+    var query = { _id: ocompanyId, uid: ouid };
     coll.findAndModify(
         query,
         [], // sort
@@ -250,7 +272,7 @@ function getNextIidPromise(uid, companyId) {
     var coll = db.collection("company");
     var ouid = new ObjectID(uid);
     var ocompanyId = new ObjectID(companyId);
-    var query = { uid: ouid, _id: ocompanyId };
+    var query = { _id: ocompanyId, uid: ouid };
     coll.findAndModify(
         query,
         [], // sort
@@ -271,52 +293,92 @@ function getNextIidPromise(uid, companyId) {
   });
 }
 
+var colls = [
+  "invite", "users", "company", "settings", "customer", "invoice", "itemGroupTempl"
+];
+
+var indexes = [
+  {
+    collection: "company",
+    specifier: {"isValid": 1, "uid": 1},
+  },
+  {
+    collection: "customer",
+    specifier: {"isValid": 1, "uid": 1},
+  },
+  {
+    collection: "customer",
+    specifier: {"isValid": 1, "uid": 1, "companyId": 1},
+  },
+  {
+    collection: "invoice",
+    specifier: {"isValid": 1, "uid": 1},
+  },
+  {
+    collection: "invoice",
+    specifier: {"isValid": 1, "uid": 1, "companyId": 1},
+  },
+  {
+    collection: "itemGroupTempl",
+    specifier: {"isValid": 1, "uid": 1},
+  },
+  {
+    collection: "settings",
+    specifier: {"uid": 1},
+  },
+  {
+    collection: "users",
+    specifier: {"username-local": 1},
+  },
+  {
+    collection: "users",
+    specifier: {"googleId": 1},
+  },
+  {
+    collection: "invite",
+    specifier: {"email": 1},
+  },
+];
+
 dropAllCollections = function() {
   var deferred = Q.defer();
-  dropCollectionPromise("invite").fail(function() {
-    console.log("Drop collection invite failed!");
-  })
-  .then(function() {
-    return dropCollectionPromise("users");
-  })
-  .fail(function() {
-    console.log("Drop collection users failed!");
-  })
-  .then(function () {
-    return dropCollectionPromise("company");
-  })
-  .fail(function() {
-    console.log("Drop collection company failed!");
-  })
-  .then(function () {
-    return dropCollectionPromise("settings");
-  })
-  .fail(function() {
-    console.log("Drop collection settings failed!");
-  })
-  .then(function() {
-    return dropCollectionPromise("customer");
-  })
-  .fail(function() {
-    console.log("Drop collection customer failed!");
-  })
-  .then(function () {
-    return dropCollectionPromise("invoice");
-  })
-  .fail(function() {
-    console.log("Drop collection invoice failed!");
-  })
-  .then(function () {
-    return dropCollectionPromise("itemGroupTempl");
-  })
-  .fail(function() {
-    console.log("Drop collection itemGroupTempl failed!");
-  })
-  .done(function() {
-    deferred.resolve();
+  var jobs = [];
+  for (var i = 0; i < colls.length; i++) {
+    var collection = colls[i];
+    jobs.push(dropCollectionPromise(collection));
+  }
+  Q.allSettled(jobs)
+  .then(function (results) {
+    results.forEach(function (result) {
+        if (result.state === "fulfilled") {
+            var value = result.value;
+        } else {
+            var reason = result.reason;
+            console.log("Collection not dropped, error ignored: " + result.reason);
+        }
+        deferred.resolve();
+    });
   });
-  
   return deferred.promise;
+};
+
+createAllCollections = function() {
+  var jobs = [];
+  for (var i = 0; i < colls.length; i++) {
+    var collection = colls[i];
+    jobs.push(createCollectionPromise(collection));
+  }
+  return Q.all(jobs);
+};
+
+createAllIndexes = function() {
+  var jobs = [];
+  for (var i = 0; i < indexes.length; i++) {
+    var collection = indexes[i].collection;
+    var specifier = indexes[i].specifier;
+    jobs.push(createIndexPromise(collection, specifier));
+  }
+  return Q.all(jobs);
 };
 
 initCollectionsRelease = function(inviteList) {
@@ -709,7 +771,17 @@ module.exports.init = function(devMode, doneCb) {
   }
   
   // Drop collections
-  dropAllCollections()
+  dropAllCollections().then(function() {
+    return createAllCollections();
+  })
+  .fail(function(err) {
+    console.log("Failed to create collections: " + err);
+  }).then(function() {
+    return createAllIndexes();
+  })
+  .fail(function(err) {
+    console.log("Failed to create indexes: " + err);
+  })
   .then(function() {
     return initDb(inviteList);
   })
@@ -787,7 +859,7 @@ module.exports.getInvoice = function(uid, id) {
   var ouid = new ObjectID(uid);
   var oid = new ObjectID(id);
   var deferred = Q.defer();
-  getOneDocPromise('invoice', {'uid': ouid, '_id': oid}).then(function(invoice) {
+  getOneDocPromise('invoice', {'_id': oid, 'uid': ouid}).then(function(invoice) {
     if (invoice == undefined) {
       console.log("getInvoice: No invoice id=" + id + " found");
       deferred.reject(new Error("The requested invoice id=" + id + " could not be found."));
@@ -808,7 +880,7 @@ module.exports.getCustomers = function(uid, companyId) {
 module.exports.getCustomer = function(uid, id) {
   var ouid = new ObjectID(uid);
   var oid = new ObjectID(id);
-  return getOneDocPromise('customer', {'isValid': true, 'uid': ouid, '_id': oid});
+  return getOneDocPromise('customer', {'_id': oid, 'isValid': true, 'uid': ouid});
 };
 
 module.exports.getCompanies = function(uid) {
@@ -819,7 +891,7 @@ module.exports.getCompanies = function(uid) {
 module.exports.getCompany = function(uid, companyId) {
   var ouid = new ObjectID(uid);
   var ocompanyId = new ObjectID(companyId);
-  return getOneDocPromise('company', {'isValid': true, 'uid': ouid, '_id': ocompanyId});
+  return getOneDocPromise('company', {'_id': ocompanyId, 'isValid': true, 'uid': ouid});
 };
 
 module.exports.getItemGroupTemplates = function(uid) {
@@ -831,7 +903,7 @@ module.exports.addInvoice = function(uid, companyId, invoice) {
   var deferred = Q.defer();
   var ouid = new ObjectID(uid);
   var ocompanyId = new ObjectID(companyId);
-  getOneDocPromise('company', {'isValid': true, 'uid': ouid, '_id': ocompanyId}).then(function(company) {
+  getOneDocPromise('company', {'_id': ocompanyId, 'isValid': true, 'uid': ouid}).then(function(company) {
     getNextIidPromise(uid, companyId).then(function(iid) {
       console.log("addInvoice: Allocated new iid=" + iid);
       invoice.iid = iid;
@@ -860,7 +932,7 @@ module.exports.updateInvoice = function(invoice) {
   var deferred = Q.defer();
   invoice.uid = new ObjectID(invoice.uid);
   invoice.companyId = new ObjectID(invoice.companyId);
-  getOneDocPromise('company', {'isValid': true, 'uid': invoice.uid, '_id': invoice.companyId}).then(function(company) {
+  getOneDocPromise('company', {'_id': invoice.companyId, 'isValid': true, 'uid': invoice.uid}).then(function(company) {
     invoice.company = company;
     updateDataPromise('invoice', invoice, true).then(function(data) {
       deferred.resolve(data);
