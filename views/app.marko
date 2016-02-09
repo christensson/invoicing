@@ -1281,7 +1281,7 @@
                 </def>
 
                 <html-comment> ko foreach: groupList </html-comment>
-                  <li class="list-group-item">
+                  <li class="list-group-item" data-bind="css: {'list-group-item-warning': isEditMode}">
                     <div class="row">
                       <div class="col-md-2">
                         <invoke function="itemTextWithEditMode" textVariable="name" cond="true"/>
@@ -1339,7 +1339,7 @@
                       <div class="col-md-2">
                       </div>
                       <div class="col-md-2">
-                        <div class="checkbox input-sm">
+                        <div class="checkbox input-sm bottom0 top0">
                           <label>
                             <input type="checkbox" data-bind="checked: hasDesc">
                             ${i18n.t('app.groupTemplates.hasDescCheckLbl')}
@@ -1347,7 +1347,7 @@
                         </div>
                       </div>
                       <div class="col-md-1">
-                        <div class="checkbox input-sm">
+                        <div class="checkbox input-sm bottom0 top0">
                           <label>
                             <input type="checkbox" data-bind="checked: hasCount">
                             ${i18n.t('app.groupTemplates.hasCountCheckLbl')}
@@ -1355,7 +1355,7 @@
                         </div>
                       </div>
                       <div class="col-md-1">
-                        <div class="checkbox input-sm">
+                        <div class="checkbox input-sm bottom0 top0">
                           <label>
                             <input type="checkbox" data-bind="checked: hasPrice">
                             ${i18n.t('app.groupTemplates.hasPriceCheckLbl')}
@@ -1363,13 +1363,13 @@
                         </div>
                       </div>
                       <div class="col-md-1">
-                        <div class="checkbox input-sm">
+                        <div class="checkbox input-sm bottom0 top0">
                           <label>
                             <input type="checkbox" data-bind="checked: hasDiscount">
                             ${i18n.t('app.groupTemplates.hasDiscountCheckLbl')}
                           </label>
                         </div>
-                        <div class="checkbox input-sm">
+                        <div class="checkbox input-sm bottom0 top0">
                           <label>
                             <input type="checkbox" data-bind="checked: negateDiscount">
                             ${i18n.t('app.groupTemplates.negateDiscountCheckLbl')}
@@ -1377,7 +1377,7 @@
                         </div>
                       </div>
                       <div class="col-md-1">
-                        <div class="checkbox input-sm">
+                        <div class="checkbox input-sm bottom0 top0">
                           <label>
                             <input type="checkbox" data-bind="checked: hasVat">
                             ${i18n.t('app.groupTemplates.hasVatCheckLbl')}
@@ -1385,7 +1385,7 @@
                         </div>
                       </div>
                       <div class="col-md-1">
-                        <div class="checkbox input-sm">
+                        <div class="checkbox input-sm bottom0 top0">
                           <label>
                             <input type="checkbox" data-bind="checked: hasTotal">
                             ${i18n.t('app.groupTemplates.hasTotalCheckLbl')}
@@ -1395,13 +1395,13 @@
                     </div>
                     <div class="row" data-bind="visible: isEditMode">
                       <div class="col-md-12">
-                        <div class="checkbox input-sm">
+                        <div class="checkbox input-sm bottom0 top0">
                           <label>
                             <input type="checkbox" data-bind="checked: hasTitleExtraField">
                             ${i18n.t('app.groupTemplates.hasTitleExtraFieldCheckLbl')}
                           </label>
                         </div>
-                        <div class="checkbox input-sm">
+                        <div class="checkbox input-sm top0">
                           <label>
                             <input type="checkbox" data-bind="checked: isQuickButton">
                             ${i18n.t('app.groupTemplates.isQuickButtonCheckLbl')}
@@ -1430,7 +1430,7 @@
             </p>
 
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-success" data-bind="disable: true">
+                <button type="button" class="btn btn-success" data-bind="click: newGroup">
                   <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                   ${i18n.t('app.groupTemplates.newTemplateBtn')}
                 </button>

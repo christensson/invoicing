@@ -1051,6 +1051,13 @@ var InvoiceItemGroupTemplatesViewModel = function(currentView) {
     group.updateServerDelete();
     self.groupList.destroy(group);
   };
+
+  self.newGroup = function() {
+    var group = new InvoiceItemGroupViewModel(false, undefined, self.isLockedDummy);
+    group.initNew();
+    group.isEditMode(true);
+    self.groupList.push(group);
+  };
 };
 
 // Trick for doing classmethods...
@@ -1162,6 +1169,31 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
     }
   };
 
+  self.initNew = function() {
+    var data = {
+      name: "",
+      title: "",
+      isValid: true,
+      isQuickButton: false,
+      titleExtraField: "",
+      hasTitleExtraField: false,
+      descColLbl: i18n.t("app.groupTemplates.descCol"),
+      priceColLbl: i18n.t("app.groupTemplates.priceCol"),
+      countColLbl: i18n.t("app.groupTemplates.countCol"),
+      discountColLbl: i18n.t("app.groupTemplates.discountCol"),
+      vatColLbl: i18n.t("app.groupTemplates.vatCol"),
+      totalColLbl: i18n.t("app.groupTemplates.totalCol"),
+      hasDesc: true,
+      hasPrice: true,
+      hasCount: true,
+      hasDiscount: true,
+      negateDiscount: false,
+      hasVat: true,
+      hasTotal: true,
+    };
+    self.setData(data);
+  };
+
   if (self.mayHaveInvoiceItems) {
     self.numInvoiceItems = ko.pureComputed(function() {
       var sum = 0;
@@ -1235,7 +1267,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
   };
 
   self.updateServer = function() {
-    if ((self._id() == undefined) && !self.isValid()) {
+    if ((self._id() === undefined) && !self.isValid()) {
       Notify_showMsg('error', i18n.t("app.groupTemplates.saveNok"));
       return;
     } else if (self.name().length == 0) {
@@ -1283,7 +1315,9 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
 
   self.updateServerDelete = function() {
     self.isValid(false);
-    self.updateServer();
+    if (self._id() !== undefined) {
+      self.updateServer();
+    }
   };
 
   self.getJson = function() {
