@@ -3,8 +3,8 @@
         "tickerText": "Laddar",
         "tickerTextUpload": "Uppdaterar data",
         "tickerTextDownload": "Hämtar data",
-        "lngSvBtn": "Svenska",
-        "lngEnBtn": "English",
+        "lngBtn_sv": "Svenska",
+        "lngBtn_en": "English",
         "pageTitle": "Inloggning",
         "header": "Lätt Fakturering",
         "welcomeText": "Välkommen till nästa generations fakturering!",
@@ -45,7 +45,7 @@
             "invoiceNew": "Ny Faktura",
             "invoiceList": "Fakturor",
             "invoiceItemGroupTemplates": "Detaljgruppmallar",
-            "adminUserLbl" : "Admin",
+            "adminUserLbl": "Admin",
             "settings": "Inställningar",
             "debug": "Debug",
             "users": "Användare",
@@ -60,63 +60,72 @@
             "companiesHeader": "Företag",
             "noCompaniesText": [
                 "Det finns <strong>inga företag</strong> konfigurerade.",
-                "Det första du behöver göra är att skapa ett eller flera företag."],
+                "Det första du behöver göra är att skapa ett eller flera företag."
+            ],
             "companiesText": [
                 "Du har <strong>ett företag</strong> konfigurerat.",
-                "Du kan när du vill skapa fler företag."],
+                "Du kan när du vill skapa fler företag."
+            ],
             "companiesText_plural": [
                 "Du har <strong>__count__ företag</strong> konfigurerade.",
-                "Du kan när du vill skapa fler företag."],
+                "Du kan när du vill skapa fler företag."
+            ],
             "companiesNewCompanyBtn": "Nytt företag",
             "customersHeader": "Kunder",
             "noCustomersText": [
                 "Det aktiva företaget har <strong>inga kunder</strong>.",
-                "Du behöver skapa en eller flera kunder."],
+                "Du behöver skapa en eller flera kunder."
+            ],
             "customersText": [
                 "Det aktiva företaget har <strong>en kund</strong>.",
-                "Du kan när du vill skapa fler kunder."],
+                "Du kan när du vill skapa fler kunder."
+            ],
             "customersText_plural": [
                 "Det aktiva företaget har <strong>__count__ kunder</strong>.",
-                "Du kan när du vill skapa fler kunder."],
+                "Du kan när du vill skapa fler kunder."
+            ],
             "customersNewCustomerBtn": "Ny kund",
             "invoicesHeader": "Fakturor",
             "noInvoicesText": [
-                "Det är dags att skapa din <strong>första faktura</strong>!"],
-            "invoicesText":  [
-                "Det aktiva företaget har <strong>en faktura</strong>."],
-            "invoicesText_plural":  [
-                "Det aktiva företaget har <strong>__count__ fakturor</strong>."],
+                "Det är dags att skapa din <strong>första faktura</strong>!"
+            ],
+            "invoicesText": [
+                "Det aktiva företaget har <strong>en faktura</strong>."
+            ],
+            "invoicesText_plural": [
+                "Det aktiva företaget har <strong>__count__ fakturor</strong>."
+            ],
             "invoicesNewInvoiceBtn": "Ny faktura"
         },
         "groupTemplates": {
-          "columnNameColHeader": "Kolumnrubrik för fakturadetaljer",
-          "nameCol": "Mallnamn",
-          "titleCol": "Grupptitel",
-          "descCol": "Beskrivning",
-          "countCol": "Antal",
-          "priceCol": "Pris",
-          "discountCol": "Rabatt",
-          "vatCol": "Moms",
-          "totalCol": "Total",
-          "hasDescCheckLbl": "Aktiv",
-          "hasCountCheckLbl": "Aktiv",
-          "hasPriceCheckLbl": "Aktiv",
-          "hasDiscountCheckLbl": "Aktiv",
-          "hasVatCheckLbl": "Aktiv",
-          "hasTotalCheckLbl": "Aktiv",
-          "negateDiscountCheckLbl" : "Använd som påslag",
-          "isQuickButtonCheckLbl": "Tillgänglig som snabbval",
-          "hasTitleExtraFieldCheckLbl": "Använd extra fritext i grupptitel",
-          "saveGroupBtn": "Spara",
-          "deleteGroupBtn": "Radera gruppmall",
-          "newTemplateBtn": "Ny gruppmall",
-          "getNok": "Misslyckades med att hämta gruppmallar!",
-          "saveTicker": "Sparar gruppmall",
-          "saveOk": "Gruppmall <strong>__name__</strong> skapad.",
-          "saveOk_update": "Gruppmall <strong>__name__</strong> uppdaterad.",
-          "saveOk_delete": "Gruppmall <strong>__name__</strong> raderad.",
-          "saveNok": "Misslyckades att spara gruppmall!",
-          "saveNok_noName": "Gruppmallnamn måste anges!"
+            "columnNameColHeader": "Kolumnrubrik för fakturadetaljer",
+            "nameCol": "Mallnamn",
+            "titleCol": "Grupptitel",
+            "descCol": "Beskrivning",
+            "countCol": "Antal",
+            "priceCol": "Pris",
+            "discountCol": "Rabatt",
+            "vatCol": "Moms",
+            "totalCol": "Total",
+            "hasDescCheckLbl": "Aktiv",
+            "hasCountCheckLbl": "Aktiv",
+            "hasPriceCheckLbl": "Aktiv",
+            "hasDiscountCheckLbl": "Aktiv",
+            "hasVatCheckLbl": "Aktiv",
+            "hasTotalCheckLbl": "Aktiv",
+            "negateDiscountCheckLbl": "Använd som påslag",
+            "isQuickButtonCheckLbl": "Tillgänglig som snabbval",
+            "hasTitleExtraFieldCheckLbl": "Använd extra fritext i grupptitel",
+            "saveGroupBtn": "Spara",
+            "deleteGroupBtn": "Radera gruppmall",
+            "newTemplateBtn": "Ny gruppmall",
+            "getNok": "Misslyckades med att hämta gruppmallar!",
+            "saveTicker": "Sparar gruppmall",
+            "saveOk": "Gruppmall <strong>__name__</strong> skapad.",
+            "saveOk_update": "Gruppmall <strong>__name__</strong> uppdaterad.",
+            "saveOk_delete": "Gruppmall <strong>__name__</strong> raderad.",
+            "saveNok": "Misslyckades att spara gruppmall!",
+            "saveNok_noName": "Gruppmallnamn måste anges!"
         },
         "settings": {
             "pageHeader": "Inställningar",
@@ -126,7 +135,7 @@
             "regDateLbl": "Registreringsdatum",
             "defNumDaysUntilPayLbl": "Betalningsvillkor (dagar)",
             "saveSettingsBtn": "Spara",
-            "invalidateCacheBtn" : "Rensa lokal cache",
+            "invalidateCacheBtn": "Rensa lokal cache",
             "getNok": "Misslyckades med att hämta inställningar!",
             "saveTicker": "Sparar inställningar",
             "saveOk": "Inställningar sparade."
@@ -153,7 +162,8 @@
             "customTextFieldsFooterTextLbl": "Valfritt textfält i fakturafot",
             "defaultReverseChargeCustomText": [
                 "Moms på byggtjänster har inte debiterats enligt Mervärdesskattelagen 1 kap 2§.",
-                "Köparens momsregistreringsnr: %c.vatNr%"],
+                "Köparens momsregistreringsnr: %c.vatNr%"
+            ],
             "defaultContact1Caption": "Telefon",
             "defaultContact2Caption": "E-post",
             "defaultContact3Caption": "",
@@ -170,7 +180,8 @@
             "logoImgAltText": "Företagslogotyp",
             "logoUploadCompanyNotSavedText": [
                 "Det går inte att ange logotyp förän företaget är skapat.",
-                "Skapa företaget genom att spara det. Därefter kan du välja en logotyp."],
+                "Skapa företaget genom att spara det. Därefter kan du välja en logotyp."
+            ],
             "companySaveBtn": "Spara",
             "getNok": "Misslyckades att hämta företag!",
             "saveTicker": "Sparar företag",
@@ -221,10 +232,10 @@
             "getNok_noCompany": "Misslyckades med att hämta kunder! Företag ej valt eller ogiltigt."
         },
         "invoice": {
-            "mainPanelHeader_newInvoice" : "Ny Faktura",
-            "mainPanelHeader_newCreditInvoice" : "Ny Kreditfaktura",
-            "mainPanelHeader_invoice" : "Faktura",
-            "mainPanelHeader_creditInvoice" : "Kreditfaktura",
+            "mainPanelHeader_newInvoice": "Ny Faktura",
+            "mainPanelHeader_newCreditInvoice": "Ny Kreditfaktura",
+            "mainPanelHeader_invoice": "Faktura",
+            "mainPanelHeader_creditInvoice": "Kreditfaktura",
             "customerLbl": "Kund",
             "customerOptCap": "Välj...",
             "yourRefLbl": "Er referens",
@@ -248,7 +259,7 @@
             "groupNumInvoiceItemsText_plural": "__count__ rader",
             "groupEditNameLbl": "Gruppnamn (fakturainmatning)",
             "groupEditColActiveCheckLbl": "Aktiv",
-            "groupEditNegateDiscountCheckLbl" : "Använd som påslag",
+            "groupEditNegateDiscountCheckLbl": "Använd som påslag",
             "groupEditIsQuickButtonCheckLbl": "Tillgänglig som snabbval",
             "groupEditHasTitleExtraFieldCheckLbl": "Använd extra fritext i grupptitel",
             "groupEditUpdateExistingBtn": "Uppdatera mall",
@@ -322,7 +333,7 @@
             "licenseCol": "Licenstyp",
             "isAdminCol": "Administratör",
             "refreshBtn": "Uppdatera",
-            "getNok": "Misslyckades med att hämta inbjudningar!"            
+            "getNok": "Misslyckades med att hämta inbjudningar!"
         }
     }
 }

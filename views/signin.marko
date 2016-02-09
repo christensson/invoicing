@@ -32,16 +32,16 @@
     <div>
         <include template="./notification.marko"/>
         <div id="signin">
-            <div class="setlng-bar">
-              <div class="btn-group" role="group" aria-label="...">
-                <a href="/signin?setLng=sv" role="button" class="btn btn-default">
-                  <span class="icon-lng-sv" aria-hidden="true"></span>
-                  ${i18n.t('signin.lngSvBtn')}
-                </a>
-                <a href="/signin?setLng=en" role="button" class="btn btn-default">
-                  <i class="icon-lng-en" aria-hidden="true"></i>
-                  ${i18n.t('signin.lngEnBtn')}
-                </a>
+            <div if="data.lngList.length > 1">
+              <div class="setlng-bar">
+                <div class="btn-group" role="group" aria-label="...">
+                  <for each="lng in data.lngList">
+                    <a href="/signin?setLng=${lng}" role="button" class="btn btn-default">
+                      <span class="icon-lng-${lng}" aria-hidden="true"></span>
+                      ${i18n.t('signin.lngBtn', {context: "${lng}"})}
+                    </a>
+                  </for>
+                </div>
               </div>
             </div>
             <h1>${i18n.t('signin.header')}</h1>
