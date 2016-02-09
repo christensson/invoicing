@@ -109,7 +109,6 @@
           "hasTitleExtraFieldCheckLbl": "Använd extra fritext i grupptitel",
           "saveGroupBtn": "Spara",
           "deleteGroupBtn": "Radera gruppmall",
-          "copyGroupBtn": "Duplicera",
           "newTemplateBtn": "Ny gruppmall",
           "getNok": "Misslyckades med att hämta gruppmallar!",
           "saveTicker": "Sparar gruppmall",

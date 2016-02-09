@@ -109,7 +109,6 @@
           "hasTitleExtraFieldCheckLbl": "Use additional custom text group title",
           "saveGroupBtn": "Save",
           "deleteGroupBtn": "Remove group template",
-          "copyGroupBtn": "Duplicate",
           "newTemplateBtn": "New group template",
           "getNok": "Failed to get group templates!",
           "saveTicker": "Saving group template",
