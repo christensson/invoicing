@@ -314,6 +314,7 @@
             "numCompaniesLbl": "Companies",
             "numCustomersLbl": "Customers",
             "numInvoicesLbl": "Invoices",
+            "numItemGroupTemplatesLbl": "Detail group templates",
             "refreshBtn": "Refresh",
             "getNok": "Failed to get users!"
         },

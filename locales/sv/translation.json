@@ -325,6 +325,7 @@
             "numCompaniesLbl": "Företag",
             "numCustomersLbl": "Kunder",
             "numInvoicesLbl": "Fakturor",
+            "numItemGroupTemplatesLbl": "Detaljgruppmallar",
             "refreshBtn": "Uppdatera",
             "getNok": "Misslyckades med att hämta användare!"
         },

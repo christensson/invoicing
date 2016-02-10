@@ -1582,20 +1582,16 @@
                           <div class="col-md-11">
                             <div class="panel panel-default">
                               <div class="panel-body">
-                                <ul class="list-inline">
-                                  <li>
-                                    ${i18n.t('app.userList.numCompaniesLbl')}
-                                    <span class="badge" data-bind="text: totalStats().numCompanies"></span>
-                                  </li>
-                                  <li>
-                                    ${i18n.t('app.userList.numCustomersLbl')}
-                                    <span class="badge" data-bind="text: totalStats().numCustomers"></span>
-                                  </li>
-                                  <li>
-                                    ${i18n.t('app.userList.numInvoicesLbl')}
-                                    <span class="badge" data-bind="text: totalStats().numInvoices"></span>
-                                  </li>
-                                </ul>
+                                <dl class="dl-horizontal">
+                                  <dt>${i18n.t('app.userList.numCompaniesLbl')}</dt>
+                                  <dd><span data-bind="text: totalStats().numCompanies"></span></dd>
+                                  <dt>${i18n.t('app.userList.numCustomersLbl')}</dt>
+                                  <dd><span data-bind="text: totalStats().numCustomers"></span></dd>
+                                  <dt>${i18n.t('app.userList.numInvoicesLbl')}</dt>
+                                  <dd><span data-bind="text: totalStats().numInvoices"></span></dd>
+                                  <dt>${i18n.t('app.userList.numItemGroupTemplatesLbl')}</dt>
+                                  <dd><span data-bind="text: totalStats().numItemGroupTemplates"></span></dd>
+                                </dl>
                               </div>
                             </div>
                           </div>

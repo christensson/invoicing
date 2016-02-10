@@ -2333,7 +2333,8 @@ var UserViewModel = function() {
     self.totalStats({
       "numCompanies": 0,
       "numCustomers": 0,
-      "numInvoices": 0
+      "numInvoices": 0,
+      "numItemGroupTemplates": 0
     });
 
     cache.on('set:' + USER_STATS_KEY(), function(stats, ttl) {

@@ -798,6 +798,7 @@ module.exports.getStats = function(uid, companyId) {
         "numCompanies": 0,
         "numCustomers": 0,
         "numInvoices": 0,
+        "numItemGroupTemplates": 0,
       },
       "activeCompany": {
         "isSet": false,
@@ -809,7 +810,8 @@ module.exports.getStats = function(uid, companyId) {
   var jobs = [
     countAllDocsPromise('company', {'isValid': true, 'uid': ouid}),
     countAllDocsPromise('customer', {'isValid': true, 'uid': ouid}),
-    countAllDocsPromise('invoice', {'isValid': true, 'uid': ouid})
+    countAllDocsPromise('invoice', {'isValid': true, 'uid': ouid}),
+    countAllDocsPromise('itemGroupTempl', {'isValid': true, 'uid': ouid}),
   ];
   
   if (companyId !== "undefined" && companyId !== "null") {
@@ -820,13 +822,15 @@ module.exports.getStats = function(uid, companyId) {
   }
   
   Q.all(jobs).then(function(results) {
-    res.total.numCompanies = results[0];
-    res.total.numCustomers = results[1];
-    res.total.numInvoices = results[2];
+    var i = 0;
+    res.total.numCompanies = results[i++];
+    res.total.numCustomers = results[i++];
+    res.total.numInvoices = results[i++];
+    res.total.numItemGroupTemplates = results[i++];
     
-    if (results.length > 3) {
-      res.activeCompany.numCustomers = results[3];
-      res.activeCompany.numInvoices = results[4];
+    if (results.length > i) {
+      res.activeCompany.numCustomers = results[i++];
+      res.activeCompany.numInvoices = results[i++];
     }
 
     deferred.resolve(res);
