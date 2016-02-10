@@ -523,7 +523,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
         invoiceDetails(x, r.invoiceItems[i]);
       }
 
-      if (r.hasTotal && r.totalExclVat) {
+      if (r.hasTotal && r.totalExclVat !== undefined && r.totalExclVat !== null) {
         var groupSummaryTopY = x.getCurrentY();
         var totalExclVatStr = 
           util.formatCurrency(parseFloat(r.totalExclVat.toFixed(2)), {currencyStr: invoice.currency});
