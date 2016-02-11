@@ -3,10 +3,11 @@ var fs = require('fs');
 var util = require('./public/util.js');
 var i18n = require('i18next');
 
-module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemoMode, debug) {
+module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFile, isDemoMode, debug, verbosity) {
   'use strict';
   isDemoMode = typeof isDemoMode !== 'undefined' ? isDemoMode : false;
   debug = typeof debug !== 'undefined' ? debug : false;
+  verbosity = typeof verbosity !== 'undefined' ? verbosity : 0;
   /*  invoice: {
    *    _id, iid, uid, companyId, isLocked, isPaid, isValid
    *    customer:{
@@ -131,8 +132,12 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
   var summaryAmountToPayTopPadding = 5;
   var detailsRowSpacing = 3;
   var margin = 45;
-  var pageFooterYOffset = -85;
+  var margins = {left: margin, right: margin, bottom: 30, top: 30};
+  var pageHeaderHeight = undefined;
   var pageFooterSeparatorLineThickness = 0.5;
+  var pageFooterHeight = undefined;
+  var pageFooterTopY = undefined;
+  var finalSummaryHeight = undefined;
   
   var headerStringX = 345;
   var headerStringY = 30;
@@ -177,7 +182,9 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
     var amountRounded = Math.round(amount);
     var adjustment = amountRounded - amount;
     var adjustedAmount = amount + adjustment;
-    console.log("calcPaymentAdjustment: amount=" + amount + ", adjAmount=" + adjustedAmount + ", adjustment=" + adjustment);
+    if (verbosity > 2) {
+      console.log("calcPaymentAdjustment: amount=" + amount + ", adjAmount=" + adjustedAmount + ", adjustment=" + adjustment);
+    }
     return adjustment;
   };
   
@@ -185,7 +192,6 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
     var dateStr = "";
     if (value !== undefined) {
       var date = new Date(value);
-      console.log("Date: " + date.toString());
       var isoDateString = date.toISOString();
       dateStr = isoDateString.split("T")[0];
     }
@@ -197,7 +203,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
     if (cust.vatNr !== undefined) {
       formatedText = formatedText.replace("%c.vatNr%", cust.vatNr);
     }
-    if (debug) {
+    if (verbosity > 2) {
       console.log("formatTextTemplate(): Formated text: " + formatedText);
     }
     return formatedText;
@@ -250,6 +256,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
   };
 
   var mypageheader = function(x) {
+    var topY = x.getCurrentY();
     var headerList =
       [{cap: "Oss tillhanda senast", data: formatDate(invoice.lastPaymentDate), isBold: true, colSize: 80},
        {cap: "Fakturadatum", data: formatDate(invoice.date), isBold: false, colSize: 60},
@@ -297,14 +304,271 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
         y: (x.maxY() / 2) - (demoModeBgH/2) + margin/2,
         align: "left", fit: [demoModeBgW, demoModeBgH]});
     }
+
+    pageHeaderHeight = x.getCurrentY() - topY;
+  };
+
+  var drawGroupHLine = function(x, yCoord, thickness, dashed) {
+    dashed = typeof dashed !== 'undefined' ? dashed : false;
+    var dash = dashed ? 2 : 0;
+    x.line(margin - 1, yCoord, margin + detailsWidth - 1, yCoord, {thickness: thickness, dash: dash});
+  };
+
+  var drawGroupDetailBars = function(x, y1, y2, thickness) {
+    if (y1 > y2) {
+      y1 = headerBottomY;
+    }
+    x.line(margin - 1, y1, margin - 1, y2, {thickness: thickness});
+    x.line(margin + detailsWidth - 1, y1, margin + detailsWidth - 1, y2, {thickness: thickness});
+  };
+
+  var drawGroupBox = function(x, startY, endY, thickness) {
+    x.box(margin, startY, detailsWidth - 1, endY - startY, {thickness: thickness, fill: "#a8a8a8", fillOpacity: 0});
+  };
+
+  var groupHeader = function(x, r, withTitle) {
+    // Group header
+    var detailsColLbl = [
+      r.hasDesc ? r.descColLbl : "",
+      r.hasCount ? r.countColLbl : "",
+      r.hasPrice ? r.priceColLbl : "",
+      r.hasDiscount ? r.discountColLbl : "",
+      r.hasVat ? r.vatColLbl : "",
+      r.hasTotal ? r.totalColLbl : ""
+    ];
+
+    var anyDetailHeader = detailsColLbl.join("").length > 0;
+
+    if (withTitle) {
+      x.addY(detailsGroupTitleTopPadding);
+      x.fontSize(style.details.groupTitle.fontSize);
+      var groupTitle = r.title;
+      if (r.hasTitleExtraField) {
+        groupTitle = groupTitle + " " + r.titleExtraField;
+      }
+      if (groupTitle && groupTitle !== "") {
+        x.print(groupTitle, {fontBold: 1, border: 0, wrap: 1, font: style.details.groupTitle.font});
+      }
+    }
+    if (anyDetailHeader) {
+      var groupHeaderTopY = x.getCurrentY();
+      drawGroupHLine(x, x.getCurrentY(), detailsGroupHeaderTopLineThickness);
+      x.fontSize(style.details.header.fontSize);
+      var printHeader = function(isDummy) {
+        x.addY(detailsGroupHeaderTopPadding);
+        var dummyStr = " ";
+        x.band( [
+          {data: isDummy?dummyStr:detailsColLbl[0], width: detailsColSize[0], align: x.left},
+          {data: isDummy?dummyStr:detailsColLbl[1], width: detailsColSize[1], align: x.right},
+          {data: isDummy?dummyStr:detailsColLbl[2], width: detailsColSize[2], align: x.right},
+          {data: isDummy?dummyStr:detailsColLbl[3], width: detailsColSize[3], align: x.right},
+          {data: isDummy?dummyStr:detailsColLbl[4], width: detailsColSize[4], align: x.right},
+          {data: isDummy?dummyStr:detailsColLbl[5], width: detailsColSize[5], align: x.right}
+        ], {fontBold: 1, border: debugBorderWidth, wrap: 1, font: style.details.header.font, padding: 2} );
+      };
+      // Print header once first to find out height to be able to draw gray background...
+      printHeader(true);
+      var headerHeight = x.getCurrentY() - groupHeaderTopY;
+      if (headerHeight >= 0) {
+        if (verbosity > 0) {
+          console.log("groupHeader: Calculated detail-header height=" + headerHeight +
+            ", will render at y=" + groupHeaderTopY);
+        }
+      } else if (headerHeight < 0) {
+        // Handle page-wrap
+        groupHeaderTopY = x.minY() + pageHeaderHeight;
+        // Need to add 3 to height, don't know why...
+        headerHeight = x.getCurrentY() - groupHeaderTopY + 3;
+        if (verbosity > 0) {
+          console.log("groupHeader: Detected page-wrap. Calculated detail-header height=" + headerHeight +
+            ", will render at y=" + groupHeaderTopY);
+        }
+      }
+      // Gray box is background...
+      x.box(margin - 1 + detailsBarsLineThickness,
+            groupHeaderTopY + detailsGroupHeaderTopLineThickness,
+            detailsWidth - detailsBarsLineThickness,
+            headerHeight - detailsGroupHeaderTopLineThickness - detailsGroupHeaderBottomLineThickness,
+            {thickness: 0, fill: detailsGroupHeaderFillColor});
+      // Draw header on-top of gray box
+      x.setCurrentY(groupHeaderTopY);
+      drawGroupHLine(x, x.getCurrentY(), detailsGroupHeaderTopLineThickness);
+      printHeader(false);
+
+      drawGroupDetailBars(x, groupHeaderTopY, x.getCurrentY(), detailsBarsLineThickness);
+    }
+    drawGroupHLine(x, x.getCurrentY() - detailsGroupHeaderBottomLineThickness, detailsGroupHeaderBottomLineThickness);
+  };
+
+  var invoiceDetails = function ( x, r ) {
+    if (r.isValid) {
+      x.fontSize(style.details.items.fontSize);
+      var styleColData = function(desc, width, align) {
+        return {
+          data: desc,
+          width: width,
+          align: align
+        };
+      };
+      var bandOpts = {border: 0, addY: detailsRowSpacing, wrap: 1, font: style.details.items.font, padding: 2};
+      var y1 = x.getCurrentY();
+      if (r.isTextOnly) {
+        x.band( [
+          styleColData(r.description, detailsWidth, x.left),
+        ], bandOpts);
+      } else {
+        var detailsColLbl = [
+          r.hasDesc ? r.description : "",
+          r.hasCount ? util.formatNumber(r.count) : "",
+          r.hasPrice ? util.formatCurrency(r.price, {currencyStr: invoice.currency}) : "",
+          r.hasDiscount ? util.formatNumber(r.discount) + '%' : "",
+          r.hasVat ? util.formatNumber(r.vat) + '%' : "",
+          r.hasTotal ? util.formatCurrency(r.total, {currencyStr: invoice.currency}) : ""
+        ];
+        x.band( [
+          styleColData(detailsColLbl[0], detailsColSize[0], x.left),
+          styleColData(detailsColLbl[1], detailsColSize[1], x.right),
+          styleColData(detailsColLbl[2], detailsColSize[2], x.right),
+          styleColData(detailsColLbl[3], detailsColSize[3], x.right),
+          styleColData(detailsColLbl[4], detailsColSize[4], x.right),
+          styleColData(detailsColLbl[5], detailsColSize[5], x.right),
+        ], bandOpts);
+      }
+      var oldStrokeColor = x.strokeColor();
+      x.strokeColor(detailsSeparatorLineColor);
+      drawGroupHLine(x, x.getCurrentY(), detailsSeparatorLineThickness, true);
+      x.strokeColor(oldStrokeColor);
+      drawGroupDetailBars(x, y1, x.getCurrentY(), detailsBarsLineThickness);
+    }
+  };
+
+  var invoiceGroups = function ( x, r ) {
+    if (r.isValid) {
+      groupHeader(x, r, true);
+      for (var i = 0; i < r.invoiceItems.length; i++) {
+        invoiceDetails(x, r.invoiceItems[i]);
+      }
+
+      if (r.hasTotal && r.totalExclVat !== undefined && r.totalExclVat !== null) {
+        var groupSummaryTopY = x.getCurrentY();
+        var totalExclVatStr = 
+          util.formatCurrency(parseFloat(r.totalExclVat.toFixed(2)), {currencyStr: invoice.currency});
+        x.addY(detailsGroupSummaryTopPadding);
+        x.fontSize(style.details.groupSummary.fontSize);
+        x.band( [
+          {data: "Summa:", width: detailsSummaryCaptionColWidth, align: x.right, fontBold: style.details.groupSummary.bold, font: style.details.groupSummary.caption.font},
+          {data: totalExclVatStr, width: detailsSummaryValueColWidth, align: x.right, font: style.details.groupSummary.value.font}
+        ], {fontBold: 0, border: debugBorderWidth, wrap: 1, padding: 2} );
+        drawGroupDetailBars(x, groupSummaryTopY, x.getCurrentY(), detailsBarsLineThickness);
+      }
+      drawGroupHLine(x, x.getCurrentY(), detailsGroupSummaryBottomLineThickness);
+    }
+  };
+
+  var finalsummary = function(x, r) {
+    if (verbosity > 0) {
+      console.log("finalsummary: Render");
+    }
+    if (finalSummaryHeight !== undefined && pageFooterTopY !== undefined) {
+      // First check if we need to page-break to not overflow into footer
+      var distanceToPageFooter = pageFooterTopY - x.getCurrentY();
+      if (finalSummaryHeight > distanceToPageFooter) {
+        if (verbosity > 0) {
+          console.log("finalsummary: page-break needed. distanceToPageFooter=" +
+            distanceToPageFooter + ", distanceRequired=" + finalSummaryHeight + ", pageFooterTopY=" + pageFooterTopY);
+        }
+        x.newPage();
+      } else {
+        if (verbosity > 0) {
+          console.log("finalsummary: No page-break needed. distanceToPageFooter=" +
+            distanceToPageFooter + ", distanceRequired=" + finalSummaryHeight + ", pageFooterTopY=" + pageFooterTopY);
+        }
+      }
+    }
+
+    var finalsummaryTopY = x.getCurrentY();
+
+    var company = invoice.company;
+    var cust = invoice.customer;
+    var totalExclVat = invoice.totalExclVat;
+    var totalVat = invoice.totalInclVat - totalExclVat;
+    totalVat = parseFloat(totalVat.toFixed(2));
+    totalExclVat = parseFloat(totalExclVat.toFixed(2));
+    var useReverseCharge = cust.useReverseCharge === true;
+    var amountToPay = useReverseCharge?invoice.totalExclVat:invoice.totalInclVat;
+    var amountToPayAdjustment = calcPaymentAdjustment(amountToPay);
+    amountToPay = amountToPay + amountToPayAdjustment;
+    x.fontSize(style.summary.fontSize);
+    x.newLine();
+    x.font(style.summary.font);
+    x.band( [
+             {data: "Netto:", width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
+             {data: util.formatCurrency(invoice.totalExclVat, {currencyStr: invoice.currency}),
+              width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
+           ], {fontBold: 0, border:0, width: 0, wrap: 1} );
+    if (!useReverseCharge) {
+      x.band( [
+               {data: "Moms:", width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
+               {data: util.formatCurrency(totalVat, {currencyStr: invoice.currency}),
+                width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
+             ], {fontBold: 0, border:0, width: 0, wrap: 1} );
+    }
+    x.band( [
+             {data: "Öresutjämning:", width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
+             {data: util.formatCurrency(amountToPayAdjustment, {currencyStr: invoice.currency}),
+              width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
+           ], {fontBold: 0, border:0, width: 0, wrap: 1} );
+    x.addY(summaryAmountToPayTopPadding);
+    x.band( [
+             {data: "Att betala:", width: summaryCaptionColWidth, align: x.right, font: style.summary.caption.font, fontBold: 1},
+             {data: util.formatCurrency(amountToPay, {currencyStr: invoice.currency}),
+              width: summaryValueColWidth, align: x.right, font: style.summary.value.font, fontBold: 1}
+             ], {fontBold: 1, border:0, width: 0, wrap: 1} );
+    if (invoice.isCanceled) {
+      x.band( [
+               {data: "", width: summaryCaptionColWidth, align: x.right},
+               {data: "*** MAKULERAD ***", width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
+               ], {fontBold: 1, border:0, width: 0, wrap: 1} );
+    }
+
+    if (useReverseCharge) {
+      x.font(style.summary.customText.font);
+      x.fontSize(style.summary.customText.fontSize);
+      x.newLine();
+      var reverseChargeText = formatTextTemplate(company.reverseChargeText, cust);
+      x.print(reverseChargeText, {fontBold: 0, border: 0, wrap: 1});
+    }
+    if (company.paymentCustomText) {
+      x.font(style.summary.customText.font);
+      x.fontSize(style.summary.customText.fontSize);
+      x.newLine();
+      x.print(company.paymentCustomText, {fontBold: 0, border: 0, wrap: 1});
+    }
+
+    if (finalSummaryHeight === undefined) {
+      finalSummaryHeight = x.getCurrentY() - finalsummaryTopY;
+      if (verbosity > 0) {
+        console.log("finalsummary: Calculated height=" + finalSummaryHeight);
+      }
+    }
+
+    if (verbosity > 1) {
+      var height = x.getCurrentY() - finalsummaryTopY;
+      console.log("finalsummary: Rendered with height " + height);
+    }
   };
 
   var mypagefooter = function(x, r) {
-    var footerY = x.maxY() + pageFooterYOffset;
-    // Workaround since always setting Y doesn't work since details overlaps in that case...
-    if (x.getCurrentY() < footerY) {
-      x.setCurrentY(footerY);
+    if (verbosity > 0) {
+      console.log("footer: Render");
     }
+    if (pageFooterHeight !== undefined) {
+      if (verbosity > 0) {
+        console.log("footer: top-y set to " + pageFooterTopY + ", maxY=" + x.maxY() + ", height=" + pageFooterHeight);
+      }
+      x.setCurrentY(pageFooterTopY);
+    }
+    var mypagefooterTopY = x.getCurrentY();
     x.addY(5);
     var footerLineMaxX = margin + detailsWidth - 1;
     x.line(margin, x.getCurrentY(), footerLineMaxX, x.getCurrentY(), {thickness: pageFooterSeparatorLineThickness});
@@ -394,209 +658,18 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
         {data: "Lätt Fakturering", width: footerLineMaxX/2, align: x.left, fontSize: style.footer.brand.fontSize},
         {data: "Sida " + x.currentPage(), width: footerLineMaxX/2 - margin, align: x.right, fontSize: style.footer.pageNumber.fontSize}
         ], {border: debugBorderWidth, font: style.footer.font});
-  };
-
-
-  var drawGroupHLine = function(x, yCoord, thickness, dashed) {
-    dashed = typeof dashed !== 'undefined' ? dashed : false;
-    var dash = dashed ? 2 : 0;
-    x.line(margin - 1, yCoord, margin + detailsWidth - 1, yCoord, {thickness: thickness, dash: dash});
-  };
-
-  var drawGroupDetailBars = function(x, y1, y2, thickness) {
-    if (y1 > y2) {
-      y1 = headerBottomY;
-    }
-    x.line(margin - 1, y1, margin - 1, y2, {thickness: thickness});
-    x.line(margin + detailsWidth - 1, y1, margin + detailsWidth - 1, y2, {thickness: thickness});
-  };
-
-  var drawGroupBox = function(x, startY, endY, thickness) {
-    x.box(margin, startY, detailsWidth - 1, endY - startY, {thickness: thickness, fill: "#a8a8a8", fillOpacity: 0});
-  };
-
-  var groupHeader = function(x, r, withTitle) {
-    // Group header
-    var detailsColLbl = [
-      r.hasDesc ? r.descColLbl : "",
-      r.hasCount ? r.countColLbl : "",
-      r.hasPrice ? r.priceColLbl : "",
-      r.hasDiscount ? r.discountColLbl : "",
-      r.hasVat ? r.vatColLbl : "",
-      r.hasTotal ? r.totalColLbl : ""
-    ];
-
-    var anyDetailHeader = detailsColLbl.join("").length > 0;
-
-    if (withTitle) {
-      x.addY(detailsGroupTitleTopPadding);
-      x.fontSize(style.details.groupTitle.fontSize);
-      var groupTitle = r.title;
-      if (r.hasTitleExtraField) {
-        groupTitle = groupTitle + " " + r.titleExtraField;
-      }
-      if (groupTitle && groupTitle !== "") {
-        x.print(groupTitle, {fontBold: 1, border: 0, wrap: 1, font: style.details.groupTitle.font});
+    if (pageFooterHeight === undefined) {
+      pageFooterHeight = x.getCurrentY() - mypagefooterTopY;
+      pageFooterTopY = x.maxY() - pageFooterHeight;
+      if (verbosity > 0) {
+        console.log("footer: Calculated height=" + pageFooterHeight + ", topY=" + pageFooterTopY);
       }
     }
-    if (anyDetailHeader) {
-      var groupHeaderTopY = x.getCurrentY();
-      drawGroupHLine(x, x.getCurrentY(), detailsGroupHeaderTopLineThickness);
-      x.fontSize(style.details.header.fontSize);
-      var printHeader = function() {
-        x.addY(detailsGroupHeaderTopPadding);
-        x.band( [
-          {data: detailsColLbl[0], width: detailsColSize[0], align: x.left},
-          {data: detailsColLbl[1], width: detailsColSize[1], align: x.right},
-          {data: detailsColLbl[2], width: detailsColSize[2], align: x.right},
-          {data: detailsColLbl[3], width: detailsColSize[3], align: x.right},
-          {data: detailsColLbl[4], width: detailsColSize[4], align: x.right},
-          {data: detailsColLbl[5], width: detailsColSize[5], align: x.right}
-        ], {fontBold: 1, border: debugBorderWidth, wrap: 1, font: style.details.header.font, padding: 2} );
-      };
-      // Print header once first to find out height to be able to draw gray background...
-      printHeader();
-      var headerHeight = x.getCurrentY() - groupHeaderTopY;
-      // Gray box is background...
-      x.box(margin - 1 + detailsBarsLineThickness,
-            groupHeaderTopY + detailsGroupHeaderTopLineThickness,
-            detailsWidth - detailsBarsLineThickness,
-            /* Need to adjust height with +1, don't know why, bold font? */
-            //style.details.header.fontSize + detailsGroupHeaderTopPadding  + detailsGroupHeaderBottomLineThickness + 1,
-            headerHeight - detailsGroupHeaderTopLineThickness - detailsGroupHeaderBottomLineThickness,
-            {thickness: 0, fill: detailsGroupHeaderFillColor});
-      // Draw header on-top of gray box
-      x.setCurrentY(groupHeaderTopY);
-      printHeader();
-
-      drawGroupDetailBars(x, groupHeaderTopY, x.getCurrentY(), detailsBarsLineThickness);
-    }
-    drawGroupHLine(x, x.getCurrentY() - detailsGroupHeaderBottomLineThickness, detailsGroupHeaderBottomLineThickness);
-  };
-
-  var invoiceDetails = function ( x, r ) {
-    if (r.isValid) {
-      x.fontSize(style.details.items.fontSize);
-      var styleColData = function(desc, width, align) {
-        return {
-          data: desc,
-          width: width,
-          align: align
-        };
-      };
-      var bandOpts = {border: 0, addY: detailsRowSpacing, wrap: 1, font: style.details.items.font, padding: 2};
-      var y1 = x.getCurrentY();
-      if (r.isTextOnly) {
-        x.band( [
-          styleColData(r.description, detailsWidth, x.left),
-        ], bandOpts);
-      } else {
-        var detailsColLbl = [
-          r.hasDesc ? r.description : "",
-          r.hasCount ? util.formatNumber(r.count) : "",
-          r.hasPrice ? util.formatCurrency(r.price, {currencyStr: invoice.currency}) : "",
-          r.hasDiscount ? util.formatNumber(r.discount) + '%' : "",
-          r.hasVat ? util.formatNumber(r.vat) + '%' : "",
-          r.hasTotal ? util.formatCurrency(r.total, {currencyStr: invoice.currency}) : ""
-        ];
-        x.band( [
-          styleColData(detailsColLbl[0], detailsColSize[0], x.left),
-          styleColData(detailsColLbl[1], detailsColSize[1], x.right),
-          styleColData(detailsColLbl[2], detailsColSize[2], x.right),
-          styleColData(detailsColLbl[3], detailsColSize[3], x.right),
-          styleColData(detailsColLbl[4], detailsColSize[4], x.right),
-          styleColData(detailsColLbl[5], detailsColSize[5], x.right),
-        ], bandOpts);
-      }
-      var oldStrokeColor = x.strokeColor();
-      x.strokeColor(detailsSeparatorLineColor);
-      drawGroupHLine(x, x.getCurrentY(), detailsSeparatorLineThickness, true);
-      x.strokeColor(oldStrokeColor);
-      drawGroupDetailBars(x, y1, x.getCurrentY(), detailsBarsLineThickness);
+    if (verbosity > 1) {
+      var height = x.getCurrentY() - mypagefooterTopY;
+      console.log("footer: Rendered with height " + height);
     }
   };
-
-  var invoiceGroups = function ( x, r ) {
-    if (r.isValid) {
-      groupHeader(x, r, true);
-      for (var i = 0; i < r.invoiceItems.length; i++) {
-        invoiceDetails(x, r.invoiceItems[i]);
-      }
-
-      if (r.hasTotal && r.totalExclVat !== undefined && r.totalExclVat !== null) {
-        var groupSummaryTopY = x.getCurrentY();
-        var totalExclVatStr = 
-          util.formatCurrency(parseFloat(r.totalExclVat.toFixed(2)), {currencyStr: invoice.currency});
-        x.addY(detailsGroupSummaryTopPadding);
-        x.fontSize(style.details.groupSummary.fontSize);
-        x.band( [
-          {data: "Summa:", width: detailsSummaryCaptionColWidth, align: x.right, fontBold: style.details.groupSummary.bold, font: style.details.groupSummary.caption.font},
-          {data: totalExclVatStr, width: detailsSummaryValueColWidth, align: x.right, font: style.details.groupSummary.value.font}
-        ], {fontBold: 0, border: debugBorderWidth, wrap: 1, padding: 2} );
-        drawGroupDetailBars(x, groupSummaryTopY, x.getCurrentY(), detailsBarsLineThickness);
-      }
-      drawGroupHLine(x, x.getCurrentY(), detailsGroupSummaryBottomLineThickness);
-    }
-  };
-
-  var finalsummary = function(x, r) {
-    var company = invoice.company;
-    var cust = invoice.customer;
-    var totalExclVat = invoice.totalExclVat;
-    var totalVat = invoice.totalInclVat - totalExclVat;
-    totalVat = parseFloat(totalVat.toFixed(2));
-    totalExclVat = parseFloat(totalExclVat.toFixed(2));
-    var useReverseCharge = cust.useReverseCharge === true;
-    var amountToPay = useReverseCharge?invoice.totalExclVat:invoice.totalInclVat;
-    var amountToPayAdjustment = calcPaymentAdjustment(amountToPay);
-    amountToPay = amountToPay + amountToPayAdjustment;
-    x.fontSize(style.summary.fontSize);
-    x.newLine();
-    x.font(style.summary.font);
-    x.band( [
-             {data: "Netto:", width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
-             {data: util.formatCurrency(invoice.totalExclVat, {currencyStr: invoice.currency}),
-              width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
-           ], {fontBold: 0, border:0, width: 0, wrap: 1} );
-    if (!useReverseCharge) {
-      x.band( [
-               {data: "Moms:", width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
-               {data: util.formatCurrency(totalVat, {currencyStr: invoice.currency}),
-                width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
-             ], {fontBold: 0, border:0, width: 0, wrap: 1} );
-    }
-    x.band( [
-             {data: "Öresutjämning:", width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
-             {data: util.formatCurrency(amountToPayAdjustment, {currencyStr: invoice.currency}),
-              width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
-           ], {fontBold: 0, border:0, width: 0, wrap: 1} );
-    x.addY(summaryAmountToPayTopPadding);
-    x.band( [
-             {data: "Att betala:", width: summaryCaptionColWidth, align: x.right, font: style.summary.caption.font, fontBold: 1},
-             {data: util.formatCurrency(amountToPay, {currencyStr: invoice.currency}),
-              width: summaryValueColWidth, align: x.right, font: style.summary.value.font, fontBold: 1}
-             ], {fontBold: 1, border:0, width: 0, wrap: 1} );
-    if (invoice.isCanceled) {
-      x.band( [
-               {data: "", width: summaryCaptionColWidth, align: x.right},
-               {data: "*** MAKULERAD ***", width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
-               ], {fontBold: 1, border:0, width: 0, wrap: 1} );
-    }
-    if (useReverseCharge) {
-      x.font(style.summary.customText.font);
-      x.fontSize(style.summary.customText.fontSize);
-      x.newLine();
-      var reverseChargeText = formatTextTemplate(company.reverseChargeText, cust);
-      x.print(reverseChargeText, {fontBold: 0, border: 0, wrap: 1});
-    }
-    if (company.paymentCustomText) {
-      x.font(style.summary.customText.font);
-      x.fontSize(style.summary.customText.fontSize);
-      x.newLine();
-      x.print(company.paymentCustomText, {fontBold: 0, border: 0, wrap: 1});
-    }
-  };
-
 
   // You don't have to pass in a report name; it will default to "report.pdf"
   var reportName = i18n.t('app.invoiceReport.fileName', {'cid': invoice.customer.cid, 'iid': invoice.iid});
@@ -650,22 +723,33 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, isDemo
     console.log("Created dir: " + reportDir);
     fs.mkdirSync(reportDir);
   }
-  //TODO: Cleanup old reports 
+  //TODO: Cleanup old reports
   var reportPath = reportDir + "/" + reportName;
+  
+  // Override reportPath
+  if (outFile) {
+    reportPath = outFile;
+  }
+
+  if (verbosity > 1) {
+    Report.trace = true;
+  }
+
   var rpt = new Report(reportPath)
-      .margins(margin)
+      .margins(margins)
       .paper('A4')
       .titleHeader(mytitleheader)
       .pageHeader(mypageheader)
       .pageFooter(mypagefooter)
       .data(invoice.invoiceItemGroups)   // REQUIRED
       .detail(invoiceGroups) // Optional
+      //.finalSummary(finalsummary)
       .font("Times-Roman")
       .fontSize(10); // Optional
 
   rpt.groupBy('', {runHeader: rpt.newPageOnly})
-    .footer(finalsummary);
-  
+      .footer(finalsummary);
+
   // Debug output is always nice (Optional, to help you see the structure)
   rpt.printStructure();
 

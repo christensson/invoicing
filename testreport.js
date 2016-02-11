@@ -5,14 +5,21 @@ var mongodb = require('mongodb');
 var ObjectID = mongodb.ObjectID;
 Q = require('q');
 
+function increaseVerbosity(v, total) {
+  return total + 1;
+}
+
 args.version('0.0.1')
 .option('--dbg', 'Debug mode enabled')
 .option('--invoice_id [id]', 'Invoice id')
+.option('--json [file]', 'Render invoice from JSON file')
+.option('-o, --output [file]', 'Path to output PDF file')
 .option('--demo', 'Demo mode enabled')
 .option('--real_db', 'Query real DB, not local development DB')
+.option('-v, --verbose', 'Be more verbose', increaseVerbosity, 0)
 .parse(process.argv);
 
-console.log("Init database!");
+console.log("Test report!");
 
 var debug = false;
 if (args.dbg) {
@@ -42,19 +49,7 @@ var tmpDir = __dirname + "/tmp";
 
 var userPromise = Q();
 
-if (invoiceQuery === undefined) {
-  userPromise = mydb.getUser({'username-local': 'test'}).then(function(user) {
-    uid = ObjectID(user._id);
-    console.log("Got user uid=" + uid);
-    invoiceQuery = {'uid': uid, 'iid': 101};
-    return Q();
-  });
-}
-
-userPromise.then(function() {
-  console.log("Get invoice: " + JSON.stringify(invoiceQuery));
-  return mydb.getOneDocPromise('invoice', invoiceQuery);  
-}).then(function(invoice) {
+renderInvoice = function(invoice) {
   if (invoice == undefined) {
     console.error("Invoice not found!");
     process.exit(1);
@@ -62,7 +57,35 @@ userPromise.then(function() {
     reporter.doInvoiceReport(invoice, tmpDir, function(reportFilename) {
       console.log("onCompletion: reportFilename=" + reportFilename);
       process.exit();
-    }, demoMode, debug);
+    }, args.output, demoMode, debug, args.verbose);
   }
+};
+
+getJsonFromFile = function(fileName) {
+  var deferred = Q.defer();
+  require('fs').readFile(fileName, 'utf8', function (err, data) {
+    if (err) {
+      deferred.reject(err);
+      return;
+    }
+    var obj = JSON.parse(data);
+    if (args.verbose > 0) {
+      console.log("Invoice will be rendered from JSON: " + JSON.stringify(obj, null, 2));
+    }
+    deferred.resolve(obj);
+  });
+  return deferred.promise;
+};
+
+userPromise.then(function() {
+  if (args.json) {
+    console.log("Get invoice data from JSON file: " + args.json);
+    return getJsonFromFile(args.json);
+  } else {
+    console.log("Get invoice: " + JSON.stringify(invoiceQuery, null, 2));
+    return mydb.getOneDocPromise('invoice', invoiceQuery);  
+  }
+}).then(function(invoice) {
+  renderInvoice(invoice);
 });
 
