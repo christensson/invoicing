@@ -526,6 +526,12 @@
                 <div class="panel-body">
                   <div class="checkbox">
                     <label>
+                      <input type="checkbox" data-bind="checked: data.noVat" aria-label=" ${i18n.t('app.customer.optionNoVatLbl')}">
+                      ${i18n.t('app.customer.optionNoVatLbl')}
+                    </label>
+                  </div>
+                  <div class="checkbox">
+                    <label>
                       <input type="checkbox" data-bind="checked: data.useReverseCharge" aria-label=" ${i18n.t('app.customer.optionUseReverseChargeLbl')}">
                       ${i18n.t('app.customer.optionUseReverseChargeLbl')}
                     </label>
@@ -729,6 +735,24 @@
         </div>
 
         <div id="app-invoice_new" data-bind="visible: currentView() == 'invoice_new' || (currentView() != undefined && currentView().search('invoice_show') == 0)" style="display: none">
+            <def function="labelWithEditMode(textVariable, cond)">
+              <span data-bind="ifnot: ${cond}">
+                <span data-bind="text: ${textVariable}"></span>
+              </span>
+              <span data-bind="if: ${cond}">
+                <input type="text" class="form-control" data-bind="value: ${textVariable}"></input>
+              </span>
+            </def>
+
+            <def function="labelWithEditModeCondensed(textVariable, cond)">
+              <span data-bind="ifnot: ${cond}">
+                <span class="form-control-static" data-bind="text: ${textVariable}"></span>
+              </span>
+              <span data-bind="if: ${cond}">
+                <input type="text" class="form-control input-sm" data-bind="value: ${textVariable}"></input>
+              </span>
+            </def>
+
             <div class="row"> <!-- top panel -->
               <div class="col-md-8">
                 <div class="panel panel-default">
@@ -808,22 +832,52 @@
               </div>
 
               <div class="col-md-4">
-                <div class="panel panel-default">
-                    <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.invoice.customerDetailsPaneHeader')}</h3></div>
+                <div class="panel" data-bind="css: {'panel-default': !data.customerAddrIsEditMode(), 'panel-warning': data.customerAddrIsEditMode}">
+                    <div class="panel-heading invoice-customer-addr-panel-heading">
+                      <div class="row">
+                        <div class="col-md-10">
+                          <p class="form-control-static panel-title">${i18n.t('app.invoice.customerDetailsPaneHeader')}</p>
+                        </div>
+                        <div class="col-md-2">
+                          <button class="btn btn-sm top0 bottom0"
+                                  data-bind="click: data.toggleCustomerAddrEditMode,
+                                             css: {'btn-default': !data.customerAddrIsEditMode(), 'btn-success': data.customerAddrIsEditMode},
+                                             disable: data.isLocked">
+                            <div data-bind="ifnot: data.customerAddrIsEditMode">
+                              <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                            </div>
+                            <div data-bind="if: data.customerAddrIsEditMode">
+                              <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                     <div class="panel-body">
                         <form class="form-horizontal">
-                            <div>
-                                <p class="form-control-static">
-                                    ${i18n.t('app.invoice.customerDetailsCustomerNrLbl')}
-                                    &nbsp;<span data-bind="text: data.customer().cid"></span>
-                                </p>
+                          <div class="col-md-12">
+                            <div class="row">
+                              <p class="form-control-static">
+                                  ${i18n.t('app.invoice.customerDetailsCustomerNrLbl')}
+                                  &nbsp;<span data-bind="text: data.customer().cid"></span>
+                              </p>
                             </div>
-                            <address>
-                                <strong><span data-bind="text: data.customer().name"></span></strong><br/>
-                                <span data-bind="text: data.customer().addr1"></span><br/>
-                                <span data-bind="text: data.customer().addr2"></span><br/>
-                                <span data-bind="text: data.customer().addr3"></span>
-                            </address>
+                            <div class="row">
+                              <strong><span data-bind="text: data.customerMirror_name"></span></strong><br/>
+                            </div>
+                            <div class="row">
+                              <invoke function="labelWithEditModeCondensed"
+                                      textVariable="data.customerMirror_addr1" cond="data.customerAddrIsEditMode"/>
+                            </div>
+                            <div class="row">
+                              <invoke function="labelWithEditModeCondensed"
+                                      textVariable="data.customerMirror_addr2" cond="data.customerAddrIsEditMode"/>
+                            </div>
+                            <div class="row">
+                              <invoke function="labelWithEditModeCondensed"
+                                      textVariable="data.customerMirror_addr3" cond="data.customerAddrIsEditMode"/>
+                            </div>
+                          </div>
                         </form>
                     </div>
                 </div>
@@ -934,15 +988,6 @@
                               </div>
                             </div>
 
-                            <def function="labelWithEditMode(textVariable, cond)">
-                              <span data-bind="ifnot: ${cond}">
-                                <span data-bind="text: ${textVariable}"></span>
-                              </span>
-                              <span data-bind="if: ${cond}">
-                                <input type="text" class="form-control" data-bind="value: ${textVariable}"></input>
-                              </span>
-                            </def>
-
                             <table class="table table-striped table-condensed">
                                 <colgroup>
                                   <col class="col-md-2">
@@ -1027,7 +1072,12 @@
                                             </div>
                                           </div>
                                           <html-comment> ko if: hasVat </html-comment>
-                                            <invoke function="labelWithEditMode" textVariable="vatColLbl" cond="isEditMode"/>
+                                            <span data-bind="ifnot: isEditMode">
+                                              <span data-bind="text: vatColLbl, css: {'text-muted': !\$parent.data.hasVat()}"></span>
+                                            </span>
+                                            <span data-bind="if: isEditMode">
+                                              <input type="text" class="form-control" data-bind="value: vatColLbl"></input>
+                                            </span>
                                           <html-comment> /ko </html-comment>
                                         </th>
                                         <th style="vertical-align:top;text-align:right">
@@ -1093,7 +1143,8 @@
                                         <html-comment> ko if: descriptionColspan() < 5 </html-comment>
                                           <td>
                                             <html-comment> ko if: hasVat </html-comment>
-                                              <input type="number" class="form-control" data-bind="textInput: vat, disable: \$parents[1].data.isLocked"></input>
+                                              <input type="number" class="form-control"
+                                                     data-bind="textInput: vat, disable: \$parents[1].data.isLocked() || !\$parents[1].data.hasVat()"></input>
                                             <html-comment> /ko </html-comment>
                                           </td>
                                         <html-comment> /ko </html-comment>
@@ -1160,15 +1211,19 @@
                         </div>
                       </div>
                       <div class="col-md-4">
-                        <p class="form-control-static text-right">
+                        <p class="form-control-static text-right invoice-summary-labels">
                           ${i18n.t('app.invoice.totalExclVatLbl')}<br/>
-                          <strong>${i18n.t('app.invoice.totalInclVatLbl')}</strong>
+                          <html-comment> ko if: data.hasVat </html-comment>
+                            <strong>${i18n.t('app.invoice.totalInclVatLbl')}</strong>
+                          <html-comment> /ko </html-comment>
                         </p>
                       </div>
                       <div class="col-md-2">
-                        <p class="form-control-static text-right">
+                        <p class="form-control-static text-right invoice-summary-labels">
                           <span data-bind="text: data.totalExclVatStr"></span><br/>
-                          <strong><span data-bind="text: data.totalInclVatStr"></span></strong>
+                          <html-comment> ko if: data.hasVat </html-comment>
+                            <strong><span data-bind="text: data.totalInclVatStr"></span></strong>
+                          <html-comment> /ko </html-comment>
                         </p>
                       </div>
                     </div> <!-- invoice group summary and controls -->
@@ -1182,29 +1237,47 @@
               <div class="col-md-12">
                 <div class="panel panel-default">
                   <div class="panel-body">
-                    <div class="checkbox">
-                      <label>
-                        <input type="checkbox" data-bind="checked: data.isLocked">
-                        ${i18n.t('app.invoice.optIsLockedLbl')}
-                      </label>
-                    </div>
-                    <div class="checkbox">
-                      <label>
-                        <input type="checkbox" data-bind="checked: data.isPaid">
-                        ${i18n.t('app.invoice.optIsPaidLbl')}
-                      </label>
-                    </div>
-                    <div class="checkbox" data-bind="css: {disabled: data.isLocked}">
-                      <label>
-                        <input type="checkbox" value="" data-bind="checked: data.isCredit, disable: data.isLocked">
-                        ${i18n.t('app.invoice.optIsCreditLbl')}
-                      </label>
-                    </div>
-                    <div class="checkbox" data-bind="css: {disabled: data.isLocked}">
-                      <label>
-                        <input type="checkbox" value="" data-bind="checked: data.isCanceled, disable: data.isLocked">
-                        ${i18n.t('app.invoice.optIsCanceledLbl')}
-                      </label>
+                    <div class="row">
+                      <div class="col-md-3">
+                        <div class="checkbox top0">
+                          <label>
+                            <input type="checkbox" data-bind="checked: data.isLocked">
+                            ${i18n.t('app.invoice.optIsLockedLbl')}
+                          </label>
+                        </div>
+                        <div class="checkbox">
+                          <label>
+                            <input type="checkbox" data-bind="checked: data.isPaid">
+                            ${i18n.t('app.invoice.optIsPaidLbl')}
+                          </label>
+                        </div>
+                        <div class="checkbox" data-bind="css: {disabled: data.isLocked}">
+                          <label>
+                            <input type="checkbox" value="" data-bind="checked: data.isCredit, disable: data.isLocked">
+                            ${i18n.t('app.invoice.optIsCreditLbl')}
+                          </label>
+                        </div>
+                        <div class="checkbox bottom0" data-bind="css: {disabled: data.isLocked}">
+                          <label>
+                            <input type="checkbox" value="" data-bind="checked: data.isCanceled, disable: data.isLocked">
+                            ${i18n.t('app.invoice.optIsCanceledLbl')}
+                          </label>
+                        </div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="checkbox top0">
+                          <label>
+                            <input type="checkbox" data-bind="checked: data.customerMirror_noVat">
+                            ${i18n.t('app.invoice.optNoVatLbl')}
+                          </label>
+                        </div>
+                        <div class="checkbox">
+                          <label>
+                            <input type="checkbox" data-bind="checked: data.customerMirror_useReverseCharge">
+                            ${i18n.t('app.invoice.optUseReverseChargeLbl')}
+                          </label>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

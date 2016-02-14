@@ -24,10 +24,21 @@ body { padding-top: 70px; }
 .left15 { margin-left:15px; }
 .left20 { margin-left:20px; }
 
+.invoice-customer-addr-panel-heading {
+  padding-top: 3px;
+  padding-right: 5px;
+  padding-bottom: 3px;
+}
+
 .invoice-item-group-panel-heading {
   padding-top: 3px;
   padding-bottom: 3px;
   padding-right: 3px;
+}
+
+.invoice-summary-labels {
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
 
 .valign-middle {

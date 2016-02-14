@@ -326,14 +326,14 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     x.box(margin, startY, detailsWidth - 1, endY - startY, {thickness: thickness, fill: "#a8a8a8", fillOpacity: 0});
   };
 
-  var groupHeader = function(x, r, withTitle) {
+  var groupHeader = function(x, r, withTitle, invoiceHasVat) {
     // Group header
     var detailsColLbl = [
       r.hasDesc ? r.descColLbl : "",
       r.hasCount ? r.countColLbl : "",
       r.hasPrice ? r.priceColLbl : "",
       r.hasDiscount ? r.discountColLbl : "",
-      r.hasVat ? r.vatColLbl : "",
+      r.hasVat && invoiceHasVat ? r.vatColLbl : "",
       r.hasTotal ? r.totalColLbl : ""
     ];
 
@@ -400,7 +400,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     drawGroupHLine(x, x.getCurrentY() - detailsGroupHeaderBottomLineThickness, detailsGroupHeaderBottomLineThickness);
   };
 
-  var invoiceDetails = function ( x, r ) {
+  var invoiceDetails = function (x, r, invoiceHasVat) {
     if (r.isValid) {
       x.fontSize(style.details.items.fontSize);
       var styleColData = function(desc, width, align) {
@@ -422,7 +422,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
           r.hasCount ? util.formatNumber(r.count) : "",
           r.hasPrice ? util.formatCurrency(r.price, {currencyStr: invoice.currency}) : "",
           r.hasDiscount ? util.formatNumber(r.discount) + '%' : "",
-          r.hasVat ? util.formatNumber(r.vat) + '%' : "",
+          r.hasVat && invoiceHasVat ? util.formatNumber(r.vat) + '%' : "",
           r.hasTotal ? util.formatCurrency(r.total, {currencyStr: invoice.currency}) : ""
         ];
         x.band( [
@@ -444,9 +444,10 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
 
   var invoiceGroups = function ( x, r ) {
     if (r.isValid) {
-      groupHeader(x, r, true);
+      var invoiceHasVat = !invoice.customer.useReverseCharge && !invoice.customer.noVat
+      groupHeader(x, r, true, invoiceHasVat);
       for (var i = 0; i < r.invoiceItems.length; i++) {
-        invoiceDetails(x, r.invoiceItems[i]);
+        invoiceDetails(x, r.invoiceItems[i], invoiceHasVat);
       }
 
       if (r.hasTotal && r.totalExclVat !== undefined && r.totalExclVat !== null) {
@@ -494,6 +495,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     var totalVat = invoice.totalInclVat - totalExclVat;
     totalVat = parseFloat(totalVat.toFixed(2));
     totalExclVat = parseFloat(totalExclVat.toFixed(2));
+    var noVat = cust.noVat === true;
     var useReverseCharge = cust.useReverseCharge === true;
     var amountToPay = useReverseCharge?invoice.totalExclVat:invoice.totalInclVat;
     var amountToPayAdjustment = calcPaymentAdjustment(amountToPay);
@@ -506,7 +508,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
              {data: util.formatCurrency(invoice.totalExclVat, {currencyStr: invoice.currency}),
               width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
-    if (!useReverseCharge) {
+    if (!(useReverseCharge || noVat)) {
       x.band( [
                {data: "Moms:", width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
                {data: util.formatCurrency(totalVat, {currencyStr: invoice.currency}),
