@@ -292,7 +292,7 @@ var SettingsDataModel = function() {
     self.activeCompanyId(id);
   };
   
-  self.getJson = function() {
+  self.toJSON = function() {
     var data = {
         _id: self._id(),
         activeCompanyId: self.activeCompanyId(),
@@ -341,7 +341,7 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
   };
   
   self.saveSettings = function() {
-    var ajaxData = self.settings.getJson();
+    var ajaxData = self.settings.toJSON();
     var ajaxUrl = "/api/settings";
     Log.info("saveSettings: AJAX PUT (url=" + ajaxUrl + "): JSON="
         + JSON.stringify(ajaxData));
@@ -851,6 +851,7 @@ var CustomerViewModel = function() {
       return;
     }
     self.nameError(false);
+    var isNewCustomer = (self._id() == undefined) ? true : false;
     Notify_showSpinner(true, i18n.t("app.customer.saveTicker"));
     return $.ajax({
       url : "/api/customer/" + self._id(),
@@ -1327,7 +1328,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
       url : "/api/itemGroupTemplate/" + self._id(),
       type : "PUT",
       contentType : "application/json",
-      data : JSON.stringify(self.getJson()),
+      data : JSON.stringify(self.toJSON()),
       dataType : "json",
       success : function(data) {
         Log.info("updateServer: response: " + JSON.stringify(data));
@@ -1365,7 +1366,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
     }
   };
 
-  self.getJson = function() {
+  self.toJSON = function() {
     var res = {
       _id : self._id(),
       uid : self.uid(),
@@ -1392,7 +1393,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
     if (self.mayHaveInvoiceItems) {
       var items = [];
       for ( var i = 0; i < self.invoiceItems().length; i++) {
-        items.push(self.invoiceItems()[i].getJson());
+        items.push(self.invoiceItems()[i].toJSON());
       }
       res.invoiceItems = items;
       res.totalExclVat = self.totalExclVat();
@@ -1458,7 +1459,7 @@ var InvoiceItemViewModel = function(data, parent) {
     return colspan;
   }, self);
 
-  self.getJson = function() {
+  self.toJSON = function() {
     var res = {
       description : self.description(),
       price : self.price(),
@@ -1503,12 +1504,13 @@ var InvoiceDataViewModel = function() {
   self.customerAddrIsEditMode = ko.observable(false);
   self.extraOptionExpanded = ko.observable(false);
 
-  var registerMirrors = function(mirrorFieldPrefix, fields, updateFunc) {
+  var registerMirrors = function(mirrorFieldPrefix, fields, writeBackFunc) {
     for (var i = 0; i < fields.length; i++) {
       var field = fields[i];
       self[mirrorFieldPrefix + field] = ko.observable();
+      // Subscribe to mirror field changes to write-back changes to source field
       self[mirrorFieldPrefix + field].subscribe(
-        updateFunc.bind(null, field));
+        writeBackFunc.bind(null, field));
     }
   };
 
@@ -1549,7 +1551,14 @@ var InvoiceDataViewModel = function() {
   self.companyFieldMirror = [
     'reverseChargeText',
     'vatNrCustomText',
-    'paymentCustomText'
+    'paymentCustomText',
+    'payment1Caption',
+    'payment2Caption',
+    'payment3Caption',
+    'payment1',
+    'payment2',
+    'payment3',
+    'paymentFocus'
   ];
 
   var companyFieldMirrorUpdate = function(field, val) {
@@ -1584,11 +1593,11 @@ var InvoiceDataViewModel = function() {
   self.setCompany = function(data) {
     // Use copy to not update cached version of company...
     var companyCopy = ko.toJS(data);
+    Log.info("Invoice company set to: " + JSON.stringify(companyCopy));
     self.company(companyCopy);
     // Updated mirrored data
     self.updateMirrors(self.companyFieldMirrorPrefix,
       self.companyFieldMirror, companyCopy);
-    self.extraOptionExpanded(false);
   };
 
   self.setData = function(newData) {
@@ -1816,11 +1825,12 @@ var InvoiceDataViewModel = function() {
     }
   };
 
-  self.getJson = function() {
+  self.toJSON = function() {
     var groups = [];
     for ( var i = 0; i < self.invoiceItemGroups().length; i++) {
-      groups.push(self.invoiceItemGroups()[i].getJson());
+      groups.push(self.invoiceItemGroups()[i].toJSON());
     }
+    console.log("invoice JSON company=" + JSON.stringify(self.company(), null, 2));
     var res = {
       _id : self._id(),
       iid : self.iid(),
@@ -2126,7 +2136,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
       self.selectedCustomerUpdatesData = true;
       if (self.activeCompany() !== undefined) {
         self.data.init(self.activeCompany().defaultNumDaysUntilPayment());
-        self.data.setCompany(self.activeCompany());
+        self.data.setCompany(self.activeCompany().toJSON());
         self.data.setCompanyId(self.activeCompany()._id());
         self.populatePromise().done(self.syncCustomerIdInput);
       } else {
@@ -2334,7 +2344,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
       Notify_showMsg('error', i18n.t("app.invoice.saveNok"));
       Log.info("saveInvoice: Nothing to do (invalid entry without _id)");
       return;
-    } else if (self.data.customer()._id === undefined) {
+    } else if (self.data.customer() === undefined) {
       Notify_showMsg('error', i18n.t("app.invoice.saveNok", {context: 'invalidCustomer'}));
       Log.info("No customer selected: " + JSON.stringify(self.data.customer()));
       return;
@@ -2343,7 +2353,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
       return;
     }
     var isNewInvoice = (self.data._id() == undefined) ? true : false;
-    var ajaxData = JSON.stringify(self.data.getJson());
+    var ajaxData = JSON.stringify(self.data.toJSON());
     var ajaxUrl = "/api/invoice/" + self.data._id();
     Log.info("saveInvoice: AJAX PUT (url=" + ajaxUrl + "): JSON="
         + ajaxData);
@@ -2405,7 +2415,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   };
 
   self.refreshCompanyData = function() {
-    self.data.setCompany(self.activeCompany());
+    self.data.setCompany(self.activeCompany().toJSON());
   };
 };
 

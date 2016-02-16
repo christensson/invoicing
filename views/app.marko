@@ -1289,13 +1289,13 @@
                         <div class="col-md-12">
                           <div class="checkbox top0">
                             <label>
-                              <input type="checkbox" data-bind="checked: data.customerMirror_noVat">
+                              <input type="checkbox" data-bind="checked: data.customerMirror_noVat, disable: data.isLocked() || data.customer() === undefined">
                               ${i18n.t('app.invoice.optNoVatLbl')}
                             </label>
                           </div>
                           <div class="checkbox bottom0">
                             <label>
-                              <input type="checkbox" data-bind="checked: data.customerMirror_useReverseCharge">
+                              <input type="checkbox" data-bind="checked: data.customerMirror_useReverseCharge, disable: data.isLocked() || data.customer() === undefined">
                               ${i18n.t('app.invoice.optUseReverseChargeLbl')}
                             </label>
                           </div>
@@ -1312,10 +1312,36 @@
                         </div>
                       </div>
                       <div class="row top10">
+                        <div class="col-md-2">
+                          <label class="control-label">${i18n.t('app.company.paymentOptCaptionHeader')}</label>
+                        </div>
+                        <div class="col-md-3">
+                          <label class="control-label">${i18n.t('app.company.paymentOptInfoHeader')}</label>
+                        </div>
+                        <div class="col-md-3">
+                          <label class="control-label">${i18n.t('app.company.paymentOptFocusHeader')}</label>
+                        </div>
+                      </div>
+                      <div class="row top5" for="idx in [1,2,3]">
+                        <div class="col-sm-2">
+                          <input type="text" id="pay${idx}Cap" class="form-control" data-bind="value: data.companyMirror_payment${idx}Caption, disable: data.isLocked"></input>
+                        </div>
+                        <div class="col-sm-3">
+                          <input type="text" id="pay${idx}" class="form-control" data-bind="value: data.companyMirror_payment${idx}, disable: data.isLocked"></input>
+                        </div>
+                        <div class="col-sm-3">
+                          <div class="radio">
+                            <label>
+                              <input type="radio" data-bind="checked: data.companyMirror_paymentFocus, disable: data.isLocked" value="${idx}" name="paymentFocusRadios">
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row top7">
                         <div class="form-group">
                           <label for="payCustomText" class="col-md-2 control-label">${i18n.t('app.invoice.paymentOptCustomTextHeader')}</label>
                           <div class="col-sm-6">
-                            <textarea rows="4" id="payCustomText" class="form-control" data-bind="value: data.companyMirror_paymentCustomText"></textarea>
+                            <textarea rows="4" id="payCustomText" class="form-control" data-bind="value: data.companyMirror_paymentCustomText, disable: data.isLocked"></textarea>
                           </div>
                         </div>
                       </div>
@@ -1323,7 +1349,7 @@
                         <div class="form-group">
                           <label for="footerText" class="col-sm-2 control-label">${i18n.t('app.invoice.customTextFieldsFooterTextLbl')}</label>
                           <div class="col-sm-6">
-                            <input type="text" id="footerText" class="form-control" data-bind="value: data.companyMirror_vatNrCustomText"></input>
+                            <input type="text" id="footerText" class="form-control" data-bind="value: data.companyMirror_vatNrCustomText, disable: data.isLocked"></input>
                           </div>
                         </div>
                       </div>
@@ -1331,7 +1357,7 @@
                         <div class="form-group">
                           <label for="reverseChargeText" class="col-sm-2 control-label">${i18n.t('app.invoice.customTextFieldsReverseChargeTextLbl')}</label>
                           <div class="col-sm-6">
-                            <textarea rows="4" id="reverseChargeText" class="form-control" data-bind="value: data.companyMirror_reverseChargeText" aria-describedby="reverseChargeTextHelp"></textarea>
+                            <textarea rows="4" id="reverseChargeText" class="form-control" data-bind="value: data.companyMirror_reverseChargeText, disable: data.isLocked" aria-describedby="reverseChargeTextHelp"></textarea>
                             <span id="reverseChargeTextHelp" class="help-block">${i18n.t('app.invoice.customTextFieldsReverseChargeHelpText')}</span>
                           </div>
                         </div>
