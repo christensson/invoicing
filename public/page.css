@@ -9,6 +9,11 @@ body { padding-top: 70px; }
 .top20 { margin-top:20px; }
 
 .bottom0 { margin-bottom:0px; }
+.bottom5 { margin-bottom:5px; }
+.bottom7 { margin-bottom:7px; }
+.bottom10 { margin-bottom:10px; }
+.bottom15 { margin-bottom:15px; }
+.bottom20 { margin-bottom:20px; }
 
 .right3 { margin-right:3px; }
 .right5 { margin-right:5px; }
@@ -23,6 +28,12 @@ body { padding-top: 70px; }
 .left10 { margin-left:10px; }
 .left15 { margin-left:15px; }
 .left20 { margin-left:20px; }
+
+.center-block {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
 
 .invoice-customer-addr-panel-heading {
   padding-top: 3px;

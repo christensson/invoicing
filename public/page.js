@@ -851,7 +851,6 @@ var CustomerViewModel = function() {
       return;
     }
     self.nameError(false);
-    var isNewCustomer = (self._id() == undefined) ? true : false;
     Notify_showSpinner(true, i18n.t("app.customer.saveTicker"));
     return $.ajax({
       url : "/api/customer/" + self._id(),
@@ -1502,6 +1501,27 @@ var InvoiceDataViewModel = function() {
   self.invoiceItemGroups = ko.observableArray();
   self.invoiceItems = ko.observableArray();
   self.customerAddrIsEditMode = ko.observable(false);
+  self.extraOptionExpanded = ko.observable(false);
+
+  var registerMirrors = function(mirrorFieldPrefix, fields, updateFunc) {
+    for (var i = 0; i < fields.length; i++) {
+      var field = fields[i];
+      self[mirrorFieldPrefix + field] = ko.observable();
+      self[mirrorFieldPrefix + field].subscribe(
+        updateFunc.bind(null, field));
+    }
+  };
+
+  self.updateMirrors = function(mirrorFieldPrefix, fields, sourceData) {
+    if (sourceData !== undefined) {
+      for (var i = 0; i < fields.length; i++) {
+        var field = fields[i];
+        var mirrorField = mirrorFieldPrefix + field;
+        Log.info("Mirrored field " + mirrorField + " set to " + sourceData[field]);
+        self[mirrorField](sourceData[field]);
+      }
+    }
+  };
 
   // Mirror customer fields
   self.customerFieldMirrorPrefix = 'customerMirror_';
@@ -1513,18 +1533,34 @@ var InvoiceDataViewModel = function() {
     'addr2',
     'addr3'
   ];
+
   var customerFieldMirrorUpdate = function(field, val) {
-    if (self.customer()) {
+    if (self.customer() !== undefined) {
       Log.info("Mirror updated, write-back customer." + field + " = " + val);
       self.customer()[field] = val;
     }
   };
-  for (var i = 0; i < self.customerFieldMirror.length; i++) {
-    var field = self.customerFieldMirror[i];
-    self[self.customerFieldMirrorPrefix + field] = ko.observable();
-    self[self.customerFieldMirrorPrefix + field].subscribe(
-      customerFieldMirrorUpdate.bind(null, field));
-  }
+
+  registerMirrors(self.customerFieldMirrorPrefix,
+    self.customerFieldMirror, customerFieldMirrorUpdate);
+
+  // Mirror company fields
+  self.companyFieldMirrorPrefix = 'companyMirror_';
+  self.companyFieldMirror = [
+    'reverseChargeText',
+    'vatNrCustomText',
+    'paymentCustomText'
+  ];
+
+  var companyFieldMirrorUpdate = function(field, val) {
+    if (self.company() !== undefined) {
+      Log.info("Mirror updated, write-back company." + field + " = " + val);
+      self.company()[field] = val;
+    }
+  };
+
+  registerMirrors(self.companyFieldMirrorPrefix,
+    self.companyFieldMirror, companyFieldMirrorUpdate);
 
   self.hasVat = ko.pureComputed(function() {
     if (this[this.customerFieldMirrorPrefix + 'useReverseCharge']() ||
@@ -1540,20 +1576,29 @@ var InvoiceDataViewModel = function() {
     var customerCopy = ko.toJS(data);
     self.customer(customerCopy);
     // Updated mirrored data
-    for (var i = 0; i < self.customerFieldMirror.length; i++) {
-      var field = self.customerFieldMirror[i];
-      self[self.customerFieldMirrorPrefix + field](customerCopy[field]);
-    }
+    self.updateMirrors(self.customerFieldMirrorPrefix,
+      self.customerFieldMirror, customerCopy);
     self.customerAddrIsEditMode(false);
+  };
+
+  self.setCompany = function(data) {
+    // Use copy to not update cached version of company...
+    var companyCopy = ko.toJS(data);
+    self.company(companyCopy);
+    // Updated mirrored data
+    self.updateMirrors(self.companyFieldMirrorPrefix,
+      self.companyFieldMirror, companyCopy);
+    self.extraOptionExpanded(false);
   };
 
   self.setData = function(newData) {
     self.customerAddrIsEditMode(false);
+    self.extraOptionExpanded(false);
     self._id(newData._id);
     self.iid(newData.iid);
     self.uid(newData.uid);
     self.companyId(newData.companyId);
-    self.company(newData.company);
+    self.setCompany(newData.company);
     self.isValid(newData.isValid);
     self.isCanceled(newData.isCanceled);
     self.isPaid(newData.isPaid);
@@ -1596,14 +1641,7 @@ var InvoiceDataViewModel = function() {
       uid : undefined,
       companyId : undefined,
       company: undefined,
-      customer : {
-        _id : undefined,
-        cid : undefined,
-        name : "",
-        addr1 : "",
-        addr2 : "",
-        addr3 : "",
-      },
+      customer : undefined,
       yourRef : "",
       ourRef : "",
       // Initialize to current date
@@ -1685,6 +1723,13 @@ var InvoiceDataViewModel = function() {
     Log.info("Edit mode toggled for customer address isEditMode=" +
         newEditMode + " (new)");
     self.customerAddrIsEditMode(newEditMode);
+  };
+
+  self.toggleExtraOptionExpanded = function() {
+    var newMode = !self.extraOptionExpanded();
+    Log.info("Expanded toggled for extra options extraOptionExpanded=" +
+        newMode + " (new)");
+    self.extraOptionExpanded(newMode);
   };
 
   var printGroupArray = function(prefix, array, idx) {
@@ -2051,13 +2096,12 @@ var InvoiceCustomerModel = function(data) {
   };
 };
 
-var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) {
+var InvoiceNewViewModel = function(currentView, activeCompany) {
   var self = this;
 
   self.data = new InvoiceDataViewModel();
 
   self.currentView = currentView;
-  self.activeCompanyId = activeCompanyId;
   self.activeCompany = activeCompany;
   self.customerList = ko.observableArray();
   self.selectedCustomer = ko.observable();
@@ -2082,16 +2126,19 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       self.selectedCustomerUpdatesData = true;
       if (self.activeCompany() !== undefined) {
         self.data.init(self.activeCompany().defaultNumDaysUntilPayment());
-        self.data.setCompanyId(self.activeCompanyId());
+        self.data.setCompany(self.activeCompany());
+        self.data.setCompanyId(self.activeCompany()._id());
         self.populatePromise().done(self.syncCustomerIdInput);
       } else {
         Notify_showMsg('info', i18n.t("app.invoice.newNok", {context: "noCompany"}));
         browserNavigateBack();
       }
     } else if (viewArray[0] == 'invoice_show' && viewArray.length > 1) {
-      self.selectedCustomerUpdatesData = false;
       var _id = viewArray[1];
       Log.info("InvoiceNewViewModel - activated - show #" + _id);
+      // Disable that the customer select via the subscription updates
+      // the customer fields stored in the invoice.
+      self.selectedCustomerUpdatesData = false;
       var getInvoiceJob = self.getInvoicePromise(_id);
       var populateJob = self.populatePromise();
       $.when(getInvoiceJob, populateJob).then(function(getInvoiceRes, populateRes) {
@@ -2168,7 +2215,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   self.populatePromise = function(force) {
     var deferred = $.Deferred();
     force = typeof force !== 'undefined' ? force : false;
-    var companyId = self.activeCompanyId();
+    var companyId = self.activeCompany()._id();
     if (companyId != null) {
       var customersJob = undefined;
       var groupTemplatesJob = undefined;
@@ -2241,7 +2288,6 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
         invoice.invoiceItemGroups = [newGroup];
       }
       self.data.setData(invoice);
-      //self.selectedCustomer(self.data.customer());
       self.selectedCurrency(self.data.currency());
     };
 
@@ -2269,8 +2315,8 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
 
   self.syncCustomerIdInput = function() {
     Log.info("InvoiceNewViewModel - syncCustomerIdInput");
-    var cid = self.data.customer().cid;
-    if (cid !== undefined) {
+    if (self.data.customer() !== undefined) {
+      var cid = self.data.customer().cid;
       for (var i = 0; i < self.customerList().length; i++) {
         if (cid === self.customerList()[i].data.cid) {
           Log.info("InvoiceNewViewModel - syncCustomerIdInput: cid=" + cid + " found");
@@ -2279,7 +2325,7 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
         }
       }
     } else {
-      Log.info("InvoiceNewViewModel - syncCustomerIdInput: customer.cid is undefined");        
+      Log.info("InvoiceNewViewModel - syncCustomerIdInput: customer is undefined");        
     }
   };
 
@@ -2356,6 +2402,10 @@ var InvoiceNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   };
   self.doTogglePaid = function(item) {
     self.data.doTogglePaid();
+  };
+
+  self.refreshCompanyData = function() {
+    self.data.setCompany(self.activeCompany());
   };
 };
 
@@ -2910,8 +2960,7 @@ var setupKo = function() {
       navViewModel.activeCompanyId);
   var invoiceListViewModel = new InvoiceListViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId);
-  var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView,
-      navViewModel.activeCompanyId, navViewModel.activeCompany);
+  var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView, navViewModel.activeCompany);
   var invoiceItemGroupTemplatesViewModel = new InvoiceItemGroupTemplatesViewModel(
       navViewModel.currentView);
 
