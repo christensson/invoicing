@@ -1262,7 +1262,7 @@
                   <div class="panel-body">
                     <div class="row">
                       <div class="col-md-12">
-                        <div class="checkbox">
+                        <div class="checkbox top0">
                           <label>
                             <input type="checkbox" value="" data-bind="checked: data.isCredit, disable: data.isLocked">
                             ${i18n.t('app.invoice.optIsCreditLbl')}
@@ -1274,7 +1274,7 @@
                             ${i18n.t('app.invoice.optIsCanceledLbl')}
                           </label>
                         </div>
-                        <div class="checkbox">
+                        <div class="checkbox bottom0">
                           <label>
                             <input type="checkbox" data-bind="checked: data.isPaid">
                             ${i18n.t('app.invoice.optIsPaidLbl')}
@@ -1305,42 +1305,34 @@
                       <h3>${i18n.t('app.invoice.extraOptCompanyHeader')}</h3>
                       <div class="row">
                         <div class="col-md-12">
-                          <button class="btn btn-info"
-                                  data-bind="click: refreshCompanyData,
-                                             disable: data.isLocked">
-                              <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
-                              ${i18n.t('app.invoice.refreshCompanyDataBtn')}
+                          <button class="btn btn-info" data-bind="click: refreshCompanyData, disable: data.isLocked">
+                            <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                            ${i18n.t('app.invoice.refreshCompanyDataBtn')}
                           </button>
                         </div>
                       </div>
-                      <div class="row top7">
-                        <div class="col-md-12">
-                          <div class="form-group">
-                            <label for="payCustomText" class="col-md-2 control-label">${i18n.t('app.invoice.paymentOptCustomTextHeader')}</label>
-                            <div class="col-sm-6">
-                              <textarea rows="4" id="payCustomText" class="form-control" data-bind="value: data.companyMirror_paymentCustomText"></textarea>
-                            </div>
+                      <div class="row top10">
+                        <div class="form-group">
+                          <label for="payCustomText" class="col-md-2 control-label">${i18n.t('app.invoice.paymentOptCustomTextHeader')}</label>
+                          <div class="col-sm-6">
+                            <textarea rows="4" id="payCustomText" class="form-control" data-bind="value: data.companyMirror_paymentCustomText"></textarea>
                           </div>
                         </div>
                       </div>
                       <div class="row top7">
-                        <div class="col-md-12">
-                          <div class="form-group">
-                            <label for="footerText" class="col-sm-2 control-label">${i18n.t('app.invoice.customTextFieldsFooterTextLbl')}</label>
-                            <div class="col-sm-4">
-                              <input type="text" id="footerText" class="form-control" data-bind="value: data.companyMirror_vatNrCustomText"></input>
-                            </div>
+                        <div class="form-group">
+                          <label for="footerText" class="col-sm-2 control-label">${i18n.t('app.invoice.customTextFieldsFooterTextLbl')}</label>
+                          <div class="col-sm-6">
+                            <input type="text" id="footerText" class="form-control" data-bind="value: data.companyMirror_vatNrCustomText"></input>
                           </div>
                         </div>
                       </div>
                       <div class="row top7">
-                        <div class="col-md-12">
-                          <div class="form-group">
-                            <label for="reverseChargeText" class="col-sm-2 control-label">${i18n.t('app.invoice.customTextFieldsReverseChargeTextLbl')}</label>
-                            <div class="col-sm-6">
-                              <textarea rows="4" id="reverseChargeText" class="form-control" data-bind="value: data.companyMirror_reverseChargeText" aria-describedby="reverseChargeTextHelp"></textarea>
-                              <span id="reverseChargeTextHelp" class="help-block">${i18n.t('app.invoice.customTextFieldsReverseChargeHelpText')}</span>
-                            </div>
+                        <div class="form-group">
+                          <label for="reverseChargeText" class="col-sm-2 control-label">${i18n.t('app.invoice.customTextFieldsReverseChargeTextLbl')}</label>
+                          <div class="col-sm-6">
+                            <textarea rows="4" id="reverseChargeText" class="form-control" data-bind="value: data.companyMirror_reverseChargeText" aria-describedby="reverseChargeTextHelp"></textarea>
+                            <span id="reverseChargeTextHelp" class="help-block">${i18n.t('app.invoice.customTextFieldsReverseChargeHelpText')}</span>
                           </div>
                         </div>
                       </div>
@@ -1367,10 +1359,10 @@
                       ${i18n.t('app.invoice.copyInvoiceBtn')}
                   </button>
                 </div>
-                        <label class="checkbox-inline left7">
-                          <input type="checkbox" data-bind="checked: data.isLocked">
-                          ${i18n.t('app.invoice.optIsLockedLbl')}
-                        </label>
+                <label class="checkbox-inline left7">
+                  <input type="checkbox" data-bind="checked: data.isLocked">
+                  ${i18n.t('app.invoice.optIsLockedLbl')}
+                </label>
               </div>
             </div> <!-- buttons panel -->
         </div>

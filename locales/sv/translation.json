@@ -277,7 +277,7 @@
             "customTextFieldsReverseChargeHelpText": "Texten %c.vatNr% ersätts automatiskt med kundens angivna momsregnr.",
             "customTextFieldsFooterTextLbl": "Valfritt textfält i fakturafot",
             "paymentOptCustomTextHeader": "Valfritt textfält efter totalsumma",
-            "refreshCompanyDataBtn": "Uppdatera fakturans företagsdata",
+            "refreshCompanyDataBtn": "Uppdatera fakturan med senaste företagsdata",
             "optIsLockedLbl": "Låst",
             "optIsPaidLbl": "Betald",
             "optIsCreditLbl": "Kreditfaktura",
