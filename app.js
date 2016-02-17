@@ -376,7 +376,11 @@ app.post("/api/company_logo/:companyId", ensureAuthenticated, upload.single('log
     return mydb.updateCompany(company);
   }).then(function(company) {
     console.log("Company logo set: " + JSON.stringify(company));
-    res.status(204).end();
+    var jsonRes = {
+      'logo': company.logo
+    };
+    res.status(200).json(jsonRes);
+    res.end();
   }).fail(
       myFailureHandler.bind(null, res));
 });

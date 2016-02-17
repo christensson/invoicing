@@ -191,7 +191,8 @@
             "saveNok": "Misslyckades att spara företag!",
             "saveNok_noName": "Företagsnamn måste anges!",
             "uploadLogoNok_noId": "Företaget måste sparas först!",
-            "uploadLogoNok_noFile": "Ingen logo vald!"
+            "uploadLogoNok_noFile": "Ingen logo vald!",
+            "uploadLogoNok_serverFailure": "Fel vid uppladdning av logo. Felkod från server: __status__"
         },
         "companyList": {
             "nameCol": "Företagsnamn",

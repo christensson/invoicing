@@ -372,11 +372,12 @@
                   <div data-bind="visible: data._id() != undefined">
                     <div class="row">
                       <form class="form-horizontal"
+                            id="logoUploadForm"
                             action="/api/company_logo"
                             accept="image/gif, image/jpeg, image/png"
                             method="POST"
-                            enctype="multipart/form-data"
-                            data-bind="submit: uploadLogo">
+                            data-bind="submit: uploadLogo"
+                            enctype="multipart/form-data">
                         <div class="col-sm-6">
                           <div class="input-group">
                             <input type="file" name="logo" id="companyLogoInput" class="form-control" placeholder="${i18n.t('app.company.logoSelectPlaceholder')}" data-bind="value: companyLogoInput"></input>

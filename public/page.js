@@ -1,11 +1,21 @@
 function Log(){};
 
 Log._getCallerInfo = function() {
+  var isFirefox = typeof InstallTrigger !== 'undefined';
+  var isChrome = !!window.chrome && !!window.chrome.webstore;
   var err = undefined;
   try { throw Error(''); } catch(e) { err = e; }
-  var callerLine = err.stack.split("\n")[4];
-  var callerFuncStart = callerLine.indexOf("at ") + 3;
-  return callerLine.slice(callerFuncStart, callerLine.length);
+  if (isChrome) {
+    var callerLine = err.stack.split("\n")[4];
+    var callerFuncStart = callerLine.indexOf("at ") + 3;
+    return callerLine.slice(callerFuncStart, callerLine.length);
+  } else if (isFirefox) {
+    var callerLine = err.stack.split("\n")[3];
+    var callerFuncEnd = callerLine.indexOf("@");
+    return callerLine.slice(0, callerFuncEnd);
+  } else {
+    return "-";
+  }
 };
 
 Log.backtrace = function(msg) {
@@ -477,6 +487,10 @@ var CompanyViewModel = function() {
     self.reverseChargeText(i18n.t("app.company.defaultReverseChargeCustomText"));
   };
 
+  self.setLogo = function(logo) {
+    self.logo(logo);
+  };
+
   self.updateServer = function(onCompletion) {
     if ((self._id() == undefined) && !self.isValid()) {
       Notify_showMsg('error', i18n.t("app.company.saveNok"));
@@ -727,27 +741,50 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       }
     });
   };
-  
+
   self.uploadLogo = function(formElement) {
     var _id = self.data._id();
-    Log.info("CompanyNewViewModel - uploadLogo: companyId=" + _id + ", logo=" + formElement.elements.logo.value);
-    Log.info("form data: " + JSON.stringify(formElement));
+    var form = document.getElementById('logoUploadForm');
+    Log.info("CompanyNewViewModel - uploadLogo: companyId=" + _id + ", logo=" + form.elements.logo.value);
+    Log.info("Form data: " + JSON.stringify(form.elements, null, 2));
     var submitForm = false;
     if (_id === undefined) {
       Notify_showMsg('error', i18n.t("app.company.uploadLogoNok", {context: "noId"}));
-    } else if (formElement.elements.logo.value.length == 0) {
+    } else if (form.elements.logo.value.length == 0) {
       Notify_showMsg('error', i18n.t("app.company.uploadLogoNok", {context: "noFile"}));
     } else {
-      formElement.action = "/api/company_logo/" + _id;
-      submitForm = true;
+      var formData = new FormData(form);
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4) // Upload done!
+        {          
+          Log.info("Upload done: status=" + xhr.status + ", res=" + xhr.responseText);
+          if (xhr.status == 200) { // Success
+            var logoJson = JSON.parse(xhr.responseText);
+            Log.info("Saved logo info: " + JSON.stringify(logoJson));
+            self.data.setLogo(logoJson.logo);
+            Cache.getCompany(self.data._id(), function(c) {
+              c.logo = logoJson.logo;
+              Cache.updateCompany(c);
+            });
+          } else {
+            Notify_showMsg('error', i18n.t("app.company.uploadLogoNok", {context: "serverFailure", "status": xhr.status}));
+          }
+        }
+      }; 
+      xhr.open('POST', "/api/company_logo/" + _id, true);
+      xhr.send(formData);
+
+      // Prevent normal submit handler...
+      submitForm = false;
     }
     return submitForm;
   };
-  
+
   self.setDefaultReverseChargeText = function() {
     self.data.setDefaultReverseChargeCustomText();
   };
-  
+
   document.getElementById("companyLogoInput").onchange = function() {
     var reader = new FileReader();
 

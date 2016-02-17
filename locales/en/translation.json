@@ -180,7 +180,8 @@
             "saveNok": "Company save failed!",
             "saveNok_noName": "Company name must be specified!",
             "uploadLogoNok_noId": "Company must be saved first!",
-            "uploadLogoNok_noFile": "No logo selected!"
+            "uploadLogoNok_noFile": "No logo selected!",
+            "uploadLogoNok_serverFailure": "Failed to upload logo. Error code received from server: __status__"
         },
         "companyList": {
             "nameCol": "Company Name",
