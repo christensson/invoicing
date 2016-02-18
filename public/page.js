@@ -279,6 +279,17 @@ var browserNavigateBack = function() {
   history.go(-1);
 };
 
+var inheritInvoiceStyleModel = function(self) {
+  self.invoiceStyleList = ko.observableArray([
+    "right", // First is default
+    "left"
+  ]);
+
+  self.getInvoiceStyleDesc = function(name) {
+    return i18n.t("app.invoiceStyle.description", {context: name});
+  }
+};
+
 var SettingsDataModel = function() {
   var self = this;
 
@@ -408,6 +419,7 @@ var CompanyViewModel = function() {
   self.logo = ko.observable();
   self.nextCid = ko.observable();
   self.nextIid = ko.observable();
+  self.invoiceStyle = ko.observable();
   self.nameError = ko.observable(false);
   self.hasErrorCss = ko.pureComputed(function() {
     // return this.nameError() ? "has-error" : "";
@@ -444,6 +456,7 @@ var CompanyViewModel = function() {
     self.logo(data.logo);
     self.nextCid(data.nextCid);
     self.nextIid(data.nextIid);
+    self.invoiceStyle(data.invoiceStyle);
   };
   
   self.init = function() {
@@ -476,7 +489,8 @@ var CompanyViewModel = function() {
         isValid : true,
         logo : undefined,
         nextCid : 100,
-        nextIid : 100
+        nextIid : 100,
+        invoiceStyle : "right"
       };
     self.setData(data);
   };
@@ -560,6 +574,7 @@ var CompanyViewModel = function() {
       logo : self.logo(),
       nextCid : parseInt(self.nextCid()),
       nextIid : parseInt(self.nextIid()),
+      invoiceStyle : self.invoiceStyle()
     };
     return res;
   };
@@ -672,6 +687,8 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
   self.activeCompany = activeCompany;
+
+  inheritInvoiceStyleModel(self);
   
   self.logoPath = ko.pureComputed(function() {
     var path = "";
@@ -1595,7 +1612,8 @@ var InvoiceDataViewModel = function() {
     'payment1',
     'payment2',
     'payment3',
-    'paymentFocus'
+    'paymentFocus',
+    'invoiceStyle'
   ];
 
   var companyFieldMirrorUpdate = function(field, val) {
@@ -2157,6 +2175,8 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   self.selectedCustomerUpdatesData = true;
 
   self.itemGroupList = ko.observableArray();
+
+  inheritInvoiceStyleModel(self);
   
   self.newGroup = function(g) {
     var group = ko.toJS(g)

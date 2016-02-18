@@ -31,6 +31,7 @@
     "isValid": true,
     "nextCid": 101,
     "nextIid": 101,
+    "invoiceStyle": "left",
     "uid": "56ba53ecaf82211b4ef31d22",
     "logo": {
       "mimetype": "image/png",

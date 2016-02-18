@@ -3,6 +3,11 @@ var fs = require('fs');
 var util = require('./public/util.js');
 var i18n = require('i18next');
 
+var convMmToDpi = function(lengthMm) {
+  // 1 inch = 72 dots = 25.4 mm = 2,8346 dots/mm
+  return (lengthMm * 72) / 25.4;
+};
+
 module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFile, isDemoMode, debug, verbosity) {
   'use strict';
   isDemoMode = typeof isDemoMode !== 'undefined' ? isDemoMode : false;
@@ -22,6 +27,13 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
    *  }
    * 
    */
+  var invoiceStyle = "right"; // Default
+  if (invoice.company.invoiceStyle) {
+    invoiceStyle = invoice.company.invoiceStyle;
+  }
+  
+  console.log("invoiceStyle: " + invoiceStyle);  
+
   var style = {
     header: {
       fontSize: 22,
@@ -139,29 +151,53 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
   var pageFooterTopY = undefined;
   var finalSummaryHeight = undefined;
   
-  var headerStringX = 345;
+  // Default X values is for invoiceStyle "right"
+  var headerStringX = convMmToDpi(114 + 10) - margin;
   var headerStringY = 30;
   var headerStringWidth = 195;
-  var subHeaderStringX = 345;
+  var subHeaderStringX = headerStringX;
   var subHeaderStringY = 55;
   var subHeaderStringWidth = 190;
-  
-  var demoStringX = 345;
-  var demoStringY = 60;
 
-  var customerAddrX = 345;
-  var customerAddrY = 100;
+  // C5 Envelope window is 100 x 34 mm
+  // H2 placement is 114 mm from left, 15 mm from right and 44 mm from top.
+  // Reference: http://epi.mapsverige.se/upload/Produktkatalogen/Dokument/Kuvert%20F%C3%B6nsterplacering.pdf
+  var envelopeWinX = convMmToDpi(114);
+  var envelopeWinY = convMmToDpi(44);
+  var envelopeWinWidth = convMmToDpi(210 - 114 - 15);
+  var envelopeWinHeight = convMmToDpi(34);
+
+  var customerAddrX = headerStringX;
+  var customerAddrY = convMmToDpi(45);
   var customerAddrWidth = 195;
+  var customerAddrCaptionX = customerAddrX;
+  var customerAddrCaptionY = customerAddrY - convMmToDpi(7);
   
   var companyLogoX = margin;
   var companyLogoY = 30;
-  var companyLogoWidth = 285;
-  var companyLogoHeight = 120;
+  var companyLogoWidth = convMmToDpi(100);
+  var companyLogoHeight = convMmToDpi(50);
+  var companyLogoAlign = "left";
 
-  var companyNameX = 0;
-  var companyNameY = 160;
-  var companyNameWidth = 330;
+  var companyNameX = companyLogoX - margin;
+  var companyNameY = companyLogoY + companyLogoHeight + convMmToDpi(4);
+  var companyNameWidth = companyLogoWidth;
+  var companyNameAlign = "left";
   
+  if (invoiceStyle === "left") {
+    // V2 placement is 15 mm from left, 114 mm from right and 44 mm from top.
+    headerStringX = 0;
+    subHeaderStringX = 0;
+    envelopeWinX = convMmToDpi(15);
+    envelopeWinWidth = convMmToDpi(210 - 114 - 15);
+    customerAddrX = convMmToDpi(20) - margin;
+    customerAddrCaptionX = customerAddrX;
+    companyLogoX = convMmToDpi(99);
+    companyNameX = companyLogoX - margin;
+    companyLogoAlign = "right";
+    companyNameAlign = "right";
+  }
+
   var demoModeBgImg = "img/invoice_demo.png";
   var demoModeBgW = 442;
   var demoModeBgH = 442;
@@ -226,29 +262,37 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     }
     
     x.band([{data: "Kund", width: customerAddrWidth, fontSize: style.customerAddrCaption.fontSize}],
-           {x: customerAddrX, y: customerAddrY, font: style.customerAddrCaption.font});
+           {x: customerAddrCaptionX, y: customerAddrCaptionY, font: style.customerAddrCaption.font});
     x.fontSize(style.customerAddr.fontSize);
     x.font(style.customerAddr.font);
     x.band([{data: invoice.customer.name, width: customerAddrWidth}],
-        {x: customerAddrX, y: customerAddrY + 20, border: debugBorderWidth});
+        {x: customerAddrX, y: customerAddrY, border: debugBorderWidth});
     x.band([{data: invoice.customer.addr1, width: customerAddrWidth}], {x: customerAddrX, border: debugBorderWidth});
     x.band([{data: invoice.customer.addr2, width: customerAddrWidth}], {x: customerAddrX, border: debugBorderWidth});
     x.band([{data: invoice.customer.addr3, width: customerAddrWidth}], {x: customerAddrX, border: debugBorderWidth});
     
+    if (debug) {
+      x.box(envelopeWinX, envelopeWinY, envelopeWinWidth, envelopeWinHeight, {dash: 1});
+    }
+
     if (invoice.company.logo !== undefined && invoice.company.logo.path !== undefined) {
       x.image(invoice.company.logo.path, {
-        x: companyLogoX, y: companyLogoY, align: "left", fit: [companyLogoWidth, companyLogoHeight]});
+        x: companyLogoX, y: companyLogoY, align: companyLogoAlign, fit: [companyLogoWidth, companyLogoHeight]});
       if (debug) {
-        x.box(companyLogoX, companyLogoY, companyLogoX + companyLogoWidth, companyLogoY + companyLogoHeight);
+        x.box(companyLogoX, companyLogoY, companyLogoWidth, companyLogoHeight);
       }
     } else {
       console.log("doInvoiceReport: No company logo configured for companyId=" + invoice.company._id);
     }
 
-    x.setCurrentX(companyNameX);
     x.setCurrentY(companyNameY);
-    x.band([{data: invoice.company.name, width: companyNameWidth, fontSize: style.companyName.fontSize, fontBold: true}],
-        {font: style.companyName.font, border: debugBorderWidth});
+    if (companyNameAlign === "left") {
+      companyNameAlign = x.left;
+    } else if (companyNameAlign === "right") {
+      companyNameAlign = x.right;
+    }
+    x.band([{data: invoice.company.name, width: companyNameWidth, fontSize: style.companyName.fontSize, fontBold: true, align: companyNameAlign}],
+        {font: style.companyName.font, border: debugBorderWidth, x: companyNameX});
 
     x.addY(10);
     

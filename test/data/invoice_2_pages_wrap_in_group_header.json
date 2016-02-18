@@ -667,38 +667,6 @@
           "hasDiscount": false,
           "hasTotal": true,
           "isValid": true
-        },
-        {
-          "description": "15",
-          "price": 0,
-          "count": 1,
-          "vat": 25,
-          "discount": 0,
-          "total": 0,
-          "isTextOnly": false,
-          "hasDesc": true,
-          "hasPrice": true,
-          "hasCount": true,
-          "hasVat": true,
-          "hasDiscount": false,
-          "hasTotal": true,
-          "isValid": true
-        },
-        {
-          "description": "16",
-          "price": 0,
-          "count": 1,
-          "vat": 25,
-          "discount": 0,
-          "total": 0,
-          "isTextOnly": false,
-          "hasDesc": true,
-          "hasPrice": true,
-          "hasCount": true,
-          "hasVat": true,
-          "hasDiscount": false,
-          "hasTotal": true,
-          "isValid": true
         }
       ],
       "totalExclVat": 0,

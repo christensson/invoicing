@@ -171,6 +171,8 @@
             "defaultPayment2Caption": "Plusgiro",
             "defaultPaymentCustomText": "Dröjsmålsränta 25%",
             "defaultVatNrCustomText": "Innehar F-skattebevis",
+            "reportStylePaneHeader": "Rapportutseende",
+            "invoiceReportStyleLbl": "Fakturautseende",
             "countersPaneHeader": "Räknare",
             "countersNextCustomerNrLbl": "Nästa kundnr",
             "countersNextInvoiceNrLbl": "Nästa fakturanr",
@@ -274,6 +276,7 @@
             "extraOptToggleLbl_hide": "Dölj ytterligare alternativ",
             "extraOptCustomerHeader": "Alternativ importerade från kund",
             "extraOptCompanyHeader": "Alternativ importerade från aktivt företag",
+            "invoiceReportStyleLbl": "Fakturautseende",
             "customTextFieldsReverseChargeTextLbl": "Omvänd skattskyldighet text",
             "customTextFieldsReverseChargeHelpText": "Texten %c.vatNr% ersätts automatiskt med kundens angivna momsregnr.",
             "customTextFieldsFooterTextLbl": "Valfritt textfält i fakturafot",
@@ -348,6 +351,10 @@
             "isAdminCol": "Administratör",
             "refreshBtn": "Uppdatera",
             "getNok": "Misslyckades med att hämta inbjudningar!"
+        },
+        "invoiceStyle": {
+            "description_right": "Standard - fönsterkuvert höger (C5 - H2)",
+            "description_left": "Standard - fönsterkuvert vänster (C5 - V2)"
         }
     }
 }

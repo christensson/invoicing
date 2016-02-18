@@ -161,6 +161,8 @@
             "defaultPayment2Caption": "Postgiro",
             "defaultPaymentCustomText": "",
             "defaultVatNrCustomText": "",
+            "reportStylePaneHeader": "Report design",
+            "invoiceReportStyleLbl": "Invoice report",
             "countersPaneHeader": "Counters",
             "countersNextCustomerNrLbl": "Next customer nr",
             "countersNextInvoiceNrLbl": "Next invoice nr",
@@ -263,6 +265,7 @@
             "extraOptToggleLbl_hide": "Hide additional options",
             "extraOptCustomerHeader": "Options imported from customer",
             "extraOptCompanyHeader": "Options imported from active company",
+            "invoiceReportStyleLbl": "Invoice report",
             "customTextFieldsReverseChargeTextLbl": "Reverse charge text",
             "customTextFieldsReverseChargeHelpText": "Special text %c.vatNr% is automatically replaced by the customers VAT-nr.",
             "customTextFieldsFooterTextLbl": "Custom text in invoice footer",
@@ -337,6 +340,10 @@
             "isAdminCol": "Admin",
             "refreshBtn": "Refresh",
             "getNok": "Failed to get invitations!"
+        },
+        "invoiceStyle": {
+            "description_right": "Default - window envelop right (C5 - H2)",
+            "description_left": "Default - window envelop left (C5 - V2)"
         }
     }
 }
