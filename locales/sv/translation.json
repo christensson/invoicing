@@ -172,7 +172,6 @@
             "defaultPaymentCustomText": "Dröjsmålsränta 25%",
             "defaultVatNrCustomText": "Innehar F-skattebevis",
             "reportStylePaneHeader": "Rapportutseende",
-            "invoiceReportStyleLbl": "Fakturautseende",
             "countersPaneHeader": "Räknare",
             "countersNextCustomerNrLbl": "Nästa kundnr",
             "countersNextInvoiceNrLbl": "Nästa fakturanr",
@@ -276,7 +275,6 @@
             "extraOptToggleLbl_hide": "Dölj ytterligare alternativ",
             "extraOptCustomerHeader": "Alternativ importerade från kund",
             "extraOptCompanyHeader": "Alternativ importerade från aktivt företag",
-            "invoiceReportStyleLbl": "Fakturautseende",
             "customTextFieldsReverseChargeTextLbl": "Omvänd skattskyldighet text",
             "customTextFieldsReverseChargeHelpText": "Texten %c.vatNr% ersätts automatiskt med kundens angivna momsregnr.",
             "customTextFieldsFooterTextLbl": "Valfritt textfält i fakturafot",
@@ -320,7 +318,31 @@
             "printNok_noId": "Utskriften misslyckades, fakturan har inget id!"
         },
         "invoiceReport": {
-            "fileName": "faktura-__iid__-kund-__cid__.pdf"
+            "fileName": "faktura-__iid__-kund-__cid__.pdf",
+            "decimalSeparator": ",",
+            "headerString": "FAKTURA",
+            "headerString_isCredit": "KREDITFAKTURA",
+            "subHeaderString": "",
+            "subHeaderString_isCanceled": "*** MAKULERAD ***",
+            "customerAddrCaption": "Kund",
+            "lastPaymentDateCaption": "Oss tillhanda senast",
+            "invoiceDateCaption": "Fakturadatum",
+            "invoiceNrCaption": "Fakturanr",
+            "customerNrCaption": "Kundnr",
+            "projIdCaption": "Projektid",
+            "ourRefCaption": "Vår referens",
+            "yourRefCaption": "Er referens",
+            "groupSumLbl": "Summa:",
+            "summaryTotalExclVatLbl": "Netto:",
+            "summaryTotalVatLbl": "Moms:",
+            "summaryTotalToPayAdjLbl": "Öresutjämning:",
+            "summaryTotalToPayLbl": "Att betala:",
+            "summaryTotalIsCanceledLbl": "*** MAKULERAD ***",
+            "companyAddrCaption": "Adress",
+            "companyVatNrCaption": "Momsreg nr",
+            "companyOrgNrCaption": "Organisationsnr",
+            "footerAdvertismentLbl": "Lätt Fakturering",
+            "footerPageLbl": "Sida "
         },
         "debugAndTest": {
             "pageHeader": "Debug och Test",
@@ -353,8 +375,14 @@
             "getNok": "Misslyckades med att hämta inbjudningar!"
         },
         "invoiceStyle": {
+            "selectLbl": "Fakturautseende",
             "description_right": "Standard - fönsterkuvert höger (C5 - H2)",
             "description_left": "Standard - fönsterkuvert vänster (C5 - V2)"
-        }
+        },
+        "invoiceLng": {
+            "selectLbl": "Fakturaspråk",
+            "description_sv": "Svenska",
+            "description_en": "Engelska"
+        }        
     }
 }

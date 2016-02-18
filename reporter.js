@@ -1,6 +1,7 @@
 var Report = require('fluentreports').Report;
 var fs = require('fs');
 var util = require('./public/util.js');
+var defaults = require('./public/default.js').get();
 var i18n = require('i18next');
 
 var convMmToDpi = function(lengthMm) {
@@ -27,12 +28,35 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
    *  }
    * 
    */
-  var invoiceStyle = "right"; // Default
+  var invoiceStyle = defaults.invoiceReportStyle;
   if (invoice.company.invoiceStyle) {
     invoiceStyle = invoice.company.invoiceStyle;
   }
   
-  console.log("invoiceStyle: " + invoiceStyle);  
+  var invoiceLng = defaults.invoiceLng;
+  if (invoice.customer.invoiceLng) {
+    invoiceLng = invoice.customer.invoiceLng;
+  }
+
+  var getStr = function(key) {
+    var opt = {lng: invoiceLng};
+    var contextSepIdx = key.indexOf('_');
+    if (contextSepIdx != -1) {
+      opt.context = key.slice(contextSepIdx + 1);
+      key = key.slice(0, contextSepIdx);
+    };
+    var tStr = i18n.t('app.invoiceReport.' + key, opt);
+    if (verbosity > 3) {
+      console.log("getStr: translate key=" + key +
+        ", opt=" + JSON.stringify(opt) + " => " + tStr);
+    }
+    return tStr;
+  };
+
+  if (verbosity > 0) {
+    console.log("invoiceStyle: " + invoiceStyle);  
+    console.log("invoiceLng: " + invoiceLng);
+  }
 
   var style = {
     header: {
@@ -246,13 +270,13 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
   };
 
   var mytitleheader = function(x) {
-    var headerString = "FAKTURA";
+    var headerString = getStr("headerString");
     if (invoice.isCredit) {
-      headerString = "KREDITFAKTURA";
+      headerString = getStr("headerString_isCredit");
     }
-    var subHeaderString = "";
+    var subHeaderString = getStr("subHeaderString");
     if (invoice.isCanceled) {
-      subHeaderString = "*** MAKULERAD ***";
+      subHeaderString = getStr("subHeaderString_isCanceled");
     }
     x.band([{data: headerString, width: headerStringWidth, fontSize: style.header.fontSize, fontBold: true}],
            {x: headerStringX, y: headerStringY, font: style.header.font, border: debugBorderWidth});
@@ -261,7 +285,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
              {x: subHeaderStringX, y: subHeaderStringY, font: style.subHeader.font, border: debugBorderWidth});
     }
     
-    x.band([{data: "Kund", width: customerAddrWidth, fontSize: style.customerAddrCaption.fontSize}],
+    x.band([{data: getStr("customerAddrCaption"), width: customerAddrWidth, fontSize: style.customerAddrCaption.fontSize}],
            {x: customerAddrCaptionX, y: customerAddrCaptionY, font: style.customerAddrCaption.font});
     x.fontSize(style.customerAddr.fontSize);
     x.font(style.customerAddr.font);
@@ -301,20 +325,21 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
 
   var mypageheader = function(x) {
     var topY = x.getCurrentY();
+    var headerColSize = [80, 60, 50, 50, 90, 90, 90];
     var headerList =
-      [{cap: "Oss tillhanda senast", data: formatDate(invoice.lastPaymentDate), isBold: true, colSize: 80},
-       {cap: "Fakturadatum", data: formatDate(invoice.date), isBold: false, colSize: 60},
-       {cap: "Fakturanr", data: "" + invoice.iid, isBold: false, colSize: 40},
-       {cap: "Kundnr", data: "" + invoice.customer.cid, isBold: false, colSize: 40}
+      [{cap: getStr("lastPaymentDateCaption"), data: formatDate(invoice.lastPaymentDate), isBold: true, colSize: headerColSize[0]},
+       {cap: getStr("invoiceDateCaption"), data: formatDate(invoice.date), isBold: false, colSize: headerColSize[1]},
+       {cap: getStr("invoiceNrCaption"), data: "" + invoice.iid, isBold: false, colSize: headerColSize[2]},
+       {cap: getStr("customerNrCaption"), data: "" + invoice.customer.cid, isBold: false, colSize: headerColSize[3]}
        ];
     if (invoice.projId !== undefined && invoice.projId.length > 0) {
-      headerList.push({cap: "Projektnr", data: invoice.projId, isBold: false, colSize: 100});
+      headerList.push({cap: getStr("projIdCaption"), data: invoice.projId, isBold: false, colSize: headerColSize[4]});
     }
     if (invoice.ourRef !== undefined && invoice.ourRef.length > 0) {
-      headerList.push({cap: "Vår referens", data: invoice.ourRef, isBold: false, colSize: 100});
+      headerList.push({cap: getStr("ourRefCaption"), data: invoice.ourRef, isBold: false, colSize: headerColSize[5]});
     }
     if (invoice.yourRef !== undefined && invoice.yourRef.length > 0) {
-      headerList.push({cap: "Er referens", data: invoice.yourRef, isBold: false, colSize: 100});
+      headerList.push({cap: getStr("yourRefCaption"), data: invoice.yourRef, isBold: false, colSize: headerColSize[6]});
     }
     
     var captionList = [];
@@ -501,7 +526,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
         x.addY(detailsGroupSummaryTopPadding);
         x.fontSize(style.details.groupSummary.fontSize);
         x.band( [
-          {data: "Summa:", width: detailsSummaryCaptionColWidth, align: x.right, fontBold: style.details.groupSummary.bold, font: style.details.groupSummary.caption.font},
+          {data: getStr("groupSumLbl"), width: detailsSummaryCaptionColWidth, align: x.right, fontBold: style.details.groupSummary.bold, font: style.details.groupSummary.caption.font},
           {data: totalExclVatStr, width: detailsSummaryValueColWidth, align: x.right, font: style.details.groupSummary.value.font}
         ], {fontBold: 0, border: debugBorderWidth, wrap: 1, padding: 2} );
         drawGroupDetailBars(x, groupSummaryTopY, x.getCurrentY(), detailsBarsLineThickness);
@@ -548,32 +573,32 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     x.newLine();
     x.font(style.summary.font);
     x.band( [
-             {data: "Netto:", width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
+             {data: getStr("summaryTotalExclVatLbl"), width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
              {data: util.formatCurrency(invoice.totalExclVat, {currencyStr: invoice.currency}),
               width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     if (!(useReverseCharge || noVat)) {
       x.band( [
-               {data: "Moms:", width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
+               {data: getStr("summaryTotalVatLbl"), width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
                {data: util.formatCurrency(totalVat, {currencyStr: invoice.currency}),
                 width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
              ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     }
     x.band( [
-             {data: "Öresutjämning:", width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
+             {data: getStr("summaryTotalToPayAdjLbl"), width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
              {data: util.formatCurrency(amountToPayAdjustment, {currencyStr: invoice.currency}),
               width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     x.addY(summaryAmountToPayTopPadding);
     x.band( [
-             {data: "Att betala:", width: summaryCaptionColWidth, align: x.right, font: style.summary.caption.font, fontBold: 1},
+             {data: getStr("summaryTotalToPayLbl"), width: summaryCaptionColWidth, align: x.right, font: style.summary.caption.font, fontBold: 1},
              {data: util.formatCurrency(amountToPay, {currencyStr: invoice.currency}),
               width: summaryValueColWidth, align: x.right, font: style.summary.value.font, fontBold: 1}
              ], {fontBold: 1, border:0, width: 0, wrap: 1} );
     if (invoice.isCanceled) {
       x.band( [
                {data: "", width: summaryCaptionColWidth, align: x.right},
-               {data: "*** MAKULERAD ***", width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
+               {data: getStr("summaryTotalIsCanceledLbl"), width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
                ], {fontBold: 1, border:0, width: 0, wrap: 1} );
     }
 
@@ -622,7 +647,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     var c = invoice.company;
     var hasExtraBand = false;
     var col1 = {
-        cap: "Adress",
+        cap: getStr("companyAddrCaption"),
         text: [c.name, c.addr1, c.addr2, c.addr3]
     };
     if (c.addr3 !== undefined && c.addr3.length > 0) {
@@ -636,9 +661,9 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
       hasExtraBand = true;
     }
 
-    var col3 = [{cap: "Momsreg nr", text: c.vatNr}];
+    var col3 = [{cap: getStr("companyVatNrCaption"), text: c.vatNr}];
     if (c.orgNr !== undefined && c.orgNr.length > 0) {
-      col3.push({cap: "Organisationsnr", text: c.orgNr});
+      col3.push({cap: getStr("companyOrgNrCaption"), text: c.orgNr});
       hasExtraBand = true;
     }
     col3.push({cap: "", text: c.vatNrCustomText});
@@ -701,8 +726,8 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     }
     x.addY(6);
     x.band( [
-        {data: "Lätt Fakturering", width: footerLineMaxX/2, align: x.left, fontSize: style.footer.brand.fontSize},
-        {data: "Sida " + x.currentPage(), width: footerLineMaxX/2 - margin, align: x.right, fontSize: style.footer.pageNumber.fontSize}
+        {data: getStr("footerAdvertismentLbl"), width: footerLineMaxX/2, align: x.left, fontSize: style.footer.brand.fontSize},
+        {data: getStr("footerPageLbl") + x.currentPage(), width: footerLineMaxX/2 - margin, align: x.right, fontSize: style.footer.pageNumber.fontSize}
         ], {border: debugBorderWidth, font: style.footer.font});
     if (pageFooterHeight === undefined) {
       pageFooterHeight = x.getCurrentY() - mypagefooterTopY;

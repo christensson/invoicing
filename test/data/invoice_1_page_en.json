@@ -59,7 +59,8 @@
     "email": "",
     "useReverseCharge": true,
     "contact": "",
-    "isValid": true
+    "isValid": true,
+    "invoiceLng": "en"
   },
   "yourRef": "Pelle",
   "ourRef": "Marcus",

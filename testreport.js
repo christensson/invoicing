@@ -3,6 +3,7 @@ var reporter = require('./reporter.js');
 var mydb = require('./mydb.js');
 var mongodb = require('mongodb');
 var ObjectID = mongodb.ObjectID;
+var i18n = require('i18next');
 Q = require('q');
 
 function increaseVerbosity(v, total) {
@@ -18,6 +19,30 @@ args.version('0.0.1')
 .option('--real_db', 'Query real DB, not local development DB')
 .option('-v, --verbose', 'Be more verbose', increaseVerbosity, 0)
 .parse(process.argv);
+
+var i18nInit = function() {
+  var deferred = Q.defer();
+  // i18n
+  i18n.init(
+    {
+      lng: 'sv',
+      preload: ["sv", "en"],
+      lngWhitelist: ["sv", "en"],
+      fallbackLng: ['sv'],
+      saveMissing: false,
+      debug: true,
+      ignoreRoutes: ['uploads/', 'public/img/', 'public/', 'views/']
+    },
+    function(err, t) {
+      if (err) {
+        deferred.reject(err);
+      } else {
+        deferred.resolve(t);
+      }
+    }
+  );
+  return deferred.promise;
+};
 
 console.log("Test report!");
 
@@ -47,17 +72,22 @@ if (args.invoice_id) {
 
 var tmpDir = __dirname + "/tmp";
 
-var userPromise = Q();
+i18nInitPromise = i18nInit();
 
 renderInvoice = function(invoice) {
   if (invoice == undefined) {
     console.error("Invoice not found!");
     process.exit(1);
   } else {
-    reporter.doInvoiceReport(invoice, tmpDir, function(reportFilename) {
-      console.log("onCompletion: reportFilename=" + reportFilename);
-      process.exit();
-    }, args.output, demoMode, debug, args.verbose);
+    i18nInitPromise.then(function(t) {
+      reporter.doInvoiceReport(invoice, tmpDir, function(reportFilename) {
+        console.log("onCompletion: reportFilename=" + reportFilename);
+        process.exit();
+      }, args.output, demoMode, debug, args.verbose);
+    }).fail(function(err) {
+      console.log("ERROR: i18n.init: " + err);
+      process.exit(1);
+    });
   }
 };
 
@@ -77,7 +107,7 @@ getJsonFromFile = function(fileName) {
   return deferred.promise;
 };
 
-userPromise.then(function() {
+Q().then(function() {
   if (args.json) {
     console.log("Get invoice data from JSON file: " + args.json);
     return getJsonFromFile(args.json);

@@ -16,9 +16,7 @@ var multer = require('multer');
 var i18n = require('i18next');
 var simLatency = require('express-simulate-latency');
 var bcrypt = require('bcryptjs');
-
-// Add 'en' below to enable english...
-var enabledLanguages = ['sv'];
+var defaults = require('./public/default.js').get();
 
 function list(val) {
   return val.split(',');
@@ -95,11 +93,11 @@ var upload = multer({
 
 // i18n
 i18n.init({
-  lng: 'sv',
-  preload: enabledLanguages,
-  lngWhitelist: enabledLanguages,
-  fallbackLng: ['sv'],
-  saveMissing: true,
+  lng: defaults.defaultLng,
+  preload: defaults.enabledLngList,
+  lngWhitelist: defaults.enabledLngList,
+  fallbackLng: [defaults.defaultLng],
+  saveMissing: false,
   debug: true,
   ignoreRoutes: ['uploads/', 'public/img/', 'public/', 'views/']
 });
@@ -705,7 +703,7 @@ app.get('/signin', function(req, res) {
   };
   signinTemplate.render({
     msg : msg,
-    lngList : enabledLanguages,
+    lngList : defaults.uiEnabledLngList,
   }, res);
 });
 

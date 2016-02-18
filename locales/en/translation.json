@@ -162,7 +162,6 @@
             "defaultPaymentCustomText": "",
             "defaultVatNrCustomText": "",
             "reportStylePaneHeader": "Report design",
-            "invoiceReportStyleLbl": "Invoice report",
             "countersPaneHeader": "Counters",
             "countersNextCustomerNrLbl": "Next customer nr",
             "countersNextInvoiceNrLbl": "Next invoice nr",
@@ -265,7 +264,6 @@
             "extraOptToggleLbl_hide": "Hide additional options",
             "extraOptCustomerHeader": "Options imported from customer",
             "extraOptCompanyHeader": "Options imported from active company",
-            "invoiceReportStyleLbl": "Invoice report",
             "customTextFieldsReverseChargeTextLbl": "Reverse charge text",
             "customTextFieldsReverseChargeHelpText": "Special text %c.vatNr% is automatically replaced by the customers VAT-nr.",
             "customTextFieldsFooterTextLbl": "Custom text in invoice footer",
@@ -309,7 +307,31 @@
             "printNok_noId": "Cannot print invoice without id!"
         },
         "invoiceReport": {
-            "fileName": "invoice-__iid__-customer-__cid__.pdf"
+            "fileName": "invoice-__iid__-customer-__cid__.pdf",
+            "decimalSeparator": ".",
+            "headerString": "INVOICE",
+            "headerString_isCredit": "CREDIT INVOICE",
+            "subHeaderString": "",
+            "subHeaderString_isCanceled": "*** CANCELED ***",
+            "customerAddrCaption": "Customer",
+            "lastPaymentDateCaption": "Payment Due By",
+            "invoiceDateCaption": "Invoice Date",
+            "invoiceNrCaption": "Invoice Nr",
+            "customerNrCaption": "Customer Nr",
+            "projIdCaption": "Project Id",
+            "ourRefCaption": "Our Reference",
+            "yourRefCaption": "Your Reference",
+            "groupSumLbl": "Sum:",
+            "summaryTotalExclVatLbl": "Total Excl VAT:",
+            "summaryTotalVatLbl": "VAT:",
+            "summaryTotalToPayAdjLbl": "Cash Rounding:",
+            "summaryTotalToPayLbl": "Amount Due:",
+            "summaryTotalIsCanceledLbl": "*** CANCELED ***",
+            "companyAddrCaption": "Address",
+            "companyVatNrCaption": "VAT Reg. Nr",
+            "companyOrgNrCaption": "Organisation Nr",
+            "footerAdvertismentLbl": "Lätt Fakturering",
+            "footerPageLbl": "Page "
         },
         "debugAndTest": {
             "pageHeader": "Debug and Test",
@@ -342,8 +364,14 @@
             "getNok": "Failed to get invitations!"
         },
         "invoiceStyle": {
+            "selectLbl": "Invoice report",
             "description_right": "Default - window envelop right (C5 - H2)",
             "description_left": "Default - window envelop left (C5 - V2)"
+        },
+        "invoiceLng": {
+            "selectLbl": "Invoice language",
+            "description_sv": "Swedish",
+            "description_en": "English"
         }
     }
 }

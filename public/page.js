@@ -280,13 +280,18 @@ var browserNavigateBack = function() {
 };
 
 var inheritInvoiceStyleModel = function(self) {
-  self.invoiceStyleList = ko.observableArray([
-    "right", // First is default
-    "left"
-  ]);
+  self.invoiceStyleList = ko.observableArray(Default.get().invoiceReportStyleList);
 
   self.getInvoiceStyleDesc = function(name) {
     return i18n.t("app.invoiceStyle.description", {context: name});
+  }
+};
+
+var inheritInvoiceLngModel = function(self) {
+  self.invoiceLngList = ko.observableArray(Default.get().invoiceLngList);
+
+  self.getInvoiceLngDesc = function(name) {
+    return i18n.t("app.invoiceLng.description", {context: name});
   }
 };
 
@@ -456,6 +461,9 @@ var CompanyViewModel = function() {
     self.logo(data.logo);
     self.nextCid(data.nextCid);
     self.nextIid(data.nextIid);
+    if (data.invoiceStyle === undefined) {
+      data.invoiceStyle = Default.get().invoiceReportStyle;
+    }
     self.invoiceStyle(data.invoiceStyle);
   };
   
@@ -488,9 +496,9 @@ var CompanyViewModel = function() {
         reverseChargeText : i18n.t("app.company.defaultReverseChargeCustomText"),
         isValid : true,
         logo : undefined,
-        nextCid : 100,
-        nextIid : 100,
-        invoiceStyle : "right"
+        nextCid : Default.get().firstCid,
+        nextIid : Default.get().firstIid,
+        invoiceStyle : Default.get().invoiceReportStyle
       };
     self.setData(data);
   };
@@ -835,6 +843,7 @@ var CustomerViewModel = function() {
   self.contact = ko.observable();
   self.isValid = ko.observable();
   self.companyId = ko.observable();
+  self.invoiceLng = ko.observable();
   
   self.nameError = ko.observable(false);
   self.hasErrorCss = ko.pureComputed(function() {
@@ -860,6 +869,10 @@ var CustomerViewModel = function() {
     self.contact(data.contact);
     self.isValid(data.isValid);
     self.companyId(data.companyId);
+    if (data.invoiceLng === undefined) {
+      data.invoiceLng = Default.get().invoiceLng;
+    }
+    self.invoiceLng(data.invoiceLng);
   };
 
   self.init = function() {
@@ -881,6 +894,7 @@ var CustomerViewModel = function() {
       useReverseCharge : false,
       contact : "",
       isValid : true,
+      invoiceLng : Default.get().invoiceLng,
     };
     self.setData(data);
   };
@@ -954,7 +968,8 @@ var CustomerViewModel = function() {
       noVat : self.noVat(),
       useReverseCharge : self.useReverseCharge(),
       contact : self.contact(),
-      isValid : self.isValid()
+      isValid : self.isValid(),
+      invoiceLng : self.invoiceLng()
     };
     return res;
   };
@@ -1043,6 +1058,8 @@ var CustomerNewViewModel = function(currentView, activeCompanyId) {
 
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
+
+  inheritInvoiceLngModel(self);
   
   self.currentView.subscribe(function(newValue) {
     self.data.init();
@@ -1587,7 +1604,8 @@ var InvoiceDataViewModel = function() {
     'name',
     'addr1',
     'addr2',
-    'addr3'
+    'addr3',
+    'invoiceLng'
   ];
 
   var customerFieldMirrorUpdate = function(field, val) {
@@ -2177,6 +2195,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   self.itemGroupList = ko.observableArray();
 
   inheritInvoiceStyleModel(self);
+  inheritInvoiceLngModel(self);
   
   self.newGroup = function(g) {
     var group = ko.toJS(g)

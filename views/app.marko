@@ -350,7 +350,7 @@
                 </div>
                 <div class="panel-body">
                   <div class="form-group">
-                    <label for="invoiceStyleSelect" class="col-sm-2 control-label">${i18n.t('app.company.invoiceReportStyleLbl')}</label>
+                    <label for="invoiceStyleSelect" class="col-sm-2 control-label">${i18n.t('app.invoiceStyle.selectLbl')}</label>
                     <div class="col-sm-4">
                       <select id="invoiceStyleSelect" class="form-control"
                         data-bind="options: invoiceStyleList, optionsText: getInvoiceStyleDesc, value: data.invoiceStyle">
@@ -551,6 +551,15 @@
                       <input type="checkbox" data-bind="checked: data.useReverseCharge" aria-label=" ${i18n.t('app.customer.optionUseReverseChargeLbl')}">
                       ${i18n.t('app.customer.optionUseReverseChargeLbl')}
                     </label>
+                  </div>
+                  <hr/>
+                  <div class="form-group">
+                    <label for="invoiceLngSelect" class="col-sm-2 control-label">${i18n.t('app.invoiceLng.selectLbl')}</label>
+                    <div class="col-sm-4">
+                      <select id="invoiceLngSelect" class="form-control"
+                        data-bind="options: invoiceLngList, optionsText: getInvoiceLngDesc, value: data.invoiceLng">
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1309,11 +1318,21 @@
                               ${i18n.t('app.invoice.optNoVatLbl')}
                             </label>
                           </div>
-                          <div class="checkbox bottom0">
+                          <div class="checkbox">
                             <label>
                               <input type="checkbox" data-bind="checked: data.customerMirror_useReverseCharge, disable: data.isLocked() || data.customer() === undefined">
                               ${i18n.t('app.invoice.optUseReverseChargeLbl')}
                             </label>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row top5">
+                        <div class="form-group">
+                          <label for="invoiceLngSelect" class="col-sm-2 control-label">${i18n.t('app.invoiceLng.selectLbl')}</label>
+                          <div class="col-sm-4">
+                            <select id="invoiceLngSelect" class="form-control"
+                              data-bind="options: invoiceLngList, optionsText: getInvoiceLngDesc, value: data.customerMirror_invoiceLng, disable: data.isLocked() || data.customer() === undefined">
+                            </select>
                           </div>
                         </div>
                       </div>
@@ -1329,10 +1348,10 @@
                       </div>
                       <div class="row top5">
                         <div class="form-group">
-                          <label for="invoiceStyleSelect" class="col-sm-2 control-label">${i18n.t('app.invoice.invoiceReportStyleLbl')}</label>
+                          <label for="invoiceStyleSelect" class="col-sm-2 control-label">${i18n.t('app.invoiceStyle.selectLbl')}</label>
                           <div class="col-sm-4">
                             <select id="invoiceStyleSelect" class="form-control"
-                              data-bind="options: invoiceStyleList, optionsText: getInvoiceStyleDesc, value: data.companyMirror_invoiceStyle">
+                              data-bind="options: invoiceStyleList, optionsText: getInvoiceStyleDesc, value: data.companyMirror_invoiceStyle, disable: data.isLocked">
                             </select>
                           </div>
                         </div>
@@ -1854,6 +1873,7 @@
       };
   </script> 
   <script src="util.js"></script>
+  <script src="default.js"></script>
   <script src="notification.js"></script>
   <script src="page.js"></script>
 </html>
