@@ -38,7 +38,6 @@ var formatNumber = function(value, opts) {
     decPart = valIntAndDec[1];
     if (opts.zeroFill && decPart.length < opts.numDecimalTrunc) {
       decPartNumZeroPad = opts.numDecimalTrunc - decPart.length;
-      decPart = decPart + Array(opts.numDecimalTrunc + 1).join("0");;
     } else if (opts.numDecimalTrunc) {
       // Extract only specified number of decimals
       decPart = decPart.substr(0, opts.numDecimalTrunc);
@@ -78,7 +77,7 @@ var formatCurrency = function(value, opts) {
     opts.currencyStr = 'kr';
   }
   if (!opts.numDecimalTrunc) {
-    opts.numDecimalTrunc = '2';
+    opts.numDecimalTrunc = 2;
   }
   if (!opts.zeroFill) {
     opts.zeroFill = true;

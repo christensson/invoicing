@@ -1485,7 +1485,7 @@ var InvoiceItemViewModel = function(data, parent) {
         discount = -discount;
       }
       total = count * price * (1.0 - discount);
-    }    
+    }
     return total;
   }, self);
 
