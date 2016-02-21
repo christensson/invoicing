@@ -146,12 +146,12 @@ passport.use(
               function(user) {
                 if (user) {
                   console.log("LOGGED IN AS: " + user.info.name);
-                  req.flash('success', i18n.t("signin.loginOkMsg", {name: user.info.name}));
+                  req.flash('success', req.t("signin.loginOkMsg", {name: user.info.name}));
                   done(null, user);
                 }
                 if (!user) {
                   console.log("COULD NOT LOG IN");
-                  req.flash('error', i18n.t("signin.loginNokMsg", {context: "local"}));
+                  req.flash('error', req.t("signin.loginNokMsg", {context: "local"}));
                   done(null, user);
                 }
               }).fail(function(err) {
@@ -174,18 +174,18 @@ passport.use(
             "password": hash,
             "info" : funct.createUserInfo(req.body.fullName, username)
           };
-          var errorMessage = i18n.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"});
+          var errorMessage = req.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"});
           mydb.isEmailInvited(userData.info.email).then(function(inviteInfo) {
-            errorMessage = i18n.t("signin.registerNokMsg");
+            errorMessage = req.t("signin.registerNokMsg");
             return funct.findOrCreate("username-local", userData, inviteInfo);
           }).then(function(result) {
             if (result.user) {
               if (result.isNew) {
-                req.flash('success', i18n.t("signin.registerOkMsg", {name: result.user.info.name}));
+                req.flash('success', req.t("signin.registerOkMsg", {name: result.user.info.name}));
                 done(null, result.user);
               } else {
                 // Failure, registration doesn't expect user to exist.
-                done(null, false, {message: i18n.t("signin.registerNokMsg", {name: username, context: "userExists"})});
+                done(null, false, {message: req.t("signin.registerNokMsg", {name: username, context: "userExists"})});
               }
               return done(null, result.user);
             } else {
@@ -221,12 +221,10 @@ passport.use(new GoogleStrategy(
         }).then(function(inviteInfo) {
           return funct.findOrCreate("googleId", userData, inviteInfo);
         }).then(function(result) {
+          console.log("Google authentication result=" + JSON.stringify(result));
           if (result.user) {
-            if (result.isNew) {
-              result.user.greetingMsg = i18n.t("signin.registerOkMsg", {name: result.user.info.name});
-            } else {
-              result.user.greetingMsg = i18n.t("signin.loginOkMsg", {name: result.user.info.name});
-            }
+            result.user.isNew = result.isNew;
+            console.log("Google authentication OK!");
             return done(null, result.user);
           } else {
             console.log("Google authentication failed.");
@@ -252,7 +250,7 @@ function ensureAuthenticated(req, res, next) {
       return next();
     }
     console.log("ensureAuthenticated: Not authenticated!");
-    req.flash('error', i18n.t("signin.authNokMsg"));
+    req.flash('error', req.t("signin.authNokMsg"));
     res.redirect('/signin');
   } else {
     console.log(
@@ -670,7 +668,7 @@ app.get('/logout', ensureAuthenticated, function(req, res) {
   var name = req.user.info.name;
   console.log("LOGGIN OUT " + req.user.info.name);
   req.logout();
-  req.flash('notice', i18n.t("signin.logoutOkMsg", {name: name}));
+  req.flash('notice', req.t("signin.logoutOkMsg", {name: name}));
   res.redirect('/signin');
 });
 
@@ -711,17 +709,17 @@ app.get('/auth/google',
     passport.authenticate('google', { scope : ['https://www.googleapis.com/auth/plus.login', 'https://www.googleapis.com/auth/userinfo.email'] }));
 
 app.get('/auth/google/callback', 
-    passport.authenticate('google', { successRedirect: '/', failureRedirect: '/signin', failureFlash: true}),
+    passport.authenticate('google', { failureRedirect: '/signin', failureFlash: true}),
     function(req, res) {
-      req.flash('success', req.user.greetingMsg);
+      var greetingMsg;
+      if (req.user.isNew) {
+        greetingMsg = req.t("signin.registerOkMsg", {name: req.user.info.name});
+      } else {
+        greetingMsg = req.t("signin.loginOkMsg", {name: req.user.info.name});
+      }
+      req.flash('success', greetingMsg);
       // Successful authentication, redirect home.
       res.redirect('/');
-    },
-    function(req, res) {
-      console.log("Login using google account failed! req=" + JSON.stringify(req));
-      req.flash('error', i18n.t("signin.loginNokMsg", {context: "google"}));
-      // Failed authentication, redirect to login.
-      res.redirect(401, '/signin');
     });
 
 //start listening on port 8080

@@ -1,3 +1,5 @@
+defaults = Default.get();
+
 function Log(){};
 
 Log._getCallerInfo = function() {
@@ -280,7 +282,7 @@ var browserNavigateBack = function() {
 };
 
 var inheritInvoiceStyleModel = function(self) {
-  self.invoiceStyleList = ko.observableArray(Default.get().invoiceReportStyleList);
+  self.invoiceStyleList = ko.observableArray(defaults.invoiceReportStyleList);
 
   self.getInvoiceStyleDesc = function(name) {
     return i18n.t("app.invoiceStyle.description", {context: name});
@@ -288,7 +290,7 @@ var inheritInvoiceStyleModel = function(self) {
 };
 
 var inheritInvoiceLngModel = function(self) {
-  self.invoiceLngList = ko.observableArray(Default.get().invoiceLngList);
+  self.invoiceLngList = ko.observableArray(defaults.invoiceLngList);
 
   self.getInvoiceLngDesc = function(name) {
     return i18n.t("app.invoiceLng.description", {context: name});
@@ -462,7 +464,7 @@ var CompanyViewModel = function() {
     self.nextCid(data.nextCid);
     self.nextIid(data.nextIid);
     if (data.invoiceStyle === undefined) {
-      data.invoiceStyle = Default.get().invoiceReportStyle;
+      data.invoiceStyle = defaults.invoiceReportStyle;
     }
     self.invoiceStyle(data.invoiceStyle);
   };
@@ -496,9 +498,9 @@ var CompanyViewModel = function() {
         reverseChargeText : i18n.t("app.company.defaultReverseChargeCustomText"),
         isValid : true,
         logo : undefined,
-        nextCid : Default.get().firstCid,
-        nextIid : Default.get().firstIid,
-        invoiceStyle : Default.get().invoiceReportStyle
+        nextCid : defaults.firstCid,
+        nextIid : defaults.firstIid,
+        invoiceStyle : defaults.invoiceReportStyle
       };
     self.setData(data);
   };
@@ -870,7 +872,7 @@ var CustomerViewModel = function() {
     self.isValid(data.isValid);
     self.companyId(data.companyId);
     if (data.invoiceLng === undefined) {
-      data.invoiceLng = Default.get().invoiceLng;
+      data.invoiceLng = defaults.invoiceLng;
     }
     self.invoiceLng(data.invoiceLng);
   };
@@ -894,7 +896,7 @@ var CustomerViewModel = function() {
       useReverseCharge : false,
       contact : "",
       isValid : true,
-      invoiceLng : Default.get().invoiceLng,
+      invoiceLng : defaults.invoiceLng,
     };
     self.setData(data);
   };
@@ -3090,17 +3092,17 @@ var setupKo = function() {
 $(function() {
   Log.info("init - load translations");
   $.i18n.init({
-    //lng: 'en-US',
-    useLocalStorage: false,
-    supportedLngs: ['en', 'sv'],
-    resGetPath: "locales/resources.json?lng=__lng__&ns=__ns__",
-    sendMissing: true,
-    dynamicLoad: true,
-    debug: true
+      //lng: defaults.defaultLng,
+      useLocalStorage: false,
+      lngWhitelist: defaults.enabledLngList,
+      resGetPath: "locales/resources.json?lng=__lng__&ns=__ns__",
+      sendMissing: true,
+      dynamicLoad: true,
+      debug: true
     }, function() {
-    Log.info("init - load translations - done");
-    Log.info("init - setupKo");
-    setupKo();
-    Log.info("init - setupKo - done");
+      Log.info("init - load translations - done");
+      Log.info("init - setupKo");
+      setupKo();
+      Log.info("init - setupKo - done");
   });  
 });
