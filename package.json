@@ -23,7 +23,6 @@
     "express-simulate-latency": "0.0.2",
     "fluentreports": "^1.0.6",
     "i18next": "^1.10.6",
-    "i18next-client": "^1.11.4",
     "jquery": "^2.2.0",
     "js-cache": "^1.0.2",
     "knockout": "^3.4.0",
