@@ -14,6 +14,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
   isDemoMode = typeof isDemoMode !== 'undefined' ? isDemoMode : false;
   debug = typeof debug !== 'undefined' ? debug : false;
   verbosity = typeof verbosity !== 'undefined' ? verbosity : 0;
+
   /*  invoice: {
    *    _id, iid, uid, companyId, isLocked, isPaid, isValid
    *    customer:{
@@ -51,6 +52,11 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
         ", opt=" + JSON.stringify(opt) + " => " + tStr);
     }
     return tStr;
+  };
+
+  var fmtNumOpt = {
+    decimalSeparator: getStr('decimalSeparator'),
+    currencyStr: invoice.currency,
   };
 
   if (verbosity > 0) {
@@ -488,11 +494,11 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
       } else {
         var detailsColLbl = [
           r.hasDesc ? r.description : "",
-          r.hasCount ? util.formatNumber(r.count) : "",
-          r.hasPrice ? util.formatCurrency(r.price, {currencyStr: invoice.currency}) : "",
-          r.hasDiscount ? util.formatNumber(r.discount) + '%' : "",
-          r.hasVat && invoiceHasVat ? util.formatNumber(r.vat) + '%' : "",
-          r.hasTotal ? util.formatCurrency(r.total, {currencyStr: invoice.currency}) : ""
+          r.hasCount ? util.formatNumber(r.count, fmtNumOpt) : "",
+          r.hasPrice ? util.formatCurrency(r.price, fmtNumOpt) : "",
+          r.hasDiscount ? util.formatNumber(r.discount, fmtNumOpt) + '%' : "",
+          r.hasVat && invoiceHasVat ? util.formatNumber(r.vat, fmtNumOpt) + '%' : "",
+          r.hasTotal ? util.formatCurrency(r.total, fmtNumOpt) : ""
         ];
         x.band( [
           styleColData(detailsColLbl[0], detailsColSize[0], x.left),
@@ -522,7 +528,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
       if (r.hasTotal && r.totalExclVat !== undefined && r.totalExclVat !== null) {
         var groupSummaryTopY = x.getCurrentY();
         var totalExclVatStr = 
-          util.formatCurrency(parseFloat(r.totalExclVat.toFixed(2)), {currencyStr: invoice.currency});
+          util.formatCurrency(parseFloat(r.totalExclVat.toFixed(2)), fmtNumOpt);
         x.addY(detailsGroupSummaryTopPadding);
         x.fontSize(style.details.groupSummary.fontSize);
         x.band( [
@@ -574,25 +580,25 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     x.font(style.summary.font);
     x.band( [
              {data: getStr("summaryTotalExclVatLbl"), width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
-             {data: util.formatCurrency(invoice.totalExclVat, {currencyStr: invoice.currency}),
+             {data: util.formatCurrency(invoice.totalExclVat, fmtNumOpt),
               width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     if (!(useReverseCharge || noVat)) {
       x.band( [
                {data: getStr("summaryTotalVatLbl"), width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
-               {data: util.formatCurrency(totalVat, {currencyStr: invoice.currency}),
+               {data: util.formatCurrency(totalVat, fmtNumOpt),
                 width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
              ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     }
     x.band( [
              {data: getStr("summaryTotalToPayAdjLbl"), width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
-             {data: util.formatCurrency(amountToPayAdjustment, {currencyStr: invoice.currency}),
+             {data: util.formatCurrency(amountToPayAdjustment, fmtNumOpt),
               width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     x.addY(summaryAmountToPayTopPadding);
     x.band( [
              {data: getStr("summaryTotalToPayLbl"), width: summaryCaptionColWidth, align: x.right, font: style.summary.caption.font, fontBold: 1},
-             {data: util.formatCurrency(amountToPay, {currencyStr: invoice.currency}),
+             {data: util.formatCurrency(amountToPay, fmtNumOpt),
               width: summaryValueColWidth, align: x.right, font: style.summary.value.font, fontBold: 1}
              ], {fontBold: 1, border:0, width: 0, wrap: 1} );
     if (invoice.isCanceled) {
