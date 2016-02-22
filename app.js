@@ -14,6 +14,8 @@ var path = require('path');
 var marko = require('marko');
 var multer = require('multer');
 var i18n = require('i18next');
+var i18nFsBackend = require('i18next-node-fs-backend');
+var i18nMiddleware = require('i18next-express-middleware');
 var simLatency = require('express-simulate-latency');
 var bcrypt = require('bcryptjs');
 var defaults = require('./public/default.js').get();
@@ -81,6 +83,8 @@ app.use(express.static('node_modules/bootstrap'));
 app.use(express.static('node_modules/director/build'));
 app.use(express.static('node_modules/jquery/dist'));
 app.use(express.static('node_modules/js-cache/bundle'));
+app.use(express.static('node_modules/i18next'));
+app.use(express.static('node_modules/i18next-xhr-backend/'));
 
 if (smallLag != undefined) {
   app.use(smallLag);
@@ -92,23 +96,33 @@ var upload = multer({
 });
 
 // i18n
-i18n.init({
-  lng: defaults.defaultLng,
-  preload: defaults.enabledLngList,
-  lngWhitelist: defaults.enabledLngList,
-  fallbackLng: [defaults.defaultLng],
-  saveMissing: false,
-  debug: true,
-  ignoreRoutes: ['uploads/', 'public/img/', 'public/', 'views/']
-});
+i18n
+  .use(i18nFsBackend)
+  .init({
+    lng: defaults.defaultLng,
+    preload: defaults.enabledLngList,
+    whitelist: defaults.enabledLngList,
+    fallbackLng: defaults.defaultLng,
+    saveMissing: true,
+    debug: true,
+    backend: {
+      // path where resources get loaded from
+      loadPath: 'locales/{{lng}}/{{ns}}.json',
 
-app.use(i18n.handle);
-i18n.registerAppHelper(app);
-i18n.serveClientScript(app)      // grab i18next.js in browser
-  .serveDynamicResources(app)    // route which returns all resources in on response
-  .serveMissingKeyRoute(app)     // route to send missing keys
-  .serveChangeKeyRoute(app)      // route to post value changes
-  .serveRemoveKeyRoute(app);     // route to remove key/value
+      // path to post missing resources
+      addPath: 'locales/{{lng}}/{{ns}}.missing.json',
+
+      // jsonIndent to use when storing json files
+      jsonIndent: 2
+    }
+  }, function(err, t) {
+  });
+
+app.use(i18nMiddleware.handle(i18n, {
+    ignoreRoutes: ['uploads/', 'public/img/', 'public/', 'views/']
+  }));
+
+app.get('/locales/resources.json', i18nMiddleware.getResourcesHandler(i18n)); // serves resources for consumers (browser)
 
 // App modules
 var hostname = "";

@@ -1,7 +1,7 @@
 var defaults = {
   defaultLng: "sv",
   enabledLngList: ["sv", "en"],
-  uiEnabledLngList: ["sv", "en"],
+  uiEnabledLngList: ["sv"],
   invoiceLng: "sv",
   invoiceLngList: ["sv", "en"],
   invoiceReportStyle: "right",

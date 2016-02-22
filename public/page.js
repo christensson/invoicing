@@ -36,6 +36,17 @@ Log.warn = function(msg) {
   console.log("WARN - " + functionName + " - " + msg);
 };
 
+var i18nTFunc = undefined;
+
+function t(key, opt) {
+  if (i18nTFunc !== undefined) {
+    return i18nTFunc(key, opt);
+  } else {
+    Log.warn("No translator func: key=" + key + ", opt=" + JSON.stringify(opt));
+    return key;
+  }
+}
+
 var CacheOp = function() {
   var self = this;
 
@@ -285,7 +296,7 @@ var inheritInvoiceStyleModel = function(self) {
   self.invoiceStyleList = ko.observableArray(defaults.invoiceReportStyleList);
 
   self.getInvoiceStyleDesc = function(name) {
-    return i18n.t("app.invoiceStyle.description", {context: name});
+    return t("app.invoiceStyle.description", {context: name});
   }
 };
 
@@ -293,7 +304,7 @@ var inheritInvoiceLngModel = function(self) {
   self.invoiceLngList = ko.observableArray(defaults.invoiceLngList);
 
   self.getInvoiceLngDesc = function(name) {
-    return i18n.t("app.invoiceLng.description", {context: name});
+    return t("app.invoiceLng.description", {context: name});
   }
 };
 
@@ -364,7 +375,7 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
         }).fail(function() {
           Log.info("SettingsViewModel - populate - failed");
           Notify_showSpinner(false);
-          Notify_showMsg('error', i18n.t("app.settings.getNok"));
+          Notify_showMsg('error', t("app.settings.getNok"));
         });
   };
   
@@ -373,7 +384,7 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
     var ajaxUrl = "/api/settings";
     Log.info("saveSettings: AJAX PUT (url=" + ajaxUrl + "): JSON="
         + JSON.stringify(ajaxData));
-    Notify_showSpinner(true, i18n.t("app.settings.saveTicker"));
+    Notify_showSpinner(true, t("app.settings.saveTicker"));
     return $.ajax({
       url : ajaxUrl,
       type : "PUT",
@@ -383,7 +394,7 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
       success : function(data) {
         Log.info("saveSettings: response: " + JSON.stringify(data));
         Notify_showSpinner(false);
-        Notify_showMsg('success', i18n.t("app.settings.saveOk"));
+        Notify_showMsg('success', t("app.settings.saveOk"));
       },
     });
   };
@@ -477,25 +488,25 @@ var CompanyViewModel = function() {
         addr1 : "",
         addr2 : "",
         addr3 : "",
-        contact1Caption : i18n.t("app.company.defaultContact1Caption"),
-        contact2Caption : i18n.t("app.company.defaultContact2Caption"),
-        contact3Caption : i18n.t("app.company.defaultContact3Caption"),
+        contact1Caption : t("app.company.defaultContact1Caption"),
+        contact2Caption : t("app.company.defaultContact2Caption"),
+        contact3Caption : t("app.company.defaultContact3Caption"),
         contact1 : "",
         contact2 : "",
         contact3 : "",
-        payment1Caption : i18n.t("app.company.defaultPayment1Caption"),
-        payment2Caption : i18n.t("app.company.defaultPayment2Caption"),
+        payment1Caption : t("app.company.defaultPayment1Caption"),
+        payment2Caption : t("app.company.defaultPayment2Caption"),
         payment3Caption : "",
         payment1 : "",
         payment2 : "",
         payment3 : "",
         paymentFocus : "1",
-        paymentCustomText : i18n.t("app.company.defaultPaymentCustomText"),
+        paymentCustomText : t("app.company.defaultPaymentCustomText"),
         defaultNumDaysUntilPayment : 30,
         vatNr : "",
         orgNr : "",
-        vatNrCustomText : i18n.t("app.company.defaultVatNrCustomText"),
-        reverseChargeText : i18n.t("app.company.defaultReverseChargeCustomText"),
+        vatNrCustomText : t("app.company.defaultVatNrCustomText"),
+        reverseChargeText : t("app.company.defaultReverseChargeCustomText"),
         isValid : true,
         logo : undefined,
         nextCid : defaults.firstCid,
@@ -508,7 +519,7 @@ var CompanyViewModel = function() {
   self.init();
   
   self.setDefaultReverseChargeCustomText = function() {
-    self.reverseChargeText(i18n.t("app.company.defaultReverseChargeCustomText"));
+    self.reverseChargeText(t("app.company.defaultReverseChargeCustomText"));
   };
 
   self.setLogo = function(logo) {
@@ -517,16 +528,16 @@ var CompanyViewModel = function() {
 
   self.updateServer = function(onCompletion) {
     if ((self._id() == undefined) && !self.isValid()) {
-      Notify_showMsg('error', i18n.t("app.company.saveNok"));
+      Notify_showMsg('error', t("app.company.saveNok"));
       return;
     } else if (self.name().length == 0) {
-      Notify_showMsg('error', i18n.t("app.company.saveNok", {context: "noName"}));
+      Notify_showMsg('error', t("app.company.saveNok", {context: "noName"}));
       self.nameError(true);
       return;
     }
     self.nameError(false);
     var isNew = (self._id() == undefined) ? true : false;
-    Notify_showSpinner(true, i18n.t("app.company.saveTicker"));
+    Notify_showSpinner(true, t("app.company.saveTicker"));
     return $.ajax({
       url : "/api/company/" + self._id(),
       type : "PUT",
@@ -540,7 +551,7 @@ var CompanyViewModel = function() {
           tContext = (data.company.isValid) ? 'update' : 'delete';
         }
         Notify_showSpinner(false);
-        Notify_showMsg('success', i18n.t("app.company.saveOk",
+        Notify_showMsg('success', t("app.company.saveOk",
             {context: tContext, name: data.company.name}));
         self.uid(data.company.uid);
         self._id(data.company._id);
@@ -642,7 +653,7 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompany,
       }).fail(function() {
         Log.info("CompanyListViewModel - populate - failed");
         Notify_showSpinner(false);
-        Notify_showMsg('error', i18n.t("app.companyList.getNok"));
+        Notify_showMsg('error', t("app.companyList.getNok"));
       });
     } else {
       Log.info("CompanyListViewModel - populate - data is cached!");
@@ -739,7 +750,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
             }).fail(function() {
               Log.info("CompanyNewViewModel - getCompany - failed");
               Notify_showSpinner(false);
-              Notify_showMsg('error', i18n.t("app.company.getNok"));
+              Notify_showMsg('error', t("app.company.getNok"));
             });
       }
     });
@@ -776,9 +787,9 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
     Log.info("Form data: " + JSON.stringify(form.elements, null, 2));
     var submitForm = false;
     if (_id === undefined) {
-      Notify_showMsg('error', i18n.t("app.company.uploadLogoNok", {context: "noId"}));
+      Notify_showMsg('error', t("app.company.uploadLogoNok", {context: "noId"}));
     } else if (form.elements.logo.value.length == 0) {
-      Notify_showMsg('error', i18n.t("app.company.uploadLogoNok", {context: "noFile"}));
+      Notify_showMsg('error', t("app.company.uploadLogoNok", {context: "noFile"}));
     } else {
       var formData = new FormData(form);
       var xhr = new XMLHttpRequest();
@@ -795,7 +806,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
               Cache.updateCompany(c);
             });
           } else {
-            Notify_showMsg('error', i18n.t("app.company.uploadLogoNok", {context: "serverFailure", "status": xhr.status}));
+            Notify_showMsg('error', t("app.company.uploadLogoNok", {context: "serverFailure", "status": xhr.status}));
           }
         }
       }; 
@@ -909,20 +920,20 @@ var CustomerViewModel = function() {
 
   self.updateServer = function() {
     if (self.companyId() == null) {
-      Notify_showMsg('error', i18n.t("app.customer.saveNok", {context: "noCompany"}));
+      Notify_showMsg('error', t("app.customer.saveNok", {context: "noCompany"}));
       return;
     } else if ((self._id() == undefined) && !self.isValid()) {
       Log.info("updateServer: Nothing to do (invalid entry without _id)");
-      Notify_showMsg('error', i18n.t("app.customer.saveNok"));
+      Notify_showMsg('error', t("app.customer.saveNok"));
       return;
     } else if (self.name().length == 0) {
-      Notify_showMsg('error', i18n.t("app.customer.saveNok", {context: "noName"}));
+      Notify_showMsg('error', t("app.customer.saveNok", {context: "noName"}));
       self.nameError(true);
       return;
     }
     self.nameError(false);
     var isNewCustomer = (self._id() == undefined) ? true : false;
-    Notify_showSpinner(true, i18n.t("app.customer.saveTicker"));
+    Notify_showSpinner(true, t("app.customer.saveTicker"));
     return $.ajax({
       url : "/api/customer/" + self._id(),
       type : "PUT",
@@ -936,7 +947,7 @@ var CustomerViewModel = function() {
           tContext = (data.customer.isValid) ? 'update' : 'delete';
         }
         Notify_showSpinner(false);
-        Notify_showMsg('success', i18n.t("app.customer.saveOk",
+        Notify_showMsg('success', t("app.customer.saveOk",
             {context: tContext, cid: ""+data.customer.cid, name: data.customer.name}));
         self.cid(data.customer.cid);
         self.uid(data.customer.uid);
@@ -1041,13 +1052,13 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
         }).fail(function() {
           Log.info("CustomerListViewModel - populate - failed");
           Notify_showSpinner(false);
-          Notify_showMsg('error', i18n.t("app.customerList.getNok"));
+          Notify_showMsg('error', t("app.customerList.getNok"));
         });
       } else {
         Log.info("CustomerListViewModel - populate - data is cached!");
       }
     } else {
-      Notify_showMsg('info', i18n.t("app.customerList.getNok", {context: "noCompany"}));
+      Notify_showMsg('info', t("app.customerList.getNok", {context: "noCompany"}));
       browserNavigateBack();
     }
   };
@@ -1072,7 +1083,7 @@ var CustomerNewViewModel = function(currentView, activeCompanyId) {
         self.data.init();
         self.data.setActiveCompanyId(self.activeCompanyId());
       } else {
-        Notify_showMsg('info', i18n.t("app.customer.newNok", {context: "noCompany"}));
+        Notify_showMsg('info', t("app.customer.newNok", {context: "noCompany"}));
         browserNavigateBack();
       }
     } else if (viewArray[0] == 'customer_show' && viewArray.length > 1) {
@@ -1097,7 +1108,7 @@ var CustomerNewViewModel = function(currentView, activeCompanyId) {
             }).fail(function() {
               Log.info("CustomerNewViewModel - getCustomer - failed");
               Notify_showSpinner(false);
-              Notify_showMsg('error', i18n.t("app.customer.getNok"));
+              Notify_showMsg('error', t("app.customer.getNok"));
             });
       }
     });
@@ -1159,7 +1170,7 @@ var InvoiceItemGroupTemplatesViewModel = function(currentView) {
       }).fail(function() {
         Log.info("InvoiceItemGroupTemplatesViewModel - populate - failed");
         Notify_showSpinner(false);
-        Notify_showMsg('error', i18n.t("app.groupTemplates.getNok"));
+        Notify_showMsg('error', t("app.groupTemplates.getNok"));
       });
     } else {
       Log.info("InvoiceItemGroupTemplatesViewModel - populate - data is cached!");
@@ -1296,12 +1307,12 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
       isQuickButton: false,
       titleExtraField: "",
       hasTitleExtraField: false,
-      descColLbl: i18n.t("app.groupTemplates.descCol"),
-      priceColLbl: i18n.t("app.groupTemplates.priceCol"),
-      countColLbl: i18n.t("app.groupTemplates.countCol"),
-      discountColLbl: i18n.t("app.groupTemplates.discountCol"),
-      vatColLbl: i18n.t("app.groupTemplates.vatCol"),
-      totalColLbl: i18n.t("app.groupTemplates.totalCol"),
+      descColLbl: t("app.groupTemplates.descCol"),
+      priceColLbl: t("app.groupTemplates.priceCol"),
+      countColLbl: t("app.groupTemplates.countCol"),
+      discountColLbl: t("app.groupTemplates.discountCol"),
+      vatColLbl: t("app.groupTemplates.vatCol"),
+      totalColLbl: t("app.groupTemplates.totalCol"),
       hasDesc: true,
       hasPrice: true,
       hasCount: true,
@@ -1325,7 +1336,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
     }, this);
 
     self.numInvoiceItemsText = ko.pureComputed(function() {
-      return i18n.t("app.invoice.groupNumInvoiceItemsText", {count: self.numInvoiceItems()});
+      return t("app.invoice.groupNumInvoiceItemsText", {count: self.numInvoiceItems()});
     }, this);
 
     self.totalExclVat = ko.pureComputed(function() {
@@ -1387,16 +1398,16 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
 
   self.updateServer = function() {
     if ((self._id() === undefined) && !self.isValid()) {
-      Notify_showMsg('error', i18n.t("app.groupTemplates.saveNok"));
+      Notify_showMsg('error', t("app.groupTemplates.saveNok"));
       return;
     } else if (self.name().length == 0) {
-      Notify_showMsg('error', i18n.t("app.groupTemplates.saveNok", {context: "noName"}));
+      Notify_showMsg('error', t("app.groupTemplates.saveNok", {context: "noName"}));
       self.nameError(true);
       return;
     }
     self.nameError(false);
     var isNew = (self._id() == undefined) ? true : false;
-    Notify_showSpinner(true, i18n.t("app.groupTemplates.saveTicker"));
+    Notify_showSpinner(true, t("app.groupTemplates.saveTicker"));
     return $.ajax({
       url : "/api/itemGroupTemplate/" + self._id(),
       type : "PUT",
@@ -1411,7 +1422,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
           tContext = isDelete ? 'delete' : 'update';
         }
         Notify_showSpinner(false);
-        Notify_showMsg('success', i18n.t("app.groupTemplates.saveOk",
+        Notify_showMsg('success', t("app.groupTemplates.saveOk",
             {context: tContext, name: data.groupTempl.name}));
         self.uid(data.groupTempl.uid);
         self._id(data.groupTempl._id);
@@ -1987,7 +1998,7 @@ var InvoiceListDataViewModel = function(data) {
     if (self._id() !== undefined) {
       InvoiceOps.printInvoice(self._id());
     } else {
-      Notify_showMsg('error', i18n.t("app.invoiceList.printNok", {context: "noId"}));
+      Notify_showMsg('error', t("app.invoiceList.printNok", {context: "noId"}));
       Log.info("InvoiceListDataViewModel - Invoice has no id.");
     }
   };
@@ -2057,13 +2068,13 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
         }).fail(function() {
           Log.info("InvoiceListViewModel - populate - failed");
           Notify_showSpinner(false);
-          Notify_showMsg('error', i18n.t("app.invoiceList.getNok"));
+          Notify_showMsg('error', t("app.invoiceList.getNok"));
         });
       } else {
         Log.info("InvoiceListViewModel - populate - data is cached!");
       }
     } else {
-      Notify_showMsg('info', i18n.t("app.invoiceList.getNok", {context: "noCompany"}));
+      Notify_showMsg('info', t("app.invoiceList.getNok", {context: "noCompany"}));
       browserNavigateBack();
     }
   };
@@ -2218,7 +2229,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
         self.data.setCompanyId(self.activeCompany()._id());
         self.populatePromise().done(self.syncCustomerIdInput);
       } else {
-        Notify_showMsg('info', i18n.t("app.invoice.newNok", {context: "noCompany"}));
+        Notify_showMsg('info', t("app.invoice.newNok", {context: "noCompany"}));
         browserNavigateBack();
       }
     } else if (viewArray[0] == 'invoice_show' && viewArray.length > 1) {
@@ -2331,12 +2342,12 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
       }).fail(function() {
          Log.info("InvoiceNewViewModel - populate - failed");
          Notify_showSpinner(false);
-         Notify_showMsg('error', i18n.t("app.invoice.getGroupTemplatesNok"));
-         Notify_showMsg('error', i18n.t("app.invoice.getCustomersNok"));
+         Notify_showMsg('error', t("app.invoice.getGroupTemplatesNok"));
+         Notify_showMsg('error', t("app.invoice.getCustomersNok"));
          deferred.reject();
       });
     } else {
-      Notify_showMsg('info', i18n.t("app.invoice.getCustomersNok", {context: "noCompany"}));
+      Notify_showMsg('info', t("app.invoice.getCustomersNok", {context: "noCompany"}));
       browserNavigateBack();
       deferred.reject();
     }
@@ -2394,7 +2405,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
       }).fail(function(err) {
         Log.info("InvoiceNewViewModel - getInvoice - failed");
         Notify_showSpinner(false);
-        Notify_showMsg('error', i18n.t("app.invoice.getNok"));
+        Notify_showMsg('error', t("app.invoice.getNok"));
         deferred.reject(err);
       });
     });
@@ -2419,15 +2430,15 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
 
   self.saveInvoice = function() {
     if ((self.data._id() === undefined) && !self.data.isValid()) {
-      Notify_showMsg('error', i18n.t("app.invoice.saveNok"));
+      Notify_showMsg('error', t("app.invoice.saveNok"));
       Log.info("saveInvoice: Nothing to do (invalid entry without _id)");
       return;
     } else if (self.data.customer() === undefined) {
-      Notify_showMsg('error', i18n.t("app.invoice.saveNok", {context: 'invalidCustomer'}));
+      Notify_showMsg('error', t("app.invoice.saveNok", {context: 'invalidCustomer'}));
       Log.info("No customer selected: " + JSON.stringify(self.data.customer()));
       return;
     } else if (self.data.date() === undefined) {
-      Notify_showMsg('error', i18n.t("app.invoice.saveNok", {context: 'invalidDate'}));
+      Notify_showMsg('error', t("app.invoice.saveNok", {context: 'invalidDate'}));
       return;
     }
     var isNewInvoice = (self.data._id() == undefined) ? true : false;
@@ -2435,7 +2446,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     var ajaxUrl = "/api/invoice/" + self.data._id();
     Log.info("saveInvoice: AJAX PUT (url=" + ajaxUrl + "): JSON="
         + ajaxData);
-    Notify_showSpinner(true, i18n.t("app.invoice.saveTicker"));
+    Notify_showSpinner(true, t("app.invoice.saveTicker"));
     return $.ajax({
       url : ajaxUrl,
       type : "PUT",
@@ -2450,7 +2461,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
         }
         Notify_showSpinner(false);
         Notify_showMsg('success',
-            i18n.t("app.invoice.saveOk",
+            t("app.invoice.saveOk",
                    {context: tContext, iid: data.invoice.iid}));
         // Set params set from server
         self.data._id(data.invoice._id);
@@ -2474,7 +2485,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     if (self.data._id() !== undefined) {
       InvoiceOps.printInvoice(self.data._id());
     } else {
-      Notify_showMsg('info', i18n.t("app.invoice.printNok", {context: 'noId'}));
+      Notify_showMsg('info', t("app.invoice.printNok", {context: 'noId'}));
       Log.info("InvoiceNewViewModel - Invoice not saved.");
     }
   };
@@ -2601,7 +2612,7 @@ var UserViewModel = function() {
           }).fail(function() {
             Log.info("UserViewModel - toggleDetailedInfo - failed");
             Notify_showSpinner(false);
-            Notify_showMsg('error', i18n.t("app.userList.getNok"));
+            Notify_showMsg('error', t("app.userList.getNok"));
           });      
     } else {
       Log.info("UserViewModel - populate - data is cached!");
@@ -2667,7 +2678,7 @@ var UserListViewModel = function(currentView) {
       }).fail(function() {
         Log.info("UserListViewModel - populate - failed");
         Notify_showSpinner(false);
-        Notify_showMsg('error', i18n.t("app.userList.getNok"));
+        Notify_showMsg('error', t("app.userList.getNok"));
       });
     } else {
       Log.info("UserListViewModel - populate - data is cached!");
@@ -2737,7 +2748,7 @@ var InviteListViewModel = function(currentView) {
       }).fail(function() {
         Log.info("InviteListViewModel - populate - failed");
         Notify_showSpinner(false);
-        Notify_showMsg('error', i18n.t("app.inviteList.getNok"));
+        Notify_showMsg('error', t("app.inviteList.getNok"));
       });
     } else {
       Log.info("InviteListViewModel - populate - data is cached!");
@@ -2756,75 +2767,75 @@ var NavViewModel = function() {
   self.mainViews = [];
   self.mainViews.push({
     name : '/page/home',
-    title : i18n.t("app.navBar.home"),
+    title : t("app.navBar.home"),
     icon : 'glyphicon glyphicon-home',
     location : 'main'
   });
   self.mainViews.push({
     name : '/page/companies',
-    title : i18n.t("app.navBar.companyAdmin"),
+    title : t("app.navBar.companyAdmin"),
     icon : 'glyphicon glyphicon-wrench',
     location : 'companyMenu'
   });
   self.mainViews.push({
     name : '/page/customer_new',
-    title : i18n.t("app.navBar.customerNew"),
+    title : t("app.navBar.customerNew"),
     icon : 'glyphicon glyphicon-user',
     location : 'main'
   });
   self.mainViews.push({
     name : '/page/customers',
-    title : i18n.t("app.navBar.customerList"),
+    title : t("app.navBar.customerList"),
     icon : 'glyphicon glyphicon-user',
     location : 'main'
   });
   self.mainViews.push({
     name : '/page/invoice_new',
-    title : i18n.t("app.navBar.invoiceNew"),
+    title : t("app.navBar.invoiceNew"),
     icon : 'glyphicon glyphicon-file',
     location : 'main'
   });
   self.mainViews.push({
     name : '/page/invoices',
-    title : i18n.t("app.navBar.invoiceList"),
+    title : t("app.navBar.invoiceList"),
     icon : 'glyphicon glyphicon-th-list',
     location : 'main'
   });
   self.mainViews.push({
     name : '/page/invoice_item_group_templates',
-    title : i18n.t("app.navBar.invoiceItemGroupTemplates"),
+    title : t("app.navBar.invoiceItemGroupTemplates"),
     icon : 'glyphicon glyphicon-list-alt',
     location : 'userMenu'
   });
   self.mainViews.push({
     name : '/page/settings',
-    title : i18n.t("app.navBar.settings"),
+    title : t("app.navBar.settings"),
     icon : 'glyphicon glyphicon-wrench',
     location : 'userMenu'
   });
   if (cfg.isAdmin) {
     self.mainViews.push({
       name : '/page/debug',
-      title : i18n.t("app.navBar.debug"),
+      title : t("app.navBar.debug"),
       icon : 'glyphicon glyphicon-eye-open',
       location : 'userMenu'
     });
     self.mainViews.push({
       name : '/page/users',
-      title : i18n.t("app.navBar.users"),
+      title : t("app.navBar.users"),
       icon : 'glyphicon glyphicon-user',
       location : 'userMenu'
     });
     self.mainViews.push({
       name : '/page/invites',
-      title : i18n.t("app.navBar.invites"),
+      title : t("app.navBar.invites"),
       icon : 'glyphicon glyphicon-user',
       location : 'userMenu'
     });
   }
   self.mainViews.push({
     name : '/logout',
-    title : i18n.t("app.navBar.logout"),
+    title : t("app.navBar.logout"),
     icon : 'glyphicon glyphicon-log-out',
     location : 'userMenuNoRoute'
   });
@@ -2832,7 +2843,7 @@ var NavViewModel = function() {
   self.currentView = ko.observable("");
   self.activeCompanyId = ko.observable();
   self.activeCompany = ko.observable();
-  self.activeCompanyName = ko.observable(i18n.t('app.navBar.noCompanyName'));
+  self.activeCompanyName = ko.observable(t('app.navBar.noCompanyName'));
   self.companyList = ko.observableArray();
 
   self.selectView = function(view) {
@@ -2909,25 +2920,25 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
   
   self.companiesTextTrans = ko.pureComputed(function() {
     if (self.numCompanies() > 0) {
-      return i18n.t("app.gettingStarted.companiesText", {count: self.numCompanies()});
+      return t("app.gettingStarted.companiesText", {count: self.numCompanies()});
     } else {
-      return i18n.t("app.gettingStarted.noCompaniesText");
+      return t("app.gettingStarted.noCompaniesText");
     }
   }, self);
 
   self.customersTextTrans = ko.pureComputed(function() {
     if (self.numCustomers() > 0) {
-      return i18n.t("app.gettingStarted.customersText", {count: self.numCustomers()});
+      return t("app.gettingStarted.customersText", {count: self.numCustomers()});
     } else {
-      return i18n.t("app.gettingStarted.noCustomersText");
+      return t("app.gettingStarted.noCustomersText");
     }
   }, self);
 
   self.invoicesTextTrans = ko.pureComputed(function() {
     if (self.numInvoices() > 0) {
-      return i18n.t("app.gettingStarted.invoicesText", {count: self.numInvoices()});
+      return t("app.gettingStarted.invoicesText", {count: self.numInvoices()});
     } else {
-      return i18n.t("app.gettingStarted.noInvoicesText");
+      return t("app.gettingStarted.noInvoicesText");
     }
   }, self);
 
@@ -3002,7 +3013,7 @@ var setupKo = function() {
               attr = parts[0].substr(1, parts[0].length - 1);
           }
 
-          translation = i18n.t(key, options);
+          translation = t(key, options);
 
           if (attr === undefined) {
               // Check whether the translation contains markup
@@ -3091,15 +3102,30 @@ var setupKo = function() {
 
 $(function() {
   Log.info("init - load translations");
-  $.i18n.init({
-      //lng: defaults.defaultLng,
+  i18next
+    .use(window.i18nextXHRBackend)
+    .init({
+      lng: defaults.defaultLng,
       useLocalStorage: false,
-      lngWhitelist: defaults.enabledLngList,
-      resGetPath: "locales/resources.json?lng=__lng__&ns=__ns__",
-      sendMissing: true,
-      dynamicLoad: true,
-      debug: true
-    }, function() {
+      whitelist: defaults.enabledLngList,
+      fallbackLng: defaults.defaultLng,
+      sendMissing: false,
+      debug: true,
+      joinArrays: ' ',
+      backend: {
+        // path where resources get loaded from
+        loadPath: 'locales/resources.json?lng={{lng}}&ns={{ns}}',
+        // your backend server supports multiloading
+        // /locales/resources.json?lng=de+en&ns=ns1+ns2
+        allowMultiLoading: true,
+        // allow cross domain requests
+        crossDomain: false,
+      }
+    }, function(err, tFunc) {
+      if (err) {
+        Log.warn("i18next init error: " + err);
+      }
+      i18nTFunc = tFunc;
       Log.info("init - load translations - done");
       Log.info("init - setupKo");
       setupKo();

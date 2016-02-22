@@ -20,13 +20,13 @@
         "regPasswordLbl": "Lösenord",
         "signinBtn": "Logga in",
         "registerBtn": "Registrera användare",
-        "loginOkMsg": "Välkommen __name__!",
+        "loginOkMsg": "Välkommen {{name}}!",
         "loginNokMsg_local": "Inloggning misslyckades! Var god försök igen.",
         "loginNokMsg_google": "Inloggning med Google konto misslyckades! Var god försök igen.",
-        "logoutOkMsg": "Du är nu utloggad __name__!",
-        "registerOkMsg": "Välkommen __name__! Du är nu registrerad.",
-        "registerNokMsg_userExists": "Användarnamnet __name__ är upptaget! Var god ange ett annat.",
-        "registerNokMsg_notInvited": "Inbjudan saknas för E-post __email__! Försök igen när du har fått en inbjudan eller ange annan e-postadress.",
+        "logoutOkMsg": "Du är nu utloggad {{name}}!",
+        "registerOkMsg": "Välkommen {{name}}! Du är nu registrerad.",
+        "registerNokMsg_userExists": "Användarnamnet {{name}} är upptaget! Var god ange ett annat.",
+        "registerNokMsg_notInvited": "Inbjudan saknas för E-post {{email}}! Försök igen när du har fått en inbjudan eller ange annan e-postadress.",
         "registerNokMsg": "Registreringen misslyckades! Var god försök igen.",
         "authNokMsg": "Var god logga in!"
     },
@@ -67,7 +67,7 @@
                 "Du kan när du vill skapa fler företag."
             ],
             "companiesText_plural": [
-                "Du har <strong>__count__ företag</strong> konfigurerade.",
+                "Du har <strong>{{count}} företag</strong> konfigurerade.",
                 "Du kan när du vill skapa fler företag."
             ],
             "companiesNewCompanyBtn": "Nytt företag",
@@ -81,7 +81,7 @@
                 "Du kan när du vill skapa fler kunder."
             ],
             "customersText_plural": [
-                "Det aktiva företaget har <strong>__count__ kunder</strong>.",
+                "Det aktiva företaget har <strong>{{count}} kunder</strong>.",
                 "Du kan när du vill skapa fler kunder."
             ],
             "customersNewCustomerBtn": "Ny kund",
@@ -93,7 +93,7 @@
                 "Det aktiva företaget har <strong>en faktura</strong>."
             ],
             "invoicesText_plural": [
-                "Det aktiva företaget har <strong>__count__ fakturor</strong>."
+                "Det aktiva företaget har <strong>{{count}} fakturor</strong>."
             ],
             "invoicesNewInvoiceBtn": "Ny faktura"
         },
@@ -121,9 +121,9 @@
             "newTemplateBtn": "Ny gruppmall",
             "getNok": "Misslyckades med att hämta gruppmallar!",
             "saveTicker": "Sparar gruppmall",
-            "saveOk": "Gruppmall <strong>__name__</strong> skapad.",
-            "saveOk_update": "Gruppmall <strong>__name__</strong> uppdaterad.",
-            "saveOk_delete": "Gruppmall <strong>__name__</strong> raderad.",
+            "saveOk": "Gruppmall <strong>{{name}}</strong> skapad.",
+            "saveOk_update": "Gruppmall <strong>{{name}}</strong> uppdaterad.",
+            "saveOk_delete": "Gruppmall <strong>{{name}}</strong> raderad.",
             "saveNok": "Misslyckades att spara gruppmall!",
             "saveNok_noName": "Gruppmallnamn måste anges!"
         },
@@ -143,7 +143,7 @@
         "company": {
             "generalPaneHeader": "Generell info",
             "companyNameLbl": "Företagsnamn",
-            "addrLbl": "Adressrad __nr__",
+            "addrLbl": "Adressrad {{nr}}",
             "vatNrLbl": "Momsregnr",
             "orgNrLbl": "Orgnr",
             "contactPaneHeader": "Kontaktuppgifter",
@@ -186,18 +186,18 @@
             "companySaveBtn": "Spara",
             "getNok": "Misslyckades att hämta företag!",
             "saveTicker": "Sparar företag",
-            "saveOk": "Företag <strong>__name__</strong> skapat.",
-            "saveOk_update": "Företag <strong>__name__</strong> uppdaterat.",
-            "saveOk_delete": "Företag <strong>__name__</strong> raderat.",
+            "saveOk": "Företag <strong>{{name}}</strong> skapat.",
+            "saveOk_update": "Företag <strong>{{name}}</strong> uppdaterat.",
+            "saveOk_delete": "Företag <strong>{{name}}</strong> raderat.",
             "saveNok": "Misslyckades att spara företag!",
             "saveNok_noName": "Företagsnamn måste anges!",
             "uploadLogoNok_noId": "Företaget måste sparas först!",
             "uploadLogoNok_noFile": "Ingen logo vald!",
-            "uploadLogoNok_serverFailure": "Fel vid uppladdning av logo. Felkod från server: __status__"
+            "uploadLogoNok_serverFailure": "Fel vid uppladdning av logo. Felkod från server: {{status}}"
         },
         "companyList": {
             "nameCol": "Företagsnamn",
-            "addrCol": "Adress __nr__",
+            "addrCol": "Adress {{nr}}",
             "newCompanyBtn": "Nytt företag",
             "getNok": "Misslyckades med att hämta företag!"
         },
@@ -205,11 +205,11 @@
             "generalInfoPaneHeader": "Generell info",
             "customerNrLbl": "Kundnr",
             "nameLbl": "Kundnamn",
-            "addrLbl": "Adressrad __nr__",
+            "addrLbl": "Adressrad {{nr}}",
             "vatNrLbl": "Momsregnr",
             "contactInfoPaneHeader": "Kontaktinfo",
             "contactLbl": "Kontaktperson",
-            "phoneLbl": "Telefon __nr__",
+            "phoneLbl": "Telefon {{nr}}",
             "emailLbl": "E-post",
             "optionPaneHeader": "Alternativ",
             "optionNoVatLbl": "Fakturera exklusive moms",
@@ -218,9 +218,9 @@
             "getNok": "Misslyckades med att hämta kund!",
             "newNok_noCompany": "Går inte att skapa kund! Företag ej valt eller ogiltigt.",
             "saveTicker": "Sparar kund",
-            "saveOk": "Kund <strong>__name__</strong> med kundnr __cid__ skapad.",
-            "saveOk_update": "Kund <strong>__name__</strong> med kundnr __cid__ uppdaterad.",
-            "saveOk_delete": "Kund <strong>__name__</strong> med kundnr __cid__ raderad.",
+            "saveOk": "Kund <strong>{{name}}</strong> med kundnr {{cid}} skapad.",
+            "saveOk_update": "Kund <strong>{{name}}</strong> med kundnr {{cid}} uppdaterad.",
+            "saveOk_delete": "Kund <strong>{{name}}</strong> med kundnr {{cid}} raderad.",
             "saveNok": "Misslyckades att spara kund!",
             "saveNok_noCompany": "Misslyckades att spara kund! Inget företag valt.",
             "saveNok_noName": "Kund måste anges!"
@@ -228,8 +228,8 @@
         "customerList": {
             "cidCol": "Nr",
             "nameCol": "Namn",
-            "addrCol": "Adress __nr__",
-            "phoneCol": "Telefon __nr__",
+            "addrCol": "Adress {{nr}}",
+            "phoneCol": "Telefon {{nr}}",
             "newCustomerBtn": "Ny kund",
             "getNok": "Misslyckades med att hämta kunder!",
             "getNok_noCompany": "Misslyckades med att hämta kunder! Företag ej valt eller ogiltigt."
@@ -258,8 +258,8 @@
             "detailsTotalCol": "Summa",
             "detailsNewRowBtn": "Ny rad",
             "detailsIsTextOnlyCheckLbl": "Fritext",
-            "groupNumInvoiceItemsText": "__count__ rad",
-            "groupNumInvoiceItemsText_plural": "__count__ rader",
+            "groupNumInvoiceItemsText": "{{count}} rad",
+            "groupNumInvoiceItemsText_plural": "{{count}} rader",
             "groupEditNameLbl": "Gruppnamn (fakturainmatning)",
             "groupEditColActiveCheckLbl": "Aktiv",
             "groupEditNegateDiscountCheckLbl": "Använd som påslag",
@@ -295,9 +295,9 @@
             "getGroupTemplatesNok": "Misslyckades med att hämta gruppmallar!",
             "getNok": "Misslyckades med att hämta faktura!",
             "saveTicker": "Sparar faktura",
-            "saveOk": "Faktura <strong>__iid__</strong> skapad.",
-            "saveOk_update": "Faktura <strong>__iid__</strong> uppdaterad.",
-            "saveOk_delete": "Faktura <strong>__iid__</strong> raderad.",
+            "saveOk": "Faktura <strong>{{iid}}</strong> skapad.",
+            "saveOk_update": "Faktura <strong>{{iid}}</strong> uppdaterad.",
+            "saveOk_delete": "Faktura <strong>{{iid}}</strong> raderad.",
             "saveNok": "Misslyckades att spara fakturan!",
             "saveNok_invalidCustomer": "Ingen kund vald!",
             "saveNok_invalidDate": "Ingen datum angiven!",
@@ -318,7 +318,7 @@
             "printNok_noId": "Utskriften misslyckades, fakturan har inget id!"
         },
         "invoiceReport": {
-            "fileName": "faktura-__iid__-kund-__cid__.pdf",
+            "fileName": "faktura-{{iid}}-kund-{{cid}}.pdf",
             "decimalSeparator": ",",
             "headerString": "FAKTURA",
             "headerString_isCredit": "KREDITFAKTURA",
