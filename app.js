@@ -30,6 +30,7 @@ args.version('0.0.1')
   .option('--ssl', 'Start server on https')
   .option('--monitor', 'Monitor used resources')
   .option('--local', 'Run on localhost')
+  .option('-v,--verbose', 'Run with verbose info')
   .parse(process.argv);
 
 explicitUser = null;
@@ -103,8 +104,8 @@ i18n
     preload: defaults.enabledLngList.slice(0),
     whitelist: defaults.enabledLngList.slice(0),
     fallbackLng: defaults.defaultLng,
-    saveMissing: true,
-    debug: true,
+    saveMissing: args.local,
+    debug: args.verbose,
     backend: {
       // path where resources get loaded from
       loadPath: 'locales/{{lng}}/{{ns}}.json',
