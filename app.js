@@ -100,8 +100,8 @@ i18n
   .use(i18nFsBackend)
   .init({
     lng: defaults.defaultLng,
-    preload: defaults.enabledLngList,
-    whitelist: defaults.enabledLngList,
+    preload: defaults.enabledLngList.slice(0),
+    whitelist: defaults.enabledLngList.slice(0),
     fallbackLng: defaults.defaultLng,
     saveMissing: true,
     debug: true,

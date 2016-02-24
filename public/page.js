@@ -408,68 +408,108 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
 var CompanyViewModel = function() {
   var self = this;
 
+  self.contactPaneLng = ko.observable(defaults.defaultLng);
+  self.paymentOptPaneLng = ko.observable(defaults.defaultLng);
+  self.customTextFieldsPaneLng = ko.observable(defaults.defaultLng);
+
+  self.lngFields = [
+    {name: "contact1Caption", lngSelector: "contactPaneLng"},
+    {name: "contact2Caption", lngSelector: "contactPaneLng"},
+    {name: "contact3Caption", lngSelector: "contactPaneLng"},
+    {name: "contact1", lngSelector: "contactPaneLng"},
+    {name: "contact2", lngSelector: "contactPaneLng"},
+    {name: "contact3", lngSelector: "contactPaneLng"},
+    {name: "payment1Caption", lngSelector: "paymentOptPaneLng"},
+    {name: "payment2Caption", lngSelector: "paymentOptPaneLng"},
+    {name: "payment3Caption", lngSelector: "paymentOptPaneLng"},
+    {name: "payment1", lngSelector: "paymentOptPaneLng"},
+    {name: "payment2", lngSelector: "paymentOptPaneLng"},
+    {name: "payment3", lngSelector: "paymentOptPaneLng"},
+    {name: "paymentFocus", lngSelector: "paymentOptPaneLng"},
+    {name: "paymentCustomText", lngSelector: "paymentOptPaneLng"},
+    {name: "vatNrCustomText", lngSelector: "customTextFieldsPaneLng"},
+    {name: "reverseChargeText", lngSelector: "customTextFieldsPaneLng"}
+  ];
+
+  self.addLngField = function(field, lngSelector) {
+    var fieldName = field;
+    self[fieldName] = ko.pureComputed({
+      read: function() {
+        var lng = this[lngSelector]();
+        return this[lng][fieldName]();
+      },
+      write: function(value) {
+        var lng = this[lngSelector]();
+        this[lng][fieldName](value);
+      },
+      owner: self
+    });
+  };
+
   self._id = ko.observable();
   self.uid = ko.observable();
   self.name = ko.observable();
   self.addr1 = ko.observable();
   self.addr2 = ko.observable();
   self.addr3 = ko.observable();
-  self.contact1Caption = ko.observable();
-  self.contact2Caption = ko.observable();
-  self.contact3Caption = ko.observable();
-  self.contact1 = ko.observable();
-  self.contact2 = ko.observable();
-  self.contact3 = ko.observable();
-  self.payment1Caption = ko.observable();
-  self.payment2Caption = ko.observable();
-  self.payment3Caption = ko.observable();
-  self.payment1 = ko.observable();
-  self.payment2 = ko.observable();
-  self.payment3 = ko.observable();
-  self.paymentFocus = ko.observable();
-  self.paymentCustomText = ko.observable();
   self.defaultNumDaysUntilPayment = ko.observable();
   self.vatNr = ko.observable();
   self.orgNr = ko.observable();
-  self.vatNrCustomText = ko.observable();
-  self.reverseChargeText = ko.observable();
   self.isValid = ko.observable();
   self.logo = ko.observable();
   self.nextCid = ko.observable();
   self.nextIid = ko.observable();
   self.invoiceStyle = ko.observable();
+
+  for (var i = 0; i < defaults.invoiceLngList.length; i++) {
+    var lng = defaults.invoiceLngList[i]; 
+    self[lng] = {};
+    for (var j = 0; j < self.lngFields.length; j++) {
+      var field = self.lngFields[j].name;
+      self[lng][field] = ko.observable();
+    }
+  }
+  for (var j = 0; j < self.lngFields.length; j++) {
+    var field = self.lngFields[j].name;
+    var fieldLngSelector = self.lngFields[j].lngSelector;
+    self.addLngField(field, fieldLngSelector);
+  }
+
   self.nameError = ko.observable(false);
   self.hasErrorCss = ko.pureComputed(function() {
     // return this.nameError() ? "has-error" : "";
     return this.nameError() ? "highlighterror" : "";
   }, self);
-  
+
   self.setData = function(data) {
+    self.contactPaneLng(defaults.defaultLng);
+    self.paymentOptPaneLng(defaults.defaultLng);
+    self.customTextFieldsPaneLng(defaults.defaultLng);
     self._id(data._id);
     self.uid(data.uid);
     self.name(data.name);
     self.addr1(data.addr1);
     self.addr2(data.addr2);
     self.addr3(data.addr3);
-    self.contact1Caption(data.contact1Caption);
-    self.contact2Caption(data.contact2Caption);
-    self.contact3Caption(data.contact3Caption);
-    self.contact1(data.contact1);
-    self.contact2(data.contact2);
-    self.contact3(data.contact3);
-    self.payment1Caption(data.payment1Caption);
-    self.payment2Caption(data.payment2Caption);
-    self.payment3Caption(data.payment3Caption);
-    self.payment1(data.payment1);
-    self.payment2(data.payment2);
-    self.payment3(data.payment3);
-    self.paymentFocus(data.paymentFocus);
-    self.paymentCustomText(data.paymentCustomText);
+    for (var i = 0; i < defaults.invoiceLngList.length; i++) {
+      var lng = defaults.invoiceLngList[i];
+      if (data.hasOwnProperty(lng)) {
+        for (var j = 0; j < self.lngFields.length; j++) {
+          var field = self.lngFields[j].name;
+          self[lng][field](data[lng][field]);
+        }
+      } else if (lng === 'sv') {
+        // Support old company format
+        for (var j = 0; j < self.lngFields.length; j++) {
+          var field = self.lngFields[j].name;
+          self[lng][field](data[field]);
+        }
+      }
+    }
+
     self.defaultNumDaysUntilPayment(data.defaultNumDaysUntilPayment);
     self.vatNr(data.vatNr);
     self.orgNr(data.orgNr);
-    self.vatNrCustomText(data.vatNrCustomText);
-    self.reverseChargeText(data.reverseChargeText);
     self.isValid(data.isValid);
     self.logo(data.logo);
     self.nextCid(data.nextCid);
@@ -488,38 +528,43 @@ var CompanyViewModel = function() {
         addr1 : "",
         addr2 : "",
         addr3 : "",
-        contact1Caption : t("app.company.defaultContact1Caption"),
-        contact2Caption : t("app.company.defaultContact2Caption"),
-        contact3Caption : t("app.company.defaultContact3Caption"),
-        contact1 : "",
-        contact2 : "",
-        contact3 : "",
-        payment1Caption : t("app.company.defaultPayment1Caption"),
-        payment2Caption : t("app.company.defaultPayment2Caption"),
-        payment3Caption : "",
-        payment1 : "",
-        payment2 : "",
-        payment3 : "",
-        paymentFocus : "1",
-        paymentCustomText : t("app.company.defaultPaymentCustomText"),
         defaultNumDaysUntilPayment : 30,
         vatNr : "",
         orgNr : "",
-        vatNrCustomText : t("app.company.defaultVatNrCustomText"),
-        reverseChargeText : t("app.company.defaultReverseChargeCustomText"),
         isValid : true,
         logo : undefined,
         nextCid : defaults.firstCid,
         nextIid : defaults.firstIid,
         invoiceStyle : defaults.invoiceReportStyle
+    };
+    for (var i = 0; i < defaults.invoiceLngList.length; i++) {
+      var lng = defaults.invoiceLngList[i];
+      data[lng] = {
+        contact1Caption : t("app.company.defaultContact1Caption", {'lng': lng}),
+        contact2Caption : t("app.company.defaultContact2Caption", {'lng': lng}),
+        contact3Caption : t("app.company.defaultContact3Caption", {'lng': lng}),
+        contact1 : "",
+        contact2 : "",
+        contact3 : "",
+        payment1Caption : t("app.company.defaultPayment1Caption", {'lng': lng}),
+        payment2Caption : t("app.company.defaultPayment2Caption", {'lng': lng}),
+        payment3Caption : "",
+        payment1 : "",
+        payment2 : "",
+        payment3 : "",
+        paymentFocus : "1",
+        paymentCustomText : t("app.company.defaultPaymentCustomText", {'lng': lng}),
+        vatNrCustomText : t("app.company.defaultVatNrCustomText", {'lng': lng}),
+        reverseChargeText : t("app.company.defaultReverseChargeCustomText", {'lng': lng}),
       };
+    }
     self.setData(data);
   };
   
   self.init();
   
   self.setDefaultReverseChargeCustomText = function() {
-    self.reverseChargeText(t("app.company.defaultReverseChargeCustomText"));
+    self.reverseChargeText(t("app.company.defaultReverseChargeCustomText", {'lng': self.customTextFieldsPaneLng()}));
   };
 
   self.setLogo = function(logo) {
@@ -572,31 +617,24 @@ var CompanyViewModel = function() {
       addr1 : self.addr1(),
       addr2 : self.addr2(),
       addr3 : self.addr3(),
-      contact1Caption : self.contact1Caption(),
-      contact2Caption : self.contact2Caption(),
-      contact3Caption : self.contact3Caption(),
-      contact1 : self.contact1(),
-      contact2 : self.contact2(),
-      contact3 : self.contact3(),
-      payment1Caption : self.payment1Caption(),
-      payment2Caption : self.payment2Caption(),
-      payment3Caption : self.payment3Caption(),
-      payment1 : self.payment1(),
-      payment2 : self.payment2(),
-      payment3 : self.payment3(),
-      paymentFocus : self.paymentFocus(),
-      paymentCustomText : self.paymentCustomText(),
+      sv: {},
+      en: {},
       defaultNumDaysUntilPayment : self.defaultNumDaysUntilPayment(),
       vatNr : self.vatNr(),
       orgNr : self.orgNr(),
-      vatNrCustomText : self.vatNrCustomText(),
-      reverseChargeText : self.reverseChargeText(),
       isValid : self.isValid(),
       logo : self.logo(),
       nextCid : parseInt(self.nextCid()),
       nextIid : parseInt(self.nextIid()),
       invoiceStyle : self.invoiceStyle()
     };
+    for (var i = 0; i < defaults.invoiceLngList.length; i++) {
+      var lng = defaults.invoiceLngList[i];
+      for (var j = 0; j < self.lngFields.length; j++) {
+        var field = self.lngFields[j].name;
+        res[lng][field] = self[lng][field]();
+      }
+    }
     return res;
   };
 };
@@ -710,11 +748,12 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
   self.activeCompany = activeCompany;
 
   inheritInvoiceStyleModel(self);
-  
+  inheritInvoiceLngModel(self);
+
   self.logoPath = ko.pureComputed(function() {
     var path = "";
-    if (self.data._id() !== undefined && self.data.logo() !== undefined) {
-      path = "/api/company_logo/" + self.data._id();
+    if (this.data._id() !== undefined && this.data.logo() !== undefined) {
+      path = "/api/company_logo/" + this.data._id();
     }
     return path;
   }, self);
@@ -1598,6 +1637,41 @@ var InvoiceDataViewModel = function() {
     }
   };
 
+  var registerCompanyLngMirrors = function(mirrorFieldPrefix, fields) {
+    for (var i = 0; i < fields.length; i++) {
+      var field = fields[i];
+      self[mirrorFieldPrefix + field] = ko.pureComputed({
+        read: function(srcField) {
+          var lngField = this[this.customerFieldMirrorPrefix + 'invoiceLng']();
+          var srcFieldName = "company." + lngField + "." + srcField;
+          if (this.company() === undefined) {
+            Log.info("Mirror read of " + srcFieldName + " failed. company undefined!");
+          } else if (!this.company().hasOwnProperty(lngField)) {
+            Log.info("Mirror read of " + srcFieldName + " failed. company." + lngField + " not present!");
+          } else {
+            var value = this.company()[lngField][srcField];
+            Log.info("Mirror read of " + srcFieldName + " returned " + value);
+            return value;
+          }
+          return undefined;
+        }.bind(self, field),
+        write: function(dstField, value) {
+          var lngField = this[this.customerFieldMirrorPrefix + 'invoiceLng']();
+          var dstFieldName = "company." + lngField + "." + dstField;
+          if (this.company() === undefined) {
+            Log.info("Mirror write to " + dstFieldName + " failed. company undefined!");
+          } else if (!this.company().hasOwnProperty(lngField)) {
+            Log.info("Mirror write to " + dstFieldName + " failed. company." + lngField + " not present!");
+          } else {
+            Log.info("Mirror write-back of " + dstFieldName + " set to " + value);
+            this.company()[lngField][dstField] = value;
+          }
+        }.bind(self, field),
+        owner: self
+      });
+    }
+  };
+
   self.updateMirrors = function(mirrorFieldPrefix, fields, sourceData) {
     if (sourceData !== undefined) {
       for (var i = 0; i < fields.length; i++) {
@@ -1634,16 +1708,6 @@ var InvoiceDataViewModel = function() {
   // Mirror company fields
   self.companyFieldMirrorPrefix = 'companyMirror_';
   self.companyFieldMirror = [
-    'reverseChargeText',
-    'vatNrCustomText',
-    'paymentCustomText',
-    'payment1Caption',
-    'payment2Caption',
-    'payment3Caption',
-    'payment1',
-    'payment2',
-    'payment3',
-    'paymentFocus',
     'invoiceStyle'
   ];
 
@@ -1656,6 +1720,23 @@ var InvoiceDataViewModel = function() {
 
   registerMirrors(self.companyFieldMirrorPrefix,
     self.companyFieldMirror, companyFieldMirrorUpdate);
+
+  self.companyLngFieldMirrorPrefix = 'companyLngMirror_';
+  self.companyLngFieldMirror = [
+    'reverseChargeText',
+    'vatNrCustomText',
+    'paymentCustomText',
+    'payment1Caption',
+    'payment2Caption',
+    'payment3Caption',
+    'payment1',
+    'payment2',
+    'payment3',
+    'paymentFocus'
+  ];
+
+  registerCompanyLngMirrors(self.companyLngFieldMirrorPrefix,
+    self.companyLngFieldMirror);
 
   self.hasVat = ko.pureComputed(function() {
     if (this[this.customerFieldMirrorPrefix + 'useReverseCharge']() ||
@@ -1684,6 +1765,11 @@ var InvoiceDataViewModel = function() {
     // Updated mirrored data
     self.updateMirrors(self.companyFieldMirrorPrefix,
       self.companyFieldMirror, companyCopy);
+    var lng = self.customerMirror_invoiceLng();
+    if (companyCopy !== undefined) {
+      self.updateMirrors(self.companyLngFieldMirrorPrefix,
+        self.companyLngFieldMirror, companyCopy[lng]);
+    }
   };
 
   self.setData = function(newData) {
@@ -3087,7 +3173,6 @@ var setupKo = function() {
   ko.applyBindings(invoiceItemGroupTemplatesViewModel, document.getElementById("app-invoice_item_group_templates"));
 
   ko.applyBindings(settingsViewModel, document.getElementById("app-settings"));
-
   if (cfg.isAdmin) {
     var debugViewModel = new DebugViewModel(navViewModel.currentView);
     var userListViewModel = new UserListViewModel(navViewModel.currentView);
@@ -3107,7 +3192,8 @@ $(function() {
     .init({
       lng: defaults.defaultLng,
       useLocalStorage: false,
-      whitelist: defaults.enabledLngList,
+      whitelist: defaults.enabledLngList.slice(0),
+      preload: defaults.enabledLngList.slice(0),
       fallbackLng: defaults.defaultLng,
       sendMissing: false,
       debug: true,

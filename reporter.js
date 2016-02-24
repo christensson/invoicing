@@ -612,14 +612,14 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
       x.font(style.summary.customText.font);
       x.fontSize(style.summary.customText.fontSize);
       x.newLine();
-      var reverseChargeText = formatTextTemplate(company.reverseChargeText, cust);
+      var reverseChargeText = formatTextTemplate(company[invoiceLng].reverseChargeText, cust);
       x.print(reverseChargeText, {fontBold: 0, border: 0, wrap: 1});
     }
-    if (company.paymentCustomText) {
+    if (company[invoiceLng].paymentCustomText) {
       x.font(style.summary.customText.font);
       x.fontSize(style.summary.customText.fontSize);
       x.newLine();
-      x.print(company.paymentCustomText, {fontBold: 0, border: 0, wrap: 1});
+      x.print(company[invoiceLng].paymentCustomText, {fontBold: 0, border: 0, wrap: 1});
     }
 
     if (finalSummaryHeight === undefined) {
@@ -660,10 +660,12 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
       hasExtraBand = true;
     }
 
-    var col2 = [{cap: c.contact1Caption, text: c.contact1},
-                {cap: c.contact2Caption, text: c.contact2},
-                {cap: c.contact3Caption, text: c.contact3}];
-    if (c.contact3 !== undefined && c.contact3.length > 0) {
+    var cLngFields = c[invoiceLng];
+
+    var col2 = [{cap: cLngFields.contact1Caption, text: cLngFields.contact1},
+                {cap: cLngFields.contact2Caption, text: cLngFields.contact2},
+                {cap: cLngFields.contact3Caption, text: cLngFields.contact3}];
+    if (cLngFields.contact3 !== undefined && cLngFields.contact3.length > 0) {
       hasExtraBand = true;
     }
 
@@ -672,14 +674,14 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
       col3.push({cap: getStr("companyOrgNrCaption"), text: c.orgNr});
       hasExtraBand = true;
     }
-    col3.push({cap: "", text: c.vatNrCustomText});
+    col3.push({cap: "", text: cLngFields.vatNrCustomText});
     // Add dummy to always have at least three items
     col3.push({cap: "", text: ""});
 
-    var col4 = [{cap: c.payment1Caption, text: c.payment1, focus: c.paymentFocus === "1"},
-                {cap: c.payment2Caption, text: c.payment2, focus: c.paymentFocus === "2"},
-                {cap: c.payment3Caption, text: c.payment3, focus: c.paymentFocus === "3"}];
-    if (c.payment3 !== undefined && c.payment3.length > 0) {
+    var col4 = [{cap: cLngFields.payment1Caption, text: cLngFields.payment1, focus: cLngFields.paymentFocus === "1"},
+                {cap: cLngFields.payment2Caption, text: cLngFields.payment2, focus: cLngFields.paymentFocus === "2"},
+                {cap: cLngFields.payment3Caption, text: cLngFields.payment3, focus: cLngFields.paymentFocus === "3"}];
+    if (cLngFields.payment3 !== undefined && cLngFields.payment3.length > 0) {
       hasExtraBand = true;
     }
 
@@ -790,6 +792,39 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
       newGroup.invoiceItems[i].hasTotal = groupToUse.hasTotal;
     }
     invoice.invoiceItemGroups = [newGroup];
+  }
+
+  // Support old companies without multiple languages
+  if (!invoice.company.hasOwnProperty("sv")) {
+    console.log("Detected old company format of invoice id=" + invoice._id +
+      " without info for multiple languages. Converting invoice to support language sv.");
+    var companyFieldsToCopy = [
+      "contact1Caption",
+      "contact2Caption",
+      "contact3Caption",
+      "contact1",
+      "contact2",
+      "contact3",
+      "payment1Caption",
+      "payment2Caption",
+      "payment3Caption",
+      "payment1",
+      "payment2",
+      "payment3",
+      "paymentFocus",
+      "paymentCustomText",
+      "vatNrCustomText",
+      "reverseChargeText"
+    ];
+    for (var i = 0; i < defaults.invoiceLngList.length; i++) {
+      var lng = defaults.invoiceLngList[i]; 
+      invoice.company[lng] = {};
+    }
+
+    for (var j = 0; j < companyFieldsToCopy.length; j++) {
+      var field = companyFieldsToCopy[j];
+      invoice.company["sv"][field] = invoice.company[field];
+    }
   }
   
   // companyId makes directory unique

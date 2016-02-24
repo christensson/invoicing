@@ -137,6 +137,7 @@
             "addrLbl": "Address {{nr}}",
             "vatNrLbl": "VAT nr",
             "orgNrLbl": "Org nr",
+            "showLngLbl": "Show settings for invoice language",
             "contactPaneHeader": "Contact info",
             "contactCaptionHeader": "Contact type",
             "contactInfoHeader": "Info",

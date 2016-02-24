@@ -146,6 +146,7 @@
             "addrLbl": "Adressrad {{nr}}",
             "vatNrLbl": "Momsregnr",
             "orgNrLbl": "Orgnr",
+            "showLngLbl": "Visa inställningar för fakturaspråk",
             "contactPaneHeader": "Kontaktuppgifter",
             "contactCaptionHeader": "Kontakttyp",
             "contactInfoHeader": "Info",
