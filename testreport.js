@@ -3,7 +3,9 @@ var reporter = require('./reporter.js');
 var mydb = require('./mydb.js');
 var mongodb = require('mongodb');
 var ObjectID = mongodb.ObjectID;
+var defaults = require('./public/default.js').get();
 var i18n = require('i18next');
+var i18nFsBackend = require('i18next-node-fs-backend');
 Q = require('q');
 
 function increaseVerbosity(v, total) {
@@ -23,24 +25,31 @@ args.version('0.0.1')
 var i18nInit = function() {
   var deferred = Q.defer();
   // i18n
-  i18n.init(
-    {
-      lng: 'sv',
-      preload: ["sv", "en"],
-      lngWhitelist: ["sv", "en"],
-      fallbackLng: ['sv'],
-      saveMissing: false,
-      debug: true,
-      ignoreRoutes: ['uploads/', 'public/img/', 'public/', 'views/']
-    },
-    function(err, t) {
-      if (err) {
-        deferred.reject(err);
-      } else {
-        deferred.resolve(t);
-      }
+  i18n
+  .use(i18nFsBackend)
+  .init({
+    lng: defaults.defaultLng,
+    preload: defaults.enabledLngList.slice(0),
+    whitelist: defaults.enabledLngList.slice(0),
+    fallbackLng: defaults.defaultLng,
+    saveMissing: false,
+    backend: {
+      // path where resources get loaded from
+      loadPath: 'locales/{{lng}}/{{ns}}.json',
+
+      // path to post missing resources
+      addPath: 'locales/{{lng}}/{{ns}}.missing.json',
+
+      // jsonIndent to use when storing json files
+      jsonIndent: 2
     }
-  );
+  }, function(err, t) {
+    if (err) {
+      deferred.reject(err);
+    } else {
+      deferred.resolve(t);
+    }
+  });
   return deferred.promise;
 };
 

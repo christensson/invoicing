@@ -7,11 +7,14 @@
 var formatNumber = function(value, opts) {
   opts = typeof opts !== 'undefined' ? opts : {};
   // Set default parameters
-  if (!opts.decimalSeparator) {
-    opts.decimalSeparator = ',';
+  if (!opts.decimalSep) {
+    opts.decimalSep = ',';
   }
   if (!opts.thousandSep) {
     opts.thousandSep = ' ';
+  }
+  if (!opts.zeroFill) {
+    opts.zeroFill = false;
   }
 
   var valueString = value.toString();
@@ -58,7 +61,7 @@ var formatNumber = function(value, opts) {
   
   var resultStr = intPart;
   if (decPart !== "") {
-    resultStr = resultStr + opts.decimalSeparator + decPart;
+    resultStr = resultStr + opts.decimalSep + decPart;
   }
   return resultStr;
 };
