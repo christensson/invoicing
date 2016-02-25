@@ -81,7 +81,7 @@ app.use(methodOverride('X-HTTP-Method-Override'));
 
 app.set('trust proxy', 1) // trust first proxy
 var expiryDate = new Date( Date.now() + 4 * 60 * 60 * 1000 ); // 4 hours
-var enforceSsl = args.ssl === true || args.local === false;
+var enforceSsl = args.ssl === true || args.local !== true;
 console.log("enforceSsl=" + enforceSsl);
 app.use(session({
   secret : '345jlfe9324jfsdl2093xc',
