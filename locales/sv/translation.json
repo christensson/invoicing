@@ -384,6 +384,13 @@
             "selectLbl": "Fakturaspråk",
             "description_sv": "Svenska",
             "description_en": "Engelska"
-        }        
+        },
+        "currency": {
+            "selectLbl": "Valuta",
+            "description_SEK": "SEK - Svenska Kronor",
+            "description_EUR": "EUR - Euro",
+            "description_USD": "USD - Dollar (USA)",
+            "description_GBP": "GBP - Britiska Pund"
+        }
     }
 }

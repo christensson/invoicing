@@ -308,6 +308,14 @@ var inheritInvoiceLngModel = function(self) {
   }
 };
 
+var inheritCurrencyModel = function(self) {
+  self.currencyList = ko.observableArray(defaults.currencyList);
+
+  self.getCurrencyDesc = function(name) {
+    return t("app.currency.description", {context: name});
+  }
+};
+
 var SettingsDataModel = function() {
   var self = this;
 
@@ -896,6 +904,7 @@ var CustomerViewModel = function() {
   self.isValid = ko.observable();
   self.companyId = ko.observable();
   self.invoiceLng = ko.observable();
+  self.currency = ko.observable();
   
   self.nameError = ko.observable(false);
   self.hasErrorCss = ko.pureComputed(function() {
@@ -925,6 +934,10 @@ var CustomerViewModel = function() {
       data.invoiceLng = defaults.invoiceLng;
     }
     self.invoiceLng(data.invoiceLng);
+    if (data.currency === undefined) {
+      data.currency = defaults.defaultCurrency;
+    }
+    self.currency(data.currency);
   };
 
   self.init = function() {
@@ -947,6 +960,7 @@ var CustomerViewModel = function() {
       contact : "",
       isValid : true,
       invoiceLng : defaults.invoiceLng,
+      currency : defaults.defaultCurrency,
     };
     self.setData(data);
   };
@@ -1021,7 +1035,8 @@ var CustomerViewModel = function() {
       useReverseCharge : self.useReverseCharge(),
       contact : self.contact(),
       isValid : self.isValid(),
-      invoiceLng : self.invoiceLng()
+      invoiceLng : self.invoiceLng(),
+      currency : self.currency(),
     };
     return res;
   };
@@ -1112,6 +1127,7 @@ var CustomerNewViewModel = function(currentView, activeCompanyId) {
   self.activeCompanyId = activeCompanyId;
 
   inheritInvoiceLngModel(self);
+  inheritCurrencyModel(self);
   
   self.currentView.subscribe(function(newValue) {
     self.data.init();
@@ -1621,11 +1637,18 @@ var InvoiceDataViewModel = function() {
   self.date = ko.observable();
   self.daysUntilPayment = ko.observable();
   self.projId = ko.observable();
-  self.currency = ko.observable();
   self.invoiceItemGroups = ko.observableArray();
   self.invoiceItems = ko.observableArray();
   self.customerAddrIsEditMode = ko.observable(false);
   self.extraOptionExpanded = ko.observable(false);
+
+  self.currency = ko.pureComputed(function() {
+    if ((this.customer() === undefined) || (this.customerMirror_currency() === undefined)) {
+      return defaults.defaultCurrency;
+    } else {
+      return this.customerMirror_currency();
+    }
+  }, self);
 
   var registerMirrors = function(mirrorFieldPrefix, fields, writeBackFunc) {
     for (var i = 0; i < fields.length; i++) {
@@ -1692,7 +1715,8 @@ var InvoiceDataViewModel = function() {
     'addr1',
     'addr2',
     'addr3',
-    'invoiceLng'
+    'invoiceLng',
+    'currency'
   ];
 
   var customerFieldMirrorUpdate = function(field, val) {
@@ -1791,7 +1815,6 @@ var InvoiceDataViewModel = function() {
     self.date(newData.date);
     self.daysUntilPayment(newData.daysUntilPayment);
     self.projId(newData.projId);
-    self.currency(newData.currency);
 
     self.invoiceItemGroups.removeAll();
 
@@ -1811,10 +1834,6 @@ var InvoiceDataViewModel = function() {
     self.companyId(companyId);
   };
 
-  self.setCurrency = function(currency) {
-    self.currency(currency);
-  };
-
   self.init = function(defaultNumDaysUntilPayment) {
     var data = {
       _id : undefined,
@@ -1829,7 +1848,6 @@ var InvoiceDataViewModel = function() {
       date : new Date().toISOString().split("T")[0],
       daysUntilPayment : defaultNumDaysUntilPayment,
       projId : "",
-      currency : "SEK",
       isLocked : false,
       isCanceled : false,
       isPaid : false,
@@ -2021,7 +2039,6 @@ var InvoiceDataViewModel = function() {
       daysUntilPayment : self.daysUntilPayment(),
       lastPaymentDate : self.lastPaymentDate(),
       projId : self.projId(),
-      currency : self.currency(),
       invoiceItemGroups : groups,
       totalExclVat : self.totalExclVat(),
       totalInclVat : self.totalInclVat()
@@ -2287,14 +2304,13 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   self.activeCompany = activeCompany;
   self.customerList = ko.observableArray();
   self.selectedCustomer = ko.observable();
-  self.currencyList = ko.observableArray(["SEK", "EUR", "USD", "GBP"]);
-  self.selectedCurrency = ko.observable();
   self.selectedCustomerUpdatesData = true;
 
   self.itemGroupList = ko.observableArray();
 
   inheritInvoiceStyleModel(self);
   inheritInvoiceLngModel(self);
+  inheritCurrencyModel(self);
   
   self.newGroup = function(g) {
     var group = ko.toJS(g)
@@ -2340,14 +2356,6 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
       if (self.selectedCustomerUpdatesData) {
         self.data.setCustomer(newValue.data);
       }
-    }
-  });
-
-  self.selectedCurrency.subscribe(function(newValue) {
-    if (newValue !== undefined) {
-      Log.info("InvoiceNewViewModel - Currency selected - "
-          + newValue);
-      self.data.setCurrency(newValue);
     }
   });
 
@@ -2473,7 +2481,6 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
         invoice.invoiceItemGroups = [newGroup];
       }
       self.data.setData(invoice);
-      self.selectedCurrency(self.data.currency());
     };
 
     Cache.getInvoicePromise(_id).done(function(invoice) {

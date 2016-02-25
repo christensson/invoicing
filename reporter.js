@@ -39,6 +39,13 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     invoiceLng = invoice.customer.invoiceLng;
   }
 
+  var invoiceCurrency = defaults.invoiceLng;
+  if (invoice.customer.currency) {
+    invoiceCurrency = invoice.customer.currency;
+  } else if (invoice.currency) {
+    invoiceCurrency = invoice.currency;
+  }
+
   var getStr = function(key) {
     var opt = {lng: invoiceLng};
     var contextSepIdx = key.indexOf('_');
@@ -62,7 +69,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
   var fmtCurrencyOpt = {
     decimalSep: getStr('decimalSeparator'),
     thousandSep: ' ',
-    currencyStr: invoice.currency,
+    currencyStr: invoiceCurrency,
     numDecimalTrunc: 2,
     zeroFill: true
   };

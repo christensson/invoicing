@@ -373,6 +373,13 @@
             "selectLbl": "Invoice language",
             "description_sv": "Swedish",
             "description_en": "English"
+        },
+        "currency": {
+            "selectLbl": "Currency",
+            "description_SEK": "SEK - Swedish Krona",
+            "description_EUR": "EUR - Euro",
+            "description_USD": "USD - Dollar (US)",
+            "description_GBP": "GBP - British Pound"
         }
     }
 }

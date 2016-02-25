@@ -6,6 +6,8 @@ var defaults = {
   invoiceLngList: ["sv", "en"],
   invoiceReportStyle: "right",
   invoiceReportStyleList: ["right", "left"],
+  defaultCurrency: "SEK",
+  currencyList: ["SEK", "EUR", "USD", "GBP"], // First is default
   firstCid: 100,
   firstIid: 100,
 };
