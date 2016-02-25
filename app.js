@@ -104,8 +104,8 @@ i18n
     preload: defaults.enabledLngList.slice(0),
     whitelist: defaults.enabledLngList.slice(0),
     fallbackLng: defaults.defaultLng,
-    saveMissing: args.local,
-    debug: args.verbose,
+    saveMissing: args.local === true,
+    debug: args.verbose === true,
     backend: {
       // path where resources get loaded from
       loadPath: 'locales/{{lng}}/{{ns}}.json',
