@@ -585,9 +585,9 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     var totalVat = invoice.totalInclVat - totalExclVat;
     totalVat = parseFloat(totalVat.toFixed(2));
     totalExclVat = parseFloat(totalExclVat.toFixed(2));
-    var noVat = cust.noVat === true;
+    var noVat = cust.noVat === true || cust.useReverseCharge === true;
     var useReverseCharge = cust.useReverseCharge === true;
-    var amountToPay = useReverseCharge?invoice.totalExclVat:invoice.totalInclVat;
+    var amountToPay = noVat?invoice.totalExclVat:invoice.totalInclVat;
     var amountToPayAdjustment = calcPaymentAdjustment(amountToPay);
     amountToPay = amountToPay + amountToPayAdjustment;
     x.fontSize(style.summary.fontSize);
@@ -598,7 +598,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
              {data: util.formatCurrency(invoice.totalExclVat, fmtCurrencyOpt),
               width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
-    if (!(useReverseCharge || noVat)) {
+    if (!noVat) {
       x.band( [
                {data: getStr("summaryTotalVatLbl"), width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
                {data: util.formatCurrency(totalVat, fmtCurrencyOpt),
