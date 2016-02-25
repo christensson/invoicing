@@ -18,6 +18,8 @@ var i18nFsBackend = require('i18next-node-fs-backend');
 var i18nMiddleware = require('i18next-express-middleware');
 var simLatency = require('express-simulate-latency');
 var bcrypt = require('bcryptjs');
+var helmet = require('helmet');
+var expressEnforcesSsl = require('express-enforces-ssl');
 var defaults = require('./public/default.js').get();
 
 function list(val) {
@@ -60,6 +62,15 @@ var tmpDir = __dirname + "/tmp";
 
 app = express();
 
+app.use(helmet.hidePoweredBy());
+app.use(helmet.frameguard());
+app.use(helmet.ieNoOpen());
+app.use(helmet.xssFilter());
+// Not working on chrome
+//app.use(helmet.noSniff());
+var ninetyDaysInMilliseconds = 7776000000;
+app.use(helmet.hsts({ maxAge: ninetyDaysInMilliseconds }));
+
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -67,11 +78,26 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(cookieParser());
 app.use(methodOverride('X-HTTP-Method-Override'));
+
+app.set('trust proxy', 1) // trust first proxy
+var expiryDate = new Date( Date.now() + 4 * 60 * 60 * 1000 ); // 4 hours
+var enforceSsl = args.ssl === true || args.local === false;
+console.log("enforceSsl=" + enforceSsl);
 app.use(session({
   secret : '345jlfe9324jfsdl2093xc',
+  name : 'sessionId',
   resave : false,
-  saveUninitialized : false
+  saveUninitialized : false,
+  cookie: {
+    secure: enforceSsl,
+    httpOnly: true,
+    expires: expiryDate
+  }
 }));
+if (enforceSsl) {
+  console.log("use: expressEnforcesSsl");
+  app.use(expressEnforcesSsl());
+}
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
@@ -140,12 +166,16 @@ var googleAuth = require('./google_auth.json');
 
 // Passport session setup.
 passport.serializeUser(function(user, done) {
-  console.log("serializing " + user.info.name);
+  if (args.verbose) {
+    console.log("serializing " + user.info.name);
+  }
   done(null, user);
 });
 
 passport.deserializeUser(function(obj, done) {
-  console.log("deserializing " + obj);
+  if (args.verbose) {
+    console.log("deserializing " + JSON.stringify(obj));
+  }
   done(null, obj);
 });
 
@@ -707,8 +737,6 @@ var signinTemplatePath = require.resolve('./views/signin.marko');
 var signinTemplate = marko.load(signinTemplatePath);
 
 app.get('/signin', function(req, res) {
-  var currentLng = req.locale;
-  console.log("signing: currentLng=" + currentLng);
   var msg =  {
     "error": req.flash('error'),
     "notice": req.flash('notice'),
