@@ -259,16 +259,6 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
 
   var headerBottomY = 0;
 
-  var calcPaymentAdjustment = function(amount) {
-    var amountRounded = Math.round(amount);
-    var adjustment = amountRounded - amount;
-    var adjustedAmount = amount + adjustment;
-    if (verbosity > 2) {
-      console.log("calcPaymentAdjustment: amount=" + amount + ", adjAmount=" + adjustedAmount + ", adjustment=" + adjustment);
-    }
-    return adjustment;
-  };
-  
   var formatDate = function(value) {
     var dateStr = "";
     if (value !== undefined) {
@@ -588,7 +578,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     var noVat = cust.noVat === true || cust.useReverseCharge === true;
     var useReverseCharge = cust.useReverseCharge === true;
     var amountToPay = noVat?invoice.totalExclVat:invoice.totalInclVat;
-    var amountToPayAdjustment = calcPaymentAdjustment(amountToPay);
+    var amountToPayAdjustment = util.calcPaymentAdjustment(amountToPay);
     amountToPay = amountToPay + amountToPayAdjustment;
     x.fontSize(style.summary.fontSize);
     x.newLine();

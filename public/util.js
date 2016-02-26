@@ -103,6 +103,17 @@ var formatCurrency = function(value, opts) {
   return prefix + formatNumber(value, opts) + suffix;
 };
 
+/** Calculates how much to adjust payment
+ * @param value Amount to calculate adjustment for
+ */
+var calcPaymentAdjustment = function(amount) {
+  var amountRounded = Math.round(amount);
+  var adjustment = amountRounded - amount;
+  var adjustedAmount = amount + adjustment;
+  console.log("calcPaymentAdjustment: amount=" + amount + ", adjAmount=" + adjustedAmount + ", adjustment=" + adjustment);
+  return adjustment;
+};
+
 var dateAddDays = function(date, numDaysToAdd) {
   var newDateMs = date.valueOf() + (numDaysToAdd * 1000 * 3600 * 24);
   return new Date(newDateMs);
@@ -112,6 +123,7 @@ var dateAddDays = function(date, numDaysToAdd) {
 (typeof module !== "undefined" && module !== null ? module : {}).exports = this.Util = {
   formatCurrency: formatCurrency,
   formatNumber: formatNumber,
+  calcPaymentAdjustment: calcPaymentAdjustment,
   dateAddDays: dateAddDays,
 };
 

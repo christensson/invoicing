@@ -40,6 +40,7 @@
     "passport": "^0.3.2",
     "passport-google-oauth": "^0.2.0",
     "passport-local": "^1.0.0",
-    "q": "^1.4.1"
+    "q": "^1.4.1",
+    "unit.js": "^2.0.0"
   }
 }
