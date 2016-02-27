@@ -68,8 +68,8 @@ app.use(helmet.ieNoOpen());
 app.use(helmet.xssFilter());
 // Not working on chrome
 //app.use(helmet.noSniff());
-//var ninetyDaysInMilliseconds = 7776000000;
-//app.use(helmet.hsts({ maxAge: ninetyDaysInMilliseconds }));
+var ninetyDaysInMilliseconds = 7776000000;
+app.use(helmet.hsts({ maxAge: ninetyDaysInMilliseconds }));
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -80,7 +80,6 @@ app.use(cookieParser());
 app.use(methodOverride('X-HTTP-Method-Override'));
 
 app.set('trust proxy', 1) // trust first proxy
-var expiryDate = new Date( Date.now() + 4 * 60 * 60 * 1000 ); // 4 hours
 var enforceSsl = args.ssl === true || args.local !== true;
 console.log("enforceSsl=" + enforceSsl);
 app.use(session({
@@ -91,7 +90,7 @@ app.use(session({
   cookie: {
     secure: enforceSsl,
     httpOnly: true,
-    expires: expiryDate
+    maxAge: 4 * 60 * 60 * 1000 // 4 hours
   }
 }));
 if (enforceSsl) {
