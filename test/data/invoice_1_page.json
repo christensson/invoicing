@@ -59,6 +59,7 @@
     "email": "",
     "useReverseCharge": true,
     "contact": "",
+    "currency": "SEK",
     "isValid": true
   },
   "yourRef": "Pelle",
@@ -67,7 +68,6 @@
   "daysUntilPayment": 30,
   "lastPaymentDate": "2016-03-11T00:00:00.000Z",
   "projId": "Testprojekt",
-  "currency": "SEK",
   "invoiceItemGroups": [
     {
       "_id": "56ba53ecaf82211b4ef31d24",
@@ -153,11 +153,11 @@
       "invoiceItems": [
         {
           "description": "Testtimmar",
-          "price": "1002",
+          "price": 1002.1,
           "count": "25",
           "vat": 25,
           "discount": 0,
-          "total": 25050,
+          "total": 25050.25,
           "isTextOnly": false,
           "hasDesc": true,
           "hasPrice": true,
@@ -168,8 +168,8 @@
           "isValid": true
         }
       ],
-      "totalExclVat": 25050,
-      "totalInclVat": 31312.5
+      "totalExclVat": 25050.25,
+      "totalInclVat": 31312.8125
     },
     {
       "_id": "56ba53ecaf82211b4ef31d29",
@@ -274,6 +274,6 @@
       "totalInclVat": 0
     }
   ],
-  "totalExclVat": 25050,
-  "totalInclVat": 31312.5
+  "totalExclVat": 25050.25,
+  "totalInclVat": 31312.8125
 }

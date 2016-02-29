@@ -8,6 +8,12 @@ var defaults = {
   invoiceReportStyleList: ["right", "left"],
   defaultCurrency: "SEK",
   currencyList: ["SEK", "EUR", "USD", "GBP"], // First is default
+  invoiceCurrencyAdjNumDec: {
+    "SEK": 0,
+    "EUR": 2,
+    "USD": 2,
+    "GBP": 2,
+  },
   firstCid: 100,
   firstIid: 100,
 };

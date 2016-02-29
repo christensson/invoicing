@@ -74,6 +74,21 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     zeroFill: true
   };
 
+
+  var amountToPayAdjNumDec = defaults.invoiceCurrencyAdjNumDec[invoiceCurrency];
+
+  var fmtCurrencyOptPayAdj = {
+    decimalSep: getStr('decimalSeparator'),
+    thousandSep: ' ',
+    currencyStr: invoiceCurrency,
+    numDecimalTrunc: amountToPayAdjNumDec + 1,
+    zeroFill: true
+  };
+  // We want at least the number of decimals as all other currencies...
+  if (fmtCurrencyOptPayAdj.numDecimalTrunc < fmtCurrencyOpt.numDecimalTrunc) {
+    fmtCurrencyOptPayAdj.numDecimalTrunc = fmtCurrencyOpt.numDecimalTrunc;
+  }
+
   if (verbosity > 0) {
     console.log("invoiceStyle: " + invoiceStyle);  
     console.log("invoiceLng: " + invoiceLng);
@@ -271,7 +286,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
   
   var formatTextTemplate = function(text, cust) {
     var formatedText = text;
-    if (cust.vatNr !== undefined) {
+    if (formatedText !== undefined && cust.vatNr !== undefined) {
       formatedText = formatedText.replace("%c.vatNr%", cust.vatNr);
     }
     if (verbosity > 2) {
@@ -578,8 +593,9 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     var noVat = cust.noVat === true || cust.useReverseCharge === true;
     var useReverseCharge = cust.useReverseCharge === true;
     var amountToPay = noVat?invoice.totalExclVat:invoice.totalInclVat;
-    var amountToPayAdjustment = util.calcPaymentAdjustment(amountToPay);
-    amountToPay = amountToPay + amountToPayAdjustment;
+    var amountToPayAdj = util.calcPaymentAdjustment(
+      amountToPay, {numDec: amountToPayAdjNumDec, verbose: verbosity > 1?true:false});
+    amountToPay = amountToPay + amountToPayAdj;
     x.fontSize(style.summary.fontSize);
     x.newLine();
     x.font(style.summary.font);
@@ -595,11 +611,13 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
                 width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
              ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     }
-    x.band( [
-             {data: getStr("summaryTotalToPayAdjLbl"), width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
-             {data: util.formatCurrency(amountToPayAdjustment, fmtCurrencyOpt),
-              width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
-           ], {fontBold: 0, border:0, width: 0, wrap: 1} );
+    if (amountToPayAdj !== undefined) {
+      x.band( [
+               {data: getStr("summaryTotalToPayAdjLbl_" + invoiceCurrency), width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
+               {data: util.formatCurrency(amountToPayAdj, fmtCurrencyOptPayAdj),
+                width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
+             ], {fontBold: 0, border:0, width: 0, wrap: 1} );
+    }
     x.addY(summaryAmountToPayTopPadding);
     x.band( [
              {data: getStr("summaryTotalToPayLbl"), width: summaryCaptionColWidth, align: x.right, font: style.summary.caption.font, fontBold: 1},

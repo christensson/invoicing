@@ -105,12 +105,22 @@ var formatCurrency = function(value, opts) {
 
 /** Calculates how much to adjust payment
  * @param value Amount to calculate adjustment for
+ * @param opts.numDec Round to decimal. (Default: 0)
  */
-var calcPaymentAdjustment = function(amount) {
-  var amountRounded = Math.round(amount);
-  var adjustment = amountRounded - amount;
+var calcPaymentAdjustment = function(amount, opts) {
+  opts = typeof opts !== 'undefined' ? opts : {};
+  if (!opts.numDec) {
+    opts.numDec = 0;
+  }
+  var numDecFactor = Math.pow(10, -opts.numDec);
+  var SCALE = 100 / numDecFactor; // Scale numbers to cope with double-precision problems
+  var amountRounded = Math.round(amount / numDecFactor) * numDecFactor;
+  var adjustment = ((amountRounded * SCALE) - (amount * SCALE)) / SCALE;
   var adjustedAmount = amount + adjustment;
-  console.log("calcPaymentAdjustment: amount=" + amount + ", adjAmount=" + adjustedAmount + ", adjustment=" + adjustment);
+  if (opts.verbose) {
+    console.log("calcPaymentAdjustment: amountRounded=" + amountRounded +
+      ", adjustment=" + adjustment + ", adjustedAmount=" + adjustedAmount + ", opts.numDec=" + opts.numDec);
+  }
   return adjustment;
 };
 
