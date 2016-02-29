@@ -3046,7 +3046,7 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
     self.currentView.subscribe(function(newValue) {
       if (newValue == 'home') {
         Log.info("GettingStartedViewModel - activated");
-        self.populate();
+        self.populatePromise();
       }
     });
 
@@ -3054,7 +3054,7 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
       Log.info("GettingStartedViewModel - activeCompanyId.subscribe: value="
           + newValue);
       if (self.currentView() == 'home') {
-        self.populate(true);
+        self.populatePromise(true);
       } else {
         cache.del(Cache.CURR_USER_STATS());
       }
@@ -3063,8 +3063,9 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
     self.enabled(true);
   };
 
-  self.populate = function(force) {
+  self.populatePromise = function(force) {
     force = typeof force !== 'undefined' ? force : false;
+    var deferred = $.Deferred();
     // Do nothing if object exists in cache
     if (force || !cache.get(Cache.CURR_USER_STATS())) {
       Notify_showSpinner(true);
@@ -3074,13 +3075,18 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
             Log.info("Got stats id=" + self.activeCompanyId() + ", stats=" + JSON.stringify(stats));
             cache.set(Cache.CURR_USER_STATS(), stats);
             Notify_showSpinner(false);
+            deferred.resolve();
           }).fail(function() {
             Log.info("GettingStartedViewModel - populate - failed");
             Notify_showSpinner(false);
+            Notify_showMsg('error', t("app.gettingStarted.getNok"));
+            deferred.reject();
           });
     } else {
       Log.info("GettingStartedViewModel - populate - data is cached!");
+      deferred.resolve();
     }
+    return deferred.promise();
   };
 };
 
@@ -3165,7 +3171,9 @@ var setupKo = function() {
 
     // Stats
     cache.set(Cache.CURR_USER_STATS(), data.stats);
-    gettingStartedViewModel.enable();
+    gettingStartedViewModel.populatePromise().done(function() {
+      gettingStartedViewModel.enable();
+    });
   }).fail(function() {
     Notify_showMsg('error', t("app.settings.getInitialDataNok"));
   });

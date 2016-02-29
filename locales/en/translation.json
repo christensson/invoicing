@@ -86,7 +86,8 @@
                 "The active company has <strong>one invoice</strong>."],
             "invoicesText_plural":  [
                 "The active company has <strong>{{count}} invoices</strong>."],
-            "invoicesNewInvoiceBtn": "New invoice"
+            "invoicesNewInvoiceBtn": "New invoice",
+            "getNok": "Failed to get statistics!"
         },
         "groupTemplates": {
           "columnNameColHeader": "Invoice details column header",

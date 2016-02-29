@@ -333,14 +333,10 @@ app.get("/api/initial", ensureAuthenticated, function(req, res) {
 
   var resJson = {};
 
-  settingsJob
-  .then(function(doc) {
-    resJson.settings = doc;
-    return Q.all([companiesJob, mydb.getStats(uid, doc.activeCompanyId)]);
-  }, myFailureHandler.bind(null, res))
+  Q.all([settingsJob, companiesJob])
   .then(function(docs) {
-    resJson.companies = docs[0];
-    resJson.stats = docs[1];
+    resJson.settings = docs[0];
+    resJson.companies = docs[1];
     return Q();
   }, myFailureHandler.bind(null, res))
   .done(function() {

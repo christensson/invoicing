@@ -95,7 +95,8 @@
             "invoicesText_plural": [
                 "Det aktiva företaget har <strong>{{count}} fakturor</strong>."
             ],
-            "invoicesNewInvoiceBtn": "Ny faktura"
+            "invoicesNewInvoiceBtn": "Ny faktura",
+            "getNok": "Misslyckades med att hämta statistik!"
         },
         "groupTemplates": {
             "columnNameColHeader": "Kolumnrubrik för fakturadetaljer",
