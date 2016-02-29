@@ -136,6 +136,7 @@
             "defNumDaysUntilPayLbl": "Betalningsvillkor (dagar)",
             "saveSettingsBtn": "Spara",
             "invalidateCacheBtn": "Rensa lokal cache",
+            "getInitialDataNok": "Misslyckades med att hämta initial data!",
             "getNok": "Misslyckades med att hämta inställningar!",
             "saveTicker": "Sparar inställningar",
             "saveOk": "Inställningar sparade."

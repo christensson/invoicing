@@ -127,6 +127,7 @@
             "defNumDaysUntilPayLbl": "Number of days until payment",
             "saveSettingsBtn": "Save",
             "invalidateCacheBtn" : "Clear local cache",
+            "getInitialDataNok": "Failed to get initial data!",
             "getNok": "Failed to get settings!",
             "saveTicker": "Saving settings",
             "saveOk": "Settings saved."

@@ -832,7 +832,6 @@ module.exports.getStats = function(uid, companyId) {
       res.activeCompany.numCustomers = results[i++];
       res.activeCompany.numInvoices = results[i++];
     }
-
     deferred.resolve(res);
   })
   .fail(function(err) {

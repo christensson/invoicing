@@ -184,7 +184,7 @@ var CacheOp = function() {
       cache.set(self.ITEM_GROUP_TEMPLATES(), data);
       deferred.resolve(data);
     });
-    return deferred.promise;
+    return deferred.promise();
   };
 
   self.getItemGroupTemplate = function(id, callback) {
@@ -221,7 +221,7 @@ var CacheOp = function() {
     }).fail(function() {
       deferred.reject(data);
     });
-    return deferred;
+    return deferred.promise();
   };
 
   self.getCustomer = function(id, callback) {
@@ -259,7 +259,7 @@ var CacheOp = function() {
         deferred.reject();
       }
     });
-    return deferred;
+    return deferred.promise();
   };
 
   self.fetchInvoicePromise = function(id) {
@@ -269,7 +269,7 @@ var CacheOp = function() {
     }).fail(function(err) {
       deferred.reject(err);
     });
-    return deferred;
+    return deferred.promise();
   };
 
   self.invalidateInvoices = function() {
@@ -365,28 +365,20 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
     }
   });
 
-  self.populate = function(isPopulatedCb) {
-    Notify_showSpinner(true);
-    $.getJSON(
-        "/api/settings",
-        function(settings) {
-          self.settings.setData(settings);
-          self.setActiveCompanyId(settings.activeCompanyId);
-          self.activeCompanyId.subscribe(function(newValue) {
-            Log.info("SettingsViewModel - Active company change detected: ID="
-                  + newValue);
-            self.settings.setActiveCompanyId(newValue);
-            self.saveSettings();
-          });
-          Notify_showSpinner(false);
-          isPopulatedCb();
-        }).fail(function() {
-          Log.info("SettingsViewModel - populate - failed");
-          Notify_showSpinner(false);
-          Notify_showMsg('error', t("app.settings.getNok"));
-        });
+  self.enable = function() {
+    self.activeCompanyId.subscribe(function(newValue) {
+      Log.info("SettingsViewModel - Active company change detected: ID="
+            + newValue);
+      self.settings.setActiveCompanyId(newValue);
+      self.saveSettings();
+    });
   };
-  
+
+  self.setData = function(settings) {
+    self.settings.setData(settings);
+    self.setActiveCompanyId(settings.activeCompanyId);
+  };
+
   self.saveSettings = function() {
     var ajaxData = self.settings.toJSON();
     var ajaxUrl = "/api/settings";
@@ -694,7 +686,7 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompany,
     force = typeof force !== 'undefined' ? force : false;
     if (force || !cache.get(Cache.COMPANIES())) {
       Notify_showSpinner(true);
-      Cache.fetchCompanies().success(function() {
+      Cache.fetchCompanies().done(function() {
         Notify_showSpinner(false);
       }).fail(function() {
         Log.info("CompanyListViewModel - populate - failed");
@@ -1100,7 +1092,7 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
       // Do nothing if object exists in cache
       if (force || !cache.get(Cache.CUSTOMERS())) {
         Notify_showSpinner(true);
-        Cache.fetchCustomers(companyId).success(function() {
+        Cache.fetchCustomers(companyId).done(function() {
           Log.info("CustomerListViewModel - populate - success");
           Notify_showSpinner(false);
         }).fail(function() {
@@ -1220,7 +1212,7 @@ var InvoiceItemGroupTemplatesViewModel = function(currentView) {
     force = typeof force !== 'undefined' ? force : false;
     if (force || !cache.get(Cache.ITEM_GROUP_TEMPLATES())) {
       Notify_showSpinner(true);
-      Cache.fetchItemGroupTemplates().success(function() {
+      Cache.fetchItemGroupTemplates().done(function() {
         Notify_showSpinner(false);
       }).fail(function() {
         Log.info("InvoiceItemGroupTemplatesViewModel - populate - failed");
@@ -2165,7 +2157,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
       // Do nothing if object exists in cache
       if (force || !cache.get(Cache.INVOICES())) {
         Notify_showSpinner(true);
-        Cache.fetchInvoices(companyId).success(function() {
+        Cache.fetchInvoices(companyId).done(function() {
           Log.info("InvoiceListViewModel - populate - success");
           Notify_showSpinner(false);
         }).fail(function() {
@@ -2445,7 +2437,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
       browserNavigateBack();
       deferred.reject();
     }
-    return deferred;
+    return deferred.promise();
   };
 
   self.getInvoicePromise = function(_id) {
@@ -2502,7 +2494,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
         deferred.reject(err);
       });
     });
-    return deferred;
+    return deferred.promise();
   };
 
   self.syncCustomerIdInput = function() {
@@ -3090,6 +3082,26 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
   };
 };
 
+var getInitialDataPromise = function() {
+  var deferred = $.Deferred();
+  Notify_showSpinner(true);
+  $.getJSON(
+    "/api/initial",
+    function(data) {
+      deferred.resolve(data);
+    }
+  )
+  .fail(function() {
+    Log.info("Failed to get initial data");
+    deferred.reject(data);
+  })
+  .always(function() {
+    Notify_showSpinner(false);
+  });
+
+  return deferred.promise();
+}
+
 var setupKo = function() {
   ko.bindingHandlers.i18n = {
       update: function (element, valueAccessor, allBindings) {
@@ -3139,9 +3151,20 @@ var setupKo = function() {
   var gettingStartedViewModel = new GettingStartedViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId);
 
-  settingsViewModel.populate(function() {
-    companyViewModel.populate();
-    gettingStartedViewModel.enable();
+  getInitialDataPromise().done(function(data) {
+    Log.info("Got initial data: " + JSON.stringify(data, null, 2));
+
+    // Settings
+    settingsViewModel.setData(data.settings);
+    settingsViewModel.enable();
+
+    // Companies
+    cache.set(Cache.COMPANIES(), data.companies);
+
+    // Stats
+    cache.set(Cache.CURR_USER_STATS(), data.stats);
+  }).fail(function() {
+    Notify_showMsg('error', t("app.settings.getInitialDataNok"));
   });
   
   var companyNewViewModel = new CompanyNewViewModel(navViewModel.currentView,

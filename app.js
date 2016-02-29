@@ -20,6 +20,7 @@ var simLatency = require('express-simulate-latency');
 var bcrypt = require('bcryptjs');
 var helmet = require('helmet');
 var expressEnforcesSsl = require('express-enforces-ssl');
+var Q = require('q');
 var defaults = require('./public/default.js').get();
 
 function list(val) {
@@ -317,6 +318,35 @@ function myFailureHandler(res, err) {
   res.sendStatus(500);
   res.end();
 }
+
+/**
+ * Responds with:
+ * - settings
+ * - companies
+ * - stats
+ */
+app.get("/api/initial", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  console.log("Get initial data: user=" + req.user.info.name + ", uid=" + uid);
+  var settingsJob = mydb.getSettings(uid);
+  var companiesJob = mydb.getCompanies(uid);
+
+  var resJson = {};
+
+  settingsJob
+  .then(function(doc) {
+    resJson.settings = doc;
+    return Q.all([companiesJob, mydb.getStats(uid, doc.activeCompanyId)]);
+  }, myFailureHandler.bind(null, res))
+  .then(function(docs) {
+    resJson.companies = docs[0];
+    resJson.stats = docs[1];
+    return Q();
+  }, myFailureHandler.bind(null, res))
+  .done(function() {
+    res.status(200).json(resJson).end();
+  });
+});
 
 app.get("/api/settings", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
