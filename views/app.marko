@@ -111,7 +111,7 @@
             <p data-bind="i18n: 'app.home.greetingsText'"></p>
 
             <p></p>
-            <div class="panel-group">
+            <div class="panel-group" data-bind="visible: enabled" style="display: none">
               <div class="col-md-4">
                 <div class="panel" data-bind='css: {"panel-primary": numCompanies() == 0, "panel-success": numCompanies() > 0}'>
                   <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.companiesHeader')}</h3></div>

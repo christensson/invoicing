@@ -2975,6 +2975,7 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
   self.stats = ko.observable();
+  self.enabled = ko.observable(false);
 
   self.numCompanies = ko.pureComputed(function() {
     if ((self.activeCompanyId() === undefined) || (self.activeCompanyId() === null) ||
@@ -3042,7 +3043,6 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
   });
 
   self.enable = function() {
-    self.populate();
     self.currentView.subscribe(function(newValue) {
       if (newValue == 'home') {
         Log.info("GettingStartedViewModel - activated");
@@ -3059,6 +3059,8 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
         cache.del(Cache.CURR_USER_STATS());
       }
     });
+
+    self.enabled(true);
   };
 
   self.populate = function(force) {
@@ -3163,6 +3165,7 @@ var setupKo = function() {
 
     // Stats
     cache.set(Cache.CURR_USER_STATS(), data.stats);
+    gettingStartedViewModel.enable();
   }).fail(function() {
     Notify_showMsg('error', t("app.settings.getInitialDataNok"));
   });
