@@ -30,6 +30,9 @@
         "registerNokMsg": "Registration failed! Please try again.",
         "authNokMsg": "Please sign in!"
     },
+    "notification" : {
+        "panelTitle": "Notifications"
+    },
     "app": {
         "pageTitle": "Easy Invoicing",
         "tickerText": "Loading",

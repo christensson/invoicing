@@ -30,6 +30,9 @@
         "registerNokMsg": "Registreringen misslyckades! Var god försök igen.",
         "authNokMsg": "Var god logga in!"
     },
+    "notification" : {
+        "panelTitle": "Notifieringar"
+    },
     "app": {
         "pageTitle": "Lätt Fakturering",
         "tickerText": "Laddar",

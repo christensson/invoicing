@@ -1,3 +1,5 @@
+<require module="i18next" var="i18n" />
+
 <div id="notification-area">
   <div class="notification-area-center">
     <div class="alert alert-info" role="alert" data-bind="visible: spinnerVisible" style="display: none">
@@ -7,11 +9,26 @@
   </div>
 
   <div data-bind="css: notificationCss">
-    <ul class="list-group" data-bind="foreach: notificationArray">
-      <li class="list-group-item" data-bind="css: \$data.css">
-        <span data-bind="html: \$data.message"></span>
-        <button type="button" class="close" aria-label="Close" data-bind="click: \$data.doClose"><span aria-hidden="true">&times;</span></button>
-      </li>
-    </ul>
+    <div class="panel panel-default" data-bind="visible: notificationArray().length > 0" style="display: none">
+      <div class="panel-heading notification-panel-heading">
+        <div class="form-inline">
+          <div class="row">
+            <div class="col-md-12">
+              <span>${i18n.t('notification.panelTitle')}</span>
+              <span class="pull-right">
+                <span class="glyphicon glyphicon-remove" aria-hidden="true" data-bind="click: closeAll"></span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="list-group bottom0 top0 left0 right0" data-bind="foreach: notificationArray">
+          <button type="button" class="list-group-item notification-panel-item" data-bind="css: \$data.css, click: \$data.doClose">
+            <span data-bind="html: \$data.message"></span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

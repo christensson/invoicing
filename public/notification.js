@@ -8,36 +8,18 @@ var NotifyViewModel = function() {
     self.spinnerVisible = ko.observable(cfg.showInitialTicker);
     self.spinnerMsg = ko.observable(cfg.tickerText);
     self.notificationPlacement = ko.observable(cfg.notificationAreaPlacement);
+
+    self.closeAll = function() {
+      console.log("Notification: Close all");
+      self.notificationArray.removeAll();
+    };
+
     self.notificationCss = ko.pureComputed(function() {
       return "notification-area-" + self.notificationPlacement();
     }, self);
 
     self.formatMsgHtml = function(kind, msg) {
-        //var msgHtml = '<a class="close" href="#">×</a>' + msg;
-        var icon = undefined;
-        switch(kind) {
-            default:
-            case 'info':
-            case 'success':
-                break;
-            case 'warn':
-            case 'warning':
-                //icon = "glyphicon-exclamation-sign";
-                break;
-            case 'error':
-                //icon = "glyphicon-warning-sign";
-                break;
-        }
-        var msgHtml = msg;
-        if (icon !== undefined) {
-          if (true) {
-            msgHtml = '<span class="glyphicon ' + icon + '" aria-hidden="true"></span>' + msg;
-          } else {
-            msgHtml = '<span class="glyphicon ' + icon + '" aria-hidden="true"></span>' +
-              '<p>' + msg + '</p>';
-          }
-        }
-        return msgHtml;
+      return msg;
     };
 
     self.showMsg = function(kind, msg, hideDelayMs) {
@@ -49,21 +31,17 @@ var NotifyViewModel = function() {
             default:
             case 'info':
                 prio = 'info';
-                //self.msgInfo(msgHtml);
                 break;
             case 'warn':
             case 'warning':
                 prio = 'warning';
-                //self.msgWarning(msgHtml);
                 break;
             case 'error':
                 prio = 'danger';
                 hideDelayMs = 0; // Do not auto-hide error messages!
-                //self.msgError(msgHtml);
                 break;
             case 'success':
                 prio = 'success';
-                //self.msgSuccess(msgHtml);
                 break;
         }
         var cssClass = 'list-group-item-' + prio;
