@@ -3113,45 +3113,6 @@ var getInitialDataPromise = function() {
 }
 
 var setupKo = function() {
-  ko.bindingHandlers.i18n = {
-      update: function (element, valueAccessor, allBindings) {
-          var key = ko.unwrap(valueAccessor()),
-              options = ko.toJS(allBindings.get('i18n-options') || {}),
-              translation,
-              parts,
-              attr;
-
-          // Check whether we are dealing with attributes
-          if (key.indexOf('[') === 0) {
-              parts = key.split(']');
-              key = parts[1];
-              attr = parts[0].substr(1, parts[0].length - 1);
-          }
-
-          translation = t(key, options);
-
-          if (attr === undefined) {
-              // Check whether the translation contains markup
-              if (translation.match(/<(\w+)((?:\s+\w+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/)) {
-                  //noinspection InnerHTMLJS
-                  element.innerHTML = translation;
-              } else {
-                  // Check whether the translation contains HTML entities
-                  if (translation.match(/&(?:[a-z]+|#x?\d+);/gi)) {
-                      //noinspection InnerHTMLJS
-                      element.innerHTML = translation;
-                  } else {
-                      // Treat translation as plain text
-                      element.innerText = translation;
-                  }
-              }
-          } else {
-              // Add translation to given attribute
-              element.setAttribute(attr, translation);
-          }
-      }
-  };
-  
   var navViewModel = new NavViewModel();
   var settings = new SettingsDataModel();
   var companyViewModel = new CompanyListViewModel(navViewModel.currentView,
