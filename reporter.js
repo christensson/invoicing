@@ -1,3 +1,5 @@
+'use strict';
+
 var Report = require('fluentreports').Report;
 var fs = require('fs');
 var util = require('./public/util.js');

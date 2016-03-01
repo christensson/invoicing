@@ -1,3 +1,5 @@
+'use strict';
+
 /** Format a number to a string
  * @param opts.decimalSep (Default: ',')
  * @param opts.thousandSep (Default: ' ')

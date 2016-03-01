@@ -1,3 +1,5 @@
+'use strict';
+
 var defaults = {
   defaultLng: "sv",
   enabledLngList: ["sv", "en"],

@@ -1,3 +1,4 @@
+'use strict';
 //Frameworks
 var args = require('commander');
 var express = require("express");
@@ -28,30 +29,12 @@ function list(val) {
 }
 
 args.version('0.0.1')
-  .option('-l, --login <username,password>', 'Login with username and password', list)
   .option('--sim_latency', 'Simulate network latency')
   .option('--ssl', 'Start server on https')
   .option('--monitor', 'Monitor used resources')
   .option('--local', 'Run on localhost')
   .option('-v,--verbose', 'Run with verbose info')
   .parse(process.argv);
-
-explicitUser = null;
-if (args.login) {
-  if (args.login.length == 2) {
-    explicitUser = {
-      username : args.login[0],
-      password : args.login[1]
-    };
-  } else {
-    console.error("Login requires both username and password");
-    args.outputHelp();
-    process.exit(1);
-  }
-}
-if (explicitUser !== null) {
-  console.log("Starting server with user: " + JSON.stringify(explicitUser));
-}
 
 var smallLag = undefined;
 if (args.sim_latency) {
@@ -61,7 +44,7 @@ if (args.sim_latency) {
 
 var tmpDir = __dirname + "/tmp";
 
-app = express();
+var app = express();
 
 app.use(helmet.hidePoweredBy());
 app.use(helmet.frameguard());
@@ -289,23 +272,13 @@ passport.use(new GoogleStrategy(
 // the request will proceed. Otherwise, the user will be redirected to the
 // login page.
 function ensureAuthenticated(req, res, next) {
-  if (explicitUser == null) {
-    if (req.isAuthenticated()) {
-      console.log("ensureAuthenticated: Authenticated!");
-      return next();
-    }
-    console.log("ensureAuthenticated: Not authenticated!");
-    req.flash('error', req.t("signin.authNokMsg"));
-    res.redirect('/signin');
-  } else {
-    console.log(
-        "ensureAuthenticated: Authenticated from command line using %j",
-        explicitUser);
-    req.user = {
-      username : explicitUser.name
-    };
+  if (req.isAuthenticated()) {
+    console.log("ensureAuthenticated: Authenticated!");
     return next();
   }
+  console.log("ensureAuthenticated: Not authenticated!");
+  req.flash('error', req.t("signin.authNokMsg"));
+  res.redirect('/signin');
 }
 
 function myFailureHandler(res, err) {
@@ -323,7 +296,6 @@ function myFailureHandler(res, err) {
  * Responds with:
  * - settings
  * - companies
- * - stats
  */
 app.get("/api/initial", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
@@ -356,7 +328,7 @@ app.get("/api/settings", ensureAuthenticated, function(req, res) {
 app.put("/api/settings", ensureAuthenticated, function(req, res) {
   var okHandler = function(logText, res, settings) {
     console.log(logText + ": OK, obj=" + JSON.stringify(settings));
-    resData = {
+    var resData = {
       'settings' : settings
     };
     res.status(200).json(resData);
@@ -394,7 +366,7 @@ app.get("/api/company/:id", ensureAuthenticated,
 app.put("/api/company/:id", ensureAuthenticated, function(req, res) {
   var okHandler = function(logText, res, company) {
     console.log(logText + ": OK, obj=" + JSON.stringify(company));
-    resData = {
+    var resData = {
       'company' : company
     };
     res.status(200).json(resData);
@@ -511,7 +483,7 @@ app.get("/api/customer/:id", ensureAuthenticated,
 app.put("/api/customer/:id", ensureAuthenticated, function(req, res) {
   var okHandler = function(logText, res, customer) {
     console.log(logText + ": OK, obj=" + JSON.stringify(customer));
-    resData = {
+    var resData = {
       'customer' : customer
     };
     res.status(200).json(resData);
@@ -560,7 +532,7 @@ app.get("/api/invoice/:id", ensureAuthenticated,
 app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
   var okHandler = function(logText, res, invoice) {
     console.log(logText + ": OK, obj=" + JSON.stringify(invoice));
-    resData = {
+    var resData = {
       'invoice' : invoice
     };
     res.status(200).json(resData);
@@ -595,7 +567,7 @@ app.get("/api/itemGroupTemplates", ensureAuthenticated, function(req, res) {
 app.put("/api/itemGroupTemplate/:id", ensureAuthenticated, function(req, res) {
   var okHandler = function(logText, res, groupTempl) {
     console.log(logText + ": OK, obj=" + JSON.stringify(groupTempl));
-    resData = {
+    var resData = {
       'groupTempl' : groupTempl
     };
     res.status(200).json(resData);

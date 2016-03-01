@@ -2,7 +2,7 @@ var args = require('commander');
 var mydb = require('./mydb.js');
 var mongodb = require('mongodb');
 var ObjectID = mongodb.ObjectID;
-Q = require('q');
+var Q = require('q');
 
 args.version('0.0.1')
 .option('--dev', 'Init DB with development data')

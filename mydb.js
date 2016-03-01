@@ -1,3 +1,5 @@
+'use strict';
+
 var mongodb = require('mongodb');
 var Q = require('q');
 var util = require('./public/util.js');
@@ -340,7 +342,7 @@ var indexes = [
   },
 ];
 
-dropAllCollections = function() {
+var dropAllCollections = function() {
   var deferred = Q.defer();
   var jobs = [];
   for (var i = 0; i < colls.length; i++) {
@@ -362,7 +364,7 @@ dropAllCollections = function() {
   return deferred.promise;
 };
 
-createAllCollections = function() {
+var createAllCollections = function() {
   var jobs = [];
   for (var i = 0; i < colls.length; i++) {
     var collection = colls[i];
@@ -371,7 +373,7 @@ createAllCollections = function() {
   return Q.all(jobs);
 };
 
-createAllIndexes = function() {
+var createAllIndexes = function() {
   var jobs = [];
   for (var i = 0; i < indexes.length; i++) {
     var collection = indexes[i].collection;
@@ -381,11 +383,11 @@ createAllIndexes = function() {
   return Q.all(jobs);
 };
 
-initCollectionsRelease = function(inviteList) {
+var initCollectionsRelease = function(inviteList) {
   return insertDataPromise("invite", inviteList);
 };
 
-initCollectionsDevel = function(inviteList) {
+var initCollectionsDevel = function(inviteList) {
   var deferred = Q.defer();
 
   var machUserId = undefined;

@@ -1,4 +1,6 @@
-defaults = Default.get();
+'use strict';
+
+var defaults = Default.get();
 
 function Log(){};
 

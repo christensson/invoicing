@@ -1,3 +1,5 @@
+'use strict';
+
 // functions.js/
 var bcrypt = require('bcryptjs'),
     Q = require('q'),

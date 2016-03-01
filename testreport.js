@@ -6,7 +6,7 @@ var ObjectID = mongodb.ObjectID;
 var defaults = require('./public/default.js').get();
 var i18n = require('i18next');
 var i18nFsBackend = require('i18next-node-fs-backend');
-Q = require('q');
+var Q = require('q');
 
 function increaseVerbosity(v, total) {
   return total + 1;
