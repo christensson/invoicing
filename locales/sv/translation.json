@@ -5,13 +5,13 @@
         "tickerTextDownload": "Hämtar data",
         "lngBtn_sv": "Svenska",
         "lngBtn_en": "English",
-        "pageTitle": "Inloggning",
+        "pageTitle": "Lätt Fakturering - Logga in",
         "header": "Lätt Fakturering",
         "welcomeText": "Välkommen till nästa generations fakturering!",
-        "cloudAccountTitle": "Molnkonto",
-        "localAccountTitle": "Lokalt konto",
-        "accountExistsBtn": "Jag har redan ett konto",
-        "createAccountBtn": "Jag behöver skapa ett konto",
+        "loginPanelTitle": "Logga in",
+        "googleAccountTitle": "med <strong>Google</strong>-konto",
+        "localAccountTitle": "eller med <strong>lokalt</strong> konto",
+        "createAccountBtn": "Registrera ny användare <i>(nytt lokalt konto)</i>",
         "usernameLbl": "E-post",
         "passwordLbl": "Lösenord",
         "usernamePlaceholder": "E-post",
@@ -31,7 +31,7 @@
         "authNokMsg": "Var god logga in!"
     },
     "notification" : {
-        "panelTitle": "Notifieringar"
+        "panelTitle": "Meddelanden"
     },
     "app": {
         "pageTitle": "Lätt Fakturering",

@@ -5,13 +5,13 @@
         "tickerTextDownload": "Fetching data",
         "lngBtn_sv": "Svenska",
         "lngBtn_en": "English",
-        "pageTitle": "Signin",
+        "pageTitle": "Easy Invoicing - Sign in",
         "header": "Easy Invoicing",
         "welcomeText": "Welcome to the next generation Invoicing!",
-        "cloudAccountTitle": "Cloud account",
-        "localAccountTitle": "Local account",
-        "accountExistsBtn": "I already have an account",
-        "createAccountBtn": "I need to make an account",
+        "loginPanelTitle": "Sign in",
+        "googleAccountTitle": "using <strong>Google</strong> account",
+        "localAccountTitle": "or using <strong>local</strong> account",
+        "createAccountBtn": "Register new user <i>(new local account)</i>",
         "usernameLbl": "E-mail",
         "passwordLbl": "Password",
         "usernamePlaceholder": "E-mail",
@@ -31,7 +31,7 @@
         "authNokMsg": "Please sign in!"
     },
     "notification" : {
-        "panelTitle": "Notifications"
+        "panelTitle": "Messages"
     },
     "app": {
         "pageTitle": "Easy Invoicing",

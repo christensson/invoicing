@@ -29,8 +29,9 @@ body { padding-top: 70px; }
 .left15 { margin-left:15px; }
 .left20 { margin-left:20px; }
 
-.center-block {
-  display: block;
+.panel-signin {
+  /** display: inline-block; */
+  width: 50%;
   margin-left: auto;
   margin-right: auto;
 }
@@ -74,6 +75,16 @@ body { padding-top: 70px; }
 .label-fix {
   display: inline-block;
   margin: 2px;
+}
+
+.inline-icon-left-fix {
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.inline-icon-right-fix {
+  display: inline-block;
+  margin-left: 5px;
 }
 
 .button-signin-google {
@@ -122,6 +133,15 @@ body { padding-top: 70px; }
   right: 0px;
 }
 
+.notification-area-center-inline {
+  position: relative;
+  text-align: center;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
 .notification-area-center {
   position: fixed;
   width: 300px;
@@ -136,9 +156,6 @@ body { padding-top: 70px; }
   width: 30%;
   top: 70px;
   right: 7px;
-  /*margin-left: -150px;
-  top: 0px;
-  right: 0px;*/
   text-align: left;
   z-index: 9999;
 }
@@ -159,4 +176,53 @@ body { padding-top: 70px; }
   width: 16px;
   height: 11px;
   margin-right: 5px;
+}
+
+.strike {
+    display: block;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap; 
+}
+
+.strike > span {
+    position: relative;
+    display: inline-block;
+}
+
+.strike > span:before,
+.strike > span:after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 9999px;
+    height: 1px;
+    background: #eee;
+    /* Success color
+    background: #5bc0de;
+    */
+}
+
+.strike > span:before {
+    right: 100%;
+    margin-right: 15px;
+}
+
+.strike > span:after {
+    left: 100%;
+    margin-left: 15px;
+}
+
+.jumbotron { 
+  background-color: #ffffff;
+  border-color: #eee;
+  border-width: 1px;
+  border-style:solid;
+  /* Yellow
+  background-color: #fff9c4;
+  */
+  /* Orange
+    background-color: #f4511e;
+    color: #ffffff;
+  */
 }

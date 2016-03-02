@@ -277,7 +277,7 @@ function ensureAuthenticated(req, res, next) {
     return next();
   }
   console.log("ensureAuthenticated: Not authenticated!");
-  req.flash('error', req.t("signin.authNokMsg"));
+  req.flash('notice', req.t("signin.authNokMsg"));
   res.redirect('/signin');
 }
 

@@ -1,23 +1,18 @@
 var SigninViewModel = function() {
-    var self = this;
+  var self = this;
 
-    this.isSignInVisible = ko.observable(true);
-    this.isLocalRegVisible = ko.observable(false);
+  this.isLocalRegVisible = ko.observable(false);
 
-    self.activateSignIn = function() {
-        self.isLocalRegVisible(false);
-        self.isSignInVisible(true);
-    };
-    self.activateLocalReg = function() {
-        self.isSignInVisible(false);
-        self.isLocalRegVisible(true);
-    };
+  self.toggleLocalReg = function() {
+    var newState = !self.isLocalRegVisible();
+    self.isLocalRegVisible(newState);
+  };
 };
 
 $(function() {
-    var viewModel = new SigninViewModel();
- 
-    ko.applyBindings(
-        viewModel,
-        document.getElementById("signin"));
+  var viewModel = new SigninViewModel();
+
+  ko.applyBindings(
+    viewModel,
+    document.getElementById("signin"));
 });
