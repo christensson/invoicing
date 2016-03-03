@@ -157,7 +157,7 @@ body { padding-top: 70px; }
   top: 70px;
   right: 7px;
   text-align: left;
-  z-index: 9999;
+  z-index: 1;
 }
 
 .icon-lng-sv {
