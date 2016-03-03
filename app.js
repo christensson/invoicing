@@ -335,8 +335,15 @@ app.put("/api/settings", ensureAuthenticated, function(req, res) {
     res.end();
   };
   var uid = req.user._id;
+  var isAdmin = req.user.info.isAdmin;
+
+  // Only admin is allowed to update license
+  if (!isAdmin) {
+    delete req.body.license;
+  }
+
   console.log("Update settings: user=" + req.user.info.name + ", uid=" + uid
-      + ", settings=" + JSON.stringify(req.body));
+      + ", isAdmin=" + isAdmin + ", settings=" + JSON.stringify(req.body));
   mydb.updateSettings(uid, req.body).then(
       okHandler.bind(null, 'updateSettings', res)).fail(
       myFailureHandler.bind(null, res));
