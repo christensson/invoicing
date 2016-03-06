@@ -18,7 +18,6 @@ var i18n = require('i18next');
 var i18nFsBackend = require('i18next-node-fs-backend');
 var i18nMiddleware = require('i18next-express-middleware');
 var simLatency = require('express-simulate-latency');
-var bcrypt = require('bcryptjs');
 var helmet = require('helmet');
 var expressEnforcesSsl = require('express-enforces-ssl');
 var Q = require('q');
@@ -115,6 +114,7 @@ i18n
     fallbackLng: defaults.defaultLng,
     saveMissing: args.local === true,
     debug: args.verbose === true,
+    joinArrays: ' ',
     backend: {
       // path where resources get loaded from
       loadPath: 'locales/{{lng}}/{{ns}}.json',
@@ -137,6 +137,9 @@ app.get('/locales/resources.json', i18nMiddleware.getResourcesHandler(i18n)); //
 // App modules
 var hostname = "";
 var mydb = require('./mydb.js');
+if (args.verbose) {
+  mydb.setVerbose();
+}
 if (args.local) {
   mydb.setLocalDb();
 } else {
@@ -196,34 +199,40 @@ passport.use(
         }, // allows us to pass back the request to the callback
         function(req, username, password, done) {
           console.log("signup: user=" + username);
-          var hash = bcrypt.hashSync(password, 8);
+          var hash = funct.encryptPassword(password);
           var userData = {
             "username-local": username, // username is e-mail for local users!
             "password": hash,
             "info" : funct.createUserInfo(req.body.fullName, username)
           };
-          var errorMessage = req.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"});
-          mydb.isEmailInvited(userData.info.email).then(function(inviteInfo) {
-            errorMessage = req.t("signin.registerNokMsg");
-            return funct.findOrCreate("username-local", userData, inviteInfo);
-          }).then(function(result) {
-            if (result.user) {
-              if (result.isNew) {
-                req.flash('success', req.t("signin.registerOkMsg", {name: result.user.info.name}));
-                done(null, result.user);
-              } else {
-                // Failure, registration doesn't expect user to exist.
-                done(null, false, {message: req.t("signin.registerNokMsg", {name: username, context: "userExists"})});
-              }
-              return done(null, result.user);
-            } else {
-              console.log("Registration failed.");
-              done(null, false, {message: errorMessage});
-            }
-          }).fail(function(error) {
-            console.log("ERROR: " + error.message);
+          var errorMessage = undefined;
+          if (password.length < defaults.minPwdLen) {
+            errorMessage = req.t("signin.registerNokMsg", {context: "pwdTooShort", len: defaults.minPwdLen});
             done(null, false, {message: errorMessage});
-          });
+          } else {
+            errorMessage = req.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"});
+            mydb.isEmailInvited(userData.info.email).then(function(inviteInfo) {
+              errorMessage = req.t("signin.registerNokMsg");
+              return funct.findOrCreate("username-local", userData, inviteInfo);
+            }).then(function(result) {
+              if (result.user) {
+                if (result.isNew) {
+                  req.flash('success', req.t("signin.registerOkMsg", {name: result.user.info.name}));
+                  done(null, result.user);
+                } else {
+                  // Failure, registration doesn't expect user to exist.
+                  done(null, false, {message: req.t("signin.registerNokMsg", {name: username, context: "userExists"})});
+                }
+                return done(null, result.user);
+              } else {
+                console.log("Registration failed.");
+                done(null, false, {message: errorMessage});
+              }
+            }).fail(function(error) {
+              console.log("ERROR: " + error.message);
+              done(null, false, {message: errorMessage});
+            });
+          }
         }));
 
 passport.use(new GoogleStrategy(
@@ -345,8 +354,103 @@ app.put("/api/settings", ensureAuthenticated, function(req, res) {
   console.log("Update settings: user=" + req.user.info.name + ", uid=" + uid
       + ", isAdmin=" + isAdmin + ", settings=" + JSON.stringify(req.body));
   mydb.updateSettings(uid, req.body).then(
-      okHandler.bind(null, 'updateSettings', res)).fail(
-      myFailureHandler.bind(null, res));
+    okHandler.bind(null, 'updateSettings', res)
+  ).fail(
+    myFailureHandler.bind(null, res)
+  );
+});
+
+app.put("/api/user", ensureAuthenticated, function(req, res) {
+  var okHandler = function(logText, res, user) {
+    user = typeof user !== 'undefined' ? user : false;
+    if (user) {
+      console.log(logText + ": OK, obj=" + JSON.stringify(user));
+      var resData = {
+        'user' : user
+      };
+      res.status(200).json(resData);
+    } else {
+      console.log(logText + ": OK");
+      res.status(204);
+    }
+    res.end();
+  };
+  var uid = req.user._id;
+  var isLocalUser = req.user.hasOwnProperty("username-local");
+
+  console.log("Update user: user=" + req.user.info.name + ", uid=" + uid
+      + ", isLocalUser=" + isLocalUser + ", user=" + JSON.stringify(req.body));
+
+  /* Only some fields are allowed to be updated for the user. Copy them...
+   * Note that dot-notation is used for fields in sub-structures 
+   * since user document is updated using the $set modifier */
+  var user = {};
+  if (req.body.name) {
+    user['info.name'] = req.body.name;
+  }
+  /* Do not allow email/login updates yet... Need to make sure that new email is unique.
+  if (req.body.email) {
+    user['info.email'] = req.body.email;
+    if (isLocalUser) {
+      user["username-local"] = req.body.email;
+    }
+  }
+  */
+
+  if (JSON.stringify(user) !== "{}") {
+    console.log("Update user: user=" + req.user.info.name + ", uid=" + uid
+        + ": Will update using user=" + JSON.stringify(user));
+    mydb.updateUser(uid, user).then(
+      okHandler.bind(null, 'updateUser', res)
+    ).fail(
+      myFailureHandler.bind(null, res)
+    );
+  } else {
+    console.log("Update user: user=" + req.user.info.name + ", uid=" + uid
+        + ": Nothing to do... user=" + JSON.stringify(user));
+    okHandler('updateUser', res);
+  }
+});
+
+app.post("/api/user-local-pwd-update", ensureAuthenticated, function(req, res) {
+  var okHandler = function(logText, res, data) {
+    console.log(logText + ": OK, data=" + JSON.stringify(data));
+    res.status(200).json(data);
+    res.end();
+  };
+  var uid = req.user._id;
+  var isLocalUser = req.user.hasOwnProperty("username-local");
+
+  console.log("Update local user password: user=" + req.user.info.name + ", uid=" + uid
+      + ", isLocalUser=" + isLocalUser);
+
+  if (isLocalUser) {
+    // Verify old password
+    funct.localAuth(req.user["username-local"], req.body.oldPwd).then(function(user) {
+      if (user) {
+        // Old password OK, update to new
+        var hash = funct.encryptPassword(req.body.newPwd);
+        var user = {password: hash};
+        mydb.updateUser(uid, user).then(
+          okHandler.bind(null, 'updateLocalUserPassword', res, {'success': true})
+        ).fail(
+          myFailureHandler.bind(null, res)
+        );
+      } else {
+        console.log("ERROR: Old password doesn't match: user=" + req.user.info.name + ", uid=" + uid);
+        okHandler('updateLocalUserPassword', res, {
+          'success': false,
+          'message': "" + req.t("app.settings.pwdNok", {context: "serverFailureOldPwdWrong"})
+        });
+      }
+    }).fail(function(err) {
+      myFailureHandler(res, err);
+    });
+  } else {
+    console.log("ERROR: Non-local user cannot update password: user=" + req.user.info.name + ", uid=" + uid);
+    res.sendStatus(500);
+    res.end();
+  }
 });
 
 app.get("/api/companies", ensureAuthenticated, function(req, res) {
@@ -726,6 +830,9 @@ var appTemplate = marko.load(appTemplatePath);
 
 app.get('/', ensureAuthenticated, function(req, res) {
   var userInfo = req.user.info;
+  // Only local users have a password...
+  userInfo.isLocal = req.user.hasOwnProperty('username-local');
+
   var msg =  {
       "error": req.flash('error'),
       "notice": req.flash('notice'),

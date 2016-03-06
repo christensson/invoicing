@@ -318,6 +318,28 @@ var inheritCurrencyModel = function(self) {
   }
 };
 
+var UserDataModel = function(navBarUserName) {
+  var self = this;
+
+  self._id = ko.observable(cfg.user._id);
+  self.name = ko.observable(navBarUserName());
+  self.email = ko.observable(cfg.user.email);
+  self.navBarUserName = navBarUserName;
+
+  self.updateNavBarUsername = function() {
+    self.navBarUserName(self.name());
+  }
+
+  self.toJSON = function() {
+    var data = {
+        _id: self._id(),
+        name: self.name(),
+        email: self.email(),
+    };
+    return data;
+  };
+};
+
 var SettingsDataModel = function() {
   var self = this;
 
@@ -351,7 +373,7 @@ var SettingsDataModel = function() {
   };
 };
 
-var SettingsViewModel = function(currentView, settings, activeCompanyId,
+var SettingsViewModel = function(currentView, settings, userData, activeCompanyId,
     setActiveCompanyId) {
   var self = this;
 
@@ -360,6 +382,7 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
   self.setActiveCompanyId = setActiveCompanyId;
 
   self.settings = settings;
+  self.user = userData;
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'settings') {
@@ -384,21 +407,85 @@ var SettingsViewModel = function(currentView, settings, activeCompanyId,
   self.saveSettings = function() {
     var ajaxData = self.settings.toJSON();
     var ajaxUrl = "/api/settings";
-    Log.info("saveSettings: AJAX PUT (url=" + ajaxUrl + "): JSON="
+    Log.info("SettingsViewModel - saveSettings: AJAX PUT (url=" + ajaxUrl + "): JSON="
         + JSON.stringify(ajaxData));
     Notify_showSpinner(true, t("app.settings.saveTicker"));
-    return $.ajax({
+    $.ajax({
       url : ajaxUrl,
       type : "PUT",
       contentType : "application/json",
       data : JSON.stringify(ajaxData),
-      dataType : "json",
-      success : function(data) {
-        Log.info("saveSettings: response: " + JSON.stringify(data));
-        Notify_showSpinner(false);
-        Notify_showMsg('success', t("app.settings.saveOk"));
-      },
+      dataType : "json"
+    }).done(function(data) {
+      Log.info("SettingsViewModel - saveSettings: response: " + JSON.stringify(data));
+      Notify_showMsg('success', t("app.settings.saveOk"));
+    }).fail(function() {
+      Log.info("SettingsViewModel - saveSettings: failed");
+      Notify_showMsg('error', t("app.settings.saveNok"));
+    }).always(function() {
+      Notify_showSpinner(false);
     });
+  };
+
+  self.updateUser = function() {
+    var ajaxData = self.user.toJSON();
+    var ajaxUrl = "/api/user";
+    Log.info("SettingsViewModel - updateUser: AJAX PUT (url=" + ajaxUrl + "): JSON="
+        + JSON.stringify(ajaxData));
+    Notify_showSpinner(true, t("app.settings.saveTicker", {context: "user"}));
+    $.ajax({
+      url : ajaxUrl,
+      type : "PUT",
+      contentType : "application/json",
+      data : JSON.stringify(ajaxData),
+      dataType : "json"
+    }).done(function(data) {
+      Log.info("SettingsViewModel - updateUser: response: " + JSON.stringify(data));
+      Notify_showMsg('success', t("app.settings.saveOk", {context: "user"}));
+      self.user.updateNavBarUsername();
+    }).fail(function() {
+      Log.info("SettingsViewModel - updateUser: failed");
+      Notify_showMsg('error', t("app.settings.saveNok", {context: "user"}));
+    }).always(function() {
+      Notify_showSpinner(false);
+    });
+  };
+
+  self.updatePassword = function(formElement) {
+    var form = document.getElementById('local-pwd-update');
+    Log.info("SettingsViewModel - updatePassword");
+    var oldPwd = form.elements.oldPwd.value;
+    var newPwd = form.elements.newPwd.value;
+    var newPwd2 = form.elements.newPwd2.value;
+    // First check data
+    if (newPwd.length < defaults.minPwdLen) {
+      Notify_showMsg('error', t("app.settings.pwdNok", {context: "tooShort", len: defaults.minPwdLen}));
+    } else if (newPwd !== newPwd2) {
+      Notify_showMsg('error', t("app.settings.pwdNok", {context: "repMismatch"}));
+    } else {
+      // OK
+      Notify_showSpinner(true, t("app.settings.saveTicker", {context: "pwd"}));
+      $.ajax({
+        type: "POST",
+        url: '/api/user-local-pwd-update',
+        data: $("#local-pwd-update").serialize() // serializes the form's elements.
+      }).done(function(data) {
+        console.log("SettingsViewModel - updatePassword: Server OK: " + JSON.stringify(data));
+        if (data.success) {
+          Notify_showMsg('success', t("app.settings.pwdOk"));
+        } else {
+          Notify_showMsg('error', data.message);
+        }
+      }).fail(function(err) {
+        console.log("SettingsViewModel - updatePassword: Server error: " + JSON.stringify(err));
+        Notify_showMsg('error', t("app.settings.pwdNok", {context: "serverFailure"}));
+      }).always(function() {
+        Notify_showSpinner(false);
+      });
+    }
+
+    // Prevent normal submit handler...
+    return false;
   };
 
   self.invalidateCache = function() {
@@ -2900,7 +2987,7 @@ var NavViewModel = function() {
     icon : 'glyphicon glyphicon-wrench',
     location : 'userMenu'
   });
-  if (cfg.isAdmin) {
+  if (cfg.user.isAdmin) {
     self.mainViews.push({
       name : '/page/debug',
       title : t("app.navBar.debug"),
@@ -2931,6 +3018,7 @@ var NavViewModel = function() {
   self.activeCompanyId = ko.observable();
   self.activeCompany = ko.observable();
   self.activeCompanyName = ko.observable(t('app.navBar.noCompanyName'));
+  self.userName = ko.observable(cfg.user.name);
   self.companyList = ko.observableArray();
 
   self.selectView = function(view) {
@@ -3115,10 +3203,11 @@ var getInitialDataPromise = function() {
 var setupKo = function() {
   var navViewModel = new NavViewModel();
   var settings = new SettingsDataModel();
+  var userData = new UserDataModel(navViewModel.userName)
   var companyViewModel = new CompanyListViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId, navViewModel.activeCompany, navViewModel.companyList);
   var settingsViewModel = new SettingsViewModel(navViewModel.currentView,
-      settings, navViewModel.activeCompanyId, companyViewModel.setActiveCompanyId);
+      settings, userData, navViewModel.activeCompanyId, companyViewModel.setActiveCompanyId);
   var gettingStartedViewModel = new GettingStartedViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId);
 
@@ -3174,10 +3263,10 @@ var setupKo = function() {
   ko.applyBindings(invoiceNewViewModel, document
       .getElementById("app-invoice_new"));
 
-  ko.applyBindings(invoiceItemGroupTemplatesViewModel, document.getElementById("app-invoice_item_group_templates"));
+  ko.applyBindings(invoiceItemGroupTemplatesViewModel,document.getElementById("app-invoice_item_group_templates"));
 
   ko.applyBindings(settingsViewModel, document.getElementById("app-settings"));
-  if (cfg.isAdmin) {
+  if (cfg.user.isAdmin) {
     var debugViewModel = new DebugViewModel(navViewModel.currentView);
     var userListViewModel = new UserListViewModel(navViewModel.currentView);
     var inviteListViewModel = new InviteListViewModel(navViewModel.currentView);

@@ -18,6 +18,7 @@ var defaults = {
   },
   firstCid: 100,
   firstIid: 100,
+  minPwdLen: 8
 };
 
 var getDefaults = function() {

@@ -15,16 +15,15 @@ exports.localAuth = function (username, password) {
   mydb.getUser({"username-local": username}, true).then(function (result){
     var hash = result.password;
     delete result.password; // Do not expose password!
-    console.log("Found local user=" + result.info.name);
     if (bcrypt.compareSync(password, hash)) {
       deferred.resolve(result);
     } else {
-      console.log("Password incorrect!");
+      console.log("localAuth: Password incorrect for local user=" + result.info.name);
       deferred.resolve(false);
     }
   }).fail(function (err){
     if (err.message == 'The requested items could not be found.') {
-      console.log("Couldn't find user " + username + " in DB for signin!");
+      console.log("localAuth: Couldn't find user " + username + " in DB for signin!");
       deferred.resolve(false);
     } else {
       deferred.reject(new Error(err));
@@ -86,6 +85,10 @@ exports.findOrCreate = function(idField, userData, inviteInfo) {
 
   return deferred.promise;
 };
+
+exports.encryptPassword = function(password) {
+  return bcrypt.hashSync(password, 8);
+}
 
 exports.createUserInfo = function(name, email, isAdmin, regDate) {
   var todaysDate = new Date().toISOString().split("T")[0];

@@ -75,8 +75,8 @@
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                   <span class="glyphicon glyphicon-user inline-icon-left-fix" aria-hidden="true"></span>
-                  $data.user.name
-                  <span if="data.user.isAdmin === true" class="label label-primary">${i18n.t('app.navBar.adminUserLbl')}</span>
+                  <span data-bind="text: userName"></span>
+                  <span if="data.user.isAdmin === true" class="label label-primary label-fix">${i18n.t('app.navBar.adminUserLbl')}</span>
                   <span class="caret"></span>
               </a>
               <ul class="dropdown-menu" role="menu" data-bind="foreach: mainViews">
@@ -1701,43 +1701,114 @@
           </div>
 
           <div>
-              <div class="panel panel-default">
-                <div class="panel-heading">
-                  <h3 class="panel-title">${i18n.t('app.settings.userInfoPanelTitle')}</h3>
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">${i18n.t('app.settings.userInfoPanelTitle')}</h3>
+              </div>
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label for="license" class="control-label">${i18n.t('app.settings.licenseLbl')}</label>
+                      <p class="form-control-static" id="license" data-bind="text: settings.license"></p>
+                    </div>
+                  </div>
                 </div>
-                <div class="panel-body">
-                  <div class="row">
-                    <div class="col-md-12">
-                      <div class="form-group">
-                        <label for="license" class="control-label">${i18n.t('app.settings.licenseLbl')}</label>
-                        <p class="form-control-static" id="license" data-bind="text: settings.license"></p>
-                      </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label for="regDate" class="control-label">${i18n.t('app.settings.regDateLbl')}</label>
+                      <p class="form-control-static" id="regDate">${data.user.registrationDate}</p>
                     </div>
                   </div>
-                  <div class="row">
-                    <div class="col-md-12">
-                      <div class="form-group">
-                        <label for="email" class="control-label">${i18n.t('app.settings.emailLbl')}</label>
-                        <p class="form-control-static" id="email">$data.user.email</p>
-                      </div>
-                      </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-md-12">
-                      <div class="form-group">
-                        <label for="regDate" class="control-label">${i18n.t('app.settings.regDateLbl')}</label>
-                        <p class="form-control-static" id="regDate">$data.user.registrationDate</p>
-                      </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label for="email" class="control-label">${i18n.t('app.settings.emailLbl')}</label>
+                      <p class="form-control-static" id="email" data-bind="text: user.email"></p>
+                      <!--
+                      <input type="email" class="form-control" name="email" data-bind="value: user.email"/>
+                      -->
                     </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label for="name" class="control-label">${i18n.t('app.settings.nameLbl')}</label>
+                      <input type="text" class="form-control" name="name" data-bind="value: user.name"/>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-12">
+                    <button type="button" class="btn btn-success" data-bind="click: updateUser">
+                      <span class="glyphicon glyphicon-save inline-icon-left-fix" aria-hidden="true"></span>
+                      ${i18n.t('app.settings.updateUserBtn')}
+                    </button>
                   </div>
                 </div>
               </div>
-              <div class="btn-group" role="group">
+            </div>
+
+            <div if="data.user.isLocal === true">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h3 class="panel-title">${i18n.t('app.settings.userSecurityPanelTitle')}</h3>
+                </div>
+                <div class="panel-body">
+                  <form id="local-pwd-update" action="/api/user-local-pwd-update" method="post" data-bind="submit: updatePassword">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <label for="oldPwd" class="control-label">${i18n.t('app.settings.oldPwdLbl')}</label>
+                          <input type="password" class="form-control" id="oldPwd" name="oldPwd" required/>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <label for="newPwd" class="control-label">${i18n.t('app.settings.newPwdLbl')}</label>
+                          <input type="password" class="form-control" id="newPwd" name="newPwd" required/>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <label for="newPwd2" class="control-label">${i18n.t('app.settings.newPwd2Lbl')}</label>
+                          <input type="password" class="form-control" id="newPwd2" name="newPwd2" required/>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-12">
+                        <button type="submit" class="btn btn-warning">
+                          <span class="glyphicon glyphicon-lock inline-icon-left-fix" aria-hidden="true"></span>
+                          ${i18n.t('app.settings.updatePwdBtn')}
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <hr/>
+
+            <div class="row">
+              <div class="col-md-12">
                 <button type="button" class="btn btn-warning" data-bind="click: invalidateCache">
                   <span class="glyphicon glyphicon-trash inline-icon-left-fix" aria-hidden="true"></span>
                   ${i18n.t('app.settings.invalidateCacheBtn')}
                 </button>
               </div>
+            </div>
           </div>
         </div>
 
@@ -1919,7 +1990,13 @@
           showInitialTicker: true,
           tickerText: "${i18n.t('app.tickerText')}",
           notificationAreaPlacement: "right",
-          isAdmin: $data.user.isAdmin,
+          user: {
+            name: "${data.user.name}",
+            email: "${data.user.email}",
+            isAdmin: ${data.user.isAdmin},
+            registrationDate: "${data.user.registrationDate}",
+            isĹocal: ${data.user.isLocal}
+          }
       };
       var serverMsg = {
           error: "$data.msg.error",

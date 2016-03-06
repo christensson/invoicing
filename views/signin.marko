@@ -35,82 +35,86 @@
             <p class="text-center">${i18n.t('signin.welcomeText')}</p>
             <include template="./notification.marko" />
 
-            <div id="signin" class="center-block">
-              <div class="panel panel-default panel-signin">
-                <div class="panel-heading">
-                  <h3 class="panel-title text-center">${i18n.t('signin.loginPanelTitle')}</h3>
-                </div>
-                <div class="panel-body">
-                  <div class="col-md-12">
-                    <div class="row">
-                      <div class="strike bottom15">
-                         <span>$!{i18n.t('signin.googleAccountTitle')}</span>
+            <div id="signin">
+              <div class="row">
+                <div class="col-md-6 col-md-offset-3">
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+                      <h3 class="panel-title text-center">${i18n.t('signin.loginPanelTitle')}</h3>
+                    </div>
+                    <div class="panel-body">
+                      <div class="col-md-12">
+                        <div class="row">
+                          <div class="strike bottom15">
+                             <span>$!{i18n.t('signin.googleAccountTitle')}</span>
+                          </div>
+                        </div>
+
+                        <a href="/auth/google" class="button-signin-google center-block" role="button"></a>
+
+                        <div class="row">
+                          <div class="strike top15 bottom15">
+                             <span>$!{i18n.t('signin.localAccountTitle')}</span>
+                          </div>
+                        </div>
+
+                        <form id="local-sign-in" action="/login" method="post">
+                          <div class="row">
+                            <div class="form-group">
+                              <label for="username" class="control-label">${i18n.t('signin.usernameLbl')}</label>
+                              <input type="text" class="form-control" name="username" placeholder="${i18n.t('signin.usernamePlaceholder')}" required/>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="form-group">
+                              <label for="password" class="control-label">${i18n.t('signin.passwordLbl')}</label>
+                              <input type="password" class="form-control" name="password" placeholder="${i18n.t('signin.passwordPlaceholder')}" required/>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <button type="submit" class="btn btn-success">
+                              <span class="glyphicon glyphicon-log-in inline-icon-left-fix" aria-hidden="true"></span>
+                              <strong>${i18n.t('signin.signinBtn')}</strong>
+                            </button>
+                          </div>
+                        </form>
+
+                        <form>
+                          <div class="row top15" data-bind="css: {bottom15: isLocalRegVisible}">
+                            <a href="#" role="button" data-bind="click: toggleLocalReg">
+                              $!{i18n.t('signin.createAccountBtn')}
+                            </a>
+                          </div>
+                        </form>
+
+                        <form id="local-reg" data-bind="visible: isLocalRegVisible" action="/local-reg" method="post" style="display: none">
+                          <div class="row">
+                            <div class="form-group">
+                              <label for="username" class="control-label">${i18n.t('signin.usernameLbl')}</label>
+                              <input type="email" class="form-control" name="username" placeholder="${i18n.t('signin.usernamePlaceholder')}" required/>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="form-group">
+                              <label for="fullName" class="control-label">${i18n.t('signin.regFullNameLbl')}</label>
+                              <input type="text" class="form-control" name="fullName" placeholder="${i18n.t('signin.regFullNameLbl')}" required/>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="form-group">
+                              <label for="password" class="control-label">${i18n.t('signin.regPasswordLbl')}</label>
+                              <input type="password" class="form-control" name="password" placeholder="${i18n.t('signin.regPasswordLbl')}" required/>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <button type="submit" class="btn btn-primary">
+                              <span class="glyphicon glyphicon-plus inline-icon-left-fix" aria-hidden="true"></span>
+                              ${i18n.t('signin.registerBtn')}
+                            </button>
+                          </div>
+                        </form>
                       </div>
                     </div>
-
-                    <a href="/auth/google" class="button-signin-google center-block" role="button"></a>
-
-                    <div class="row">
-                      <div class="strike top15 bottom15">
-                         <span>$!{i18n.t('signin.localAccountTitle')}</span>
-                      </div>
-                    </div>
-
-                    <form id="local-sign-in" action="/login" method="post">
-                      <div class="row">
-                        <div class="form-group">
-                          <label for="username" class="control-label">${i18n.t('signin.usernameLbl')}</label>
-                          <input type="text" class="form-control" name="username" placeholder="${i18n.t('signin.usernamePlaceholder')}" required/>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="form-group">
-                          <label for="password" class="control-label">${i18n.t('signin.passwordLbl')}</label>
-                          <input type="password" class="form-control" name="password" placeholder="${i18n.t('signin.passwordPlaceholder')}" required/>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <button type="submit" class="btn btn-success">
-                          <span class="glyphicon glyphicon-log-in inline-icon-left-fix" aria-hidden="true"></span>
-                          <strong>${i18n.t('signin.signinBtn')}</strong>
-                        </button>
-                      </div>
-                    </form>
-
-                    <form>
-                      <div class="row top15" data-bind="css: {bottom15: isLocalRegVisible}">
-                        <a href="#" role="button" data-bind="click: toggleLocalReg">
-                          $!{i18n.t('signin.createAccountBtn')}
-                        </a>
-                      </div>
-                    </form>
-
-                    <form id="local-reg" data-bind="visible: isLocalRegVisible" action="/local-reg" method="post" style="display: none">
-                      <div class="row">
-                        <div class="form-group">
-                          <label for="username" class="control-label">${i18n.t('signin.usernameLbl')}</label>
-                          <input type="email" class="form-control" name="username" placeholder="${i18n.t('signin.usernamePlaceholder')}" required/>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="form-group">
-                          <label for="fullName" class="control-label">${i18n.t('signin.regFullNameLbl')}</label>
-                          <input type="text" class="form-control" name="fullName" placeholder="${i18n.t('signin.regFullNameLbl')}" required/>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="form-group">
-                          <label for="password" class="control-label">${i18n.t('signin.regPasswordLbl')}</label>
-                          <input type="password" class="form-control" name="password" placeholder="${i18n.t('signin.regPasswordLbl')}" required/>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <button type="submit" class="btn btn-primary">
-                          <span class="glyphicon glyphicon-plus inline-icon-left-fix" aria-hidden="true"></span>
-                          ${i18n.t('signin.registerBtn')}
-                        </button>
-                      </div>
-                    </form>
                   </div>
                 </div>
               </div>
