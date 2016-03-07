@@ -7,7 +7,6 @@ var NotifyViewModel = function() {
     self.notificationArray = ko.observableArray();
     self.spinnerVisible = ko.observable(cfg.showInitialTicker);
     self.spinnerMsg = ko.observable(cfg.tickerText);
-    self.notificationPlacement = ko.observable(cfg.notificationAreaPlacement);
 
     self.closeAll = function() {
       console.log("Notification: Close all");
@@ -15,7 +14,11 @@ var NotifyViewModel = function() {
     };
 
     self.notificationCss = ko.pureComputed(function() {
-      return "notification-area-" + self.notificationPlacement();
+      if (cfg.notificationAreaPlacement === 'center-inline') {
+        return "col-md-6 col-md-offset-3 notification-area-center-inline";
+      } else {
+        return "notification-area-" + cfg.notificationAreaPlacement;
+      }
     }, self);
 
     self.formatMsgHtml = function(kind, msg) {

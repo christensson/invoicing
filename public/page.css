@@ -127,12 +127,7 @@ body { padding-top: 70px; }
 }
 
 .notification-area-center-inline {
-  position: relative;
   text-align: center;
-  width: 50%;
-  margin-left: auto;
-  margin-right: auto;
-  display: block;
 }
 
 .notification-area-center {
