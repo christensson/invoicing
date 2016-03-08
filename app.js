@@ -22,9 +22,10 @@ var helmet = require('helmet');
 var expressEnforcesSsl = require('express-enforces-ssl');
 var Q = require('q');
 var defaults = require('./public/default.js').get();
+var log = require('./log');
 
-function list(val) {
-  return val.split(',');
+function increaseVerbosity(v, total) {
+  return total + 1;
 }
 
 args.version('0.0.1')
@@ -32,12 +33,29 @@ args.version('0.0.1')
   .option('--ssl', 'Start server on https')
   .option('--monitor', 'Monitor used resources')
   .option('--local', 'Run on localhost')
-  .option('-v,--verbose', 'Run with verbose info')
+  .option('-v, --verbose', 'Be more verbose', increaseVerbosity, 0)
   .parse(process.argv);
+
+switch(args.verbose) {
+  case undefined:
+  case 0:
+    break;
+  case 1:
+    log.level = 'verbose';
+    break;
+  case 2:
+    log.level = 'debug';
+    break;
+  default:
+  case 3:
+    log.level = 'silly';
+    break;
+}
+log.info("Log level is " + log.level);
 
 var smallLag = undefined;
 if (args.sim_latency) {
-  console.log("Server started in NW latency simulation mode.");
+  log.info("Server started in NW latency simulation mode.");
   smallLag = simLatency({ min: 500, max: 1000 });
 }
 
@@ -54,7 +72,7 @@ app.use(helmet.xssFilter());
 var ninetyDaysInMilliseconds = 7776000000;
 app.use(helmet.hsts({ maxAge: ninetyDaysInMilliseconds }));
 
-app.use(logger('dev'));
+app.use(logger(args.local===true?'dev':'short', {stream: log.stream}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended : true
@@ -64,7 +82,7 @@ app.use(methodOverride('X-HTTP-Method-Override'));
 
 app.set('trust proxy', 1) // trust first proxy
 var enforceSsl = args.ssl === true || args.local !== true;
-console.log("enforceSsl=" + enforceSsl);
+log.info("enforceSsl=" + enforceSsl);
 app.use(session({
   secret : require('./deployment.json').session.secret,
   name : 'sessionId',
@@ -77,7 +95,7 @@ app.use(session({
   }
 }));
 if (enforceSsl) {
-  console.log("use: expressEnforcesSsl");
+  log.info("use: expressEnforcesSsl");
   app.use(expressEnforcesSsl());
 }
 app.use(flash());
@@ -113,7 +131,7 @@ i18n
     whitelist: defaults.enabledLngList.slice(0),
     fallbackLng: defaults.defaultLng,
     saveMissing: args.local === true,
-    debug: args.verbose === true,
+    debug: args.verbose > 1,
     joinArrays: ' ',
     backend: {
       // path where resources get loaded from
@@ -137,9 +155,6 @@ app.get('/locales/resources.json', i18nMiddleware.getResourcesHandler(i18n)); //
 // App modules
 var hostname = "";
 var mydb = require('./mydb.js');
-if (args.verbose) {
-  mydb.setVerbose();
-}
 if (args.local) {
   mydb.setLocalDb();
 } else {
@@ -152,16 +167,12 @@ var googleAuth = require('./google_auth.json');
 
 // Passport session setup.
 passport.serializeUser(function(user, done) {
-  if (args.verbose) {
-    console.log("serializing " + user.info.name);
-  }
+  log.verbose("serializing " + user.info.name);
   done(null, user);
 });
 
 passport.deserializeUser(function(obj, done) {
-  if (args.verbose) {
-    console.log("deserializing " + JSON.stringify(obj));
-  }
+  log.verbose("deserializing " + JSON.stringify(obj));
   done(null, obj);
 });
 
@@ -172,21 +183,21 @@ passport.use(
           passReqToCallback : true
         }, // allows us to pass back the request to the callback
         function(req, username, password, done) {
-          console.log("signin: user=" + username + ", pw=" + password);
+          log.info("signin: user=" + username);
           funct.localAuth(username, password).then(
               function(user) {
                 if (user) {
-                  console.log("LOGGED IN AS: " + user.info.name);
+                  log.debug("signin success: user=" + username + ", name=" + user.info.name);
                   req.flash('success', req.t("signin.loginOkMsg", {name: user.info.name}));
                   done(null, user);
                 }
                 if (!user) {
-                  console.log("COULD NOT LOG IN");
+                  log.debug("signin failed: user=" + username);
                   req.flash('error', req.t("signin.loginNokMsg", {context: "local"}));
                   done(null, user);
                 }
               }).fail(function(err) {
-                console.log(err.body);
+                log.error("signin: body=" + err.body);
               });
         }));
 
@@ -198,7 +209,7 @@ passport.use(
           passReqToCallback : true
         }, // allows us to pass back the request to the callback
         function(req, username, password, done) {
-          console.log("signup: user=" + username);
+          log.info("signup: user=" + username);
           var hash = funct.encryptPassword(password);
           var userData = {
             "username-local": username, // username is e-mail for local users!
@@ -225,11 +236,11 @@ passport.use(
                 }
                 return done(null, result.user);
               } else {
-                console.log("Registration failed.");
+                log.debug("signup: failed user=" + username);
                 done(null, false, {message: errorMessage});
               }
             }).fail(function(error) {
-              console.log("ERROR: " + error.message);
+              log.error("signup: msg=" + error.message);
               done(null, false, {message: errorMessage});
             });
           }
@@ -246,29 +257,31 @@ passport.use(new GoogleStrategy(
     },
     function(accessToken, refreshToken, profile, done) {
       process.nextTick(function () {
-        console.log("Google-auth: profile=" + JSON.stringify(profile));
+        log.info("Google-auth: displayName=" + profile.displayName +
+          ", emails[0]=" + profile.emails[0].value);
+        log.verbose("Google-auth: fullProfile=" + JSON.stringify(profile));
         var userData = {
             "googleId" : profile.id,
             "info" : funct.createUserInfo(profile.displayName, profile.emails[0].value)
         };
         mydb.isEmailInvited(userData.info.email).fail(function(error) {
-          console.log("ERROR: " + error.message);
+          log.info("Google-auth: isEmailInvited failed. msg=" + error.message);
           done(null, false, {
             message: i18n.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"})});
         }).then(function(inviteInfo) {
           return funct.findOrCreate("googleId", userData, inviteInfo);
         }).then(function(result) {
-          console.log("Google authentication result=" + JSON.stringify(result));
+          log.debug("Google authentication result=" + JSON.stringify(result));
           if (result.user) {
             result.user.isNew = result.isNew;
-            console.log("Google authentication OK!");
+            log.info("Google-auth: Success! name=" + result.user.info.name + ", email=" + result.user.info.email);
             return done(null, result.user);
           } else {
-            console.log("Google authentication failed.");
+            log.info("Google-auth: Failed!");
             done(null, false);
           }
         }).fail(function(error) {
-          console.log("ERROR: " + error.message);
+          log.error("Google-auth: msg=" + error.message);
           done(null, false, {message: error.message});
         });
       });
@@ -282,10 +295,10 @@ passport.use(new GoogleStrategy(
 // login page.
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
-    console.log("ensureAuthenticated: Authenticated!");
+    log.debug("ensureAuthenticated: Authenticated!");
     return next();
   }
-  console.log("ensureAuthenticated: Not authenticated!");
+  log.warn("ensureAuthenticated: Not authenticated!");
   req.flash('notice', req.t("signin.authNokMsg"));
   res.redirect('/signin');
 }
@@ -296,7 +309,7 @@ function myFailureHandler(res, err) {
     'constructor' : err.constructor,
     'message' : err.message
   };
-  console.error('ERROR: ' + JSON.stringify(errorJson));
+  log.error('ERROR: ' + JSON.stringify(errorJson));
   res.sendStatus(500);
   res.end();
 }
@@ -308,7 +321,7 @@ function myFailureHandler(res, err) {
  */
 app.get("/api/initial", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
-  console.log("Get initial data: user=" + req.user.info.name + ", uid=" + uid);
+  log.info("Get initial data: user=" + req.user.info.name + ", uid=" + uid);
   var settingsJob = mydb.getSettings(uid);
   var companiesJob = mydb.getCompanies(uid);
 
@@ -327,7 +340,7 @@ app.get("/api/initial", ensureAuthenticated, function(req, res) {
 
 app.get("/api/settings", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
-  console.log("Get settings: user=" + req.user.info.name + ", uid=" + uid);
+  log.info("Get settings: user=" + req.user.info.name + ", uid=" + uid);
   mydb.getSettings(uid).then(function(doc) {
     res.status(200).json(doc);
     res.end();
@@ -336,7 +349,7 @@ app.get("/api/settings", ensureAuthenticated, function(req, res) {
 
 app.put("/api/settings", ensureAuthenticated, function(req, res) {
   var okHandler = function(logText, res, settings) {
-    console.log(logText + ": OK, obj=" + JSON.stringify(settings));
+    log.verbose(logText + ": OK, obj=" + JSON.stringify(settings));
     var resData = {
       'settings' : settings
     };
@@ -351,7 +364,7 @@ app.put("/api/settings", ensureAuthenticated, function(req, res) {
     delete req.body.license;
   }
 
-  console.log("Update settings: user=" + req.user.info.name + ", uid=" + uid
+  log.info("Update settings: user=" + req.user.info.name + ", uid=" + uid
       + ", isAdmin=" + isAdmin + ", settings=" + JSON.stringify(req.body));
   mydb.updateSettings(uid, req.body).then(
     okHandler.bind(null, 'updateSettings', res)
@@ -364,13 +377,13 @@ app.put("/api/user", ensureAuthenticated, function(req, res) {
   var okHandler = function(logText, res, user) {
     user = typeof user !== 'undefined' ? user : false;
     if (user) {
-      console.log(logText + ": OK, obj=" + JSON.stringify(user));
+      log.verbose(logText + ": OK, obj=" + JSON.stringify(user));
       var resData = {
         'user' : user
       };
       res.status(200).json(resData);
     } else {
-      console.log(logText + ": OK");
+      log.verbose(logText + ": OK");
       res.status(204);
     }
     res.end();
@@ -378,7 +391,7 @@ app.put("/api/user", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var isLocalUser = req.user.hasOwnProperty("username-local");
 
-  console.log("Update user: user=" + req.user.info.name + ", uid=" + uid
+  log.info("Update user: user=" + req.user.info.name + ", uid=" + uid
       + ", isLocalUser=" + isLocalUser + ", user=" + JSON.stringify(req.body));
 
   /* Only some fields are allowed to be updated for the user. Copy them...
@@ -398,7 +411,7 @@ app.put("/api/user", ensureAuthenticated, function(req, res) {
   */
 
   if (JSON.stringify(user) !== "{}") {
-    console.log("Update user: user=" + req.user.info.name + ", uid=" + uid
+    log.info("Update user: user=" + req.user.info.name + ", uid=" + uid
         + ": Will update using user=" + JSON.stringify(user));
     mydb.updateUser(uid, user).then(
       okHandler.bind(null, 'updateUser', res)
@@ -406,7 +419,7 @@ app.put("/api/user", ensureAuthenticated, function(req, res) {
       myFailureHandler.bind(null, res)
     );
   } else {
-    console.log("Update user: user=" + req.user.info.name + ", uid=" + uid
+    log.info("Update user: user=" + req.user.info.name + ", uid=" + uid
         + ": Nothing to do... user=" + JSON.stringify(user));
     okHandler('updateUser', res);
   }
@@ -414,14 +427,14 @@ app.put("/api/user", ensureAuthenticated, function(req, res) {
 
 app.post("/api/user-local-pwd-update", ensureAuthenticated, function(req, res) {
   var okHandler = function(logText, res, data) {
-    console.log(logText + ": OK, data=" + JSON.stringify(data));
+    log.verbose(logText + ": OK, data=" + JSON.stringify(data));
     res.status(200).json(data);
     res.end();
   };
   var uid = req.user._id;
   var isLocalUser = req.user.hasOwnProperty("username-local");
 
-  console.log("Update local user password: user=" + req.user.info.name + ", uid=" + uid
+  log.info("Update local user password: user=" + req.user.info.name + ", uid=" + uid
       + ", isLocalUser=" + isLocalUser);
 
   if (isLocalUser) {
@@ -437,7 +450,7 @@ app.post("/api/user-local-pwd-update", ensureAuthenticated, function(req, res) {
           myFailureHandler.bind(null, res)
         );
       } else {
-        console.log("ERROR: Old password doesn't match: user=" + req.user.info.name + ", uid=" + uid);
+        log.warn("Old password doesn't match: user=" + req.user.info.name + ", uid=" + uid);
         okHandler('updateLocalUserPassword', res, {
           'success': false,
           'message': "" + req.t("app.settings.pwdNok", {context: "serverFailureOldPwdWrong"})
@@ -447,7 +460,7 @@ app.post("/api/user-local-pwd-update", ensureAuthenticated, function(req, res) {
       myFailureHandler(res, err);
     });
   } else {
-    console.log("ERROR: Non-local user cannot update password: user=" + req.user.info.name + ", uid=" + uid);
+    log.error("Non-local user cannot update password: user=" + req.user.info.name + ", uid=" + uid);
     res.sendStatus(500);
     res.end();
   }
@@ -455,7 +468,7 @@ app.post("/api/user-local-pwd-update", ensureAuthenticated, function(req, res) {
 
 app.get("/api/companies", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
-  console.log("Get companies: user=" + req.user.info.name + ", uid=" + uid);
+  log.info("Get companies: user=" + req.user.info.name + ", uid=" + uid);
   mydb.getCompanies(uid).then(function(docs) {
     res.status(200).json(docs);
     res.end();
@@ -466,7 +479,7 @@ app.get("/api/company/:id", ensureAuthenticated,
     function(req, res) {
       var uid = req.user._id;
       var id = req.params.id;
-      console.log("Get company: user=" + req.user.info.name + ", uid=" + uid
+      log.info("Get company: user=" + req.user.info.name + ", uid=" + uid
           + ", _id=" + id);
       mydb.getCompany(uid, id).then(function(company) {
         res.status(200).json(company);
@@ -476,7 +489,7 @@ app.get("/api/company/:id", ensureAuthenticated,
 
 app.put("/api/company/:id", ensureAuthenticated, function(req, res) {
   var okHandler = function(logText, res, company) {
-    console.log(logText + ": OK, obj=" + JSON.stringify(company));
+    log.verbose(logText + ": OK, obj=" + JSON.stringify(company));
     var resData = {
       'company' : company
     };
@@ -485,14 +498,14 @@ app.put("/api/company/:id", ensureAuthenticated, function(req, res) {
   };
   var uid = req.user._id;
   if (req.params.id === "undefined") {
-    console.log("New company: user=" + req.user.info.name + ", uid=" + uid
-        + ", data=" + JSON.stringify(req.body, null, 4));
+    log.info("New company: user=" + req.user.info.name + ", uid=" + uid
+        + ", data=" + JSON.stringify(req.body, null, 2));
     mydb.addCompany(uid, req.body)
         .then(okHandler.bind(null, 'addCompany', res)).fail(
             myFailureHandler.bind(null, res));
   } else {
-    console.log("Update company: user=" + req.user.info.name + ", uid=" + uid
-        + ", data=" + JSON.stringify(req.body, null, 4));
+    log.info("Update company: user=" + req.user.info.name + ", uid=" + uid
+        + ", data=" + JSON.stringify(req.body, null, 2));
     // Remove nextIid and nextCid, we don't want to modify that
     // in case of concurrent invoice or customer creation!
     delete req.body.nextCid;
@@ -507,12 +520,8 @@ app.put("/api/company/:id", ensureAuthenticated, function(req, res) {
 app.post("/api/company_logo/:companyId", ensureAuthenticated, upload.single('logo'), function(req, res) {
   var uid = req.user._id;
   var companyId = req.params.companyId;
-  console.log("Company logo upload: uid=" + uid + ", companyId=" + companyId +
+  log.info("Company logo upload: uid=" + uid + ", companyId=" + companyId +
       ", file: " + JSON.stringify(req.file));
-  console.log("company_log: path = " + req.file.path +
-      ", originalname=" + req.file.originalname +
-      ", mimetype=" + req.file.mimetype +
-      ", size=" + req.file.size);
 
   mydb.getCompany(uid, companyId).then(function(company) {
     var logoInfo = {
@@ -523,7 +532,7 @@ app.post("/api/company_logo/:companyId", ensureAuthenticated, upload.single('log
     company.logo = logoInfo;
     return mydb.updateCompany(company);
   }).then(function(company) {
-    console.log("Company logo set: " + JSON.stringify(company));
+    log.verbose("Company logo set: " + JSON.stringify(company));
     var jsonRes = {
       'logo': company.logo
     };
@@ -536,12 +545,12 @@ app.post("/api/company_logo/:companyId", ensureAuthenticated, upload.single('log
 app.get("/api/company_logo/:companyId", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var companyId = req.params.companyId;
-  console.log("Company logo get: uid=" + uid + ", companyId=" + companyId);
+  log.info("Company logo get: uid=" + uid + ", companyId=" + companyId);
 
   mydb.getCompany(uid, companyId).then(function(company) {
     if (company.logo !== undefined && company.logo.path !== undefined) {
       var logoFilename = company.logo.path;
-      console.log("Company logo for companyId=" + companyId + " path=" + logoFilename +
+      log.verbose("Company logo for companyId=" + companyId + " path=" + logoFilename +
           ", mimetype=" + company.logo.mimetype);
       var options = {
         root: __dirname,
@@ -553,15 +562,15 @@ app.get("/api/company_logo/:companyId", ensureAuthenticated, function(req, res) 
       };
       res.sendFile(logoFilename, options, function(err) {
         if (err) {
-          console.log("Error sending company logo:" + err);
+          log.error("Error sending company logo:" + err);
           res.status(err.status).end();
         }
         else {
-          console.log("Company logo sent for companyId=" + companyId + " path=" + logoFilename);
+          log.verbose("Company logo sent for companyId=" + companyId + " path=" + logoFilename);
         }
       });
     } else {
-      console.log("Company companyId=" + companyId + " has no configured logo!");
+      log.warn("Company companyId=" + companyId + " has no configured logo!");
       res.status(404).end();
     }
   }).fail(
@@ -571,7 +580,7 @@ app.get("/api/company_logo/:companyId", ensureAuthenticated, function(req, res) 
 app.get("/api/customers/:companyId", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var companyId = req.params.companyId;
-  console.log("Get customers: user=" + req.user.info.name + ", uid=" + uid
+  log.info("Get customers: user=" + req.user.info.name + ", uid=" + uid
       + ", companyId=" + companyId);
   mydb.getCustomers(uid, companyId).then(function(docs) {
     res.status(200).json(docs);
@@ -583,7 +592,7 @@ app.get("/api/customer/:id", ensureAuthenticated,
     function(req, res) {
       var uid = req.user._id;
       var id = req.params.id;
-      console.log("Get customer: user=" + req.user.info.name + ", uid=" + uid
+      log.info("Get customer: user=" + req.user.info.name + ", uid=" + uid
           + ", _id=" + id);
       mydb.getCustomer(uid, id).then(function(customer) {
         res.status(200).json(customer);
@@ -593,7 +602,7 @@ app.get("/api/customer/:id", ensureAuthenticated,
 
 app.put("/api/customer/:id", ensureAuthenticated, function(req, res) {
   var okHandler = function(logText, res, customer) {
-    console.log(logText + ": OK, obj=" + JSON.stringify(customer));
+    log.verbose(logText + ": OK, obj=" + JSON.stringify(customer));
     var resData = {
       'customer' : customer
     };
@@ -603,14 +612,14 @@ app.put("/api/customer/:id", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var companyId = req.body.companyId;
   if (req.params.id === "undefined") {
-    console.log("New customer: user=" + req.user.info.name + ", uid=" + uid
-        + ", data=" + JSON.stringify(req.body, null, 4));
+    log.info("New customer: user=" + req.user.info.name + ", uid=" + uid
+        + ", data=" + JSON.stringify(req.body, null, 2));
     mydb.addCustomer(uid, companyId, req.body).then(
         okHandler.bind(null, 'addCustomer', res)).fail(
         myFailureHandler.bind(null, res));
   } else {
-    console.log("Update customer: user=" + req.user.info.name + ", uid=" + uid
-        + ", data=" + JSON.stringify(req.body, null, 4));
+    log.info("Update customer: user=" + req.user.info.name + ", uid=" + uid
+        + ", data=" + JSON.stringify(req.body, null, 2));
     mydb.updateCustomer(req.body).then(
         okHandler.bind(null, 'updateCustomer', res)).fail(
         myFailureHandler.bind(null, res));
@@ -620,7 +629,7 @@ app.put("/api/customer/:id", ensureAuthenticated, function(req, res) {
 app.get("/api/invoices/:companyId", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var companyId = req.params.companyId;
-  console.log("Get invoices: user=" + req.user.info.name + ", uid=" + uid
+  log.info("Get invoices: user=" + req.user.info.name + ", uid=" + uid
       + ", companyId=" + companyId);
   mydb.getInvoices(uid, companyId).then(function(docs) {
     res.status(200).json(docs);
@@ -632,7 +641,7 @@ app.get("/api/invoice/:id", ensureAuthenticated,
     function(req, res) {
       var uid = req.user._id;
       var id = req.params.id;
-      console.log("Get invoice: user=" + req.user.info.name + ", uid=" + uid
+      log.info("Get invoice: user=" + req.user.info.name + ", uid=" + uid
           + ", _id=" + id);
       mydb.getInvoice(uid, id).then(function(invoice) {
         res.status(200).json(invoice);
@@ -642,7 +651,7 @@ app.get("/api/invoice/:id", ensureAuthenticated,
 
 app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
   var okHandler = function(logText, res, invoice) {
-    console.log(logText + ": OK, obj=" + JSON.stringify(invoice));
+    log.verbose(logText + ": OK, obj=" + JSON.stringify(invoice));
     var resData = {
       'invoice' : invoice
     };
@@ -652,14 +661,14 @@ app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var companyId = req.body.companyId;
   if (req.params.id === "undefined") {
-    console.log("New invoice: user=" + req.user.info.name + ", uid=" + uid
-        + ", data=" + JSON.stringify(req.body, null, 4));
+    log.info("New invoice: user=" + req.user.info.name + ", uid=" + uid
+        + ", data=" + JSON.stringify(req.body, null, 2));
     mydb.addInvoice(uid, companyId, req.body).then(
         okHandler.bind(null, 'addInvoice', res)).fail(
         myFailureHandler.bind(null, res));
   } else {
-    console.log("Update invoice: user=" + req.user.info.name + ", uid=" + uid
-        + ", data=" + JSON.stringify(req.body, null, 4));
+    log.info("Update invoice: user=" + req.user.info.name + ", uid=" + uid
+        + ", data=" + JSON.stringify(req.body, null, 2));
     mydb.updateInvoice(req.body).then(
         okHandler.bind(null, 'updateInvoice', res)).fail(
         myFailureHandler.bind(null, res));
@@ -668,7 +677,7 @@ app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
 
 app.get("/api/itemGroupTemplates", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
-  console.log("Get invoice item group templates: user=" + req.user.info.name + ", uid=" + uid);
+  log.info("Get invoice item group templates: user=" + req.user.info.name + ", uid=" + uid);
   mydb.getItemGroupTemplates(uid).then(function(docs) {
     res.status(200).json(docs);
     res.end();
@@ -677,7 +686,7 @@ app.get("/api/itemGroupTemplates", ensureAuthenticated, function(req, res) {
 
 app.put("/api/itemGroupTemplate/:id", ensureAuthenticated, function(req, res) {
   var okHandler = function(logText, res, groupTempl) {
-    console.log(logText + ": OK, obj=" + JSON.stringify(groupTempl));
+    log.verbose(logText + ": OK, obj=" + JSON.stringify(groupTempl));
     var resData = {
       'groupTempl' : groupTempl
     };
@@ -686,14 +695,14 @@ app.put("/api/itemGroupTemplate/:id", ensureAuthenticated, function(req, res) {
   };
   var uid = req.user._id;
   if (req.params.id === "undefined") {
-    console.log("New invoice item group template: user=" + req.user.info.name +
-      ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 4));
+    log.info("New invoice item group template: user=" + req.user.info.name +
+      ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 2));
     mydb.addItemGroupTemplate(uid, req.body)
         .then(okHandler.bind(null, 'addItemGroupTemplate', res)).fail(
             myFailureHandler.bind(null, res));
   } else {
-    console.log("Update invoice item group template: user=" + req.user.info.name +
-      ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 4));
+    log.info("Update invoice item group template: user=" + req.user.info.name +
+      ", uid=" + uid + ", data=" + JSON.stringify(req.body, null, 2));
 
     mydb.updateItemGroupTemplate(req.body).then(
         okHandler.bind(null, 'updateItemGroupTemplate', res)).fail(
@@ -704,7 +713,7 @@ app.put("/api/itemGroupTemplate/:id", ensureAuthenticated, function(req, res) {
 app.get("/api/invoiceReport/:id", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var id = req.params.id;
-  console.log("Invoice report: user=" + req.user.info.name + ", _id=" + id);
+  log.info("Invoice report: user=" + req.user.info.name + ", _id=" + id);
   
   // Check license in settings
   var isDemoMode = false;
@@ -714,16 +723,16 @@ app.get("/api/invoiceReport/:id", ensureAuthenticated, function(req, res) {
         settings.license === "demo") {
       isDemoMode = true;
     }
-    console.log("Invoice report: user=" + req.user.info.name + ", _id=" + id +
+    log.info("Invoice report: user=" + req.user.info.name + ", _id=" + id +
         ", isDemoMode=" + isDemoMode);
     return mydb.getInvoice(uid, id);
   }).then(function(invoice) {
     reporter.doInvoiceReport(invoice, tmpDir, function(reportFilename) {
-        console.log("onCompletion: reportFilename=" + reportFilename);
+        log.verbose("onCompletion: reportFilename=" + reportFilename);
         res.type('application/pdf');
         res.download(reportFilename, reportFilename, function(err) {
           if (err) {
-            console.error("onCompletion: " + err);
+            log.error("onCompletion: " + err);
           } else {
             res.end();
           }
@@ -737,10 +746,10 @@ app.get("/api/invoiceReport/:id", ensureAuthenticated, function(req, res) {
 app.get("/api/stats/:cid", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var cid = req.params.cid;
-  console.log("Statistics: user=" + req.user.info.name + ", cid=" + cid);
+  log.info("Statistics: user=" + req.user.info.name + ", cid=" + cid);
   
   mydb.getStats(uid, cid).then(function(stats) {
-    console.log("Statistics: user=" + req.user.info.name + ", cid=" + cid, ", stats=" + JSON.stringify(stats));
+    log.verbose("Statistics: user=" + req.user.info.name + ", cid=" + cid, ", stats=" + JSON.stringify(stats));
     res.status(200).json(stats);
     res.end();
   }).fail(myFailureHandler.bind(null, res));
@@ -750,15 +759,15 @@ app.get("/api/userStats/:uid", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var isAdmin = req.user.info.isAdmin;
   var reqForUid = req.params.uid;
-  console.log("User statistics: user=" + req.user.info.name + ", requested for user uid=" + reqForUid + ", isAdmin=" + isAdmin);
+  log.info("User statistics: user=" + req.user.info.name + ", requested for user uid=" + reqForUid + ", isAdmin=" + isAdmin);
   if (isAdmin) {
     mydb.getStats(reqForUid).then(function(stats) {
-      console.log("User statistics: user=" + req.user.info.name + ", requested for user uid=" + reqForUid + ", stats=" + JSON.stringify(stats));
+      log.verbose("User statistics: user=" + req.user.info.name + ", requested for user uid=" + reqForUid + ", stats=" + JSON.stringify(stats));
       res.status(200).json(stats);
       res.end();
     }).fail(myFailureHandler.bind(null, res));
   } else {
-    console.error('ERROR: Non-admin user uid=' + uid + ', name=' + userName + ' requested user stats!');
+    log.error('ERROR: Non-admin user uid=' + uid + ', name=' + userName + ' requested user stats!');
     res.status(500);
     res.end();
   }
@@ -769,14 +778,14 @@ app.get("/api/users", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var isAdmin = req.user.info.isAdmin;
   var userName = req.user.info.name;
-  console.log("Get users: user=" + userName + ", uid=" + uid, ", isAdmin=" + isAdmin);
+  log.info("Get users: user=" + userName + ", uid=" + uid, ", isAdmin=" + isAdmin);
   if (isAdmin) {
     mydb.getUsers().then(function(docs) {
       res.status(200).json(docs);
       res.end();
     }).fail(myFailureHandler.bind(null, res));
   } else {
-    console.error('ERROR: Non-admin user uid=' + uid + ', name=' + userName + ' requested user list!');
+    log.error('ERROR: Non-admin user uid=' + uid + ', name=' + userName + ' requested user list!');
     res.status(500);
     res.end();
   }
@@ -786,14 +795,35 @@ app.get("/api/invites", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var isAdmin = req.user.info.isAdmin;
   var userName = req.user.info.name;
-  console.log("Get invites: user=" + userName + ", uid=" + uid, ", isAdmin=" + isAdmin);
+  log.info("Get invites: user=" + userName + ", uid=" + uid, ", isAdmin=" + isAdmin);
   if (isAdmin) {
     mydb.getInvites().then(function(docs) {
       res.status(200).json(docs);
       res.end();
     }).fail(myFailureHandler.bind(null, res));
   } else {
-    console.error('ERROR: Non-admin user uid=' + uid + ', name=' + userName + ' requested invite list!');
+    log.error('ERROR: Non-admin user uid=' + uid + ', name=' + userName + ' requested invite list!');
+    res.status(500);
+    res.end();
+  }
+});
+
+app.get("/api/log", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var isAdmin = req.user.info.isAdmin;
+  var userName = req.user.info.name;
+  log.info("Get log: user=" + userName + ", uid=" + uid, ", isAdmin=" + isAdmin);
+  if (isAdmin) {
+    res.type('text/plain');
+    res.download(defaults.logFile, 'log.txt', function(err) {
+      if (err) {
+        log.error("Failed to get log: " + err);
+      } else {
+        res.end();
+      }
+    });
+  } else {
+    log.error('ERROR: Non-admin user uid=' + uid + ', name=' + userName + ' requested log!');
     res.status(500);
     res.end();
   }
@@ -819,7 +849,7 @@ app.post('/login', passport.authenticate('local-signin', {
 // homepage
 app.get('/logout', ensureAuthenticated, function(req, res) {
   var name = req.user.info.name;
-  console.log("LOGGIN OUT " + req.user.info.name);
+  log.info("logout: email=" + req.user.info.email + ", name=" + req.user.info.name);
   req.logout();
   req.flash('notice', req.t("signin.logoutOkMsg", {name: name}));
   res.redirect('/signin');
@@ -892,7 +922,7 @@ server.create(serverSettings, app, function() {
   if (serverSettings.ssl.active) {
     protocol = "HTTPS";
   }
-  console.log('Started ' + protocol + ' server listening on port ' +
+  log.info('Started ' + protocol + ' server listening on port ' +
       serverSettings.port);
 });
 
@@ -900,6 +930,6 @@ if (args.monitor) {
   var intervalMs = 15 * 60 * 1000; // Every 15 min
   setInterval(function() {
     var memUsage = process.memoryUsage();
-    console.log("Memory usage: " + JSON.stringify(memUsage));
+    log.info("Memory usage: " + JSON.stringify(memUsage));
   }, intervalMs);
 }

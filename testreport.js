@@ -7,6 +7,7 @@ var defaults = require('./public/default.js').get();
 var i18n = require('i18next');
 var i18nFsBackend = require('i18next-node-fs-backend');
 var Q = require('q');
+var log = require('./log');
 
 function increaseVerbosity(v, total) {
   return total + 1;
@@ -21,6 +22,23 @@ args.version('0.0.1')
 .option('--real_db', 'Query real DB, not local development DB')
 .option('-v, --verbose', 'Be more verbose', increaseVerbosity, 0)
 .parse(process.argv);
+
+switch(args.verbose) {
+  case undefined:
+  case 0:
+    break;
+  case 1:
+    log.level = 'verbose';
+    break;
+  case 2:
+    log.level = 'debug';
+    break;
+  default:
+  case 3:
+    log.level = 'silly';
+    break;
+}
+log.info("Log level is " + log.level);
 
 var i18nInit = function() {
   var deferred = Q.defer();
@@ -53,28 +71,28 @@ var i18nInit = function() {
   return deferred.promise;
 };
 
-console.log("Test report!");
+log.info("Test report!");
 
 var debug = false;
 if (args.dbg) {
   debug = true;
-  console.log("Debug mode enabled!");
+  log.info("Debug mode enabled!");
 }
 
 if (!args.real_db) {
-  console.log("Using local DB!");
+  log.info("Using local DB!");
   mydb.setLocalDb();
 }
 
 var demoMode = false;
 if (args.demo) {
   demoMode = true;
-  console.log("Demo mode enabled!");
+  log.info("Demo mode enabled!");
 }
 
 var invoiceQuery = undefined;
 if (args.invoice_id) {
-  console.log("Going to render invoice with _id=" + args.invoice_id);
+  log.info("Going to render invoice with _id=" + args.invoice_id);
   var oinvoice_id = ObjectID(args.invoice_id);
   invoiceQuery = {'_id': oinvoice_id};
 }
@@ -85,16 +103,16 @@ i18nInitPromise = i18nInit();
 
 renderInvoice = function(invoice) {
   if (invoice == undefined) {
-    console.error("Invoice not found!");
+    log.error("Invoice not found!");
     process.exit(1);
   } else {
     i18nInitPromise.then(function(t) {
       reporter.doInvoiceReport(invoice, tmpDir, function(reportFilename) {
-        console.log("onCompletion: reportFilename=" + reportFilename);
+        log.info("onCompletion: reportFilename=" + reportFilename);
         process.exit();
       }, args.output, demoMode, debug, args.verbose);
     }).fail(function(err) {
-      console.log("ERROR: i18n.init: " + err);
+      log.error("ERROR: i18n.init: " + err);
       process.exit(1);
     });
   }
@@ -108,9 +126,7 @@ getJsonFromFile = function(fileName) {
       return;
     }
     var obj = JSON.parse(data);
-    if (args.verbose > 0) {
-      console.log("Invoice will be rendered from JSON: " + JSON.stringify(obj, null, 2));
-    }
+    log.verbose("Invoice will be rendered from JSON: " + JSON.stringify(obj, null, 2));
     deferred.resolve(obj);
   });
   return deferred.promise;
@@ -118,10 +134,10 @@ getJsonFromFile = function(fileName) {
 
 Q().then(function() {
   if (args.json) {
-    console.log("Get invoice data from JSON file: " + args.json);
+    log.info("Get invoice data from JSON file: " + args.json);
     return getJsonFromFile(args.json);
   } else {
-    console.log("Get invoice: " + JSON.stringify(invoiceQuery, null, 2));
+    log.info("Get invoice: " + JSON.stringify(invoiceQuery, null, 2));
     return mydb.getOneDocPromise('invoice', invoiceQuery);  
   }
 }).then(function(invoice) {

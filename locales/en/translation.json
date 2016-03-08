@@ -25,7 +25,7 @@
         "loginNokMsg_google": "Could not log in using Google account! Please try again.",
         "logoutOkMsg": "Successfully logged out {{name}}!",
         "registerOkMsg": "Welcome {{name}}! You are now registed.",
-	"registerNokMsg_pwdTooShort": "Given password too short, at least {{len}} characters required! Please try again.",
+        "registerNokMsg_pwdTooShort": "Given password too short, at least {{len}} characters required! Please try again.",
         "registerNokMsg_userExists": "Username {{name}} already in use! Please try another one.",
         "registerNokMsg_notInvited": "Invite missing for E-mail {{email}}! Please try again when invited or use a different E-mail address.",
         "registerNokMsg": "Registration failed! Please try again.",
@@ -362,7 +362,8 @@
             "showInfoMsgBtn": "Show info",
             "showSuccessMsgBtn": "Show success",
             "showWarningMsgBtn": "Show warning",
-            "showErrorMsgBtn": "Show error"
+            "showErrorMsgBtn": "Show error",
+            "getLogBtn": "Get Log"
         },
         "userList": {
             "nameCol": "Name",

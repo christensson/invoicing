@@ -41,6 +41,7 @@
     "passport-google-oauth": "^0.2.0",
     "passport-local": "^1.0.0",
     "q": "^1.4.1",
-    "unit.js": "^2.0.0"
+    "unit.js": "^2.0.0",
+    "winston": "^2.2.0"
   }
 }

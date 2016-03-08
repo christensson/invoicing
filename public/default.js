@@ -18,7 +18,8 @@ var defaults = {
   },
   firstCid: 100,
   firstIid: 100,
-  minPwdLen: 8
+  minPwdLen: 8,
+  logFile: 'log/log.txt'
 };
 
 var getDefaults = function() {

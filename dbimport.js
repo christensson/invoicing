@@ -5,6 +5,7 @@ var ObjectID = mongodb.ObjectID;
 var Q = require('q');
 var Converter = require("csvtojson").Converter;
 var converter = new Converter({});
+var log = require('./log');
 
 function increaseVerbosity(v, total) {
   return total + 1;
@@ -20,12 +21,29 @@ args.version('0.0.1')
 .option('-d, --dryrun', 'Dry-run, don\'t modify DB')
 .parse(process.argv);
 
-console.log("DB importer!");
+switch(args.verbose) {
+  case undefined:
+  case 0:
+    break;
+  case 1:
+    log.level = 'verbose';
+    break;
+  case 2:
+    log.level = 'debug';
+    break;
+  default:
+  case 3:
+    log.level = 'silly';
+    break;
+}
+log.info("Log level is " + log.level);
+
+log.info("DB importer!");
 
 var devMode = false;
 
 if (!args.real_db) {
-  console.log("Using local DB!");
+  log.info("Using local DB!");
   mydb.setLocalDb();
 }
 
@@ -69,44 +87,39 @@ var convertCustomer = function(c, ouid, ocid) {
 
 if (args.cust_csv) {
   if (!args.uid || !args.cid) {
-    console.log("No user or company id given, specify with option --uid and --cid");
+    log.error("No user or company id given, specify with option --uid and --cid");
     process.exit(1);
   }
-  console.log("Going to import customers in file " + args.cust_csv + " to uid=" + args.uid + ", cid=" + args.cid);
+  log.info("Going to import customers in file " + args.cust_csv + " to uid=" + args.uid + ", cid=" + args.cid);
   var ouid = ObjectID(args.uid);
   var ocid = ObjectID(args.cid);
   converter.fromFile(args.cust_csv, function(err, result) {
     if (err) {
-      console.err("Error when converting file to JSON: " + err);
+      log.error("Error when converting file to JSON: " + err);
       process.exit(1);
     }
-    if (args.verbose > 1) {
-      console.log("CSV converted to JSON: " + JSON.stringify(result));
-    }
+    log.debug("CSV converted to JSON: " + JSON.stringify(result));
     var successCount = 0;
     var cs = [];
     for (var i = 0; i < result.length; i++) {
       var c = convertCustomer(result[i], ouid, ocid);
       cs.push(c);
-      if (args.verbose) {
-        console.log("Converted customer id=" + c.cid + ", data=" + JSON.stringify(c));
-      } else {
-        console.log("Converted customer id=" + c.cid + ", name=" + c.name);
-      }
+      log.info("Converted customer id=" + c.cid + ", name=" + c.name);
+      log.verbose("Converted customer id=" + c.cid + ", data=" + JSON.stringify(c));
       successCount++;
     }
-    console.log("Successfully converted " + successCount + " out of " + result.length + " customers.");
+    log.info("Successfully converted " + successCount + " out of " + result.length + " customers.");
     if (args.dryrun) {
-      console.log("This is a dry-run, nothing imported to DB!");
-      console.log("Done!");
+      log.info("This is a dry-run, nothing imported to DB!");
+      log.info("Done!");
       process.exit();
     } else {
       mydb.addCustomerRaw(cs).then(function() {
-        console.log("Successfully added " + successCount + " customers to DB.");
-        console.log("Done!");
+        log.info("Successfully added " + successCount + " customers to DB.");
+        log.info("Done!");
         process.exit();
       }).fail(function(err) {
-        console.log("Insertion in DB failed! err=" + err);
+        log.error("Insertion in DB failed! err=" + err);
         process.exit(1);
       });
     }
@@ -165,43 +178,38 @@ var convertTypeToGroup = function(t, uid) {
 
 if (args.types_csv) {
   if (!args.uid) {
-    console.log("No user id given, specify with option --uid");
+    log.error("No user id given, specify with option --uid");
     process.exit(1);
   }
-  console.log("Going to import types in file " + args.types_csv + " to uid=" + args.uid);
+  log.info("Going to import types in file " + args.types_csv + " to uid=" + args.uid);
   var ouid = ObjectID(args.uid);
   converter.fromFile(args.types_csv, function(err, result) {
     if (err) {
-      console.err("Error when converting file to JSON: " + err);
+      log.error("Error when converting file to JSON: " + err);
       process.exit(1);
     }
-    if (args.verbose > 1) {
-      console.log("CSV converted to JSON: " + JSON.stringify(result, null, 2));
-    }
+    log.debug("CSV converted to JSON: " + JSON.stringify(result, null, 2));
     var successCount = 0;
     var groups = [];
     for (var i = 0; i < result.length; i++) {
       var g = convertTypeToGroup(result[i], ouid);
       groups.push(g);
-      if (args.verbose) {
-        console.log("Converted group name=" + g.name + ", data=" + JSON.stringify(g));
-      } else {
-        console.log("Converted group name=" + g.name);
-      }
+      log.info("Converted group name=" + g.name);
+      log.verbose("Converted group name=" + g.name + ", data=" + JSON.stringify(g));
       successCount++;
     }
-    console.log("Successfully converted " + successCount + " out of " + result.length + " groups.");
+    log.info("Successfully converted " + successCount + " out of " + result.length + " groups.");
     if (args.dryrun) {
-      console.log("This is a dry-run, nothing imported to DB!");
-      console.log("Done!");
+      log.info("This is a dry-run, nothing imported to DB!");
+      log.info("Done!");
       process.exit();
     } else {
       mydb.addItemGroupTemplateRaw(groups).then(function() {
-        console.log("Successfully added " + successCount + " groups to DB.");
-        console.log("Done!");
+        log.info("Successfully added " + successCount + " groups to DB.");
+        log.info("Done!");
         process.exit();
       }).fail(function(err) {
-        console.log("Insertion in DB failed! err=" + err);
+        log.error("Insertion in DB failed! err=" + err);
         process.exit(1);
       });
     }

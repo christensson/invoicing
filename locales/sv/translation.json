@@ -377,7 +377,8 @@
             "showInfoMsgBtn": "Visa infomeddelande",
             "showSuccessMsgBtn": "Visa succeemeddelande",
             "showWarningMsgBtn": "Visa varningsmeddelande",
-            "showErrorMsgBtn": "Visa felmeddelande"
+            "showErrorMsgBtn": "Visa felmeddelande",
+            "getLogBtn": "Hämta log"
         },
         "userList": {
             "nameCol": "Namn",

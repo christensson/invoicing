@@ -2714,6 +2714,22 @@ var DebugViewModel = function(currentView) {
   self.showErrorMsg = function() {
     Notify_showMsg('error', "This is an <strong>error</strong> message!");
   };
+
+  self.downloadLog = function() {
+    Log.info("downloadLog");
+    Notify_showSpinner(true);
+    try {
+      var child = window.open("/api/log");
+      $(child).ready(function() {
+        Log.info("downloadLog - done!");
+        Notify_showSpinner(false);
+      });
+      child.focus();
+    } catch (e) {
+      Log.info("downloadLog - Failed!");
+      Notify_showSpinner(false);
+    }
+  };
 };
 
 var UserViewModel = function() {

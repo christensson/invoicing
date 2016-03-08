@@ -5,6 +5,7 @@ var fs = require('fs');
 var util = require('./public/util.js');
 var defaults = require('./public/default.js').get();
 var i18n = require('i18next');
+var log = require('./log');
 
 var convMmToDpi = function(lengthMm) {
   // 1 inch = 72 dots = 25.4 mm = 2,8346 dots/mm
@@ -56,10 +57,8 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
       key = key.slice(0, contextSepIdx);
     };
     var tStr = i18n.t('app.invoiceReport.' + key, opt);
-    if (verbosity > 3) {
-      console.log("getStr: translate key=" + key +
-        ", opt=" + JSON.stringify(opt) + " => " + tStr);
-    }
+    log.silly("getStr: translate key=" + key +
+      ", opt=" + JSON.stringify(opt) + " => " + tStr);
     return tStr;
   };
 
@@ -91,10 +90,8 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     fmtCurrencyOptPayAdj.numDecimalTrunc = fmtCurrencyOpt.numDecimalTrunc;
   }
 
-  if (verbosity > 0) {
-    console.log("invoiceStyle: " + invoiceStyle);  
-    console.log("invoiceLng: " + invoiceLng);
-  }
+  log.verbose("invoiceStyle: " + invoiceStyle);  
+  log.verbose("invoiceLng: " + invoiceLng);
 
   var style = {
     header: {
@@ -291,9 +288,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     if (formatedText !== undefined && cust.vatNr !== undefined) {
       formatedText = formatedText.replace("%c.vatNr%", cust.vatNr);
     }
-    if (verbosity > 2) {
-      console.log("formatTextTemplate(): Formated text: " + formatedText);
-    }
+    log.debug("formatTextTemplate(): Formated text: " + formatedText);
     return formatedText;
   };
 
@@ -334,7 +329,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
         x.box(companyLogoX, companyLogoY, companyLogoWidth, companyLogoHeight);
       }
     } else {
-      console.log("doInvoiceReport: No company logo configured for companyId=" + invoice.company._id);
+      log.verbose("doInvoiceReport: No company logo configured for companyId=" + invoice.company._id);
     }
 
     x.setCurrentY(companyNameY);
@@ -467,19 +462,15 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
       printHeader(true);
       var headerHeight = x.getCurrentY() - groupHeaderTopY;
       if (headerHeight >= 0) {
-        if (verbosity > 0) {
-          console.log("groupHeader: Calculated detail-header height=" + headerHeight +
-            ", will render at y=" + groupHeaderTopY);
-        }
+        log.verbose("groupHeader: Calculated detail-header height=" + headerHeight +
+          ", will render at y=" + groupHeaderTopY);
       } else if (headerHeight < 0) {
         // Handle page-wrap
         groupHeaderTopY = x.minY() + pageHeaderHeight;
         // Need to add 3 to height, don't know why...
         headerHeight = x.getCurrentY() - groupHeaderTopY + 3;
-        if (verbosity > 0) {
-          console.log("groupHeader: Detected page-wrap. Calculated detail-header height=" + headerHeight +
-            ", will render at y=" + groupHeaderTopY);
-        }
+        log.verbose("groupHeader: Detected page-wrap. Calculated detail-header height=" + headerHeight +
+          ", will render at y=" + groupHeaderTopY);
       }
       // Gray box is background...
       x.box(margin - 1 + detailsBarsLineThickness,
@@ -564,23 +555,17 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
   };
 
   var finalsummary = function(x, r) {
-    if (verbosity > 0) {
-      console.log("finalsummary: Render");
-    }
+    log.verbose("finalsummary: Render");
     if (finalSummaryHeight !== undefined && pageFooterTopY !== undefined) {
       // First check if we need to page-break to not overflow into footer
       var distanceToPageFooter = pageFooterTopY - x.getCurrentY();
       if (finalSummaryHeight > distanceToPageFooter) {
-        if (verbosity > 0) {
-          console.log("finalsummary: page-break needed. distanceToPageFooter=" +
-            distanceToPageFooter + ", distanceRequired=" + finalSummaryHeight + ", pageFooterTopY=" + pageFooterTopY);
-        }
+        log.verbose("finalsummary: page-break needed. distanceToPageFooter=" +
+          distanceToPageFooter + ", distanceRequired=" + finalSummaryHeight + ", pageFooterTopY=" + pageFooterTopY);
         x.newPage();
       } else {
-        if (verbosity > 0) {
-          console.log("finalsummary: No page-break needed. distanceToPageFooter=" +
-            distanceToPageFooter + ", distanceRequired=" + finalSummaryHeight + ", pageFooterTopY=" + pageFooterTopY);
-        }
+        log.verbose("finalsummary: No page-break needed. distanceToPageFooter=" +
+          distanceToPageFooter + ", distanceRequired=" + finalSummaryHeight + ", pageFooterTopY=" + pageFooterTopY);
       }
     }
 
@@ -649,25 +634,17 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
 
     if (finalSummaryHeight === undefined) {
       finalSummaryHeight = x.getCurrentY() - finalsummaryTopY;
-      if (verbosity > 0) {
-        console.log("finalsummary: Calculated height=" + finalSummaryHeight);
-      }
+      log.verbose("finalsummary: Calculated height=" + finalSummaryHeight);
     }
 
-    if (verbosity > 1) {
-      var height = x.getCurrentY() - finalsummaryTopY;
-      console.log("finalsummary: Rendered with height " + height);
-    }
+    var height = x.getCurrentY() - finalsummaryTopY;
+    log.debug("finalsummary: Rendered with height " + height);
   };
 
   var mypagefooter = function(x, r) {
-    if (verbosity > 0) {
-      console.log("footer: Render");
-    }
+    log.verbose("footer: Render");
     if (pageFooterHeight !== undefined) {
-      if (verbosity > 0) {
-        console.log("footer: top-y set to " + pageFooterTopY + ", maxY=" + x.maxY() + ", height=" + pageFooterHeight);
-      }
+      log.verbose("footer: top-y set to " + pageFooterTopY + ", maxY=" + x.maxY() + ", height=" + pageFooterHeight);
       x.setCurrentY(pageFooterTopY);
     }
     var mypagefooterTopY = x.getCurrentY();
@@ -765,14 +742,10 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     if (pageFooterHeight === undefined) {
       pageFooterHeight = x.getCurrentY() - mypagefooterTopY;
       pageFooterTopY = x.maxY() - pageFooterHeight;
-      if (verbosity > 0) {
-        console.log("footer: Calculated height=" + pageFooterHeight + ", topY=" + pageFooterTopY);
-      }
+      log.verbose("footer: Calculated height=" + pageFooterHeight + ", topY=" + pageFooterTopY);
     }
-    if (verbosity > 1) {
-      var height = x.getCurrentY() - mypagefooterTopY;
-      console.log("footer: Rendered with height " + height);
-    }
+    var height = x.getCurrentY() - mypagefooterTopY;
+    log.debug("footer: Rendered with height " + height);
   };
 
   // You don't have to pass in a report name; it will default to "report.pdf"
@@ -803,7 +776,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
       hasVat: true,
       hasTotal: true
     };
-    console.log("Detected old format of invoice id=" + invoice._id +
+    log.info("Detected old format of invoice id=" + invoice._id +
       " format without item groups. Converting invoice using group " + JSON.stringify(groupToUse));
     var newGroup = JSON.parse(JSON.stringify(groupToUse));
     newGroup.invoiceItems = invoice.invoiceItems;
@@ -821,7 +794,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
 
   // Support old companies without multiple languages
   if (!invoice.company.hasOwnProperty("sv")) {
-    console.log("Detected old company format of invoice id=" + invoice._id +
+    log.info("Detected old company format of invoice id=" + invoice._id +
       " without info for multiple languages. Converting invoice to support language sv.");
     var companyFieldsToCopy = [
       "contact1Caption",
@@ -855,9 +828,9 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
   // companyId makes directory unique
   var companyId = invoice.company._id;
   var reportDir = tmpDir + "/" + companyId;
-  console.log("Report name: " + reportName + " (dir=" + reportDir + ")");
+  log.info("Report name: " + reportName + " (dir=" + reportDir + ")");
   if (!fs.existsSync(reportDir)) {
-    console.log("Created dir: " + reportDir);
+    log.info("Created dir: " + reportDir);
     fs.mkdirSync(reportDir);
   }
   //TODO: Cleanup old reports
@@ -891,13 +864,13 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
   rpt.printStructure();
 
   // This does the MAGIC...  :-)
-  console.time("Rendered");
+  log.profile("Rendered");
   rpt.render(function(err, name) {
-      console.timeEnd("Rendered");
+      log.profile("Rendered");
       if (err) {
-          console.error("Report had an error",err);
+          log.error("Report had an error: " + err);
       } else {
-        console.log("Report is named:",name);
+        log.verbose("Report is named: " + name);
         onCompletion(name);
       }
   });

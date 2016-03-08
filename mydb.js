@@ -5,6 +5,7 @@ var Q = require('q');
 var util = require('./public/util.js');
 var funct = require('./functions.js');
 var ObjectID = mongodb.ObjectID;
+var log = require('./log');
 
 var generate_mongo_url = function(obj){
   obj.hostname = (obj.hostname || 'localhost');
@@ -43,7 +44,7 @@ module.exports.setLocalDb = function() {
 function dbop(opfunc) {
   mongodb.connect(mongourl, function(err, db){
     if (err) {
-      console.error("Error: " + err);
+      log.error("mongodb connect error: " + err);
     }
     else {
       opfunc(db);
@@ -73,10 +74,8 @@ function countAllDocsPromise(collectionName, filter) {
         deferred.reject(
             new Error("Error: countAllDocs(" + collectionName + "): " + err));
       } else {
-        if (verbose) {
-          console.log("countAllDocs(" + collectionName +
+        log.verbose("countAllDocs(" + collectionName +
               ", filter=" + JSON.stringify(filter) + "): count: " + count);
-        }
         deferred.resolve(count);
       }
     });
@@ -94,12 +93,10 @@ function getAllDocsPromise(collectionName, filter, projection) {
         deferred.reject(
             new Error("Error: getAllDocs(" + collectionName + "): " + err));
       } else {
-        if (verbose) {
-          console.log("getAllDocs(" + collectionName +
-              ", filter=" + JSON.stringify(filter) +
-              ", projection=" + JSON.stringify(projection) +
-              "): docs: " + JSON.stringify(docs));
-        }
+        log.verbose("getAllDocs(" + collectionName +
+            ", filter=" + JSON.stringify(filter) +
+            ", projection=" + JSON.stringify(projection) +
+            "): docs: " + JSON.stringify(docs));
         deferred.resolve(docs);
       }
     });
@@ -116,9 +113,7 @@ function getOneDocPromise(collectionName, filter) {
         deferred.reject(
             new Error("Error: getOneDoc(" + collectionName + "): " + err));
       } else {
-        if (verbose) {
-          console.log("getOneDoc(" + collectionName + "): filter=" + JSON.stringify(filter) + ", doc: " + JSON.stringify(doc));
-        }
+        log.verbose("getOneDoc(" + collectionName + "): filter=" + JSON.stringify(filter) + ", doc: " + JSON.stringify(doc));
         deferred.resolve(doc);
       }
     });
@@ -142,10 +137,7 @@ function dropCollectionPromise(collectionName) {
                 new Error("Error: dropCollection(" + collectionName + "): " + err));
           }
           if (reply) {
-            if (verbose) {
-              console.log(
-                  "dropCollection(" + collectionName + "): success");
-            }
+            log.verbose("dropCollection(" + collectionName + "): success");
             deferred.resolve(true);
           } else {
             deferred.reject(
@@ -166,10 +158,7 @@ function createCollectionPromise(collectionName) {
         deferred.reject(
             new Error("Error: createCollection(" + collectionName + "): " + err));
       } else {
-        if (verbose) {
-          console.log(
-                  "createCollection(" + collectionName + "): success");
-        }
+        log.verbose("createCollection(" + collectionName + "): success");
         deferred.resolve(true);
       }
     });
@@ -185,10 +174,7 @@ function createIndexPromise(collectionName, fieldOrSpec, opts) {
         deferred.reject(
             new Error("Error: createIndex(" + collectionName + ", " + fieldOrSpec + "): " + err));
       } else {
-        if (verbose) {
-          console.log(
-                  "createIndex(" + collectionName + ", " + JSON.stringify(fieldOrSpec)  + "): success");
-        }
+        log.verbose("createIndex(" + collectionName + ", " + JSON.stringify(fieldOrSpec)  + "): success");
         deferred.resolve(true);
       }
     });
@@ -204,17 +190,13 @@ function insertDataPromise(collectionName, data) {
         deferred.reject(
             new Error("insertData(" + collectionName + "): " + err));
       } else {
-        if (verbose) {
-          console.log("insertData(" + collectionName + "): " + JSON.stringify(data, null, 4));
-        }
+        log.verbose("insertData(" + collectionName + "): " + JSON.stringify(data, null, 4));
         coll.insert(data, {serializeFunctions: true}, function(err) {
           if(err) {
             deferred.reject(
                 new Error("insertData(" + collectionName + "): " + err));
           } else {
-            if (verbose) {
-              console.log("insertData(" + collectionName + "): success");
-            }
+            log.verbose("insertData(" + collectionName + "): success");
             deferred.resolve(true);
           }
         });
@@ -232,9 +214,7 @@ function updateDataPromise(collectionName, data, replace) {
         deferred.reject(
             new Error("updateData(" + collectionName + "): " + err));
       } else {
-        if (verbose) {
-          console.log("updateData(" + collectionName + "): _id=" + data._id + ", data=" + JSON.stringify(data, null, 4));
-        }
+        log.verbose("updateData(" + collectionName + "): _id=" + data._id + ", data=" + JSON.stringify(data, null, 4));
         // _id in db is really an ObjectId, but it got lost in all the JSON
         // mangling...
         data._id = new ObjectID(data._id);
@@ -283,9 +263,7 @@ function getNextCidPromise(uid, companyId) {
                 new Error("getNextCidPromise(" + JSON.stringify(query) + "): " + err));
           } else {
             var value = obj.value.nextCid;
-            if (verbose) {
-              console.log("getNextCidPromise(" + JSON.stringify(query) + "): success: cid=" + value);
-            }
+            log.verbose("getNextCidPromise(" + JSON.stringify(query) + "): success: cid=" + value);
             deferred.resolve(value);
           }
         }
@@ -312,9 +290,7 @@ function getNextIidPromise(uid, companyId) {
                 new Error("getNextIidPromise(" + JSON.stringify(query) + "): " + err));
           } else {
             var value = obj.value.nextIid;
-            if (verbose) {
-              console.log("getNextIidPromise(" + JSON.stringify(query) + "): success: iid=" + value);
-            }
+            log.verbose("getNextIidPromise(" + JSON.stringify(query) + "): success: iid=" + value);
             deferred.resolve(value);
           }
         }
@@ -384,7 +360,7 @@ var dropAllCollections = function() {
             var value = result.value;
         } else {
             var reason = result.reason;
-            console.log("Collection not dropped, error ignored: " + result.reason);
+            log.warn("Collection not dropped, error ignored: " + result.reason);
         }
         deferred.resolve();
     });
@@ -455,7 +431,7 @@ var initCollectionsDevel = function(inviteList) {
     return getOneDocPromise('users', {"username-local": 'mach'});
   })
   .then(function(user) {
-    console.log("getUser: User found: " + JSON.stringify(user));
+    log.info("getUser: User found: " + JSON.stringify(user));
     machUserId = ObjectID(user._id);
     return Q();
   })
@@ -463,7 +439,7 @@ var initCollectionsDevel = function(inviteList) {
     return getOneDocPromise('users', {"username-local": 'test'});
   })
   .then(function(user) {
-    console.log("getUser: User found: " + JSON.stringify(user));
+    log.info("getUser: User found: " + JSON.stringify(user));
     testUserId = ObjectID(user._id);
     return Q();
   })
@@ -524,7 +500,7 @@ var initCollectionsDevel = function(inviteList) {
     return getOneDocPromise('company', {name: 'Machapär'});
   })
   .then(function(c) {
-    console.log("getCompany: Found: " + JSON.stringify(c));
+    log.info("getCompany: Found: " + JSON.stringify(c));
     machCompany1 = c;
     return Q();
   })
@@ -532,7 +508,7 @@ var initCollectionsDevel = function(inviteList) {
     return getOneDocPromise('company', {name: 'Test company widht a long name 1'});
   })
   .then(function(c) {
-    console.log("getCompany: Found: " + JSON.stringify(c));
+    log.info("getCompany: Found: " + JSON.stringify(c));
     testCompany1 = c;
     return Q();
   })
@@ -540,7 +516,7 @@ var initCollectionsDevel = function(inviteList) {
     return getOneDocPromise('company', {name: 'Test company 2'});
   })
   .then(function(c) {
-    console.log("getCompany: Found: " + JSON.stringify(c));
+    log.info("getCompany: Found: " + JSON.stringify(c));
     testCompany2 = c;
     return Q();
   })
@@ -765,7 +741,7 @@ var initCollectionsDevel = function(inviteList) {
 };
 
 module.exports.init = function(devMode, doneCb) {
-  console.log("Init DB: devMode=" + devMode + " using mongourl: " + mongourl);
+  log.info("Init DB: devMode=" + devMode + " using mongourl: " + mongourl);
 
   var inviteList = [
                     {
@@ -805,12 +781,12 @@ module.exports.init = function(devMode, doneCb) {
     return createAllCollections();
   })
   .fail(function(err) {
-    console.log("Failed to create collections: " + err);
+    log.warn("Failed to create collections: " + err);
   }).then(function() {
     return createAllIndexes();
   })
   .fail(function(err) {
-    console.log("Failed to create indexes: " + err);
+    log.warn("Failed to create indexes: " + err);
   })
   .then(function() {
     return initDb(inviteList);
@@ -845,9 +821,7 @@ module.exports.getStats = function(uid, companyId) {
   ];
   
   if (companyId !== "undefined" && companyId !== "null") {
-    if (verbose) {
-      console.log("getStats: Active company is " + companyId);
-    }
+    log.verbose("getStats: Active company is " + companyId);
     var ocompanyId = new ObjectID(companyId);
     jobs.push(countAllDocsPromise('customer', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId}));
     jobs.push(countAllDocsPromise('invoice', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId}));
@@ -901,12 +875,10 @@ module.exports.getInvoice = function(uid, id) {
   var deferred = Q.defer();
   getOneDocPromise('invoice', {'_id': oid, 'uid': ouid}).then(function(invoice) {
     if (invoice == undefined) {
-      console.log("getInvoice: No invoice id=" + id + " found");
+      log.warn("getInvoice: No invoice id=" + id + " found");
       deferred.reject(new Error("The requested invoice id=" + id + " could not be found."));
     } else {
-      if (verbose) {
-        console.log("getInvoice: Invoice found: " + JSON.stringify(invoice));
-      }
+      log.verbose("getInvoice: Invoice found: " + JSON.stringify(invoice));
       deferred.resolve(invoice);
     }
   });
@@ -946,9 +918,7 @@ module.exports.addInvoice = function(uid, companyId, invoice) {
   var ouid = new ObjectID(uid);
   var ocompanyId = new ObjectID(companyId);
   getNextIidPromise(uid, companyId).then(function(iid) {
-    if (verbose) {
-      console.log("addInvoice: Allocated new iid=" + iid);
-    }
+    log.verbose("addInvoice: Allocated new iid=" + iid);
     invoice.iid = iid;
     invoice.uid = ouid;
     invoice.companyId = ocompanyId;
@@ -959,7 +929,7 @@ module.exports.addInvoice = function(uid, companyId, invoice) {
       deferred.reject(err);
     });
   }).fail(function(err) {
-    console.error("addInvoice: Error: " + err.body);
+    log.error("addInvoice: Error: " + err.body);
     deferred.reject(err);
   });
 
@@ -974,7 +944,7 @@ module.exports.updateInvoice = function(invoice) {
   updateDataPromise('invoice', invoice, true).then(function(data) {
     deferred.resolve(data);
   }).fail(function(err) {
-    console.error("updateInvoice: Error: " + err.body);
+    log.error("updateInvoice: Error: " + err.body);
     deferred.reject(err);
   });
   return deferred.promise;
@@ -983,9 +953,7 @@ module.exports.updateInvoice = function(invoice) {
 module.exports.addCustomer = function(uid, companyId, customer) {
   var deferred = Q.defer();
   getNextCidPromise(uid, companyId).then(function(cid) {
-    if (verbose) {
-      console.log("addCustomer: Allocated new cid=" + cid);
-    }
+    log.verbose("addCustomer: Allocated new cid=" + cid);
     customer.cid = cid;
     customer.uid = new ObjectID(uid);
     customer.companyId = new ObjectID(companyId);
@@ -995,7 +963,7 @@ module.exports.addCustomer = function(uid, companyId, customer) {
       deferred.reject(err);
     });
   }).fail(function(err) {
-    console.error("addCustomer: Error: " + err.body);
+    log.error("addCustomer: Error: " + err.body);
     deferred.reject(err);;
   });
 
@@ -1084,15 +1052,13 @@ module.exports.getUser = function(query, includePassword) {
   var deferred = Q.defer();
   getOneDocPromise('users', query).then(function(user) {
     if (!user) {
-      console.log("getUser: No user found");
+      log.warn("getUser: No user found! query=" + JSON.stringify(query));
       deferred.reject(new Error("The requested items could not be found."));
     } else {
       if (!includePassword) {
         delete user.password; // Do not expose password unless explicitly wanted!
       }
-      if (verbose) {
-        console.log("getUser: User found: " + JSON.stringify(user));
-      }
+      log.verbose("getUser: User found: " + JSON.stringify(user));
       deferred.resolve(user);
     }
   });
@@ -1107,10 +1073,10 @@ module.exports.isEmailInvited = function(email) {
   var deferred = Q.defer();
   getOneDocPromise('invite', {email: email}).then(function(doc) {
     if (!doc) {
-      console.log("isEmailInvited: email=" + email + " hasn't been invited!");
+      log.info("isEmailInvited: email=" + email + " hasn't been invited!");
       deferred.reject(new Error("User with email " + email + " hasn't been invited!"));
     } else {
-      console.log("isEmailInvited: email=" + email + " has been invited. info=" + JSON.stringify(doc));
+      log.verbose("isEmailInvited: email=" + email + " has been invited. info=" + JSON.stringify(doc));
       deferred.resolve(doc);
     }
   });
@@ -1268,11 +1234,11 @@ var initUserContext = function(userQuery, license, opts) {
     initTemplates: true
   };
   var deferred = Q.defer();
-  console.log("initUserContext: query=" + JSON.stringify(userQuery));
+  log.verbose("initUserContext: query=" + JSON.stringify(userQuery));
   var user = undefined;
   module.exports.getUser(userQuery).then(function (result) {
     user = result;
-    console.log("initUserContext: Found user=" + JSON.stringify(user));
+    log.verbose("initUserContext: Found user=" + JSON.stringify(user));
     return Q();
   }).then(function() {
     var defaultSettings = {
@@ -1281,18 +1247,18 @@ var initUserContext = function(userQuery, license, opts) {
         "license" : license,
     };
     if (opts.initSettings) {
-      console.log("initUserContext: Set default settings: " + JSON.stringify(defaultSettings));
+      log.verbose("initUserContext: Set default settings: " + JSON.stringify(defaultSettings));
       return insertDataPromise("settings", defaultSettings);
     } else {
-      console.log("initUserContext: Skipped default settings!");
+      log.verbose("initUserContext: Skipped default settings!");
       return Q();
     }
   }).then(function() {
     if (opts.initTemplates) {
-      console.log("initUserContext: Set default group templates, uid=" + user._id);
+      log.verbose("initUserContext: Set default group templates, uid=" + user._id);
       return initUserItemGroupTemplates(user._id);
     } else {
-      console.log("initUserContext: Skipped default group templates!");
+      log.verbose("initUserContext: Skipped default group templates!");
       return Q();
     }
   }).then(function() {

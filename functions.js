@@ -1,9 +1,10 @@
 'use strict';
 
 // functions.js/
-var bcrypt = require('bcryptjs'),
-    Q = require('q'),
-    mydb = require('./mydb.js');
+var bcrypt = require('bcryptjs');
+var Q = require('q');
+var mydb = require('./mydb.js');
+var log = require('./log');
 
 //check if user exists
 //if user exists check if passwords match (use bcrypt.compareSync(password, hash); // true where 'hash' is password in DB)
@@ -18,12 +19,12 @@ exports.localAuth = function (username, password) {
     if (bcrypt.compareSync(password, hash)) {
       deferred.resolve(result);
     } else {
-      console.log("localAuth: Password incorrect for local user=" + result.info.name);
+      log.verbose("localAuth: Password incorrect for local user=" + result.info.name);
       deferred.resolve(false);
     }
   }).fail(function (err){
     if (err.message == 'The requested items could not be found.') {
-      console.log("localAuth: Couldn't find user " + username + " in DB for signin!");
+      log.verbose("localAuth: Couldn't find user " + username + " in DB for signin!");
       deferred.resolve(false);
     } else {
       deferred.reject(new Error(err));
@@ -44,12 +45,12 @@ exports.findOrCreate = function(idField, userData, inviteInfo) {
   var userid = userData[idField];
   query[idField] = userid;
   
-  console.log("findOrCreate: idField=" + idField + ", userid=" + userid +
+  log.verbose("findOrCreate: idField=" + idField + ", userid=" + userid +
       ", userData=" + JSON.stringify(userData) +      
       ", query=" + JSON.stringify(query));
 
   mydb.getUser(query).then(function (existingUser) {
-    console.log("FOUND USER: _id=" + existingUser._id + ", user=" + JSON.stringify(existingUser));
+    log.verbose("FOUND USER: _id=" + existingUser._id + ", user=" + JSON.stringify(existingUser));
     var result = {
         "user": existingUser,
         "isNew": false,
@@ -57,7 +58,7 @@ exports.findOrCreate = function(idField, userData, inviteInfo) {
     deferred.resolve(result);
   }).fail(function (err) {
     if (err.message === 'The requested items could not be found.') {
-      console.log("User with " + idField + "=" + userid + " doesn't exist! " +
+      log.verbose("User with " + idField + "=" + userid + " doesn't exist! " +
           "Creating new user=" + JSON.stringify(userData) +
           ", inviteInfo=" + JSON.stringify(inviteInfo));
       if (inviteInfo.isAdmin) {
@@ -78,7 +79,7 @@ exports.findOrCreate = function(idField, userData, inviteInfo) {
         deferred.reject(new Error("Failed to create non-existing user!"));
       });
     } else {
-      console.log("findOrCreate: Unexpected error: " + JSON.stringify(err));
+      log.verbose("findOrCreate: Unexpected error: " + JSON.stringify(err));
       deferred.reject(new Error(err));
     }
   });
