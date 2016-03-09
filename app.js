@@ -41,17 +41,20 @@ switch(args.verbose) {
   case 0:
     break;
   case 1:
-    log.level = 'verbose';
+    log.transports.console.level = 'verbose';
+    log.transports.file.level = 'verbose';
     break;
   case 2:
-    log.level = 'debug';
+    log.transports.console.level = 'debug';
+    log.transports.file.level = 'debug';
     break;
   default:
   case 3:
-    log.level = 'silly';
+    log.transports.console.level = 'silly';
+    log.transports.file.level = 'silly';
     break;
 }
-log.info("Log level is " + log.level);
+log.info("Log level: {console: " + log.transports.console.level + ", file: " + log.transports.file.level + "}");
 
 var smallLag = undefined;
 if (args.sim_latency) {
@@ -184,7 +187,7 @@ passport.use(
         }, // allows us to pass back the request to the callback
         function(req, username, password, done) {
           log.info("signin: user=" + username);
-          funct.localAuth(username, password).then(
+          funct.localAuth(username, password, true).then(
               function(user) {
                 if (user) {
                   log.debug("signin success: user=" + username + ", name=" + user.info.name);
@@ -439,7 +442,7 @@ app.post("/api/user-local-pwd-update", ensureAuthenticated, function(req, res) {
 
   if (isLocalUser) {
     // Verify old password
-    funct.localAuth(req.user["username-local"], req.body.oldPwd).then(function(user) {
+    funct.localAuth(req.user["username-local"], req.body.oldPwd, false).then(function(user) {
       if (user) {
         // Old password OK, update to new
         var hash = funct.encryptPassword(req.body.newPwd);

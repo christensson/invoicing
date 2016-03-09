@@ -10,18 +10,24 @@ var log = require('./log');
 //if user exists check if passwords match (use bcrypt.compareSync(password, hash); // true where 'hash' is password in DB)
 //if password matches take into website
 //if user doesn't exist or password doesn't match tell them it failed
-exports.localAuth = function (username, password) {
+exports.localAuth = function (username, password, markAccess) {
   var deferred = Q.defer();
-
-  mydb.getUser({"username-local": username}, true).then(function (result){
+  var getUserOpts = {includePassword: true, markAccess: markAccess};
+  mydb.getUser({"username-local": username}, getUserOpts).then(function (result){
     var hash = result.password;
     delete result.password; // Do not expose password!
-    if (bcrypt.compareSync(password, hash)) {
-      deferred.resolve(result);
-    } else {
-      log.verbose("localAuth: Password incorrect for local user=" + result.info.name);
-      deferred.resolve(false);
-    }
+    bcrypt.compare(password, hash, function(err, res) {
+      if (err) {
+        deferred.reject(new Error(err));
+      } else {
+        if (res) {
+          deferred.resolve(result);
+        } else {
+          log.verbose("localAuth: Password incorrect for local user=" + result.info.name);
+          deferred.resolve(false);
+        }
+      }
+    });
   }).fail(function (err){
     if (err.message == 'The requested items could not be found.') {
       log.verbose("localAuth: Couldn't find user " + username + " in DB for signin!");
@@ -48,8 +54,8 @@ exports.findOrCreate = function(idField, userData, inviteInfo) {
   log.verbose("findOrCreate: idField=" + idField + ", userid=" + userid +
       ", userData=" + JSON.stringify(userData) +      
       ", query=" + JSON.stringify(query));
-
-  mydb.getUser(query).then(function (existingUser) {
+  var getUserOpts = {markAccess: true};
+  mydb.getUser(query, getUserOpts).then(function (existingUser) {
     log.verbose("FOUND USER: _id=" + existingUser._id + ", user=" + JSON.stringify(existingUser));
     var result = {
         "user": existingUser,

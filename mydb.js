@@ -103,20 +103,64 @@ function getAllDocsPromise(collectionName, filter, projection) {
     return deferred.promise;
   });
 }
+/**
+ * opts.addLastAccessDate Adds date of last access to field lastAccessDate (default: false)
+ * opts.incAccessCount Increments accessCount field (default: false)
+ */
+function getOneDocPromise(collectionName, filter, opts) {
+  opts = typeof opts !== 'undefined' ? opts : {};
+  // Set defaults
+  if (!opts.hasOwnProperty('addLastAccessDate')) {
+    opts.addLastAccessDate = false;
+  }
+  if (!opts.hasOwnProperty('incAccessCount')) {
+    opts.incAccessCount = false;
+  }
 
-function getOneDocPromise(collectionName, filter) {
   return dbopPromise().then(function(db) {
     var deferred = Q.defer();
     var custColl = db.collection(collectionName);
-    custColl.findOne(filter, function(err, doc) {
+    var resultCb = function(isFindAndModify, err, doc) {
       if (err) {
         deferred.reject(
             new Error("Error: getOneDoc(" + collectionName + "): " + err));
       } else {
-        log.verbose("getOneDoc(" + collectionName + "): filter=" + JSON.stringify(filter) + ", doc: " + JSON.stringify(doc));
-        deferred.resolve(doc);
+        var result = isFindAndModify?doc.value:doc;
+        log.verbose("getOneDoc(" + collectionName + "): filter=" + JSON.stringify(filter) + ", doc: " + JSON.stringify(result));
+        deferred.resolve(result);
       }
-    });
+    };
+    var updateSpecifier = undefined;
+    if (opts.addLastAccessDate && opts.incAccessCount) {
+      updateSpecifier = {
+        $currentDate: {lastAccessDate: true},
+        $inc: {accessCount: 1}
+      }
+    } else if (!opts.addLastAccessDate && opts.incAccessCount) {
+      updateSpecifier = {
+        $inc: {accessCount: 1}
+      }
+    } else if (opts.addLastAccessDate && !opts.incAccessCount) {
+      updateSpecifier = {
+        $currentDate: {lastAccessDate: true}
+      }
+    } else {
+    }
+
+    if (updateSpecifier === undefined) {
+      log.debug("getOneDocPromise: findOne(query: " + JSON.stringify(filter) + ")");
+      custColl.findOne(filter, resultCb.bind(null, false));
+    } else {
+      log.debug("getOneDocPromise: findAndModify(query: " + JSON.stringify(filter) +
+        ", update: " + JSON.stringify(updateSpecifier) + ")");
+      custColl.findAndModify(
+        filter, // query
+        [], // sort
+        updateSpecifier, // update
+        {}, // options
+        resultCb.bind(null, true)
+      );
+    }
     return deferred.promise;
   });
 }
@@ -1063,15 +1107,31 @@ module.exports.getInvites = function() {
   return getAllDocsPromise('invite', {});
 };
 
-module.exports.getUser = function(query, includePassword) {
-  includePassword = typeof includePassword !== 'undefined' ? includePassword : false;
+/**
+ * opts.includePassword Include the password fields in the returned data (default: false)
+ * opts.markAccess Increments accessCount and sets lastAccessDate fields (default: false)
+ */
+ module.exports.getUser = function(query, opts) {
+  opts = typeof opts !== 'undefined' ? opts : {};
+  // Set defaults
+  if (!opts.hasOwnProperty('includePassword')) {
+    opts.includePassword = false;
+  }
+  if (!opts.hasOwnProperty('markAccess')) {
+    opts.markAccess = false;
+  }
   var deferred = Q.defer();
-  getOneDocPromise('users', query).then(function(user) {
+  var getOpts = {};
+  if (opts.markAccess) {
+    getOpts.addLastAccessDate = true;
+    getOpts.incAccessCount = true;
+  }
+  getOneDocPromise('users', query, getOpts).then(function(user) {
     if (!user) {
       log.warn("getUser: No user found! query=" + JSON.stringify(query));
       deferred.reject(new Error("The requested items could not be found."));
     } else {
-      if (!includePassword) {
+      if (!opts.includePassword) {
         delete user.password; // Do not expose password unless explicitly wanted!
       }
       log.verbose("getUser: User found: " + JSON.stringify(user));
