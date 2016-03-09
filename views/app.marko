@@ -1875,17 +1875,17 @@
                         <h4 class="col-md-3 list-group-item-heading">
                           ${i18n.t('app.userList.emailCol')}
                         </h4>
-                        <h4 class="col-md-2 list-group-item-heading">
+                        <h4 class="col-md-1 list-group-item-heading">
                           ${i18n.t('app.userList.typeCol')}
                         </h4>
                         <h4 class="col-md-1 list-group-item-heading">
                           ${i18n.t('app.userList.licenseCol')}
                         </h4>
-                        <h4 class="col-md-2 list-group-item-heading">
-                          ${i18n.t('app.userList.regDateCol')}
+                        <h4 class="col-md-3 list-group-item-heading">
+                          ${i18n.t('app.userList.accessCol')}
                         </h4>
                         <h4 class="col-md-1 list-group-item-heading">
-                          ${i18n.t('app.userList.isAdminCol')}
+                          ${i18n.t('app.userList.accessCountCol')}
                         </h4>
                       </div>
                     </li>
@@ -1898,17 +1898,17 @@
                           <div class="col-md-3">
                             <p class="list-group-item-text" data-bind="text: info.email"></p>
                           </div>
-                          <div class="col-md-2">
+                          <div class="col-md-1">
                             <p class="list-group-item-text" data-bind="text: type"></p>
                           </div>
                           <div class="col-md-1">
                             <p class="list-group-item-text" data-bind="text: settings().license"></p>
                           </div>
-                          <div class="col-md-2">
-                            <p class="list-group-item-text" data-bind="text: info.registrationDate"></p>
+                          <div class="col-md-3">
+                            <p class="list-group-item-text" data-bind="text: lastAccessDateStr"></p>
                           </div>
                           <div class="col-md-1">
-                            <p class="list-group-item-text"><invoke function="condCheckIcon" cond="info.isAdmin"/></p>
+                            <p class="list-group-item-text" data-bind="text: info.accessCount"></p>
                           </div>
                           <div class="col-md-1">
                             <button type="button" class="btn btn-default" data-bind="click: toggleDetailedInfo">
@@ -1926,6 +1926,10 @@
                             <div class="panel panel-default">
                               <div class="panel-body">
                                 <dl class="dl-horizontal">
+                                  <dt>${i18n.t('app.userList.isAdminLbl')}</dt>
+                                  <dd><invoke function="condCheckIcon" cond="info.isAdmin"/></span></dd>
+                                  <dt>${i18n.t('app.userList.regDateLbl')}</dt>
+                                  <dd><span data-bind="text: info.registrationDate"></span></dd>
                                   <dt>${i18n.t('app.userList.numCompaniesLbl')}</dt>
                                   <dd><span data-bind="text: totalStats().numCompanies"></span></dd>
                                   <dt>${i18n.t('app.userList.numCustomersLbl')}</dt>

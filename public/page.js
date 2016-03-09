@@ -2756,11 +2756,24 @@ var UserViewModel = function() {
       "name": ko.observable(),
       "email": ko.observable(),
       "registrationDate": ko.observable(),
-      "isAdmin": ko.observable()
+      "isAdmin": ko.observable(),
+      "lastAccessDate": ko.observable(),
+      "accessCount": ko.observable(),
   };
   self.settings = ko.observable();
   self.isDetailsVisible = ko.observable(false);
   self.totalStats = ko.observable();
+
+  self.lastAccessDateStr = ko.pureComputed(function() {
+    var dateStr = "";
+    if (this.info.lastAccessDate() !== undefined)
+    {
+      dateStr = this.info.lastAccessDate();
+    } else {
+      dateStr = "-";
+    }
+    return dateStr;
+  }, self);
   
   self.setData = function(data) {
     self._id(data._id);
@@ -2769,6 +2782,8 @@ var UserViewModel = function() {
     self.info.email(data.info.email);
     self.info.registrationDate(data.info.registrationDate);
     self.info.isAdmin(data.info.isAdmin);
+    self.info.lastAccessDate(data.lastAccessDate);
+    self.info.accessCount(data.accessCount);
     self.settings(data.settings);
     self.isDetailsVisible(false);
     self.totalStats({
