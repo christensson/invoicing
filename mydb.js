@@ -206,7 +206,8 @@ function insertDataPromise(collectionName, data) {
   });
 }
 
-function updateDataPromise(collectionName, data, replace) {
+function updateDataPromise(collectionName, data, incFields) {
+  incFields = typeof incFields !== 'undefined' ? incFields : false;
   return dbopPromise().then(function (db) {
     var deferred = Q.defer();
     db.collection(collectionName, function(err, coll) {
@@ -219,13 +220,18 @@ function updateDataPromise(collectionName, data, replace) {
         // mangling...
         data._id = new ObjectID(data._id);
         
-        var updateData = data;        
-        if (!replace) {
+        var updateData = undefined;
+        if (incFields === false) {
           updateData = {
-              $set: data
+            $set: data
+          };
+        } else {
+          updateData = {
+            $set: data,
+            $inc: incFields
           };
         }
-        
+
         coll.update(
             {_id: data._id}, // query
             updateData, // update
@@ -855,12 +861,14 @@ module.exports.getSettings = function(uid) {
 module.exports.updateSettings = function(uid, settings) {
   settings.uid = new ObjectID(uid);
   settings.activeCompanyId = new ObjectID(settings.activeCompanyId);
-  return updateDataPromise('settings', settings, false);
+  var increment = {updateCount: 1};
+  return updateDataPromise('settings', settings, increment);
 };
 
 module.exports.updateUser = function(uid, user) {
   user._id = new ObjectID(uid);
-  return updateDataPromise('users', user, false);
+  var increment = {updateCount: 1};
+  return updateDataPromise('users', user, increment);
 };
 
 module.exports.getInvoices = function(uid, companyId) {
@@ -923,6 +931,7 @@ module.exports.addInvoice = function(uid, companyId, invoice) {
     invoice.uid = ouid;
     invoice.companyId = ocompanyId;
     invoice.company._id = ocompanyId;
+    invoice.updateCount = 0;
     insertDataPromise('invoice', invoice).then(function() {
       deferred.resolve(invoice);
     }).fail(function(err) {
@@ -941,7 +950,8 @@ module.exports.updateInvoice = function(invoice) {
   invoice.uid = new ObjectID(invoice.uid);
   invoice.companyId = new ObjectID(invoice.companyId);
   invoice.company._id = new ObjectID(invoice.company._id);
-  updateDataPromise('invoice', invoice, true).then(function(data) {
+  var increment = {updateCount: 1};
+  updateDataPromise('invoice', invoice, increment).then(function(data) {
     deferred.resolve(data);
   }).fail(function(err) {
     log.error("updateInvoice: Error: " + err.body);
@@ -957,6 +967,7 @@ module.exports.addCustomer = function(uid, companyId, customer) {
     customer.cid = cid;
     customer.uid = new ObjectID(uid);
     customer.companyId = new ObjectID(companyId);
+    customer.updateCount = 0;
     insertDataPromise('customer', customer).then(function() {
       deferred.resolve(customer);
     }).fail(function(err) {
@@ -977,12 +988,14 @@ module.exports.addCustomerRaw = function(customer) {
 module.exports.updateCustomer = function(customer) {
   customer.uid = new ObjectID(customer.uid);
   customer.companyId = new ObjectID(customer.companyId);
-  return updateDataPromise('customer', customer, true);
+  var increment = {updateCount: 1};
+  return updateDataPromise('customer', customer, increment);
 };
 
 module.exports.addCompany = function(uid, company) {
   var deferred = Q.defer();
   company.uid = new ObjectID(uid);
+  company.updateCount = 0;
   insertDataPromise('company', company).then(function() {
     deferred.resolve(company);
   }).fail(function(err) {
@@ -993,12 +1006,14 @@ module.exports.addCompany = function(uid, company) {
 
 module.exports.updateCompany = function(company) {
   company.uid = new ObjectID(company.uid);
-  return updateDataPromise('company', company, false);
+  var increment = {updateCount: 1};
+  return updateDataPromise('company', company, increment);
 };
 
 module.exports.addItemGroupTemplate = function(uid, groupTempl) {
   var deferred = Q.defer();
   groupTempl.uid = new ObjectID(uid);
+  groupTempl.updateCount = 0;
   insertDataPromise('itemGroupTempl', groupTempl).then(function() {
     deferred.resolve(groupTempl);
   }).fail(function(err) {
@@ -1013,7 +1028,8 @@ module.exports.addItemGroupTemplateRaw = function(groupTempl) {
 
 module.exports.updateItemGroupTemplate = function(groupTempl) {
   groupTempl.uid = new ObjectID(groupTempl.uid);
-  return updateDataPromise('itemGroupTempl', groupTempl, false);
+  var increment = {updateCount: 1};
+  return updateDataPromise('itemGroupTempl', groupTempl, increment);
 };
 
 module.exports.getUsers = function() {
@@ -1066,6 +1082,7 @@ module.exports.getUser = function(query, includePassword) {
 };
 
 module.exports.addUser = function(user) {
+  user.updateCount = 0;
   return insertDataPromise('users', user);
 };
 
@@ -1105,7 +1122,8 @@ var initUserItemGroupTemplates = function(uid) {
       hasDiscount: false,
       negateDiscount: false,
       hasVat: true,
-      hasTotal: true
+      hasTotal: true,
+      updateCount: 0
     },
     {
       uid: uid,
@@ -1127,7 +1145,8 @@ var initUserItemGroupTemplates = function(uid) {
       hasDiscount: true,
       negateDiscount: false,
       hasVat: true,
-      hasTotal: true
+      hasTotal: true,
+      updateCount: 0
     },
     {
       uid: uid,
@@ -1149,7 +1168,8 @@ var initUserItemGroupTemplates = function(uid) {
       hasDiscount: false,
       negateDiscount: false,
       hasVat: true,
-      hasTotal: true
+      hasTotal: true,
+      updateCount: 0
     },
     {
       uid: uid,
@@ -1171,7 +1191,8 @@ var initUserItemGroupTemplates = function(uid) {
       hasDiscount: false,
       negateDiscount: false,
       hasVat: true,
-      hasTotal: true
+      hasTotal: true,
+      updateCount: 0
     },
     {
       uid: uid,
@@ -1193,7 +1214,8 @@ var initUserItemGroupTemplates = function(uid) {
       hasDiscount: true,
       negateDiscount: true,
       hasVat: true,
-      hasTotal: true
+      hasTotal: true,
+      updateCount: 0
     },
     {
       uid: uid,
@@ -1215,7 +1237,8 @@ var initUserItemGroupTemplates = function(uid) {
       hasDiscount: false,
       negateDiscount: false,
       hasVat: false,
-      hasTotal: false
+      hasTotal: false,
+      updateCount: 0
     }
   ];
   return insertDataPromise('itemGroupTempl', initialList);
@@ -1242,9 +1265,10 @@ var initUserContext = function(userQuery, license, opts) {
     return Q();
   }).then(function() {
     var defaultSettings = {
-        "uid" : user._id,
-        "activeCompanyId" : undefined,
-        "license" : license,
+        "uid": user._id,
+        "activeCompanyId": undefined,
+        "license": license,
+        "updateCount": 0
     };
     if (opts.initSettings) {
       log.verbose("initUserContext: Set default settings: " + JSON.stringify(defaultSettings));
