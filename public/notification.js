@@ -7,6 +7,7 @@ var NotifyViewModel = function() {
     self.notificationArray = ko.observableArray();
     self.spinnerVisible = ko.observable(cfg.showInitialTicker);
     self.spinnerMsg = ko.observable(cfg.tickerText);
+    self.spinnerShowCount = cfg.showInitialTicker===true?1:0;
 
     self.closeAll = function() {
       console.log("Notification: Close all");
@@ -100,28 +101,31 @@ var NotifyViewModel = function() {
     };
 
     self.showServerMsg(serverMsg);
+
+  self.showSpinner = function(show, msg) {
+    msg = typeof msg !== 'undefined' ? msg : cfg.tickerText;
+    self.spinnerShowCount = self.spinnerShowCount + (show?1:-1);
+    if (self.spinnerShowCount < 0) {
+      self.spinnerShowCount = 0;
+    }
+    var spinnerVisible = self.spinnerShowCount > 0?true:false;
+    console.log("Notify_showSpinner: show=" + show +
+        ", spinnerShowCount=" + self.spinnerShowCount +
+        ", visible=" + spinnerVisible);
+    self.spinnerMsg(msg);
+    self.spinnerVisible(spinnerVisible);
+  };
+
 };
 
 var notifyViewModel = new NotifyViewModel();
 
 var Notify_showMsg = function(kind, msg, hideDelayMs) {
-    notifyViewModel.showMsg(kind, msg, hideDelayMs);
+  notifyViewModel.showMsg(kind, msg, hideDelayMs);
 };
 
-var spinnerShowCount = 0;
-
 var Notify_showSpinner = function(show, msg) {
-  msg = typeof msg !== 'undefined' ? msg : cfg.tickerText;
-  spinnerShowCount = spinnerShowCount + (show?1:-1);
-  if (spinnerShowCount < 0) {
-    spinnerShowCount = 0;
-  }
-  spinnerVisible = spinnerShowCount > 0?true:false;
-  console.log("Notify_showSpinner: show=" + show +
-      ", spinnerShowCount=" + spinnerShowCount +
-      ", visible=" + spinnerVisible);
-  notifyViewModel.spinnerMsg(msg);
-  notifyViewModel.spinnerVisible(spinnerVisible);
+  notifyViewModel.showSpinner(show, msg);
 };
 
 $(function() {

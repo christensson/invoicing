@@ -3180,13 +3180,13 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
           function(stats) {
             Log.info("Got stats id=" + self.activeCompanyId() + ", stats=" + JSON.stringify(stats));
             cache.set(Cache.CURR_USER_STATS(), stats);
-            Notify_showSpinner(false);
             deferred.resolve();
           }).fail(function() {
             Log.info("GettingStartedViewModel - populate - failed");
-            Notify_showSpinner(false);
             Notify_showMsg('error', t("app.gettingStarted.getNok"));
             deferred.reject();
+          }).always(function() {
+            Notify_showSpinner(false);
           });
     } else {
       Log.info("GettingStartedViewModel - populate - data is cached!");
@@ -3290,7 +3290,8 @@ var setupKo = function() {
     ko.applyBindings(userListViewModel, document.getElementById("app-users"));
     ko.applyBindings(inviteListViewModel, document.getElementById("app-invites"));
   }
-  
+
+  // Hide initial spinner
   Notify_showSpinner(false);
 };
 
