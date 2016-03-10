@@ -378,6 +378,7 @@
             "numCustomersLbl": "Customers",
             "numInvoicesLbl": "Invoices",
             "numItemGroupTemplatesLbl": "Detail group templates",
+            "loginAsOtherUserBtn": "Login as user",
             "refreshBtn": "Refresh",
             "getNok": "Failed to get users!"
         },

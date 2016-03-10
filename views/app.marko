@@ -1925,20 +1925,32 @@
                           <div class="col-md-11">
                             <div class="panel panel-default">
                               <div class="panel-body">
-                                <dl class="dl-horizontal">
-                                  <dt>${i18n.t('app.userList.isAdminLbl')}</dt>
-                                  <dd><invoke function="condCheckIcon" cond="info.isAdmin"/></span></dd>
-                                  <dt>${i18n.t('app.userList.regDateLbl')}</dt>
-                                  <dd><span data-bind="text: info.registrationDate"></span></dd>
-                                  <dt>${i18n.t('app.userList.numCompaniesLbl')}</dt>
-                                  <dd><span data-bind="text: totalStats().numCompanies"></span></dd>
-                                  <dt>${i18n.t('app.userList.numCustomersLbl')}</dt>
-                                  <dd><span data-bind="text: totalStats().numCustomers"></span></dd>
-                                  <dt>${i18n.t('app.userList.numInvoicesLbl')}</dt>
-                                  <dd><span data-bind="text: totalStats().numInvoices"></span></dd>
-                                  <dt>${i18n.t('app.userList.numItemGroupTemplatesLbl')}</dt>
-                                  <dd><span data-bind="text: totalStats().numItemGroupTemplates"></span></dd>
-                                </dl>
+                                <div class="row">
+                                  <div class="col-md-12">
+                                    <dl class="dl-horizontal">
+                                      <dt>${i18n.t('app.userList.isAdminLbl')}</dt>
+                                      <dd><invoke function="condCheckIcon" cond="info.isAdmin"/></span></dd>
+                                      <dt>${i18n.t('app.userList.regDateLbl')}</dt>
+                                      <dd><span data-bind="text: info.registrationDate"></span></dd>
+                                      <dt>${i18n.t('app.userList.numCompaniesLbl')}</dt>
+                                      <dd><span data-bind="text: totalStats().numCompanies"></span></dd>
+                                      <dt>${i18n.t('app.userList.numCustomersLbl')}</dt>
+                                      <dd><span data-bind="text: totalStats().numCustomers"></span></dd>
+                                      <dt>${i18n.t('app.userList.numInvoicesLbl')}</dt>
+                                      <dd><span data-bind="text: totalStats().numInvoices"></span></dd>
+                                      <dt>${i18n.t('app.userList.numItemGroupTemplatesLbl')}</dt>
+                                      <dd><span data-bind="text: totalStats().numItemGroupTemplates"></span></dd>
+                                    </dl>
+                                  </div>
+                                </div>
+                                <div class="row" data-bind="ifnot: isSelf">
+                                  <div class="col-md-12">
+                                    <a type="button" class="btn btn-warning" data-bind="attr: {href: '/loginAs/' + _id()}">
+                                      <span class="glyphicon glyphicon-log-in inline-icon-left-fix" aria-hidden="true"></span>
+                                      ${i18n.t('app.userList.loginAsOtherUserBtn')}
+                                    </a>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -2006,6 +2018,7 @@
           tickerText: "${i18n.t('app.tickerText')}",
           notificationAreaPlacement: "right",
           user: {
+            _id: "${data.user._id}",
             name: "${data.user.name}",
             email: "${data.user.email}",
             isAdmin: ${data.user.isAdmin},

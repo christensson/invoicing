@@ -2775,6 +2775,10 @@ var UserViewModel = function() {
     return dateStr;
   }, self);
   
+  self.isSelf = ko.pureComputed(function() {
+    return this._id() === cfg.user._id;
+  }, self);
+
   self.setData = function(data) {
     self._id(data._id);
     self.googleId(data.googleId);

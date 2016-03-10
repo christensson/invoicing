@@ -763,7 +763,7 @@ app.get("/api/userStats/:uid", ensureAuthenticated, function(req, res) {
   var isAdmin = req.user.info.isAdmin;
   var reqForUid = req.params.uid;
   log.info("User statistics: user=" + req.user.info.name + ", requested for user uid=" + reqForUid + ", isAdmin=" + isAdmin);
-  if (isAdmin) {
+  if (isAdmin === true) {
     mydb.getStats(reqForUid).then(function(stats) {
       log.verbose("User statistics: user=" + req.user.info.name + ", requested for user uid=" + reqForUid + ", stats=" + JSON.stringify(stats));
       res.status(200).json(stats);
@@ -782,7 +782,7 @@ app.get("/api/users", ensureAuthenticated, function(req, res) {
   var isAdmin = req.user.info.isAdmin;
   var userName = req.user.info.name;
   log.info("Get users: user=" + userName + ", uid=" + uid, ", isAdmin=" + isAdmin);
-  if (isAdmin) {
+  if (isAdmin === true) {
     mydb.getUsers().then(function(docs) {
       res.status(200).json(docs);
       res.end();
@@ -799,7 +799,7 @@ app.get("/api/invites", ensureAuthenticated, function(req, res) {
   var isAdmin = req.user.info.isAdmin;
   var userName = req.user.info.name;
   log.info("Get invites: user=" + userName + ", uid=" + uid, ", isAdmin=" + isAdmin);
-  if (isAdmin) {
+  if (isAdmin === true) {
     mydb.getInvites().then(function(docs) {
       res.status(200).json(docs);
       res.end();
@@ -816,7 +816,7 @@ app.get("/api/log", ensureAuthenticated, function(req, res) {
   var isAdmin = req.user.info.isAdmin;
   var userName = req.user.info.name;
   log.info("Get log: user=" + userName + ", uid=" + uid, ", isAdmin=" + isAdmin);
-  if (isAdmin) {
+  if (isAdmin === true) {
     res.type('text/plain');
     res.download(defaults.logFile, 'log.txt', function(err) {
       if (err) {
@@ -848,6 +848,31 @@ app.post('/login', passport.authenticate('local-signin', {
   failureFlash: true
 }));
 
+app.get('/loginAs/:uid', ensureAuthenticated, function(req, res) {
+  var currentUid = req.user._id;
+  var isAdmin = req.user.info.isAdmin;
+  var userName = req.user.info.name;
+  var loginAsUid = req.params.uid;
+  log.info("Login as other user requested by: user=" + userName +
+    ", uid=" + currentUid, ", isAdmin=" + isAdmin + ", loginAsUid=" + loginAsUid);
+  if (isAdmin === true) {
+    var ologinAsUid = mydb.toObjectId(loginAsUid);
+    mydb.getUser({_id: ologinAsUid}).then(function(user) {
+      log.verbose("Login as other user: user=" + userName + " requested to login as user=" + JSON.stringify(user));
+      req.login(user, function(err) {
+        if (err) { return next(err); }
+        log.verbose("Login as other user: user=" + userName + " as user=" + user.info.name + " - success!");
+        return res.redirect('/');
+      });
+    }).fail(myFailureHandler.bind(null, res));
+  } else {
+    log.error('ERROR: Non-admin user uid=' + currentUid + ', name=' + userName +
+      ' requested to login as other user!');
+    res.status(500);
+    res.end();
+  }
+});
+
 // logs user out of site, deleting them from the session, and returns to
 // homepage
 app.get('/logout', ensureAuthenticated, function(req, res) {
@@ -865,6 +890,7 @@ app.get('/', ensureAuthenticated, function(req, res) {
   var userInfo = req.user.info;
   // Only local users have a password...
   userInfo.isLocal = req.user.hasOwnProperty('username-local');
+  userInfo._id = req.user._id;
 
   var msg =  {
       "error": req.flash('error'),

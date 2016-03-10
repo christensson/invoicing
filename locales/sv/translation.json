@@ -393,6 +393,7 @@
             "numCustomersLbl": "Kunder",
             "numInvoicesLbl": "Fakturor",
             "numItemGroupTemplatesLbl": "Detaljgruppmallar",
+            "loginAsOtherUserBtn": "Logga in som användare",
             "refreshBtn": "Uppdatera",
             "getNok": "Misslyckades med att hämta användare!"
         },

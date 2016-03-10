@@ -1355,3 +1355,7 @@ var initUserContext = function(userQuery, license, opts) {
 };
 
 module.exports.initUserContext = initUserContext;
+
+module.exports.toObjectId = function(value) {
+  return new ObjectID(value);
+};
