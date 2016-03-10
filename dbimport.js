@@ -21,22 +21,24 @@ args.version('0.0.1')
 .option('-d, --dryrun', 'Dry-run, don\'t modify DB')
 .parse(process.argv);
 
+log.remove(log.transports.file); // Do not log to file!
+
 switch(args.verbose) {
   case undefined:
   case 0:
     break;
   case 1:
-    log.level = 'verbose';
+    log.transports.console.level = 'verbose';
     break;
   case 2:
-    log.level = 'debug';
+    log.transports.console.level = 'debug';
     break;
   default:
   case 3:
-    log.level = 'silly';
+    log.transports.console.level = 'silly';
     break;
 }
-log.info("Log level is " + log.level);
+log.info("Log level: console: " + log.transports.console.level);
 
 log.info("DB importer!");
 
