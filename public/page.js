@@ -2768,7 +2768,11 @@ var UserViewModel = function() {
     var dateStr = "";
     if (this.info.lastAccessDate() !== undefined)
     {
-      dateStr = this.info.lastAccessDate();
+      var lastAccessDate = this.info.lastAccessDate();
+      var dateTimePart = lastAccessDate.split("T");
+      var datePart = dateTimePart[0];
+      var timePart = dateTimePart[1].split('.')[0];
+      dateStr = datePart + " " + timePart;
     } else {
       dateStr = "-";
     }
