@@ -170,12 +170,12 @@ var googleAuth = require('./google_auth.json');
 
 // Passport session setup.
 passport.serializeUser(function(user, done) {
-  log.verbose("serializing " + user.info.name);
+  log.debug("serializing " + user.info.name);
   done(null, user);
 });
 
 passport.deserializeUser(function(obj, done) {
-  log.verbose("deserializing " + JSON.stringify(obj));
+  log.debug("deserializing " + JSON.stringify(obj));
   done(null, obj);
 });
 
