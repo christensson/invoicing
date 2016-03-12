@@ -262,7 +262,7 @@ passport.use(new GoogleStrategy(
       process.nextTick(function () {
         log.info("Google-auth: displayName=" + profile.displayName +
           ", emails[0]=" + profile.emails[0].value);
-        log.verbose("Google-auth: fullProfile=" + JSON.stringify(profile));
+        log.verbose("Google-auth: fullProfile=" + JSON.stringify(profile, null, 2));
         var userData = {
             "googleId" : profile.id,
             "info" : funct.createUserInfo(profile.displayName, profile.emails[0].value)
@@ -919,7 +919,12 @@ app.get('/signin', function(req, res) {
 });
 
 app.get('/auth/google',
-    passport.authenticate('google', { scope : ['https://www.googleapis.com/auth/plus.login', 'https://www.googleapis.com/auth/userinfo.email'] }));
+    passport.authenticate('google', {
+      scope : [
+        'profile',
+        'email'
+      ]
+    }));
 
 app.get('/auth/google/callback', 
     passport.authenticate('google', { failureRedirect: '/signin', failureFlash: true}),
