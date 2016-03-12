@@ -1928,6 +1928,8 @@
                                 <div class="row">
                                   <div class="col-md-12">
                                     <dl class="dl-horizontal">
+                                      <dt>${i18n.t('app.userList.uidLbl')}</dt>
+                                      <dd><span data-bind="text: _id"></span></dd>
                                       <dt>${i18n.t('app.userList.isAdminLbl')}</dt>
                                       <dd><invoke function="condCheckIcon" cond="info.isAdmin"/></span></dd>
                                       <dt>${i18n.t('app.userList.regDateLbl')}</dt>

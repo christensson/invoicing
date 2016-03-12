@@ -372,6 +372,7 @@
             "licenseCol": "License",
             "accessCol": "Last login",
             "accessCountCol": "#login",
+            "uidLbl": "uid",
             "isAdminLbl": "Admin",
             "regDateLbl": "Registered",
             "numCompaniesLbl": "Companies",

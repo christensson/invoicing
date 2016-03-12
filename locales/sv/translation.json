@@ -387,6 +387,7 @@
             "licenseCol": "Licens",
             "accessCol": "Senaste login",
             "accessCountCol": "#login",
+            "uidLbl": "uid",
             "isAdminLbl": "Administratör",
             "regDateLbl": "Registrerad",
             "numCompaniesLbl": "Företag",
