@@ -68,8 +68,8 @@ function dbopPromise() {
 function countAllDocsPromise(collectionName, filter) {
   return dbopPromise().then(function(db) {
     var deferred = Q.defer();
-    var custColl = db.collection(collectionName);
-    custColl.count(filter, {}, function(err, count) {
+    var coll = db.collection(collectionName);
+    coll.count(filter, {}, function(err, count) {
       if (err) {
         deferred.reject(
             new Error("Error: countAllDocs(" + collectionName + "): " + err));
@@ -87,8 +87,8 @@ function getAllDocsPromise(collectionName, filter, projection) {
   projection = typeof projection !== 'undefined' ? projection : {};
   return dbopPromise().then(function(db) {
     var deferred = Q.defer();
-    var custColl = db.collection(collectionName);
-    custColl.find(filter, projection).toArray(function(err, docs) {
+    var coll = db.collection(collectionName);
+    coll.find(filter, projection).toArray(function(err, docs) {
       if (err) {
         deferred.reject(
             new Error("Error: getAllDocs(" + collectionName + "): " + err));
@@ -103,6 +103,9 @@ function getAllDocsPromise(collectionName, filter, projection) {
     return deferred.promise;
   });
 }
+
+module.exports.getAllDocsPromise = getAllDocsPromise;
+
 /**
  * opts.addLastAccessDate Adds date of last access to field lastAccessDate (default: false)
  * opts.incAccessCount Increments accessCount field (default: false)
@@ -119,7 +122,7 @@ function getOneDocPromise(collectionName, filter, opts) {
 
   return dbopPromise().then(function(db) {
     var deferred = Q.defer();
-    var custColl = db.collection(collectionName);
+    var coll = db.collection(collectionName);
     var resultCb = function(isFindAndModify, err, doc) {
       if (err) {
         deferred.reject(
@@ -149,11 +152,11 @@ function getOneDocPromise(collectionName, filter, opts) {
 
     if (updateSpecifier === undefined) {
       log.debug("getOneDocPromise: findOne(query: " + JSON.stringify(filter) + ")");
-      custColl.findOne(filter, resultCb.bind(null, false));
+      coll.findOne(filter, resultCb.bind(null, false));
     } else {
       log.debug("getOneDocPromise: findAndModify(query: " + JSON.stringify(filter) +
         ", update: " + JSON.stringify(updateSpecifier) + ")");
-      custColl.findAndModify(
+      coll.findAndModify(
         filter, // query
         [], // sort
         updateSpecifier, // update
@@ -166,6 +169,27 @@ function getOneDocPromise(collectionName, filter, opts) {
 }
 
 module.exports.getOneDocPromise = getOneDocPromise;
+
+function deleteAllDocsPromise(collectionName, filter) {
+  return dbopPromise().then(function(db) {
+    var deferred = Q.defer();
+    var coll = db.collection(collectionName);
+    coll.deleteMany(filter, function(err, result) {
+      if (err) {
+        deferred.reject(
+            new Error("Error: deleteAllDocs(" + collectionName + "): " + err));
+      } else {
+        log.verbose("deleteAllDocs(" + collectionName +
+            ", filter=" + JSON.stringify(filter) +
+            "): result: " + JSON.stringify(result));
+        deferred.resolve(result.deletedCount);
+      }
+    });
+    return deferred.promise;
+  });
+}
+
+module.exports.deleteAllDocsPromise = deleteAllDocsPromise;
 
 function dropCollectionPromise(collectionName) {
   return dbopPromise().then(function (db) {
