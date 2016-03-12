@@ -100,6 +100,7 @@
                 "Det aktiva företaget har <strong>{{count}} fakturor</strong>."
             ],
             "invoicesNewInvoiceBtn": "Ny faktura",
+            "newsHeader": "Nyheter",
             "getNok": "Misslyckades med att hämta statistik!"
         },
         "groupTemplates": {

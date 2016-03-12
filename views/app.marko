@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
 <require module="i18next" var="i18n" />
+<require module="../news.json" var="news" />
 
 <def function="condCheckIcon(cond)">
   <span data-bind="if: ${cond}">
@@ -110,51 +111,92 @@
           <div>
             <p>$!{i18n.t('app.home.greetingsText')}</p>
 
-            <p></p>
-            <div class="panel-group" data-bind="visible: enabled" style="display: none">
-              <div class="col-md-4">
-                <div class="panel" data-bind='css: {"panel-primary": numCompanies() == 0, "panel-success": numCompanies() > 0}'>
-                  <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.companiesHeader')}</h3></div>
-                  <div class="panel-body">
-                    <p><span data-bind="html: companiesTextTrans"></span></p>
-                    <div class="btn-group" role="group">
-                      <a href="#/page/company_new" type="button" class="btn btn-success">
-                        <span class="glyphicon glyphicon-plus inline-icon-left-fix" aria-hidden="true"></span>
-                        ${i18n.t('app.gettingStarted.companiesNewCompanyBtn')}
-                      </a>
+            <div class="row top15">
+              <div class="col-md-12">
+                <div class="panel-group" data-bind="visible: enabled" style="display: none">
+                  <div class="row">
+                    <div class="col-md-4">
+                      <div class="panel" data-bind='css: {"panel-primary": numCompanies() == 0, "panel-success": numCompanies() > 0}'>
+                        <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.companiesHeader')}</h3></div>
+                        <div class="panel-body">
+                          <p><span data-bind="html: companiesTextTrans"></span></p>
+                          <div class="btn-group" role="group">
+                            <a href="#/page/company_new" type="button" class="btn btn-success">
+                              <span class="glyphicon glyphicon-plus inline-icon-left-fix" aria-hidden="true"></span>
+                              ${i18n.t('app.gettingStarted.companiesNewCompanyBtn')}
+                            </a>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
 
-              <div class="col-md-4">
-                <div data-bind="if: numCompanies() > 0">
-                  <div class="panel" data-bind='css: {"panel-primary": numCustomers() == 0, "panel-success": numCustomers() > 0}'>
-                    <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.customersHeader')}</h3></div>
-                    <div class="panel-body">
-                      <p><span data-bind="html: customersTextTrans"></span></p>
-                      <div class="btn-group" role="group">
-                        <a href="#/page/customer_new" type="button" class="btn btn-success">
-                          <span class="glyphicon glyphicon-plus inline-icon-left-fix" aria-hidden="true"></span>
-                          ${i18n.t('app.gettingStarted.customersNewCustomerBtn')}
-                        </a>
+                    <div class="col-md-4">
+                      <div data-bind="if: numCompanies() > 0">
+                        <div class="panel" data-bind='css: {"panel-primary": numCustomers() == 0, "panel-success": numCustomers() > 0}'>
+                          <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.customersHeader')}</h3></div>
+                          <div class="panel-body">
+                            <p><span data-bind="html: customersTextTrans"></span></p>
+                            <div class="btn-group" role="group">
+                              <a href="#/page/customer_new" type="button" class="btn btn-success">
+                                <span class="glyphicon glyphicon-plus inline-icon-left-fix" aria-hidden="true"></span>
+                                ${i18n.t('app.gettingStarted.customersNewCustomerBtn')}
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                      <div data-bind="if: numCustomers() > 0">
+                        <div class="panel" data-bind='css: {"panel-primary": numInvoices() == 0, "panel-success": numInvoices() > 0}'>
+                          <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.invoicesHeader')}</h3></div>
+                          <div class="panel-body">
+                            <p><span data-bind="html: invoicesTextTrans"></span></p>
+                            <div class="btn-group" role="group">
+                              <a href="#/page/invoice_new" type="button" class="btn btn-success">
+                                <span class="glyphicon glyphicon-plus inline-icon-left-fix" aria-hidden="true"></span>
+                                ${i18n.t('app.gettingStarted.invoicesNewInvoiceBtn')}
+                              </a>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              
-              <div class="col-md-4">
-                <div data-bind="if: numCustomers() > 0">
-                  <div class="panel" data-bind='css: {"panel-primary": numInvoices() == 0, "panel-success": numInvoices() > 0}'>
-                    <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.invoicesHeader')}</h3></div>
-                    <div class="panel-body">
-                      <p><span data-bind="html: invoicesTextTrans"></span></p>
-                      <div class="btn-group" role="group">
-                        <a href="#/page/invoice_new" type="button" class="btn btn-success">
-                          <span class="glyphicon glyphicon-plus inline-icon-left-fix" aria-hidden="true"></span>
-                          ${i18n.t('app.gettingStarted.invoicesNewInvoiceBtn')}
-                        </a>
+            </div>
+
+            <div class="row top20">
+              <div class="col-md-12">
+                <div class="panel-group">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="panel panel-info">
+                        <div class="panel-heading"><h3 class="panel-title">${i18n.t('app.gettingStarted.newsHeader')}</h3></div>
+                        <table class="table table-condensed">
+                          <colgroup>
+                            <col class="col-md-1">
+                            <col class="col-md-2">
+                            <col class="col-md-9">
+                          </colgroup>
+                          <tr for="item in news.items">
+                            <td>${item.date}</td>
+                            <td>${item.msgSlogan.sv}</td>
+                            <td>$!{item.msg.sv}</td>
+                          </tr>
+                        </table>
+                        <!--
+                        <div class="panel-body">
+                          <dl>
+                            <for each="item in news.items">
+                              <dt>${item.date} - ${item.msgSlogan.sv}</dt>
+                              <dd>$!{item.msg.sv}</dd>
+                            </for>
+                          </dl>
+                        </div>
+                        -->
                       </div>
                     </div>
                   </div>

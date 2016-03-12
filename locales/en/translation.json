@@ -91,6 +91,7 @@
             "invoicesText_plural":  [
                 "The active company has <strong>{{count}} invoices</strong>."],
             "invoicesNewInvoiceBtn": "New invoice",
+            "newsHeader": "News",
             "getNok": "Failed to get statistics!"
         },
         "groupTemplates": {
