@@ -1,0 +1,15 @@
+{
+  "items": [
+    {
+      "date": "2015-03-12",
+      "msgSlogan": {
+        "sv" : "Nyhetspanel",
+        "en" : ""
+      },
+      "msg": {
+        "sv": "I <strong>nyhetspanelen</strong> listas nyheter i Lätt Fakturering.",
+        "en": ""
+      }
+    }
+  ]
+}
