@@ -3042,7 +3042,7 @@ var NavViewModel = function() {
     self.mainViews.push({
       name : '/page/invites',
       title : t("app.navBar.invites"),
-      icon : 'glyphicon glyphicon-user',
+      icon : 'glyphicon glyphicon-gift',
       location : 'userMenu'
     });
   }
