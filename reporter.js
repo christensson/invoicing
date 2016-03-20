@@ -140,11 +140,11 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
       }
     },
     headerDetailsCaption: {
-      fontSize: 7,
+      fontSize: 8,
       font: "Helvetica",
     },
     headerDetails: {
-      fontSize: 8,
+      fontSize: 9,
       font: "Times-Roman",
     },
     details: {
