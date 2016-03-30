@@ -106,6 +106,17 @@ function getAllDocsPromise(collectionName, filter, projection) {
 
 module.exports.getAllDocsPromise = getAllDocsPromise;
 
+function getAllDocsCursorPromise(collectionName, filter, projection) {
+  projection = typeof projection !== 'undefined' ? projection : {};
+  return dbopPromise().then(function(db) {
+    var deferred = Q.defer();
+    var coll = db.collection(collectionName);
+    var cursor = coll.find(filter, projection);
+    deferred.resolve(cursor);
+    return deferred.promise;
+  });
+}
+
 /**
  * opts.addLastAccessDate Adds date of last access to field lastAccessDate (default: false)
  * opts.incAccessCount Increments accessCount field (default: false)
@@ -942,7 +953,13 @@ module.exports.updateUser = function(uid, user) {
 module.exports.getInvoices = function(uid, companyId) {
   var ouid = new ObjectID(uid);
   var ocompanyId = new ObjectID(companyId);
-  return getAllDocsPromise('invoice', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId});
+  var deferred = Q.defer();
+  getAllDocsCursorPromise('invoice', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId})
+    .then(function(cursor) {
+      var stream = cursor.stream();
+      deferred.resolve(stream);
+    });
+  return deferred.promise;
 };
 
 module.exports.getInvoice = function(uid, id) {

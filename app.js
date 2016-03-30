@@ -629,14 +629,31 @@ app.put("/api/customer/:id", ensureAuthenticated, function(req, res) {
   }
 });
 
+var streamJsonResponse = function(res, stream, onEndCallback) {
+  var first = true;
+  res.setHeader("Content-Type", "application/json");
+  res.write('[');
+  stream.on('data', function(item) {
+    var prefix = first ? '' : ', ';
+    res.write(prefix + JSON.stringify(item));
+    first = false;
+  });
+  stream.on('end', function() {
+    res.write(']');
+    res.end();
+    onEndCallback();
+  });
+};
+
 app.get("/api/invoices/:companyId", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var companyId = req.params.companyId;
   log.info("Get invoices: user=" + req.user.info.name + ", uid=" + uid
       + ", companyId=" + companyId);
-  mydb.getInvoices(uid, companyId).then(function(docs) {
-    res.status(200).json(docs);
-    res.end();
+  mydb.getInvoices(uid, companyId).then(function(docStream) {
+    streamJsonResponse(res, docStream, function() {
+      docStream.close();
+    });
   }).fail(myFailureHandler.bind(null, res));
 });
 
