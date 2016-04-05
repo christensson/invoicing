@@ -670,7 +670,92 @@
         </div>
 
         <div id="app-invoices" data-bind="visible: currentView() == 'invoices'" style="display: none">
-          <form>
+            <div class="panel panel-info">
+              <div class="panel-heading invoice-list-filter-panel-heading">
+                <div class="row">
+                  <div class="col-md-10">
+                    <h3 class="form-control-static panel-title"> ${i18n.t('app.invoiceList.filterPaneTitle')}</h3>
+                  </div>
+                  <div class="col-md-2">
+                    <div class="pull-right">
+                      <button type="button" class="btn btn-sm btn-default top0 bottom0" data-bind="click: doToggleFilterPaneExpanded">
+                        <span data-bind="ifnot: isFilterPaneExpanded">
+                          <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
+                        </span>
+                        <span data-bind="if: isFilterPaneExpanded">
+                          <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>
+                        </span>                  
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="panel-body" data-bind="visible: isFilterPaneExpanded">
+                <!-- Customer filter -->
+                <div class="row">
+                  <div class="col-md-12">
+                    <form class="form-inline">
+                      <div class="form-group">
+                        <label for="customerFilterCid">${i18n.t('app.invoiceList.customerFilterLbl')}</label>
+                        <select class="form-control" id="customerFilterCid"
+                               data-bind="options: customerList, value: filterOpt.customerFilterCustomer">
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+                <!-- Date filter -->
+                <div class="row">
+                  <div class="col-md-12">
+                    <form class="form-inline">
+                      <div class="checkbox right5">
+                        <label>
+                          <input type="checkbox" data-bind="checked: filterOpt.isDateFilterActive">
+                        </label>
+                      </div>
+                      <div class="form-group">
+                        <label for="fromDate">${i18n.t('app.invoiceList.dateFromFilterLbl')}</label>
+                        <input type="date" class="form-control" id="fromDate"
+                               data-bind="value: filterOpt.filterFromDate, enable: filterOpt.isDateFilterActive">
+                      </div>
+                      <div class="form-group">
+                        <label for="toDate">${i18n.t('app.invoiceList.dateToFilterLbl')}</label>
+                        <input type="date" class="form-control" id="toDate"
+                               data-bind="value: filterOpt.filterToDate, enable: filterOpt.isDateFilterActive">
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+                <!-- Invoice type paid filter -->
+                <div class="row">
+                  <div class="col-md-12">
+                    <form class="form">
+                      <div class="checkbox">
+                        <label>
+                          <input type="checkbox" data-bind="checked: filterOpt.showPaid">
+                          ${i18n.t('app.invoiceList.showPaidFilterLbl')}
+                        </label>
+                      </div>
+                      <div class="checkbox">
+                        <label>
+                          <input type="checkbox" data-bind="checked: filterOpt.showCredit">
+                          ${i18n.t('app.invoiceList.showCreditFilterLbl')}
+                        </label>
+                      </div>
+                      <div class="checkbox">
+                        <label>
+                          <input type="checkbox" data-bind="checked: filterOpt.showCanceled">
+                          ${i18n.t('app.invoiceList.showCanceledFilterLbl')}
+                        </label>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <form>
               <p>
                   <table class="table table-striped table-condensed">
                       <colgroup>
@@ -744,67 +829,17 @@
                               </th>
                               <th>
                                 ${i18n.t('app.invoiceList.colIsPaid')}
-                                <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('paid')">
-                                    <span data-bind="if: invoiceListSort() !== 'paidAsc'">
-                                        <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
-                                    </span>
-                                    <span data-bind="if: invoiceListSort() === 'paidAsc'">
-                                        <span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>
-                                    </span>
-                                </button>
-                                <button type="button" class="btn btn-default btn-xs" data-bind="click: doToggleShowPaid">
-                                    <span data-bind="if: showPaid">
-                                        <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
-                                    </span>
-                                    <span data-bind="ifnot: showPaid">
-                                        <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-                                    </span>
-                                </button>
                               </th>
                               <th>
                                 ${i18n.t('app.invoiceList.colIsCredit')}
-                                <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('credit')">
-                                    <span data-bind="if: invoiceListSort() !== 'creditAsc'">
-                                        <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
-                                    </span>
-                                    <span data-bind="if: invoiceListSort() === 'creditAsc'">
-                                        <span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>
-                                    </span>
-                                </button>
-                                <button type="button" class="btn btn-default btn-xs" data-bind="click: doToggleShowCredit">
-                                    <span data-bind="if: showCredit">
-                                        <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
-                                    </span>
-                                    <span data-bind="ifnot: showCredit">
-                                        <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-                                    </span>
-                                </button>
                               </th>
                               <th>
                                 ${i18n.t('app.invoiceList.colIsCanceled')}
-                                <button type="button" class="btn btn-default btn-xs" data-bind="click: doSortToggle('canceled')">
-                                    <span data-bind="if: invoiceListSort() !== 'canceledAsc'">
-                                        <span class="glyphicon glyphicon-sort-by-attributes" aria-hidden="true"></span>
-                                    </span>
-                                    <span data-bind="if: invoiceListSort() === 'canceledAsc'">
-                                        <span class="glyphicon glyphicon-sort-by-attributes-alt" aria-hidden="true"></span>
-                                    </span>
-                                </button>
-                                <button type="button" class="btn btn-default btn-xs" data-bind="click: doToggleShowCanceled">
-                                    <span data-bind="if: showCanceled">
-                                        <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
-                                    </span>
-                                    <span data-bind="ifnot: showCanceled">
-                                        <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-                                    </span>
-                                </button>
                               </th>
                           </tr>
                       </thead>
                       <tbody data-bind="foreach: invoiceList">
-                          <tr data-bind="if: (!isPaid() || (\$root.showPaid() && isPaid())) &&
-                                             (!isCredit() || (\$root.showCredit() && isCredit())) &&
-                                             (!isCanceled() || (\$root.showCanceled() && isCanceled())),
+                          <tr data-bind="if: isVisible(),
                                          css: { danger: (!isPaid() && isOverdue()) }">
                               <td>
                                 <div class="btn-group" role="group">
@@ -852,7 +887,7 @@
                       ${i18n.t('app.invoiceList.newInvoiceBtn')}
                   </a>
               </div>
-          </form>
+            </form>
         </div>
 
         <div id="app-invoice_new" data-bind="visible: currentView() == 'invoice_new' || (currentView() != undefined && currentView().search('invoice_show') == 0)" style="display: none">

@@ -39,6 +39,12 @@ body { padding-top: 70px; }
   padding-bottom: 5px;
 }
 
+.invoice-list-filter-panel-heading {
+  padding-top: 3px;
+  padding-right: 5px;
+  padding-bottom: 3px;
+}
+
 .invoice-customer-addr-panel-heading {
   padding-top: 3px;
   padding-right: 5px;

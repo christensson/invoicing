@@ -330,6 +330,14 @@
             "printNok_noId": "Utskriften misslyckades, fakturan ej sparad!"
         },
         "invoiceList": {
+            "filterPaneTitle": "Filter",
+            "customerFilterLbl": "Kund",
+            "customerFilterWildcardText": "Alla",
+            "dateFromFilterLbl": "Fakturadatum från",
+            "dateToFilterLbl": "till",
+            "showPaidFilterLbl": "Visa betalda fakturor",
+            "showCreditFilterLbl": "Visa kreditfakturor",
+            "showCanceledFilterLbl": "Visa makulerade fakturor",
             "colNr": "Nr",
             "colDate": "Datum",
             "colCustomerNr": "Kundnr",
