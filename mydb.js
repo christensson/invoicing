@@ -950,11 +950,16 @@ module.exports.updateUser = function(uid, user) {
   return updateDataPromise('users', user, increment);
 };
 
-module.exports.getInvoices = function(uid, companyId) {
+module.exports.getInvoices = function(uid, companyId, compact) {
+  compact = typeof compact !== 'undefined' ? compact : false;
   var ouid = new ObjectID(uid);
   var ocompanyId = new ObjectID(companyId);
   var deferred = Q.defer();
-  getAllDocsCursorPromise('invoice', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId})
+  var projection = undefined;
+  if (compact) {
+    projection = {'invoiceItemGroups': 0};
+  }
+  getAllDocsCursorPromise('invoice', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId}, projection)
     .then(function(cursor) {
       var stream = cursor.stream();
       deferred.resolve(stream);
