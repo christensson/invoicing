@@ -650,7 +650,7 @@ app.get("/api/invoices/:companyId", ensureAuthenticated, function(req, res) {
   var companyId = req.params.companyId;
   log.info("Get invoices: user=" + req.user.info.name + ", uid=" + uid
       + ", companyId=" + companyId);
-  mydb.getInvoices(uid, companyId, true).then(function(docStream) {
+  mydb.getInvoices(uid, companyId, false).then(function(docStream) {
     streamJsonResponse(res, docStream, function() {
       docStream.close();
     });
