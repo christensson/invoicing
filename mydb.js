@@ -1035,6 +1035,10 @@ module.exports.addInvoice = function(uid, companyId, invoice) {
   return deferred.promise;
 };
 
+module.exports.addInvoiceRaw = function(invoice) {
+  return insertDataPromise('invoice', invoice);
+};
+
 module.exports.updateInvoice = function(invoice) {
   var deferred = Q.defer();
   invoice.uid = new ObjectID(invoice.uid);
