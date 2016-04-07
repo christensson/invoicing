@@ -9,6 +9,10 @@ function increaseVerbosity(v, total) {
   return total + 1;
 }
 
+function list(val) {
+  return val.split(',');
+}
+
 args.version('0.0.1')
 .option('--real_db', 'Work on real DB, not local development DB')
 .option('--uid [id]', 'User to operate on')
@@ -17,6 +21,8 @@ args.version('0.0.1')
 .option('--types_csv [file]', 'Import types CSV file as group templates to user')
 .option('--rm', 'Removes user and all associated documents')
 .option('--get', 'Gets user and all associated documents')
+.option('--gendata [num_customers],[num_invoices],[tag]', 'Generate debug customers and invoices to user', list)
+.option('--invoice [file]', 'Invoice described as JSON file to use for gendata')
 .option('-v, --verbose', 'Be more verbose', increaseVerbosity, 0)
 .option('-d, --dryrun', 'Dry-run, don\'t modify DB')
 .parse(process.argv);
@@ -48,6 +54,21 @@ if (!args.real_db) {
   log.info("Using local DB!");
   mydb.setLocalDb();
 }
+
+var getJsonFromFile = function(fileName) {
+  var deferred = Q.defer();
+  require('fs').readFile(fileName, 'utf8', function (err, data) {
+    if (err) {
+      deferred.reject(err);
+      return;
+    }
+    var obj = JSON.parse(data);
+    log.verbose("Invoice will be rendered from JSON: " + JSON.stringify(obj, null, 2));
+    deferred.resolve(obj);
+  });
+  return deferred.promise;
+};
+
 
 var convertCustomer = function(c, ouid, ocid) {
   /* Input fields:
@@ -224,8 +245,9 @@ var getAllUserData = function(uid) {
 
   var user = null;
   var settings = null;
-  var invoices = null;
+  var companies = null;
   var customers = null;
+  var invoices = null;
   var itemGroupTemplates = null;
 
   var failureHdlr = function(msg, err) {
@@ -264,6 +286,13 @@ var getAllUserData = function(uid) {
         log.info("Settings found");
       }      
       log.verbose("Settings found: " + JSON.stringify(settings, null, 2));
+      return mydb.getAllDocsPromise('company', {'uid': ouid})
+    })
+    .fail(failureHdlr.bind("Companies for uid=" + uid + " not found!"))
+    .then(function(doc) {
+      companies = doc;
+      log.info(companies.length + " companies found!");
+      log.verbose("Companies found: " + JSON.stringify(companies, null, 2));
       return mydb.getAllDocsPromise('customer', {'uid': ouid})
     })
     .fail(failureHdlr.bind("Customers for uid=" + uid + " not found!"))
@@ -290,6 +319,7 @@ var getAllUserData = function(uid) {
       deferred.resolve({
         "user": user,
         "settings": settings,
+        "companies": companies,
         "customers": customers,
         "invoices": invoices,
         "itemGroupTemplates": itemGroupTemplates
@@ -404,6 +434,19 @@ var rmAllUserData = function(uid, data, dryrun) {
     })
     .then(logDeleteResult)
     .then(function() {
+      var numItems = data.companies.length;
+      return queryIfElse(rl, "Remove " + numItems + " companies?", numItems > 0, false);
+    })
+    .then(function(yes) {
+      if (yes && !dryrun) {
+        log.info("Removing %d companies!", data.companies.length);
+        return mydb.deleteAllDocsPromise('company', {uid: ouid});
+      } else {
+        return Q.fcall(returnMyArgument.bind(null, undefined));
+      }
+    })
+    .then(logDeleteResult)
+    .then(function() {
       return queryIfElse(rl, "Remove settings?", data.settings !== null, false);
     })
     .then(function(yes) {
@@ -469,5 +512,140 @@ if (args.get || args.rm) {
       log.info("Done!");
       process.exit(0);
     });
+}
 
+if (args.gendata) {
+  if (!args.uid || !args.cid) {
+    log.error("No user or company id given, specify with option --uid and --cid");
+    process.exit(1);
+  }
+
+  if (args.gendata.length != 3) {
+    log.error("--gendata requires three comma-separated arguments for number of customers, invoices and a tag");
+    process.exit(1);
+  }
+
+  if (!args.invoice) {
+    log.error("--gendata requires --invoice to specify an invoice JSON file");
+    process.exit(1);
+  }
+
+  var createCustomers = function(uid, companyId, count, tag) {
+    var ouid = mydb.toObjectId(uid);
+    var ocompanyId = mydb.toObjectId(companyId);
+    var customer = {
+      "name" : "Customer ",
+      "addr1" : "Some street 2",
+      "addr2" : "Some region",
+      "addr3" : "",
+      "phone1" : "",
+      "phone2" : "",
+      "phone3" : "",
+      "vatNr" : "",
+      "email" : "",
+      "noVat" : false,
+      "useReverseCharge" : false,
+      "contact" : "",
+      "isValid" : true,
+      "invoiceLng" : "sv",
+      "currency" : "SEK",
+      "cid" : 100000,
+      "updateCount" : 0,
+      "loadGenTag": tag,
+    };
+    var customers = [];
+
+    for (var i = 0; i < count; i++) {
+      var c = JSON.parse(JSON.stringify(customer));
+      c.name = c.name + i;
+      c.uid = ouid;
+      c.companyId = ocompanyId;
+      c.cid = c.cid + i;
+      customers.push(c);
+    }
+    return mydb.addCustomerRaw(customers);
+  };
+
+  var createInvoices = function(uid, companyId, invoiceBase, customers, count, tag) {
+    var ouid = mydb.toObjectId(uid);
+    var ocompanyId = mydb.toObjectId(companyId);
+    var invoices = [];
+    for (var i = 0; i < count; i++) {
+      var invoice = JSON.parse(JSON.stringify(invoiceBase));
+      var customerIdx = Math.floor(Math.random() * customers.length);
+      delete invoice._id;
+      invoice.uid = ouid;
+      invoice.customer = customers[customerIdx];
+      invoice.customer._id = mydb.toObjectId(invoice.customer._id);
+      invoice.companyId = ocompanyId;
+      invoice.company._id = ocompanyId;
+      invoice.iid = 10000 + i;
+      invoice.loadGenTag = tag;
+      var invoiceAgeInDays = Math.floor(Math.random() * 50);
+      var invoiceDate = new Date(Date.now() - (invoiceAgeInDays * 24 * 60 * 60 * 1000));
+      invoice.date = invoiceDate.toISOString().split("T")[0];
+      invoices.push(invoice);
+    }
+    return mydb.addInvoiceRaw(invoices);
+  };
+
+  var uid = args.uid;
+  var cid = args.cid;
+  var ouid = mydb.toObjectId(uid);
+  var ocid = mydb.toObjectId(cid);
+  var numCustomers = args.gendata[0];
+  var numInvoices = args.gendata[1];
+  var tag = args.gendata[2];
+  var customers = undefined;
+  var company = undefined;
+  var invoice = undefined;
+  log.info("Going to generate " + numCustomers + " customers and " + 
+    numInvoices + " invoices with tag " + tag + " to user with uid=" + uid);
+  mydb.getOneDocPromise('company', {'uid': ouid, '_id': ocid})
+    .fail(function(err) {
+      log.error("Company with cid=" + cid + " not found! err=" + err);
+      process.exit(1);
+    })
+    .then(function(doc) {
+      company = doc;
+      log.verbose("Company " + company.name + " found");
+      return getJsonFromFile(args.invoice);
+    })
+    .fail(function(err) {
+      log.error("Failed to read invoice JSON file " + args.invoice + ": err=" + JSON.stringify(err));
+      process.exit(1);
+    })
+    .then(function(invoiceData) {
+      invoice = invoiceData;
+      return createCustomers(uid, cid, numCustomers, tag);
+    })
+    .fail(function(err) {
+      log.error("Failed to create customers: err=" + JSON.stringify(err));
+      process.exit(1);
+    })
+    .then(function(results) {
+      log.info("%d customers created", numCustomers);
+      return mydb.getAllDocsPromise('customer', {'uid': ouid, 'companyId': ocid, 'loadGenTag': String(tag)})
+    })
+    .fail(function(err) {
+      log.error("Failed to get customers: err=" + JSON.stringify(err));
+      process.exit(1);
+    })
+    .then(function(docs) {
+      customers = docs;
+      log.info("%d customers read from DB with loadGenTag=%s", customers.length, tag);
+      invoice.company = company;
+      return createInvoices(uid, cid, invoice, customers, numInvoices, tag);
+    })
+    .fail(function(err) {
+      log.error("Failed to create invoices: err=" + JSON.stringify(err));
+      process.exit(1);
+    })
+    .then(function(results) {
+      log.info("%d invoices created", numInvoices);
+    })
+    .done(function() {
+      log.info("Done!");
+      process.exit(0);
+    });
 }

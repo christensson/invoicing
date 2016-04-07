@@ -238,6 +238,14 @@
             "saveNok_noName": "Customer name must be specified!"
         },
         "customerList": {
+            "filterPaneTitle": "Filter",
+            "customerFilterLbl": "Customer",
+            "customerFilterWildcardText": "All",
+            "dateFromFilterLbl": "Invoice date from",
+            "dateToFilterLbl": "to",
+            "showPaidFilterLbl": "Show paid invoices",
+            "showCreditFilterLbl": "Show credit invoices",
+            "showCanceledFilterLbl": "Show canceled invoices",
             "cidCol": "Nr",
             "nameCol": "Name",
             "addrCol": "Address {{nr}}",

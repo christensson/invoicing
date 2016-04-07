@@ -248,6 +248,17 @@ var CacheOp = function() {
     });
   };
 
+  self.fetchInvoicesPromise = function(companyId) {
+    var deferred = $.Deferred();
+    $.getJSON("/api/invoices/" + companyId).done(function(data) {
+      cache.set(self.INVOICES(), data);
+      deferred.resolve(data);
+    }).fail(function() {
+      deferred.reject(data);
+    });
+    return deferred.promise();
+  };
+
   self.getInvoice = function(id, callback) {
     self._arrayGetItem(self.INVOICES(), '_id', id, callback);
   };
@@ -2128,8 +2139,11 @@ var InvoiceDataViewModel = function() {
   };
 };
 
-var InvoiceListDataViewModel = function(data) {
+var InvoiceListDataViewModel = function(data, filterOpt) {
   var self = this;
+
+  self.filterOpt = filterOpt;
+
   self._id = ko.observable(data._id);
   self.iid = ko.observable(data.iid);
   self.uid = ko.observable(data.uid);
@@ -2175,7 +2189,37 @@ var InvoiceListDataViewModel = function(data) {
           + self.daysUntilPayment());
     }
     return overdue;
-  });
+  }, self);
+
+  self.isVisible = ko.pureComputed(function() {
+    var paidVisible = !this.isPaid() || (this.filterOpt.showPaid() && this.isPaid());
+    var creditVisible = !this.isCredit() || (this.filterOpt.showCredit() && this.isCredit());
+    var canceledVisible = !this.isCanceled() || (this.filterOpt.showCanceled() && this.isCanceled());
+
+    var customerMatch = true;
+    var custToMatch = this.filterOpt.customerFilterCustomer();
+    if (custToMatch !== undefined) {
+      if (custToMatch.isWildcard) {
+        customerMatch = true;
+        Log.info("InvoiceListDataViewModel - customerMatch=" + customerMatch +
+          ", cid=" + this.customer().cid + ", matches wildcard");
+      } else {
+        customerMatch = this.customer().cid == custToMatch.data.cid;
+        Log.info("InvoiceListDataViewModel - customerMatch=" + customerMatch +
+          ", cid=" + this.customer().cid + ", matchCid=" + custToMatch.data.cid);
+      }
+    }
+
+    var inDateRange = true;
+    if (this.filterOpt.isDateFilterActive()) {
+      var fromDate = new Date(this.filterOpt.filterFromDate());
+      var toDate = new Date(this.filterOpt.filterToDate());
+      var invoiceDate = new Date(this.date());
+      inDateRange = (invoiceDate >= fromDate) && (invoiceDate <= toDate);
+      Log.info("InvoiceListDataViewModel - inDateRange=" + inDateRange + ", from=" + fromDate + ", to=" + toDate + ", date=" + invoiceDate);
+    }
+    return customerMatch && inDateRange && paidVisible && creditVisible && canceledVisible;
+  }, self);
 
   self.printInvoice = function() {
     Log.info("InvoiceListDataViewModel - Report requested");
@@ -2193,15 +2237,27 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
 
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
-  self.showPaid = ko.observable(true);
-  self.showCredit = ko.observable(true);
-  self.showCanceled = ko.observable(true);
+
+  self.customerList = ko.observableArray();
+
+  self.isFilterPaneExpanded = ko.observable(true);
+
+  self.filterOpt = {
+    showPaid: ko.observable(true),
+    showCredit: ko.observable(true),
+    showCanceled: ko.observable(true),
+    isDateFilterActive: ko.observable(false),
+    filterFromDate: ko.observable(new Date().toISOString().split("T")[0]),
+    filterToDate: ko.observable(new Date().toISOString().split("T")[0]),
+    customerFilterCustomer: ko.observable(),
+  };
+
   self.invoiceListSort = ko.observable('iidAsc');
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'invoices') {
       Log.info("InvoiceListViewModel - activated");
-      self.populate();
+      self.populatePromise();
     }
   });
 
@@ -2209,7 +2265,10 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     Log.info("InvoiceListViewModel - activeCompanyId.subscribe: value="
         + newValue);
     if (self.currentView() == 'invoices') {
-      self.populate(true);
+      self.populatePromise(true).done(function() {
+        // Make sure that the wildcard customer is selected (first item!)
+        self.filterOpt.customerFilterCustomer(self.customerList()[0]);
+      });
     } else {
       Cache.invalidateInvoices();
     }
@@ -2221,7 +2280,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   cache.on('set:' + Cache.INVOICES(), function(invoices, ttl) {
     Log.info("InvoiceListViewModel - event - set:" + Cache.INVOICES());
     var mappedInvoices = $.map(invoices, function(item) {
-      return new InvoiceListDataViewModel(item);
+      return new InvoiceListDataViewModel(item, self.filterOpt);
     });
     self.invoiceList(mappedInvoices);
   });
@@ -2229,7 +2288,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   cache.on('update:' + Cache.INVOICES(), function(invoices, ttl) {
     Log.info("InvoiceListViewModel - event - update:" + Cache.INVOICES());
     var mappedInvoices = $.map(invoices, function(item) {
-      return new InvoiceListDataViewModel(item);
+      return new InvoiceListDataViewModel(item, self.filterOpt);
     });
     self.invoiceList(mappedInvoices);
   });
@@ -2239,48 +2298,82 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     self.invoiceList.removeAll();
   });
 
-  self.populate = function(force) {
+  cache.on('set:' + Cache.CUSTOMERS(), function(customers, ttl) {
+    Log.info("InvoiceListViewModel - event - set:" + Cache.CUSTOMERS());
+    var mappedCustomers = $.map(customers, function(item) {
+      return new InvoiceListCustomerModel(item);
+    });
+    // Add wildcard
+    mappedCustomers.unshift(new InvoiceListCustomerModel(null, true));
+    self.customerList(mappedCustomers);
+  });
+
+  cache.on('update:' + Cache.CUSTOMERS(), function(customers, ttl) {
+    Log.info("InvoiceListViewModel - event - update:" + Cache.CUSTOMERS());
+    var mappedCustomers = $.map(customers, function(item) {
+      return new InvoiceListCustomerModel(item);
+    });
+    // Add wildcard
+    mappedCustomers.unshift(new InvoiceListCustomerModel(null, true));
+    self.customerList(mappedCustomers);
+  });
+
+  cache.on('del:' + Cache.CUSTOMERS(), function() {
+    Log.info("InvoiceListViewModel - event - del:" + Cache.CUSTOMERS());
+    self.customerList.removeAll();
+  });
+
+  self.populatePromise = function(force) {
+    var deferred = $.Deferred();
     force = typeof force !== 'undefined' ? force : false;
     var companyId = self.activeCompanyId();
     if (companyId != null) {
+      var invoicesJob = undefined;
+      var customersJob = undefined;
+
       // Do nothing if object exists in cache
       if (force || !cache.get(Cache.INVOICES())) {
-        Notify_showSpinner(true);
-        Cache.fetchInvoices(companyId).done(function() {
-          Log.info("InvoiceListViewModel - populate - success");
-          Notify_showSpinner(false);
-        }).fail(function() {
-          Log.info("InvoiceListViewModel - populate - failed");
-          Notify_showSpinner(false);
-          Notify_showMsg('error', t("app.invoiceList.getNok"));
-        });
+        invoicesJob = Cache.fetchInvoicesPromise(companyId);
       } else {
-        Log.info("InvoiceListViewModel - populate - data is cached!");
+        Log.info("InvoiceListViewModel - populate - invoice data is cached!");
+        invoicesJob = $.Deferred();
+        invoicesJob.resolve();
       }
+
+      // Do nothing if object exists in cache
+      if (force || !cache.get(Cache.CUSTOMERS())) {
+        customersJob = Cache.fetchCustomersPromise(companyId);
+      } else {
+        Log.info("InvoiceListViewModel - populate - customer data is cached!");
+        customersJob = $.Deferred();
+        customersJob.resolve();
+      }
+
+      Notify_showSpinner(true);
+      $.when(invoicesJob, customersJob).then(function(invoicesRes, customersRes) {
+        Notify_showSpinner(false);
+        deferred.resolve();
+      }).fail(function() {
+         Log.info("InvoiceListViewModel - populate - failed");
+         Notify_showSpinner(false);
+         Notify_showMsg('error', t("app.invoiceList.getNok"));
+         deferred.reject();
+      });
+
     } else {
       Notify_showMsg('info', t("app.invoiceList.getNok", {context: "noCompany"}));
       browserNavigateBack();
+      deferred.reject();
     }
-  };
-  
-  self.doToggleShowPaid = function() {
-    self.showPaid(!self.showPaid());
-    Log.info("InvoiceListViewModel - showPaid=" + self.showPaid()
-        + " (new state)");
-  };
-  
-  self.doToggleShowCredit = function() {
-    self.showCredit(!self.showCredit());
-    Log.info("InvoiceListViewModel - showCredit=" + self.showCredit()
-        + " (new state)");
+    return deferred.promise();
   };
 
-  self.doToggleShowCanceled = function() {
-    self.showCanceled(!self.showCanceled());
-    Log.info("InvoiceListViewModel - showCanceled=" + self.showCanceled()
+  self.doToggleFilterPaneExpanded = function() {
+    self.isFilterPaneExpanded(!self.isFilterPaneExpanded());
+    Log.info("InvoiceListViewModel - isFilterPaneExpanded=" + self.isFilterPaneExpanded()
         + " (new state)");
   };
-
+  
   self.doSortToggle = function(field) {
     if (self.invoiceListSort() === field + 'Asc') {
       self.invoiceListSort(field + 'Desc');
@@ -2335,30 +2428,6 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     return self.customerAscCompare(bRow, aRow);
   };
 
-  self.paidAscCompare = function(aRow, bRow) {
-    return aRow.isPaid() - bRow.isPaid();
-  };
-
-  self.paidDescCompare = function(aRow, bRow) {
-    return self.paidAscCompare(bRow, aRow);
-  };
-
-  self.canceledAscCompare = function(aRow, bRow) {
-    return aRow.isCanceled() - bRow.isCanceled();
-  };
-
-  self.canceledDescCompare = function(aRow, bRow) {
-    return self.canceledAscCompare(bRow, aRow);
-  };
-
-  self.creditAscCompare = function(aRow, bRow) {
-    return aRow.isCredit() - bRow.isCredit();
-  };
-
-  self.creditDescCompare = function(aRow, bRow) {
-    return self.creditAscCompare(bRow, aRow);
-  };
-
   self.totalExclVatAscCompare = function(aRow, bRow) {
     return aRow.totalExclVat() - bRow.totalExclVat();
   };
@@ -2373,6 +2442,20 @@ var InvoiceCustomerModel = function(data) {
   self.data = data;
   self.toString = function() {
     return "" + self.data.cid + " - " + self.data.name;
+  };
+};
+
+var InvoiceListCustomerModel = function(data, isWildcard) {
+  var self = this;
+  isWildcard = typeof isWildcard !== 'undefined' ? isWildcard : false;
+  self.data = data;
+  self.isWildcard = isWildcard;
+  self.toString = function() {
+    if (self.isWildcard) {
+      return t("app.invoiceList.customerFilterWildcardText");
+    } else {
+      return "" + self.data.cid + " - " + self.data.name;
+    }
   };
 };
 
@@ -3042,7 +3125,7 @@ var NavViewModel = function() {
     self.mainViews.push({
       name : '/page/invites',
       title : t("app.navBar.invites"),
-      icon : 'glyphicon glyphicon-user',
+      icon : 'glyphicon glyphicon-gift',
       location : 'userMenu'
     });
   }
