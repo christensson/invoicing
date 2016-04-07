@@ -17,6 +17,7 @@ args.version('0.0.1')
 .option('--types_csv [file]', 'Import types CSV file as group templates to user')
 .option('--rm', 'Removes user and all associated documents')
 .option('--get', 'Gets user and all associated documents')
+.option('--gendata [num_customers] [num_invoices]', 'Generate debug customers and invoices to user')
 .option('-v, --verbose', 'Be more verbose', increaseVerbosity, 0)
 .option('-d, --dryrun', 'Dry-run, don\'t modify DB')
 .parse(process.argv);
@@ -469,5 +470,16 @@ if (args.get || args.rm) {
       log.info("Done!");
       process.exit(0);
     });
+}
 
+if (args.gendata) {
+  if (!args.uid || !args.cid) {
+    log.error("No user or company id given, specify with option --uid and --cid");
+    process.exit(1);
+  }
+
+  var uid = args.uid;
+  var cid = args.cid;
+  log.info("Going to generate " + args.gendata[0] + " customers and " + args.gendata[1] + " invoices to user with uid=" + uid);
+  process.exit(0);
 }
