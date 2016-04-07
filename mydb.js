@@ -1136,9 +1136,12 @@ module.exports.getUsers = function() {
     users.forEach(function(u) {
       var data = u;
       var ouid = new ObjectID(u._id);
-      data.settings = settings.find(function(s) {
-        return ouid.equals(new ObjectID(s.uid));
-      });
+      for (var i = 0; i < settings.length; i++) {
+        if (ouid.equals(new ObjectID(settings[i].uid))) {
+          data.settings = settings[i];
+          break;
+        }
+      }
       usersAndSettings.push(data);
     });
     deferred.resolve(usersAndSettings);
