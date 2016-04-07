@@ -1,6 +1,17 @@
 {
   "items": [
     {
+      "date": "2015-04-07",
+      "msgSlogan": {
+        "sv" : "Fakturor",
+        "en" : ""
+      },
+      "msg": {
+        "sv": "Det är nu möjligt att <strong>filtrera</strong> fakturorna i listan över alla fakturor.",
+        "en": ""
+      }
+    },
+    {
       "date": "2015-03-12",
       "msgSlogan": {
         "sv" : "Nyhetspanel",
