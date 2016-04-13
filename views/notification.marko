@@ -1,34 +1,47 @@
-<require module="i18next" var="i18n" />
+<script marko-init>var i18n = require("i18next");</script>
 
 <div id="notification-area">
-  <div class="notification-area-center">
-    <div class="alert alert-info" role="alert" data-bind="visible: spinnerVisible" style="display: none">
-      <span class="glyphicon glyphicon-refresh glyphicon-spin"></span>
-      <p data-bind="text: spinnerMsg"></p>
-    </div>
-  </div>
+    <div class="notification-area-center">
+        <div class="alert alert-info" role="alert"
+            data-bind="visible: spinnerVisible" style="display: none">
 
-  <div data-bind="css: notificationCss">
-    <div class="panel panel-info" data-bind="visible: notificationArray().length > 0" style="display: none">
-      <div class="panel-heading notification-panel-heading">
-        <div class="form-inline">
-          <div class="row">
-            <div class="col-md-12">
-              <span>${i18n.t('notification.panelTitle')}</span>
-              <span class="pull-right">
-                <span class="glyphicon glyphicon-remove" aria-hidden="true" data-bind="click: closeAll"></span>
-              </span>
-            </div>
-          </div>
+            <span class="glyphicon glyphicon-refresh glyphicon-spin"/>
+            <p data-bind="text: spinnerMsg"/>
+
         </div>
-      </div>
-      <div class="panel-body">
-        <div class="list-group bottom0 top0 left0 right0" data-bind="foreach: notificationArray">
-          <button type="button" class="list-group-item notification-panel-item" data-bind="css: \$data.css, click: \$data.doClose">
-            <span data-bind="html: \$data.message"></span>
-          </button>
-        </div>
-      </div>
     </div>
-  </div>
+    <div data-bind="css: notificationCss">
+        <div class="panel panel-info"
+            data-bind="visible: notificationArray().length > 0"
+            style="display: none">
+
+            <div class="panel-heading notification-panel-heading">
+                <div class="form-inline">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <span>${i18n.t('notification.panelTitle')}</span>
+                            <span class="pull-right">
+                                <span class="glyphicon glyphicon-remove"
+                                    aria-hidden="true"
+                                    data-bind="click: closeAll"/>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="list-group bottom0 top0 left0 right0"
+                    data-bind="foreach: notificationArray">
+
+                    <button type="button"
+                        class="list-group-item notification-panel-item"
+                        data-bind="css: css, click: doClose">
+                        <span data-bind="html: message"/>
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
 </div>

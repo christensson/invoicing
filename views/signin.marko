@@ -1,137 +1,196 @@
+<script marko-init>var i18n = require("i18next");</script>
 <!DOCTYPE html>
-<require module="i18next" var="i18n" />
-
 <html>
     <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-
         <title>${i18n.t('signin.pageTitle')}</title>
-        <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
-        <link rel="stylesheet" type="text/css" href="page.css">
+        <link rel="stylesheet" type="text/css" href="bootstrap.min.css"/>
+        <link rel="stylesheet" type="text/css" href="page.css"/>
     </head>
     <body role="document">
-    <div id="layout" class="container" role="main">
+        <div id="layout" class="container" role="main">
+            <div>
+                <div>
+                    <div if(data.lngList.length > 1)>
+                        <div class="setlng-bar">
+                            <div class="btn-group" role="group" aria-label="...">
+                                <for(lng in data.lngList)>
+                                    <a href="/signin?setLng=${lng}" role="button"
+                                        class="btn btn-default">
 
-    <div>
-        <div>
-          <div if="data.lngList.length > 1">
-            <div class="setlng-bar">
-              <div class="btn-group" role="group" aria-label="...">
-                <for each="lng in data.lngList">
-                  <a href="/signin?setLng=${lng}" role="button" class="btn btn-default">
-                    <span class="icon-lng-${lng}" aria-hidden="true"></span>
-                    ${i18n.t('signin.lngBtn', {context: "${lng}"})}
-                  </a>
-                </for>
-              </div>
-            </div>
-          </div>
+                                        <span class="icon-lng-${lng}"
+                                            aria-hidden="true"/>
+                                        ${i18n.t('signin.lngBtn', {context: (lng)})}
 
-          <div class="jumbotron">
-            <h1 class="text-center">${i18n.t('signin.header')}</h1>
-            <p class="text-center">${i18n.t('signin.welcomeText')}</p>
-            <div class="row">
-              <include template="./notification.marko" />
-            </div>
-
-            <div id="signin">
-              <div class="row">
-                <div class="col-md-6 col-md-offset-3">
-                  <div class="panel panel-default">
-                    <div class="panel-heading">
-                      <h3 class="panel-title text-center">${i18n.t('signin.loginPanelTitle')}</h3>
-                    </div>
-                    <div class="panel-body">
-                      <div class="col-md-12">
-                        <div class="row">
-                          <div class="strike bottom15">
-                             <span>$!{i18n.t('signin.googleAccountTitle')}</span>
-                          </div>
+                                    </a>
+                                </for>
+                            </div>
                         </div>
-
-                        <a href="/auth/google" class="button-signin-google center-block" role="button"></a>
-
-                        <div class="row">
-                          <div class="strike top15 bottom15">
-                             <span>$!{i18n.t('signin.localAccountTitle')}</span>
-                          </div>
-                        </div>
-
-                        <form id="local-sign-in" action="/login" method="post">
-                          <div class="row">
-                            <div class="form-group">
-                              <label for="username" class="control-label">${i18n.t('signin.usernameLbl')}</label>
-                              <input type="text" class="form-control" name="username" placeholder="${i18n.t('signin.usernamePlaceholder')}" required/>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <div class="form-group">
-                              <label for="password" class="control-label">${i18n.t('signin.passwordLbl')}</label>
-                              <input type="password" class="form-control" name="password" placeholder="${i18n.t('signin.passwordPlaceholder')}" required/>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <button type="submit" class="btn btn-success">
-                              <span class="glyphicon glyphicon-log-in inline-icon-left-fix" aria-hidden="true"></span>
-                              <strong>${i18n.t('signin.signinBtn')}</strong>
-                            </button>
-                          </div>
-                        </form>
-
-                        <form>
-                          <div class="row top15" data-bind="css: {bottom15: isLocalRegVisible}">
-                            <a href="#" role="button" data-bind="click: toggleLocalReg">
-                              $!{i18n.t('signin.createAccountBtn')}
-                            </a>
-                          </div>
-                        </form>
-
-                        <form id="local-reg" data-bind="visible: isLocalRegVisible" action="/local-reg" method="post" style="display: none">
-                          <div class="row">
-                            <div class="form-group">
-                              <label for="username" class="control-label">${i18n.t('signin.usernameLbl')}</label>
-                              <input type="email" class="form-control" name="username" placeholder="${i18n.t('signin.usernamePlaceholder')}" required/>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <div class="form-group">
-                              <label for="fullName" class="control-label">${i18n.t('signin.regFullNameLbl')}</label>
-                              <input type="text" class="form-control" name="fullName" placeholder="${i18n.t('signin.regFullNameLbl')}" required/>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <div class="form-group">
-                              <label for="password" class="control-label">${i18n.t('signin.regPasswordLbl')}</label>
-                              <input type="password" class="form-control" name="password" placeholder="${i18n.t('signin.regPasswordLbl')}" required/>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <button type="submit" class="btn btn-primary">
-                              <span class="glyphicon glyphicon-plus inline-icon-left-fix" aria-hidden="true"></span>
-                              ${i18n.t('signin.registerBtn')}
-                            </button>
-                          </div>
-                        </form>
-                      </div>
                     </div>
-                  </div>
+                    <div class="jumbotron">
+                        <h1 class="text-center">${i18n.t('signin.header')}</h1>
+                        <p class="text-center">
+                            ${i18n.t('signin.welcomeText')}
+                        </p>
+                        <div class="row">
+                            <include("./notification.marko")/>
+                        </div>
+                        <div id="signin">
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title text-center">
+                                                ${i18n.t('signin.loginPanelTitle')}
+                                            </h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="col-md-12">
+                                                <div class="row">
+                                                    <div class="strike bottom15">
+                                                        <span>
+                                                            $!{i18n.t('signin.googleAccountTitle')}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <a href="/auth/google" class="button-signin-google center-block"
+                                                    role="button"/>
+                                                <div class="row">
+                                                    <div class="strike top15 bottom15">
+                                                        <span>
+                                                            $!{i18n.t('signin.localAccountTitle')}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <form id="local-sign-in"
+                                                    action="/login" method="post">
+
+                                                    <div class="row">
+                                                        <div class="form-group">
+                                                            <label for="username"
+                                                                class="control-label">
+
+                                                                ${i18n.t('signin.usernameLbl')}
+
+                                                            </label>
+                                                            <input type="text"
+                                                                class="form-control"
+                                                                name="username" placeholder=i18n.t("signin.usernamePlaceholder")
+                                                                required/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="form-group">
+                                                            <label for="password"
+                                                                class="control-label">
+
+                                                                ${i18n.t('signin.passwordLbl')}
+
+                                                            </label>
+                                                            <input type="password"
+                                                                class="form-control"
+                                                                name="password" placeholder=i18n.t("signin.passwordPlaceholder")
+                                                                required/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <button type="submit"
+                                                            class="btn btn-success">
+
+                                                            <span class="glyphicon glyphicon-log-in inline-icon-left-fix"
+                                                                aria-hidden="true"/>
+                                                            <strong>
+                                                                ${i18n.t('signin.signinBtn')}
+                                                            </strong>
+
+                                                        </button>
+                                                    </div>
+
+                                                </form>
+                                                <form>
+                                                    <div class="row top15" data-bind="css: {bottom15: isLocalRegVisible}">
+                                                        <a href="#" role="button" data-bind="click: toggleLocalReg">
+                                                            $!{i18n.t('signin.createAccountBtn')}
+                                                        </a>
+                                                    </div>
+                                                </form>
+                                                <form id="local-reg" data-bind="visible: isLocalRegVisible"
+                                                    action="/local-reg"
+                                                    method="post"
+                                                    style="display: none">
+
+                                                    <div class="row">
+                                                        <div class="form-group">
+                                                            <label for="username"
+                                                                class="control-label">
+
+                                                                ${i18n.t('signin.usernameLbl')}
+
+                                                            </label>
+                                                            <input type="email"
+                                                                class="form-control"
+                                                                name="username" placeholder=i18n.t("signin.usernamePlaceholder")
+                                                                required/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="form-group">
+                                                            <label for="fullName"
+                                                                class="control-label">
+
+                                                                ${i18n.t('signin.regFullNameLbl')}
+
+                                                            </label>
+                                                            <input type="text"
+                                                                class="form-control"
+                                                                name="fullName" placeholder=i18n.t("signin.regFullNameLbl")
+                                                                required/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="form-group">
+                                                            <label for="password"
+                                                                class="control-label">
+
+                                                                ${i18n.t('signin.regPasswordLbl')}
+
+                                                            </label>
+                                                            <input type="password"
+                                                                class="form-control"
+                                                                name="password" placeholder=i18n.t("signin.regPasswordLbl")
+                                                                required/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <button type="submit"
+                                                            class="btn btn-primary">
+
+                                                            <span class="glyphicon glyphicon-plus inline-icon-left-fix"
+                                                                aria-hidden="true"/>
+                                                            ${i18n.t('signin.registerBtn')}
+
+                                                        </button>
+                                                    </div>
+
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
         </div>
-    </div>
-
-    </div>
     </body>
-
-    <script type="text/javascript" src="jquery.js"></script>
-    <script type="text/javascript" src="bootstrap.min.js"></script>
-    <script type="text/javascript" src="knockout-latest.js"></script>
-    <script type="text/javascript" src="knockout-bootstrap.js"></script>
+    <script type="text/javascript" src="jquery.js"/>
+    <script type="text/javascript" src="bootstrap.min.js"/>
+    <script type="text/javascript" src="knockout-latest.js"/>
+    <script type="text/javascript" src="knockout-bootstrap.js"/>
     <!-- Input to javascripts below -->
     <script type="text/javascript">
         var cfg = {
@@ -140,11 +199,11 @@
             notificationAreaPlacement: "center-inline",
         };
         var serverMsg = {
-            error: "$data.msg.error",
-            success: "$data.msg.success",
-            notice: "$data.msg.notice"
+            error: "${data.msg.error}",
+            success: "${data.msg.success}",
+            notice: "${data.msg.notice}"
         };
-    </script> 
-    <script type="text/javascript" src="notification.js"></script>
-    <script type="text/javascript" src="signin.js"></script>
+    </script>
+    <script type="text/javascript" src="notification.js"/>
+    <script type="text/javascript" src="signin.js"/>
 </html>
