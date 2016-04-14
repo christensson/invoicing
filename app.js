@@ -526,18 +526,19 @@ app.post("/api/company_logo/:companyId", ensureAuthenticated, upload.single('log
   log.info("Company logo upload: uid=" + uid + ", companyId=" + companyId +
       ", file: " + JSON.stringify(req.file));
 
-  mydb.getCompany(uid, companyId).then(function(company) {
-    var logoInfo = {
+  var company = {
+    '_id': mydb.toObjectId(companyId),
+    'uid': uid,
+    'logo': {
       'mimetype': req.file.mimetype,
       'path': req.file.path,
       'originalname': req.file.originalname
-    };
-    company.logo = logoInfo;
-    return mydb.updateCompany(company);
-  }).then(function(company) {
-    log.verbose("Company logo set: " + JSON.stringify(company));
+    }
+  };
+  mydb.updateCompany(company).then(function(companyResponse) {
+    log.verbose("Company logo set: " + JSON.stringify(companyResponse));
     var jsonRes = {
-      'logo': company.logo
+      'logo': companyResponse.logo
     };
     res.status(200).json(jsonRes);
     res.end();
