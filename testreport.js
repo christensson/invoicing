@@ -19,6 +19,7 @@ args.version('0.0.1')
 .option('--json [file]', 'Render invoice from JSON file')
 .option('-o, --output [file]', 'Path to output PDF file')
 .option('--demo', 'Demo mode enabled')
+.option('--reminder', 'Print invoice reminder')
 .option('--real_db', 'Query real DB, not local development DB')
 .option('-v, --verbose', 'Be more verbose', increaseVerbosity, 0)
 .parse(process.argv);
@@ -109,10 +110,17 @@ renderInvoice = function(invoice) {
     process.exit(1);
   } else {
     i18nInitPromise.then(function(t) {
+      var opts = {
+        'isReminder': args.reminder?true:false,
+        'isDemoMode': demoMode,
+        'debug': debug,
+        'verbosity': args.verbose,
+        'outFile': args.output
+      };
       reporter.doInvoiceReport(invoice, tmpDir, function(reportFilename) {
         log.info("onCompletion: reportFilename=" + reportFilename);
         process.exit();
-      }, args.output, demoMode, debug, args.verbose);
+      }, opts);
     }).fail(function(err) {
       log.error("ERROR: i18n.init: " + err);
       process.exit(1);

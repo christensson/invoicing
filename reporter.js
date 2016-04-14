@@ -12,11 +12,24 @@ var convMmToDpi = function(lengthMm) {
   return (lengthMm * 72) / 25.4;
 };
 
-module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFile, isDemoMode, debug, verbosity) {
+module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) {
   'use strict';
-  isDemoMode = typeof isDemoMode !== 'undefined' ? isDemoMode : false;
-  debug = typeof debug !== 'undefined' ? debug : false;
-  verbosity = typeof verbosity !== 'undefined' ? verbosity : 0;
+  opts = typeof opts !== 'undefined' ? opts : {};
+  if (!opts.hasOwnProperty('isReminder')) {
+    opts.isReminder = false;
+  }
+  if (!opts.hasOwnProperty('isDemoMode')) {
+    opts.isDemoMode = false;
+  }
+  if (!opts.hasOwnProperty('debug')) {
+    opts.debug = false;
+  }
+  if (!opts.hasOwnProperty('verbosity')) {
+    opts.verbosity = 0;
+  }
+  if (!opts.hasOwnProperty('outFile')) {
+    opts.outFile = false;
+  }
 
   /*  invoice: {
    *    _id, iid, uid, companyId, isLocked, isPaid, isValid
@@ -213,10 +226,10 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
   // Default X values is for invoiceStyle "right"
   var headerStringX = convMmToDpi(114 + 10) - margin;
   var headerStringY = 30;
-  var headerStringWidth = 195;
+  var headerStringWidth = 230;
   var subHeaderStringX = headerStringX;
   var subHeaderStringY = 55;
-  var subHeaderStringWidth = 190;
+  var subHeaderStringWidth = 230;
 
   // C5 Envelope window is 100 x 34 mm
   // H2 placement is 114 mm from left, 15 mm from right and 44 mm from top.
@@ -260,7 +273,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
   var demoModeBgImg = "img/invoice_demo.png";
   var demoModeBgW = 442;
   var demoModeBgH = 442;
-  var debugBorderWidth = debug?0.5:0;
+  var debugBorderWidth = opts.debug?0.5:0;
 
   var detailsColSize = [190, 60, 70, 50, 40, 110];
   var detailsWidth = detailsColSize.reduce(function(a, b) { return a + b; });
@@ -300,6 +313,8 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     var subHeaderString = getStr("subHeaderString");
     if (invoice.isCanceled) {
       subHeaderString = getStr("subHeaderString_isCanceled");
+    } else if (opts.isReminder) {
+      subHeaderString = getStr("subHeaderString_isReminder");
     }
     x.band([{data: headerString, width: headerStringWidth, fontSize: style.header.fontSize, fontBold: true}],
            {x: headerStringX, y: headerStringY, font: style.header.font, border: debugBorderWidth});
@@ -318,14 +333,14 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     x.band([{data: invoice.customer.addr2, width: customerAddrWidth}], {x: customerAddrX, border: debugBorderWidth});
     x.band([{data: invoice.customer.addr3, width: customerAddrWidth}], {x: customerAddrX, border: debugBorderWidth});
     
-    if (debug) {
+    if (opts.debug) {
       x.box(envelopeWinX, envelopeWinY, envelopeWinWidth, envelopeWinHeight, {dash: 1});
     }
 
     if (invoice.company.logo !== undefined && invoice.company.logo.path !== undefined) {
       x.image(invoice.company.logo.path, {
         x: companyLogoX, y: companyLogoY, align: companyLogoAlign, fit: [companyLogoWidth, companyLogoHeight]});
-      if (debug) {
+      if (opts.debug) {
         x.box(companyLogoX, companyLogoY, companyLogoWidth, companyLogoHeight);
       }
     } else {
@@ -390,7 +405,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     x.newLine();
     headerBottomY = x.getCurrentY();
 
-    if (isDemoMode) {
+    if (opts.isDemoMode) {
       x.image(demoModeBgImg, {
         x: (x.maxX() / 2) - (demoModeBgW/2) + margin/2,
         y: (x.maxY() / 2) - (demoModeBgH/2) + margin/2,
@@ -581,7 +596,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
     var useReverseCharge = cust.useReverseCharge === true;
     var amountToPay = noVat?invoice.totalExclVat:invoice.totalInclVat;
     var amountToPayAdj = util.calcPaymentAdjustment(
-      amountToPay, {numDec: amountToPayAdjNumDec, verbose: verbosity > 1?true:false});
+      amountToPay, {numDec: amountToPayAdjNumDec, verbose: opts.verbosity > 1?true:false});
     amountToPay = amountToPay + amountToPayAdj;
     x.fontSize(style.summary.fontSize);
     x.newLine();
@@ -837,11 +852,11 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, outFil
   var reportPath = reportDir + "/" + reportName;
   
   // Override reportPath
-  if (outFile) {
-    reportPath = outFile;
+  if (opts.outFile) {
+    reportPath = opts.outFile;
   }
 
-  if (verbosity > 1) {
+  if (opts.verbosity > 1) {
     Report.trace = true;
   }
 

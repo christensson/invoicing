@@ -2275,6 +2275,18 @@
                                     ${i18n.t('app.invoice.copyInvoiceBtn')}
 
                                 </button>
+                                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="caret"/>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="#" data-bind="click: doInvoiceReminderPrint">
+                                        <span class="glyphicon glyphicon-print inline-icon-left-fix"
+                                            aria-hidden="true"/>
+                                        ${i18n.t('app.invoice.printInvoiceReminderBtn')}
+                                        </a>
+                                    </li>
+                                </ul>
                             </div>
                             <label class="checkbox-inline left7">
                                 <input type="checkbox"
