@@ -630,13 +630,13 @@ app.put("/api/customer/:id", ensureAuthenticated, function(req, res) {
 });
 
 var streamJsonResponse = function(res, stream, onEndCallback) {
-  var first = true;
   res.setHeader("Content-Type", "application/json");
   res.write('[');
+  var prefix = '';
   stream.on('data', function(item) {
-    var prefix = first ? '' : ', ';
     res.write(prefix + JSON.stringify(item));
-    first = false;
+    // First item won't have a prefix succeding will...
+    prefix = ',';
   });
   stream.on('end', function() {
     res.write(']');
