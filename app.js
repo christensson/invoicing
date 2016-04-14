@@ -526,18 +526,19 @@ app.post("/api/company_logo/:companyId", ensureAuthenticated, upload.single('log
   log.info("Company logo upload: uid=" + uid + ", companyId=" + companyId +
       ", file: " + JSON.stringify(req.file));
 
-  mydb.getCompany(uid, companyId).then(function(company) {
-    var logoInfo = {
+  var company = {
+    '_id': mydb.toObjectId(companyId),
+    'uid': uid,
+    'logo': {
       'mimetype': req.file.mimetype,
       'path': req.file.path,
       'originalname': req.file.originalname
-    };
-    company.logo = logoInfo;
-    return mydb.updateCompany(company);
-  }).then(function(company) {
-    log.verbose("Company logo set: " + JSON.stringify(company));
+    }
+  };
+  mydb.updateCompany(company).then(function(companyResponse) {
+    log.verbose("Company logo set: " + JSON.stringify(companyResponse));
     var jsonRes = {
-      'logo': company.logo
+      'logo': companyResponse.logo
     };
     res.status(200).json(jsonRes);
     res.end();
@@ -630,13 +631,13 @@ app.put("/api/customer/:id", ensureAuthenticated, function(req, res) {
 });
 
 var streamJsonResponse = function(res, stream, onEndCallback) {
-  var first = true;
   res.setHeader("Content-Type", "application/json");
   res.write('[');
+  var prefix = '';
   stream.on('data', function(item) {
-    var prefix = first ? '' : ', ';
     res.write(prefix + JSON.stringify(item));
-    first = false;
+    // First item won't have a prefix succeding will...
+    prefix = ',';
   });
   stream.on('end', function() {
     res.write(']');
@@ -650,7 +651,7 @@ app.get("/api/invoices/:companyId", ensureAuthenticated, function(req, res) {
   var companyId = req.params.companyId;
   log.info("Get invoices: user=" + req.user.info.name + ", uid=" + uid
       + ", companyId=" + companyId);
-  mydb.getInvoices(uid, companyId, false).then(function(docStream) {
+  mydb.getInvoices(uid, companyId).then(function(docStream) {
     streamJsonResponse(res, docStream, function() {
       docStream.close();
     });

@@ -950,17 +950,33 @@ module.exports.updateUser = function(uid, user) {
   return updateDataPromise('users', user, increment);
 };
 
-module.exports.getInvoices = function(uid, companyId, compact) {
-  compact = typeof compact !== 'undefined' ? compact : false;
+/** Get invoices
+ * @param opts.batchSize (Default: 100)
+ * @param opts.limit (Default: none)
+ * @param opts.compact (Default: false)
+ */
+module.exports.getInvoices = function(uid, companyId, opts) {
+  opts = typeof opts !== 'undefined' ? opts : {};
+  // Set default parameters
+  if (!opts.batchSize) {
+    opts.batchSize = 100;
+  }
+  if (!opts.compact) {
+    opts.compact = false;
+  }
   var ouid = new ObjectID(uid);
   var ocompanyId = new ObjectID(companyId);
   var deferred = Q.defer();
   var projection = undefined;
-  if (compact) {
+  if (opts.compact) {
     projection = {'invoiceItemGroups': 0};
   }
   getAllDocsCursorPromise('invoice', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId}, projection)
     .then(function(cursor) {
+      cursor.batchSize(opts.batchSize);
+      if (opts.limit) {
+        cursor.limit(opts.limit);
+      }
       var stream = cursor.stream();
       deferred.resolve(stream);
     });
