@@ -217,6 +217,7 @@
             "saveOk_delete": "Företag <strong>{{name}}</strong> raderat.",
             "saveNok": "Misslyckades att spara företag!",
             "saveNok_noName": "Företagsnamn måste anges!",
+            "uploadLogoOk": "Företagslogo sparad",
             "uploadLogoNok_noId": "Företaget måste sparas först!",
             "uploadLogoNok_noFile": "Ingen logo vald!",
             "uploadLogoNok_serverFailure": "Fel vid uppladdning av logo. Felkod från server: {{status}}"

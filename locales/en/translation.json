@@ -203,6 +203,7 @@
             "saveOk_delete": "Company <strong>{{name}}</strong> removed.",
             "saveNok": "Company save failed!",
             "saveNok_noName": "Company name must be specified!",
+            "uploadLogoOk": "Company logo saved",
             "uploadLogoNok_noId": "Company must be saved first!",
             "uploadLogoNok_noFile": "No logo selected!",
             "uploadLogoNok_serverFailure": "Failed to upload logo. Error code received from server: {{status}}"

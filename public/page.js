@@ -943,6 +943,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
             Cache.getCompany(self.data._id(), function(c) {
               c.logo = logoJson.logo;
               Cache.updateCompany(c);
+              Notify_showMsg('success', t("app.company.uploadLogoOk"));
             });
           } else {
             Notify_showMsg('error', t("app.company.uploadLogoNok", {context: "serverFailure", "status": xhr.status}));
