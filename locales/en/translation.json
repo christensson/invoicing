@@ -203,6 +203,7 @@
             "saveOk_delete": "Company <strong>{{name}}</strong> removed.",
             "saveNok": "Company save failed!",
             "saveNok_noName": "Company name must be specified!",
+            "uploadLogoOk": "Company logo saved",
             "uploadLogoNok_noId": "Company must be saved first!",
             "uploadLogoNok_noFile": "No logo selected!",
             "uploadLogoNok_serverFailure": "Failed to upload logo. Error code received from server: {{status}}"
@@ -308,6 +309,7 @@
             "optUseReverseChargeLbl": "Use reverse charge",
             "saveInvoiceBtn": "Save",
             "printInvoiceBtn": "Print",
+            "printInvoiceReminderBtn": "Print invoice reminder",
             "copyInvoiceBtn": "Duplicate",
             "newNok_noCompany": "Failed to create invoice! Company not selected or doesn't exist.",
             "getCustomersNok": "Failed to get customers!",
@@ -344,6 +346,7 @@
             "headerString_isCredit": "CREDIT INVOICE",
             "subHeaderString": "",
             "subHeaderString_isCanceled": "*** CANCELED ***",
+            "subHeaderString_isReminder": "Payment Reminder!",
             "customerAddrCaption": "Customer",
             "lastPaymentDateCaption": "Payment Due By",
             "invoiceDateCaption": "Invoice Date",

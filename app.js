@@ -731,10 +731,11 @@ app.put("/api/itemGroupTemplate/:id", ensureAuthenticated, function(req, res) {
   }
 });
 
-app.get("/api/invoiceReport/:id", ensureAuthenticated, function(req, res) {
+app.get("/api/invoiceReport/:id/:isReminder", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var id = req.params.id;
-  log.info("Invoice report: user=" + req.user.info.name + ", _id=" + id);
+  var isReminder = req.params.isReminder;
+  log.info("Invoice report: user=" + req.user.info.name + ", _id=" + id + ", isReminder=" + isReminder);
   
   // Check license in settings
   var isDemoMode = false;
@@ -759,8 +760,12 @@ app.get("/api/invoiceReport/:id", ensureAuthenticated, function(req, res) {
           }
         });
       },
-      isDemoMode,
-      debug);
+      {
+        'isReminder': isReminder,
+        'isDemoMode': isDemoMode,
+        'debug': debug
+      }
+    );
   }).fail(myFailureHandler.bind(null, res));
 });
 

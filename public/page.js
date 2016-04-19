@@ -943,6 +943,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
             Cache.getCompany(self.data._id(), function(c) {
               c.logo = logoJson.logo;
               Cache.updateCompany(c);
+              Notify_showMsg('success', t("app.company.uploadLogoOk"));
             });
           } else {
             Notify_showMsg('error', t("app.company.uploadLogoNok", {context: "serverFailure", "status": xhr.status}));
@@ -1339,12 +1340,18 @@ var InvoiceItemGroupTemplatesViewModel = function(currentView) {
 
 // Trick for doing classmethods...
 function InvoiceOps(){};
-InvoiceOps.printInvoice = function(id) {
-  Log.info("printInvoice - id=" + id);
+InvoiceOps.printInvoice = function(id, opts) {
+  opts = typeof opts !== 'undefined' ? opts : {};
+  // Set default parameters
+  if (!opts.isReminder) {
+    opts.isReminder = false;
+  }
+  Log.info("printInvoice - id=" + id + ", opts=" + JSON.stringify(opts));
   if (id !== undefined) {
     Notify_showSpinner(true);
     try {
-      var child = window.open("/api/invoiceReport/" + id);
+      var reqUrl = "/api/invoiceReport/" + id + "/" + opts.isReminder;
+      var child = window.open(reqUrl);
       $(child).ready(function() {
         Log.info("printInvoice - Report done!");
         Notify_showSpinner(false);
@@ -2747,6 +2754,16 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     }
   };
   
+  self.doInvoiceReminderPrint = function() {
+    Log.info("InvoiceNewViewModel - Print reminder requested");
+    if (self.data._id() !== undefined) {
+      InvoiceOps.printInvoice(self.data._id(), {isReminder: true});
+    } else {
+      Notify_showMsg('info', t("app.invoice.printNok", {context: 'noId'}));
+      Log.info("InvoiceNewViewModel - Invoice not saved.");
+    }
+  };
+
   self.doCopyInvoice = function() {
     Log.info("InvoiceNewViewModel - Copy invoice requested");
     /* Mark datafields so that the next save will allocate new invoice ids */
