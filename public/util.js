@@ -131,11 +131,20 @@ var dateAddDays = function(date, numDaysToAdd) {
   return new Date(newDateMs);
 };
 
+var range = function(low, high) {
+  var list = [];
+  for (var i = low; i <= high; i++) {
+    list.push(i);
+  }
+  return list;
+};
+
 // Hack to get module.exports working on server side and namespace Util working on client side
 (typeof module !== "undefined" && module !== null ? module : {}).exports = this.Util = {
   formatCurrency: formatCurrency,
   formatNumber: formatNumber,
   calcPaymentAdjustment: calcPaymentAdjustment,
   dateAddDays: dateAddDays,
+  range: range,
 };
 

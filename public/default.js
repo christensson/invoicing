@@ -10,6 +10,7 @@ var defaults = {
   invoiceReportStyleList: ["right", "left"],
   defaultCurrency: "SEK",
   currencyList: ["SEK", "EUR", "USD", "GBP"], // First is default
+  currencyWildcard: "Wildcard",
   invoiceCurrencyAdjNumDec: {
     "SEK": 0,
     "EUR": 2,
@@ -19,6 +20,16 @@ var defaults = {
   firstCid: 100,
   firstIid: 100,
   minPwdLen: 8,
+  invoiceListFilter: {
+    isPaneExpanded: true,
+    showPaid: true,
+    showUnpaid: true,
+    showUnpaidExpired: true,
+    showNotCredit: true,
+    showCredit: true,
+    showNotCanceled: true,
+    showCanceled: false,
+  },
   logFile: 'log/log.txt'
 };
 
