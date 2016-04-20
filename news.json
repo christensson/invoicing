@@ -1,6 +1,17 @@
 {
   "items": [
     {
+      "date": "2016-04-20",
+      "msgSlogan": {
+        "sv" : "Fakturor",
+        "en" : ""
+      },
+      "msg": {
+        "sv": "Förbättrad <strong>filtrering</strong> av fakturor samt summering över vald period.",
+        "en": ""
+      }
+    },
+    {
       "date": "2016-04-07",
       "msgSlogan": {
         "sv" : "Fakturor",
