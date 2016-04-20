@@ -2321,9 +2321,13 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
         var sumItem = ko.utils.arrayFirst(sumPerCurrency, function(item) {
           return item.currency == currency;
         });
-        sumItem.sumExclVat += invoice.totalExclVat();
-        sumItem.sumInclVat += invoice.totalInclVat();
-        sumItem.sumVat += invoice.totalVat();
+        if (sumItem != undefined) {
+          sumItem.sumExclVat += invoice.totalExclVat();
+          sumItem.sumInclVat += invoice.totalInclVat();
+          sumItem.sumVat += invoice.totalVat();
+        } else {
+          Log.warn("totalPerCurrencyText: Couldn't find currency=" + currency + " for invoice _id=" + invoice._id());
+        }
       }
     }
 
