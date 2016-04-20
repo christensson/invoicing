@@ -2172,7 +2172,10 @@ var InvoiceListDataViewModel = function(data, filterOpt) {
   self.date = ko.observable(data.date);
   self.daysUntilPayment = ko.observable(data.daysUntilPayment);
   self.projId = ko.observable(data.projId);
-  self.currency = ko.observable(data.customer.currency);
+  self.currency = ko.observable(defaults.defaultCurrency);
+  if (data.customer.hasOwnProperty('currency')) {
+    self.currency(data.customer.currency);
+  }
   self.totalExclVat = ko.observable(data.totalExclVat);
   self.totalInclVat = ko.observable(data.totalInclVat);
   self.totalVat = ko.pureComputed(function() {
