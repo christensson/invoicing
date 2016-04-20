@@ -3,6 +3,17 @@
     {
       "date": "2016-04-20",
       "msgSlogan": {
+        "sv" : "Kunder",
+        "en" : ""
+      },
+      "msg": {
+        "sv": "Det är nu möjligt att <strong>överföra kunder</strong> mellan företag.",
+        "en": ""
+      }
+    },
+    {
+      "date": "2016-04-20",
+      "msgSlogan": {
         "sv" : "Fakturor",
         "en" : ""
       },
