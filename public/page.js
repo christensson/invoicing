@@ -1114,7 +1114,41 @@ var CustomerViewModel = function() {
       },
     });
   };
-  
+
+  self.transferToCompany = function(destCompanyId) {
+    if ((self._id() == undefined)) {
+      Log.info("transferToCompany: Customer not saved");
+      Notify_showMsg('error', t("app.customer.transferNok", {context: "noId"}));
+      return;
+    } else if (self.name().length == 0) {
+      Notify_showMsg('error', t("app.customer.transferNok", {context: "noName"}));
+      self.nameError(true);
+      return;
+    }
+    self.nameError(false);
+
+    var isNewCustomer = true; // New customer in destination company
+    var newCustJson = self.toJSON();
+    newCustJson.companyId = destCompanyId;
+    delete newCustJson._id;
+
+    Notify_showSpinner(true, t("app.customer.transferTicker"));
+    return $.ajax({
+      url : "/api/customer/undefined",
+      type : "PUT",
+      contentType : "application/json",
+      data : JSON.stringify(newCustJson),
+      dataType : "json",
+      success : function(data) {
+        Log.info("transferToCompany: response: " + JSON.stringify(data));
+        var tContext = "";
+        Notify_showSpinner(false);
+        Notify_showMsg('success', t("app.customer.transferOk",
+            {cid: ""+data.customer.cid}));
+      },
+    });
+  };
+
   self.toJSON = function() {
     var res = {
       _id : self._id(),
@@ -1217,13 +1251,16 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
   };
 };
 
-var CustomerNewViewModel = function(currentView, activeCompanyId) {
+var CustomerNewViewModel = function(currentView, activeCompanyId, companyList) {
   var self = this;
 
   self.data = new CustomerViewModel();
 
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
+  self.isExtraOptVisible = ko.observable(false);
+  self.companyList = companyList;
+  self.transferDestCompany = ko.observable();
 
   inheritInvoiceLngModel(self);
   inheritCurrencyModel(self);
@@ -1233,6 +1270,7 @@ var CustomerNewViewModel = function(currentView, activeCompanyId) {
     var viewArray = newValue.split("/");
     if (viewArray[0] == 'customer_new') {
       Log.info("CustomerNewViewModel - activated");
+      self.isExtraOptVisible(false);
       if (self.activeCompanyId() != null) {
         self.data.init();
         self.data.setActiveCompanyId(self.activeCompanyId());
@@ -1267,7 +1305,21 @@ var CustomerNewViewModel = function(currentView, activeCompanyId) {
       }
     });
   };
+
+  self.toggleIsExtraOptVisible = function() {
+    var newState = !self.isExtraOptVisible();
+    self.isExtraOptVisible(newState);
+  }
   
+  self.transferCustomer = function() {
+    var destCompanyId = self.transferDestCompany()._id();
+    if (destCompanyId == self.activeCompanyId()) {
+      Notify_showMsg('error', t("app.customer.transferNok", {context: "activeCompanySelected"}));
+    } else {
+      self.data.transferToCompany(destCompanyId);
+    }
+  };
+
   self.saveCustomer = function() {
     self.data.updateServer();
   };
@@ -3608,7 +3660,7 @@ var setupKo = function() {
   var customerListViewModel = new CustomerListViewModel(
       navViewModel.currentView, navViewModel.activeCompanyId);
   var customerNewViewModel = new CustomerNewViewModel(navViewModel.currentView,
-      navViewModel.activeCompanyId);
+      navViewModel.activeCompanyId, navViewModel.companyList);
   var invoiceListViewModel = new InvoiceListViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId);
   var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView, navViewModel.activeCompany);

@@ -1059,6 +1059,59 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <nav>
+                                <ul class="pager">
+                                    <li>
+                                        <a href="#" data-bind="click: toggleIsExtraOptVisible">
+                                            <span data-bind="ifnot: isExtraOptVisible">
+                                                <span class="glyphicon glyphicon-chevron-down inline-icon-left-fix"
+                                                    aria-hidden="true"/>
+                                                ${i18n.t('app.customer.extraOptToggleLbl', {context: 'show'})}
+                                                <span class="glyphicon glyphicon-chevron-down inline-icon-right-fix"
+                                                    aria-hidden="true"/>
+                                            </span>
+                                            <span data-bind="if: isExtraOptVisible">
+                                                <span class="glyphicon glyphicon-chevron-up inline-icon-left-fix"
+                                                    aria-hidden="true"/>
+                                                ${i18n.t('app.customer.extraOptToggleLbl', {context: 'hide'})}
+                                                <span class="glyphicon glyphicon-chevron-up inline-icon-right-fix"
+                                                    aria-hidden="true"/>
+                                            </span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+
+
+                            <div class="panel panel-default" data-bind="visible: isExtraOptVisible">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">
+                                        ${i18n.t('app.customer.transferPaneHeader')}
+                                    </h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="form-group" data-bind="enable: data._id() != undefined">
+                                        <label for="companySelect"
+                                            class="col-md-2 control-label">
+
+                                            ${i18n.t('app.customer.transferCompanySelectLbl')}
+
+                                        </label>
+                                        <div class="col-md-3">
+                                            <select id="companySelect" class="form-control"
+                                                data-bind="options: companyList, optionsText: 'name', value: transferDestCompany">
+                                            </select>
+                                        </div>
+                                        <button type="button" class="btn btn-default"
+                                            data-bind="click: transferCustomer, enable: data._id() != undefined">
+                                            <span class="glyphicon glyphicon-transfer inline-icon-left-fix"
+                                                aria-hidden="true"/>
+                                            ${i18n.t('app.customer.transferCustomerBtn')}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="btn-group" role="group">
                             <button type="button" class="btn btn-success"
@@ -1067,7 +1120,6 @@
                                 <span class="glyphicon glyphicon-save inline-icon-left-fix"
                                     aria-hidden="true"/>
                                 ${i18n.t('app.customer.saveBtn')}
-
                             </button>
                         </div>
                     </div>
