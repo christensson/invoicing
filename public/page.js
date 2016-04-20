@@ -321,8 +321,14 @@ var inheritInvoiceLngModel = function(self) {
   }
 };
 
-var inheritCurrencyModel = function(self) {
-  self.currencyList = ko.observableArray(defaults.currencyList);
+var inheritCurrencyModel = function(self, hasWildcard) {
+  hasWildcard = typeof hasWildcard !== 'undefined' ? hasWildcard : false;
+  // Copy currencyList array since we might add a wildcard
+  self.currencyList = ko.observableArray(defaults.currencyList.slice(0));
+
+  if (hasWildcard) {
+    self.currencyList.unshift(defaults.currencyWildcard);
+  }
 
   self.getCurrencyDesc = function(name) {
     return t("app.currency.description", {context: name});
@@ -2166,23 +2172,29 @@ var InvoiceListDataViewModel = function(data, filterOpt) {
   self.date = ko.observable(data.date);
   self.daysUntilPayment = ko.observable(data.daysUntilPayment);
   self.projId = ko.observable(data.projId);
-  self.currency = ko.observable(data.currency);
+  self.currency = ko.observable(data.customer.currency);
   self.totalExclVat = ko.observable(data.totalExclVat);
   self.totalInclVat = ko.observable(data.totalInclVat);
+  self.totalVat = ko.pureComputed(function() {
+    return self.totalInclVat() - self.totalExclVat();
+  }, self);
   self.totalExclVatStr = ko.pureComputed(function() {
     return Util.formatCurrency(self.totalExclVat(), {currencyStr: self.currency()});
   }, self);
   self.totalInclVatStr = ko.pureComputed(function() {
     return Util.formatCurrency(self.totalInclVat(), {currencyStr: self.currency()});
   }, self);
-  self.isOverdue = ko.pureComputed(function() {
+  self.totalVatStr = ko.pureComputed(function() {
+    return Util.formatCurrency(self.totalVat(), {currencyStr: self.currency()});
+  }, self);
+  self.isExpired = ko.pureComputed(function() {
     var overdue = false;
     if (self.daysUntilPayment() !== undefined && parseInt(self.daysUntilPayment()) >= 0)
     {
       var invoiceDate = new Date(self.date());
       var invoiceAgeMs = Date.now() - invoiceDate.valueOf();
       var invoiceAgeDays = invoiceAgeMs / (1000 * 3600 * 24);
-      Log.info("Invoice isOverdue: iid=" + self.iid() + ", date="
+      Log.info("Invoice isExpired: iid=" + self.iid() + ", date="
           + invoiceDate + ", ageInDays=" + invoiceAgeDays + ", daysUntilPayment="
           + self.daysUntilPayment());
       if (invoiceAgeDays > parseInt(self.daysUntilPayment())) {
@@ -2192,15 +2204,21 @@ var InvoiceListDataViewModel = function(data, filterOpt) {
     }
     else
     {
-      Log.info("Invoice isOverdue: iid=" + self.iid() + ", not valid daysUntilPayment="
+      Log.info("Invoice isExpired: iid=" + self.iid() + ", not valid daysUntilPayment="
           + self.daysUntilPayment());
     }
-    return overdue;
+    return overdue && !self.isPaid() && !self.isCanceled();
   }, self);
 
   self.isVisible = ko.pureComputed(function() {
+    var isUnpaid = !this.isPaid();
+    var isUnpaidExpired = this.isExpired();
     var paidVisible = !this.isPaid() || (this.filterOpt.showPaid() && this.isPaid());
+    var unpaidVisible = !isUnpaid || (this.filterOpt.showUnpaid() && isUnpaid) || (this.filterOpt.showUnpaidExpired() && isUnpaidExpired);
+    var unpaidExpiredVisible = !isUnpaidExpired || (this.filterOpt.showUnpaidExpired() && isUnpaidExpired);
+    var notCreditVisible = this.isCredit() || (this.filterOpt.showNotCredit() && !this.isCredit());
     var creditVisible = !this.isCredit() || (this.filterOpt.showCredit() && this.isCredit());
+    var notCanceledVisible = this.isCanceled() || (this.filterOpt.showNotCanceled() && !this.isCanceled());
     var canceledVisible = !this.isCanceled() || (this.filterOpt.showCanceled() && this.isCanceled());
 
     var customerMatch = true;
@@ -2217,15 +2235,19 @@ var InvoiceListDataViewModel = function(data, filterOpt) {
       }
     }
 
-    var inDateRange = true;
-    if (this.filterOpt.isDateFilterActive()) {
-      var fromDate = new Date(this.filterOpt.filterFromDate());
-      var toDate = new Date(this.filterOpt.filterToDate());
-      var invoiceDate = new Date(this.date());
-      inDateRange = (invoiceDate >= fromDate) && (invoiceDate <= toDate);
-      Log.info("InvoiceListDataViewModel - inDateRange=" + inDateRange + ", from=" + fromDate + ", to=" + toDate + ", date=" + invoiceDate);
+    var invoiceDate = new Date(this.date());
+    var inDateRange = this.filterOpt.dateFilterIsYearVisible(invoiceDate.getFullYear()) &&
+      this.filterOpt.dateFilterIsMonthChecked(invoiceDate.getMonth());
+
+    var currencyMatch = true;
+    if (this.filterOpt.currencyFilter() != defaults.currencyWildcard) {
+      currencyMatch = this.filterOpt.currencyFilter() == self.currency();
     }
-    return customerMatch && inDateRange && paidVisible && creditVisible && canceledVisible;
+
+    return self.isValid() && customerMatch && inDateRange && currencyMatch &&
+      paidVisible && unpaidVisible && unpaidExpiredVisible &&
+      creditVisible && notCreditVisible &&
+      canceledVisible && notCanceledVisible;
   }, self);
 
   self.printInvoice = function() {
@@ -2246,20 +2268,203 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   self.activeCompanyId = activeCompanyId;
 
   self.customerList = ko.observableArray();
+  self.invoiceListSort = ko.observable('iidAsc');
 
-  self.isFilterPaneExpanded = ko.observable(true);
+  inheritCurrencyModel(self, true);
 
-  self.filterOpt = {
-    showPaid: ko.observable(true),
-    showCredit: ko.observable(true),
-    showCanceled: ko.observable(true),
-    isDateFilterActive: ko.observable(false),
-    filterFromDate: ko.observable(new Date().toISOString().split("T")[0]),
-    filterToDate: ko.observable(new Date().toISOString().split("T")[0]),
-    customerFilterCustomer: ko.observable(),
+  self.isFilterPaneExpanded = ko.observable(defaults.invoiceListFilter.isPaneExpanded);
+
+  self.numInvoicesText = ko.pureComputed(function() {
+    var count = 0;
+    for (var i = 0; i < self.invoiceList().length; i++) {
+      var invoice = self.invoiceList()[i];
+      var currency = invoice.currency();
+      if (self.invoiceList()[i].isVisible()) {
+        count++;
+      }
+    }
+    return t('app.invoiceList.numInvoicesLbl', {count: count});
+  }, self);
+
+  self.invoiceCurrencyList = ko.pureComputed(function() {
+    var currencies = ko.utils.arrayMap(self.invoiceList(), function(item) {
+      if (item.isVisible()) {
+        return item.currency();
+      } else {
+        return undefined;
+      }
+    });
+
+    // Remove any undefined entries
+    currencies = ko.utils.arrayFilter(currencies, function(item) {
+      return item !== undefined;
+    });
+
+    return ko.utils.arrayGetDistinctValues(currencies).sort();
+  }, self);
+
+  self.totalPerCurrencyText = ko.pureComputed(function() {
+    var sumPerCurrency = ko.utils.arrayMap(self.invoiceCurrencyList(), function(item) {
+      return {
+        currency: item,
+        sumExclVat: 0,
+        sumInclVat: 0,
+        sumVat: 0,
+      };
+    });
+
+    for (var i = 0; i < self.invoiceList().length; i++) {
+      var invoice = self.invoiceList()[i];
+      var currency = invoice.currency();
+      if (invoice.isVisible()) {
+        // Find sum
+        var sumItem = ko.utils.arrayFirst(sumPerCurrency, function(item) {
+          return item.currency == currency;
+        });
+        sumItem.sumExclVat += invoice.totalExclVat();
+        sumItem.sumInclVat += invoice.totalInclVat();
+        sumItem.sumVat += invoice.totalVat();
+      }
+    }
+
+    for (var i = 0; i < sumPerCurrency.length; i++) {
+      var item = sumPerCurrency[i];
+      item.sumExclVatStr = Util.formatCurrency(item.sumExclVat, {currencyStr: item.currency});
+      item.sumInclVatStr = Util.formatCurrency(item.sumInclVat, {currencyStr: item.currency});
+      item.sumVatStr = Util.formatCurrency(item.sumVat, {currencyStr: item.currency});
+    }
+    return sumPerCurrency;
+  }, self);
+
+  self.getYear = function(offset) {
+    return new Date().getFullYear() + offset;
+  }
+
+  self.dateFilterYearList = ko.observableArray(Util.range(self.getYear(-2), self.getYear(0)));
+
+  self.dateFilterAddYears = function(numYearsToAdd) {
+    var year = self.getYear(0);
+    var addHigh = (numYearsToAdd > 0)?true:false;
+    
+    for (var i = 0; i < self.dateFilterYearList().length; i++) {
+      var y = self.dateFilterYearList()[i];
+      if (addHigh) {
+        if (y > year) {
+          year = y;
+        }
+      } else {
+        if (y < year) {
+          year = y;
+        }
+      }
+    }
+
+    var yearToAdd = year;
+
+    for (var i = 0; i < Math.abs(numYearsToAdd); i++) {
+      if (addHigh) {
+        yearToAdd = yearToAdd + 1;
+        self.dateFilterYearList.push(yearToAdd);
+      } else {
+        yearToAdd = yearToAdd - 1;
+        self.dateFilterYearList.unshift(yearToAdd);
+      }
+    }
   };
 
-  self.invoiceListSort = ko.observable('iidAsc');
+  self.filterOpt = {
+    showPaid: ko.observable(defaults.invoiceListFilter.showPaid),
+    showUnpaid: ko.observable(defaults.invoiceListFilter.showUnpaid),
+    showUnpaidExpired: ko.observable(defaults.invoiceListFilter.showUnpaidExpired),
+    showNotCredit: ko.observable(defaults.invoiceListFilter.showNotCredit),
+    showCredit: ko.observable(defaults.invoiceListFilter.showCredit),
+    showNotCanceled: ko.observable(defaults.invoiceListFilter.showNotCanceled),
+    showCanceled: ko.observable(defaults.invoiceListFilter.showCanceled),
+
+    customerFilterCustomer: ko.observable(),
+
+    currencyFilter: ko.observable(self.currencyList[0]), // Wildcard selected
+
+    // List containing full year values that will be shown
+    dateFilterCheckedYearList: ko.observableArray(['*']),
+    // List containing month identifiers (0-11) that will be shown
+    dateFilterCheckedMonthList: ko.observableArray(Util.range(0,11)),
+
+    dateFilterIsMonthChecked: function(month) {
+      var item = ko.utils.arrayFirst(self.filterOpt.dateFilterCheckedMonthList(), function(item) {
+        return item == month;
+      });
+      return item != undefined;
+    },
+    dateFilterIsYearChecked: function(fullYear) {
+      // List stores full years...
+      var item = ko.utils.arrayFirst(self.filterOpt.dateFilterCheckedYearList(), function(item) {
+        return item == fullYear;
+      });
+      return item != undefined;
+    },
+    dateFilterIsYearVisible: function(fullYear) {
+      var isPresent = false;
+
+      // Search for fullYear
+      var item = ko.utils.arrayFirst(self.filterOpt.dateFilterCheckedYearList(), function(item) {
+        return item == fullYear;
+      });
+      var isPresent = (item != undefined)?true:false;
+
+      // If not found, check for wildcard
+      if (!isPresent) {
+        item = ko.utils.arrayFirst(self.filterOpt.dateFilterCheckedYearList(), function(item) {
+          return item == '*';
+        });
+        isPresent = (item != undefined)?true:false;
+      }
+      return isPresent;
+    },
+  };
+
+  self.setDateFilterYear = function(yearToAdd) {
+    var listItem;
+    var isWildcardSelected = false;
+    if (typeof yearToAdd === 'string') {
+      if (yearToAdd === '*') {
+        listItem = '*';
+        isWildcardSelected = true;
+      }
+    } else {
+      listItem = yearToAdd;
+    }
+
+    // Check if already in checked list
+    var isPresent = self.filterOpt.dateFilterIsYearChecked(yearToAdd);
+    if (isPresent) {
+      self.filterOpt.dateFilterCheckedYearList.remove(listItem);
+    } else {
+      if (isWildcardSelected) {
+        // If wildcard is selected, start with removing previous items
+        self.filterOpt.dateFilterCheckedYearList.removeAll();
+      } else {
+        // If wildcard isn't selected, remove possible wildcard
+        self.filterOpt.dateFilterCheckedYearList.remove('*');
+      }
+      self.filterOpt.dateFilterCheckedYearList.push(listItem);
+
+    }
+    console.log("Filter " + (isPresent?"removed":"added") + " year " + listItem +
+      ", new list=" + JSON.stringify(self.filterOpt.dateFilterCheckedYearList()));
+  };
+
+  self.setDateFilterMonth = function(month) {
+    // Check if already in checked list
+    var isPresent = self.filterOpt.dateFilterIsMonthChecked(month);
+    if (isPresent) {
+      self.filterOpt.dateFilterCheckedMonthList.remove(month);
+    } else {
+      self.filterOpt.dateFilterCheckedMonthList.push(month);
+    }
+    console.log("Filter " + (isPresent?"removed":"added") + "month " + month +
+      ", new list=" + JSON.stringify(self.filterOpt.dateFilterCheckedMonthList()));
+  };
 
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'invoices') {
@@ -2435,12 +2640,34 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     return self.customerAscCompare(bRow, aRow);
   };
 
+  self.currencyAscCompare = function(aRow, bRow) {
+    if (aRow.currency() < bRow.currency()) {
+      return -1;
+    } else if (aRow.currency() > bRow.currency()) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+
+  self.currencyDescCompare = function(aRow, bRow) {
+    return self.currencyAscCompare(bRow, aRow);
+  };
+
   self.totalExclVatAscCompare = function(aRow, bRow) {
     return aRow.totalExclVat() - bRow.totalExclVat();
   };
 
   self.totalExclVatDescCompare = function(aRow, bRow) {
     return self.totalExclVatAscCompare(bRow, aRow);
+  };
+
+  self.totalVatAscCompare = function(aRow, bRow) {
+    return aRow.totalVat() - bRow.totalVat();
+  };
+
+  self.totalVatDescCompare = function(aRow, bRow) {
+    return self.totalVatAscCompare(bRow, aRow);
   };
 };
 
