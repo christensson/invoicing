@@ -734,7 +734,7 @@ app.put("/api/itemGroupTemplate/:id", ensureAuthenticated, function(req, res) {
 app.get("/api/invoiceReport/:id/:isReminder", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var id = req.params.id;
-  var isReminder = req.params.isReminder;
+  var isReminder = (req.params.isReminder==="true")?true:false;
   log.info("Invoice report: user=" + req.user.info.name + ", _id=" + id + ", isReminder=" + isReminder);
   
   // Check license in settings
