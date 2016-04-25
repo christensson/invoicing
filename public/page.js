@@ -1436,6 +1436,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
   self.title = ko.observable();
   self.isValid = ko.observable();
   self.isQuickButton = ko.observable();
+  self.isTextOnlyDefault = ko.observable();
 
   self.titleExtraField = ko.observable("");
   self.descColLbl = ko.observable();
@@ -1475,6 +1476,11 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
     self.title(data.title);
     self.isValid(data.isValid);
     self.isQuickButton(data.isQuickButton);
+    if (data.isTextOnlyDefault) {
+      self.isTextOnlyDefault(data.isTextOnlyDefault);
+    } else {
+      self.isTextOnlyDefault(false);
+    }
 
     self.titleExtraField(data.titleExtraField);
     self.hasTitleExtraField(data.hasTitleExtraField);
@@ -1517,6 +1523,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
       title: "",
       isValid: true,
       isQuickButton: false,
+      isTextOnlyDefault: false,
       titleExtraField: "",
       hasTitleExtraField: false,
       descColLbl: t("app.groupTemplates.descCol"),
@@ -1588,7 +1595,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
           vat : 25,
           discount : 0.0,
           isValid : true,
-          isTextOnly: false,
+          isTextOnly: self.isTextOnlyDefault(),
         };
       self.invoiceItems.push(new InvoiceItemViewModel(data, self));
       Log.info("Added new invoice item to group=" + self.name() +
@@ -1670,6 +1677,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
       title : self.title(),
       isValid : self.isValid(),
       isQuickButton : self.isQuickButton(),
+      isTextOnlyDefault : self.isTextOnlyDefault(),
       titleExtraField : self.titleExtraField(),
       hasTitleExtraField : self.hasTitleExtraField(),
       descColLbl : self.descColLbl(),
@@ -2917,6 +2925,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
           title: "Detaljer",
           isValid: true,
           isQuickButton: false,
+          isTextOnlyDefault: false,
           descColLbl: "Beskrivning",
           priceColLbl: "Á-pris",
           countColLbl: "Antal",
