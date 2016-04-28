@@ -241,7 +241,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
 
   var customerAddrX = headerStringX;
   var customerAddrY = convMmToDpi(45);
-  var customerAddrWidth = 195;
+  var customerAddrWidth = 300;
   var customerAddrCaptionX = customerAddrX;
   var customerAddrCaptionY = customerAddrY - convMmToDpi(7);
   
