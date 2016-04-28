@@ -330,85 +330,47 @@ function updateDataPromise(collectionName, data, incFields) {
   });
 }
 
-function getNextCidPromise(uid, companyId) {
+function getNextDocNrPerCompanyPromise(uid, companyId, nrField) {
   return dbopPromise().then(function (db) {
     var deferred = Q.defer();
     var coll = db.collection("company");
     var ouid = new ObjectID(uid);
     var ocompanyId = new ObjectID(companyId);
     var query = { _id: ocompanyId, uid: ouid };
+    var fieldIncExpr = {};
+    fieldIncExpr[String(nrField)] = 1;
     coll.findAndModify(
         query,
         [], // sort
-        { $inc: { nextCid: 1 } }, // update
+        { $inc: fieldIncExpr }, // update
         { 'new': false }, // options
         function(err, obj) {
           if(err) {
             deferred.reject(
-                new Error("getNextCidPromise(" + JSON.stringify(query) + "): " + err));
+                new Error("getNextDocNrPerCompanyPromise(" + JSON.stringify(query) +
+                  ", nrField=" + nrField + "): " + err));
           } else {
-            var value = obj.value.nextCid;
-            log.verbose("getNextCidPromise(" + JSON.stringify(query) + "): success: cid=" + value);
+            var value = obj.value[String(nrField)];
+            log.verbose("getNextDocNrPerCompanyPromise(" + JSON.stringify(query) +
+              ", nrField=" + nrField + "): success: docNr=" + value);
             deferred.resolve(value);
           }
         }
     );
     return deferred.promise;
   });
+}
+
+function getNextCidPromise(uid, companyId) {
+  return getNextDocNrPerCompanyPromise(uid, companyId, 'nextCid');
 }
 
 function getNextIidPromise(uid, companyId) {
-  return dbopPromise().then(function (db) {
-    var deferred = Q.defer();
-    var coll = db.collection("company");
-    var ouid = new ObjectID(uid);
-    var ocompanyId = new ObjectID(companyId);
-    var query = { _id: ocompanyId, uid: ouid };
-    coll.findAndModify(
-        query,
-        [], // sort
-        { $inc: { nextIid: 1 } }, // update
-        { 'new': false }, // options
-        function(err, obj) {
-          if(err) {
-            deferred.reject(
-                new Error("getNextIidPromise(" + JSON.stringify(query) + "): " + err));
-          } else {
-            var value = obj.value.nextIid;
-            log.verbose("getNextIidPromise(" + JSON.stringify(query) + "): success: iid=" + value);
-            deferred.resolve(value);
-          }
-        }
-    );
-    return deferred.promise;
-  });
+  return getNextDocNrPerCompanyPromise(uid, companyId, 'nextIid');
 }
 
 function getNextOidPromise(uid, companyId) {
-  return dbopPromise().then(function (db) {
-    var deferred = Q.defer();
-    var coll = db.collection("company");
-    var ouid = new ObjectID(uid);
-    var ocompanyId = new ObjectID(companyId);
-    var query = { _id: ocompanyId, uid: ouid };
-    coll.findAndModify(
-        query,
-        [], // sort
-        { $inc: { nextOid: 1 } }, // update
-        { 'new': false }, // options
-        function(err, obj) {
-          if(err) {
-            deferred.reject(
-                new Error("getNextOidPromise(" + JSON.stringify(query) + "): " + err));
-          } else {
-            var value = obj.value.nextIid;
-            log.verbose("getNextOidPromise(" + JSON.stringify(query) + "): success: oid=" + value);
-            deferred.resolve(value);
-          }
-        }
-    );
-    return deferred.promise;
-  });
+  return getNextDocNrPerCompanyPromise(uid, companyId, 'nextOid');
 }
 
 var colls = [

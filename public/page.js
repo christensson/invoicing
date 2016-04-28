@@ -2386,7 +2386,7 @@ var InvoiceListDataViewModel = function(data, filterOpt) {
       canceledVisible && notCanceledVisible;
   }, self);
 
-  self.printInvoice = function() {
+  self.printDoc = function() {
     Log.info("InvoiceListDataViewModel - Report requested");
     if (self._id() !== undefined) {
       InvoiceOps.printInvoice(self._id());
@@ -2414,18 +2414,17 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
 
   self.numInvoicesText = ko.pureComputed(function() {
     var count = 0;
-    for (var i = 0; i < self.docList().length; i++) {
-      var invoice = self.docList()[i];
-      var currency = invoice.currency();
-      if (self.docList()[i].isVisible()) {
+    for (var i = 0; i < self.docList()().length; i++) {
+      var invoice = self.docList()()[i];
+      if (invoice.isVisible()) {
         count++;
       }
     }
-    return t('app.invoiceList.numInvoicesLbl', {count: count});
+    return t('app.invoiceList.numDocsLbl', {count: count, context: self.docType()});
   }, self);
 
   self.invoiceCurrencyList = ko.pureComputed(function() {
-    var currencies = ko.utils.arrayMap(self.docList(), function(item) {
+    var currencies = ko.utils.arrayMap(self.docList()(), function(item) {
       if (item.isVisible()) {
         return item.currency();
       } else {
@@ -2451,10 +2450,10 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
       };
     });
 
-    for (var i = 0; i < self.docList().length; i++) {
-      var invoice = self.docList()[i];
-      var currency = invoice.currency();
+    for (var i = 0; i < self.docList()().length; i++) {
+      var invoice = self.docList()()[i];
       if (invoice.isVisible()) {
+        var currency = invoice.currency();
         // Find sum
         var sumItem = ko.utils.arrayFirst(sumPerCurrency, function(item) {
           return item.currency == currency;
@@ -3134,10 +3133,10 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     }
   };
 
-  self.saveInvoice = function() {
+  self.doSaveDoc = function() {
     if ((self.data._id() === undefined) && !self.data.isValid()) {
       Notify_showMsg('error', t("app.invoice.saveNok"));
-      Log.info("saveInvoice: Nothing to do (invalid entry without _id)");
+      Log.info("doSaveDoc: Nothing to do (invalid entry without _id)");
       return;
     } else if (self.data.customer() === undefined) {
       Notify_showMsg('error', t("app.invoice.saveNok", {context: 'invalidCustomer'}));
@@ -3150,7 +3149,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     var isNewDoc = (self.data._id() == undefined) ? true : false;
     var ajaxData = JSON.stringify(self.data.toJSON());
     var ajaxUrl = "/api/" + self.data.docType() + "/" + self.data._id();
-    Log.info("saveInvoice: AJAX PUT (url=" + ajaxUrl + "): JSON="
+    Log.info("doSaveDoc: AJAX PUT (url=" + ajaxUrl + "): JSON="
         + ajaxData);
     Notify_showSpinner(true, t("app.invoice.saveTicker"));
     return $.ajax({
@@ -3160,7 +3159,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
       data : ajaxData,
       dataType : "json",
       success : function(data) {
-        Log.info("saveInvoice: response: " + JSON.stringify(data));
+        Log.info("doSaveDoc: response: " + JSON.stringify(data));
         var tContext = "";
         if (!isNewDoc) {
           tContext = (data.doc.isValid) ? 'update' : 'delete';
@@ -3194,7 +3193,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     });
   };
   
-  self.doInvoicePrint = function() {
+  self.doDocPrint = function() {
     Log.info("InvoiceNewViewModel - Print requested");
     if (self.data._id() !== undefined) {
       InvoiceOps.printInvoice(self.data._id());
@@ -3214,7 +3213,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     }
   };
 
-  self.doCopyInvoice = function() {
+  self.doCopyDoc = function() {
     Log.info("InvoiceNewViewModel - Copy invoice requested");
     /* Mark datafields so that the next save will allocate new invoice ids */
     self.data.forceMarkAsNew();

@@ -1147,19 +1147,25 @@
                                             <label class="col-md-1 control-label" for="invoiceOptFilter">
                                                 ${i18n.t('app.invoiceList.propFilterLbl')}
                                             </label>
-                                            <div id="invoiceOptFilter">
+                                            <div id="invoiceOptFilter" data-bind="if: docType() == 'invoice'">
                                               <div class="col-md-11">
-                                                      <filterLabelToggle condVar="filterOpt.showNotCredit" text="${i18n.t('app.invoiceList.showNotCreditFilterLbl')}"/>
-                                                      <filterLabelToggle condVar="filterOpt.showCredit" text="${i18n.t('app.invoiceList.showCreditFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showNotCredit" text="${i18n.t('app.invoiceList.showNotCreditFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showCredit" text="${i18n.t('app.invoiceList.showCreditFilterLbl')}"/>
                                               </div>
                                               <div class="col-md-offset-1 col-md-11">
-                                                      <filterLabelToggle condVar="filterOpt.showPaid" text="${i18n.t('app.invoiceList.showPaidFilterLbl')}"/>
-                                                      <filterLabelToggle condVar="filterOpt.showUnpaid" text="${i18n.t('app.invoiceList.showUnpaidFilterLbl')}"/>
-                                                      <filterLabelToggle condVar="filterOpt.showUnpaidExpired" text="${i18n.t('app.invoiceList.showUnpaidExpiredFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showPaid" text="${i18n.t('app.invoiceList.showPaidFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showUnpaid" text="${i18n.t('app.invoiceList.showUnpaidFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showUnpaidExpired" text="${i18n.t('app.invoiceList.showUnpaidExpiredFilterLbl')}"/>
                                               </div>
                                               <div class="col-md-offset-1 col-md-11">
-                                                      <filterLabelToggle condVar="filterOpt.showNotCanceled" text="${i18n.t('app.invoiceList.showNotCanceledFilterLbl')}"/>
-                                                      <filterLabelToggle condVar="filterOpt.showCanceled" text="${i18n.t('app.invoiceList.showCanceledFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showNotCanceled" text="${i18n.t('app.invoiceList.showNotCanceledFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showCanceled" text="${i18n.t('app.invoiceList.showCanceledFilterLbl')}"/>
+                                              </div>
+                                            </div>
+                                            <div id="invoiceOptFilter" data-bind="if: docType() == 'offer'">
+                                              <div class="col-md-11">
+                                                  <filterLabelToggle condVar="filterOpt.showNotCanceled" text="${i18n.t('app.invoiceList.showNotCanceledFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showCanceled" text="${i18n.t('app.invoiceList.showCanceledFilterLbl')}"/>
                                               </div>
                                             </div>
                                         </div>
@@ -1326,26 +1332,20 @@
                                                 </span>
                                             </button>
                                         </th>
-                                        <th>
+                                        <th data-bind="if: docType() == 'invoice'">
                                             ${i18n.t('app.invoiceList.colIsPaid')}
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody data-bind="foreach: docList()">
-                                    <tr data-bind="if: isVisible(),
-                                                   css: { danger: isExpired }">
+                                    <tr data-bind="if: isVisible(), css: { danger: isExpired }">
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a class="btn btn-info" data-bind="attr: { href: '#/page/invoice_show/' + _id() }">
-                                                    <span class="glyphicon glyphicon-pencil"
-                                                        aria-hidden="true"/>
+                                                <a class="btn btn-info" data-bind="attr: { href: '#/page/' + docType() + '_show/' + _id() }">
+                                                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"/>
                                                 </a>
-                                                <a class="btn btn-info"
-                                                    data-bind="click: printInvoice">
-
-                                                    <span class="glyphicon glyphicon-print"
-                                                        aria-hidden="true"/>
-
+                                                <a class="btn btn-info" data-bind="click: printDoc">
+                                                    <span class="glyphicon glyphicon-print" aria-hidden="true"/>
                                                 </a>
                                             </div>
                                         </td>
@@ -1359,30 +1359,24 @@
                                             </p>
                                         </td>
                                         <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: date"/>
+                                            <p class="form-control-static" data-bind="text: date"/>
                                         </td>
                                         <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: customer().cid"/>
+                                            <p class="form-control-static" data-bind="text: customer().cid"/>
                                         </td>
                                         <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: customer().name"/>
+                                            <p class="form-control-static" data-bind="text: customer().name"/>
                                         </td>
                                         <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: currency"/>
+                                            <p class="form-control-static" data-bind="text: currency"/>
                                         </td>
                                         <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: totalExclVatStr"/>
+                                            <p class="form-control-static" data-bind="text: totalExclVatStr"/>
                                         </td>
                                         <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: totalVatStr"/>
+                                            <p class="form-control-static" data-bind="text: totalVatStr"/>
                                         </td>
-                                        <td>
+                                        <td data-bind="if: docType() == 'invoice'">
                                             <p class="form-control-static">
                                                 <condCheckIcon cond="isPaid"/>
                                             </p>
@@ -1415,19 +1409,24 @@
                                                 <html-comment> /ko </html-comment>
                                               </p>
                                         </td>
-                                        <td></td>
+                                        <td data-bind="if: docType() == 'invoice'"></td>
                                     </tr>
                                 </tfoot>
                             </table>
                         </p>
                         <div class="btn-group" role="group">
-                            <a href="#/page/invoice_new" type="button"
-                                class="btn btn-success">
-
-                                <span class="glyphicon glyphicon-plus inline-icon-left-fix"
-                                    aria-hidden="true"/>
-                                ${i18n.t('app.invoiceList.newInvoiceBtn')}
-                            </a>
+                            <html-comment> ko if: docType() == 'invoice' </html-comment>
+                                <a href="#/page/invoice_new" type="button" class="btn btn-success">
+                                    <span class="glyphicon glyphicon-plus inline-icon-left-fix" aria-hidden="true"/>
+                                    ${i18n.t('app.invoiceList.newDocBtn', {context: 'invoice'})}
+                                </a>
+                            <html-comment> /ko </html-comment>
+                            <html-comment> ko if: docType() == 'offer' </html-comment>
+                                <a href="#/page/offer_new" type="button" class="btn btn-success">
+                                    <span class="glyphicon glyphicon-plus inline-icon-left-fix" aria-hidden="true"/>
+                                    ${i18n.t('app.invoiceList.newDocBtn', {context: 'offer'})}
+                                </a>
+                            <html-comment> /ko </html-comment>
                         </div>
                     </form>
 
@@ -2259,8 +2258,7 @@
                                                     ${i18n.t('app.invoice.paymentOptCustomTextHeader')}
                                                 </label>
                                                 <div class="col-sm-6">
-                                                    <textarea rows="4"
-                                                        id="payCustomText"
+                                                    <textarea rows="4" id="payCustomText"
                                                         class="form-control" data-bind="value: data.companyLngMirror_paymentCustomText, disable: data.isLocked"/>
                                                 </div>
                                             </div>
@@ -2271,8 +2269,7 @@
                                                     ${i18n.t('app.invoice.customTextFieldsFooterTextLbl')}
                                                 </label>
                                                 <div class="col-sm-6">
-                                                    <input type="text"
-                                                        id="footerText"
+                                                    <input type="text" id="footerText"
                                                         class="form-control" data-bind="value: data.companyLngMirror_vatNrCustomText, disable: data.isLocked"/>
                                                 </div>
                                             </div>
@@ -2283,8 +2280,7 @@
                                                     ${i18n.t('app.invoice.customTextFieldsReverseChargeTextLbl')}
                                                 </label>
                                                 <div class="col-sm-6">
-                                                    <textarea rows="4"
-                                                        id="reverseChargeText"
+                                                    <textarea rows="4" id="reverseChargeText"
                                                         class="form-control" data-bind="value: data.companyLngMirror_reverseChargeText, disable: data.isLocked" aria-describedby="reverseChargeTextHelp"/>
                                                     <span id="reverseChargeTextHelp" class="help-block">
                                                         ${i18n.t('app.invoice.customTextFieldsReverseChargeHelpText')}
@@ -2303,43 +2299,32 @@
                         <!-- buttons panel -->
                         <div class="col-md-12">
                             <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-success"
-                                    data-bind="click: saveInvoice">
-
-                                    <span class="glyphicon glyphicon-save inline-icon-left-fix"
-                                        aria-hidden="true"/>
-                                    ${i18n.t('app.invoice.saveInvoiceBtn')}
+                                <button type="button" class="btn btn-success" data-bind="click: doSaveDoc">
+                                    <span class="glyphicon glyphicon-save inline-icon-left-fix" aria-hidden="true"/>
+                                    ${i18n.t('app.invoice.saveDocBtn')}
                                 </button>
-                                <button type="button" class="btn btn-info"
-                                    data-bind="click: doInvoicePrint">
-
-                                    <span class="glyphicon glyphicon-print inline-icon-left-fix"
-                                        aria-hidden="true"/>
-                                    ${i18n.t('app.invoice.printInvoiceBtn')}
+                                <button type="button" class="btn btn-info" data-bind="click: doDocPrint, disable: data._id() === undefined">
+                                    <span class="glyphicon glyphicon-print inline-icon-left-fix" aria-hidden="true"/>
+                                    ${i18n.t('app.invoice.printDocBtn')}
                                 </button>
-                                <button type="button" class="btn btn-info"
-                                    data-bind="click: doCopyInvoice">
-
-                                    <span class="glyphicon glyphicon-duplicate inline-icon-left-fix"
-                                        aria-hidden="true"/>
-                                    ${i18n.t('app.invoice.copyInvoiceBtn')}
+                                <button type="button" class="btn btn-info" data-bind="click: doCopyDoc, disable: data._id() === undefined">
+                                    <span class="glyphicon glyphicon-duplicate inline-icon-left-fix" aria-hidden="true"/>
+                                    ${i18n.t('app.invoice.copyDocBtn')}
                                 </button>
                                 <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <span class="caret"/>
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li data-bind="if: isInvoice">
-                                        <a href="#" data-bind="click: doInvoiceReminderPrint">
-                                        <span class="glyphicon glyphicon-print inline-icon-left-fix"
-                                            aria-hidden="true"/>
-                                        ${i18n.t('app.invoice.printInvoiceReminderBtn')}
+                                        <a href="#" data-bind="click: doInvoiceReminderPrint, disable: data._id() === undefined">
+                                            <span class="glyphicon glyphicon-print inline-icon-left-fix" aria-hidden="true"/>
+                                            ${i18n.t('app.invoice.printInvoiceReminderBtn')}
                                         </a>
                                     </li>
                                 </ul>
                             </div>
                             <label class="checkbox-inline left7">
-                                <input type="checkbox"
-                                    data-bind="checked: data.isLocked"/>
+                                <input type="checkbox" data-bind="checked: data.isLocked"/>
                                 ${i18n.t('app.invoice.optIsLockedLbl')}
                             </label>
                         </div>

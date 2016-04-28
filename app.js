@@ -733,7 +733,7 @@ app.put("/api/offer/:id", ensureAuthenticated, function(req, res) {
   if (req.params.id === "undefined") {
     log.info("New offer: user=" + req.user.info.name + ", uid=" + uid
         + ", data=" + JSON.stringify(req.body, null, 2));
-    mydb.addInvoiceOrOffer('invoice', uid, companyId, req.body).then(
+    mydb.addInvoiceOrOffer('offer', uid, companyId, req.body).then(
         okHandler.bind(null, 'addOffer', res)).fail(
         myFailureHandler.bind(null, res));
   } else {
