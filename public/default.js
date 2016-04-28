@@ -19,6 +19,7 @@ var defaults = {
   },
   firstCid: 100,
   firstIid: 100,
+  firstOid: 100,
   minPwdLen: 8,
   invoiceListFilter: {
     isPaneExpanded: true,

@@ -384,8 +384,35 @@ function getNextIidPromise(uid, companyId) {
   });
 }
 
+function getNextOidPromise(uid, companyId) {
+  return dbopPromise().then(function (db) {
+    var deferred = Q.defer();
+    var coll = db.collection("company");
+    var ouid = new ObjectID(uid);
+    var ocompanyId = new ObjectID(companyId);
+    var query = { _id: ocompanyId, uid: ouid };
+    coll.findAndModify(
+        query,
+        [], // sort
+        { $inc: { nextOid: 1 } }, // update
+        { 'new': false }, // options
+        function(err, obj) {
+          if(err) {
+            deferred.reject(
+                new Error("getNextOidPromise(" + JSON.stringify(query) + "): " + err));
+          } else {
+            var value = obj.value.nextIid;
+            log.verbose("getNextOidPromise(" + JSON.stringify(query) + "): success: oid=" + value);
+            deferred.resolve(value);
+          }
+        }
+    );
+    return deferred.promise;
+  });
+}
+
 var colls = [
-  "invite", "users", "company", "settings", "customer", "invoice", "itemGroupTempl"
+  "invite", "users", "company", "settings", "customer", "invoice", "offer", "itemGroupTempl"
 ];
 
 var indexes = [
@@ -407,6 +434,14 @@ var indexes = [
   },
   {
     collection: "invoice",
+    specifier: {"isValid": 1, "uid": 1, "companyId": 1},
+  },
+  {
+    collection: "offer",
+    specifier: {"isValid": 1, "uid": 1},
+  },
+  {
+    collection: "offer",
     specifier: {"isValid": 1, "uid": 1, "companyId": 1},
   },
   {
@@ -706,7 +741,8 @@ var initCollectionsDevel = function(inviteList) {
   .then(function() {
     var invoiceList = [
                        {
-                         iid: machCompany1Iid++,
+                         docNr: machCompany1Iid++,
+                         docType: 'invoice',
                          uid: machUserId,
                          companyId: ObjectID(machCompany1._id),
                          company: machCompany1,
@@ -723,7 +759,8 @@ var initCollectionsDevel = function(inviteList) {
                          totalInclVat: 0
                        },
                        {
-                         iid: testCompany1Iid++,
+                         docNr: testCompany1Iid++,
+                         docType: 'invoice',
                          uid: testUserId,
                          companyId: ObjectID(testCompany1._id),
                          company: testCompany1,
@@ -740,7 +777,8 @@ var initCollectionsDevel = function(inviteList) {
                          totalInclVat: 0
                        },
                        {
-                         iid: testCompany1Iid++,
+                         docNr: testCompany1Iid++,
+                         docType: 'invoice',
                          uid: testUserId,
                          companyId: ObjectID(testCompany1._id),
                          company: testCompany1,
@@ -780,7 +818,8 @@ var initCollectionsDevel = function(inviteList) {
                                         totalInclVat: 18865.625
                        },
                        {
-                         iid: testCompany1Iid++,
+                         docNr: testCompany1Iid++,
+                         docType: 'invoice',
                          uid: testUserId,
                          companyId: ObjectID(testCompany1._id),
                          company: testCompany1,
@@ -950,13 +989,21 @@ module.exports.updateUser = function(uid, user) {
   return updateDataPromise('users', user, increment);
 };
 
-/** Get invoices
+/** Get invoices or offers
+ * @param docType 'invoice' or 'offer'
  * @param opts.batchSize (Default: 100)
  * @param opts.limit (Default: none)
  * @param opts.compact (Default: false)
  */
-module.exports.getInvoices = function(uid, companyId, opts) {
+module.exports.getInvoicesOrOffers = function(docType, uid, companyId, opts) {
   opts = typeof opts !== 'undefined' ? opts : {};
+  var collection = undefined;
+  if (docType == 'invoice' || docType == 'offer') {
+    collection = docType;
+  } else {
+    deferred.reject(new Error("getInvoicesOrOffers: unsupported docType=" + docType));
+    return deferred.promise;
+  }
   // Set default parameters
   if (!opts.batchSize) {
     opts.batchSize = 100;
@@ -971,7 +1018,7 @@ module.exports.getInvoices = function(uid, companyId, opts) {
   if (opts.compact) {
     projection = {'invoiceItemGroups': 0};
   }
-  getAllDocsCursorPromise('invoice', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId}, projection)
+  getAllDocsCursorPromise(collection, {'isValid': true, 'uid': ouid, 'companyId': ocompanyId}, projection)
     .then(function(cursor) {
       cursor.batchSize(opts.batchSize);
       if (opts.limit) {
@@ -983,17 +1030,24 @@ module.exports.getInvoices = function(uid, companyId, opts) {
   return deferred.promise;
 };
 
-module.exports.getInvoice = function(uid, id) {
+module.exports.getInvoiceOrOffer = function(docType, uid, id) {
   var ouid = new ObjectID(uid);
   var oid = new ObjectID(id);
   var deferred = Q.defer();
-  getOneDocPromise('invoice', {'_id': oid, 'uid': ouid}).then(function(invoice) {
-    if (invoice == undefined) {
-      log.warn("getInvoice: No invoice id=" + id + " found");
-      deferred.reject(new Error("The requested invoice id=" + id + " could not be found."));
+  var collection = undefined;
+  if (docType == 'invoice' || docType == 'offer') {
+    collection = docType;
+  } else {
+    deferred.reject(new Error("getInvoiceOrOffer: unsupported docType=" + docType));
+    return deferred.promise;
+  }
+  getOneDocPromise(collection, {'_id': oid, 'uid': ouid}).then(function(doc) {
+    if (doc == undefined) {
+      log.warn("getInvoiceOrOffer: No doc type=" + docType + " with id=" + id + " found");
+      deferred.reject(new Error("The requested document id=" + id + " could not be found."));
     } else {
-      log.verbose("getInvoice: Invoice found: " + JSON.stringify(invoice));
-      deferred.resolve(invoice);
+      log.verbose("getInvoice: Doc found docType=" + docType + ": " + JSON.stringify(doc));
+      deferred.resolve(doc);
     }
   });
   return deferred.promise;
@@ -1027,24 +1081,42 @@ module.exports.getItemGroupTemplates = function(uid) {
   return getAllDocsPromise('itemGroupTempl', {'isValid': true, 'uid': ouid});
 };
 
-module.exports.addInvoice = function(uid, companyId, invoice) {
+module.exports.addInvoiceOrOffer = function(docType, uid, companyId, doc) {
   var deferred = Q.defer();
   var ouid = new ObjectID(uid);
   var ocompanyId = new ObjectID(companyId);
-  getNextIidPromise(uid, companyId).then(function(iid) {
-    log.verbose("addInvoice: Allocated new iid=" + iid);
-    invoice.iid = iid;
-    invoice.uid = ouid;
-    invoice.companyId = ocompanyId;
-    invoice.company._id = ocompanyId;
-    invoice.updateCount = 0;
-    insertDataPromise('invoice', invoice).then(function() {
-      deferred.resolve(invoice);
+  var collection = undefined;
+  if (docType == 'invoice' || docType == 'offer') {
+    collection = docType;
+  } else {
+    deferred.reject(new Error("addInvoiceOrOffer: unsupported docType=" + docType));
+    return deferred.promise;
+  }
+
+  var getNextIdJob = undefined;
+  if (docType == 'invoice') {
+    getNextIdJob = getNextIidPromise(uid, companyId);
+  } else if (docType == 'offer') {
+    getNextIdJob = getNextOidPromise(uid, companyId);
+  }
+  getNextIdJob.then(function(docId) {
+    log.verbose("addInvoiceOrOffer: Allocated new id=" + docId + " for docType=" + docType);
+    if (docType == 'invoice') {
+      doc.docNr = docId;
+    } else if (docType == 'offer') {
+      doc.docNr = docId;
+    }
+    doc.uid = ouid;
+    doc.companyId = ocompanyId;
+    doc.company._id = ocompanyId;
+    doc.updateCount = 0;
+    insertDataPromise(collection, doc).then(function() {
+      deferred.resolve(doc);
     }).fail(function(err) {
       deferred.reject(err);
     });
   }).fail(function(err) {
-    log.error("addInvoice: Error: " + err.body);
+    log.error("addInvoiceOrOffer: Error: " + err.body);
     deferred.reject(err);
   });
 
@@ -1055,16 +1127,27 @@ module.exports.addInvoiceRaw = function(invoice) {
   return insertDataPromise('invoice', invoice);
 };
 
-module.exports.updateInvoice = function(invoice) {
+module.exports.addOfferRaw = function(offer) {
+  return insertDataPromise('offer', offer);
+};
+
+module.exports.updateInvoiceOrOffer = function(docType, doc) {
   var deferred = Q.defer();
-  invoice.uid = new ObjectID(invoice.uid);
-  invoice.companyId = new ObjectID(invoice.companyId);
-  invoice.company._id = new ObjectID(invoice.company._id);
+  var collection = undefined;
+  if (docType == 'invoice' || docType == 'offer') {
+    collection = docType;
+  } else {
+    deferred.reject(new Error("updateInvoiceOrOffer: unsupported docType=" + docType));
+    return deferred.promise;
+  }
+  doc.uid = new ObjectID(doc.uid);
+  doc.companyId = new ObjectID(doc.companyId);
+  doc.company._id = new ObjectID(doc.company._id);
   var increment = {updateCount: 1};
-  updateDataPromise('invoice', invoice, increment).then(function(data) {
+  updateDataPromise(collection, doc, increment).then(function(data) {
     deferred.resolve(data);
   }).fail(function(err) {
-    log.error("updateInvoice: Error: " + err.body);
+    log.error("updateInvoiceOrOffer: Error: " + err.body);
     deferred.reject(err);
   });
   return deferred.promise;

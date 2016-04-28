@@ -509,10 +509,11 @@ app.put("/api/company/:id", ensureAuthenticated, function(req, res) {
   } else {
     log.info("Update company: user=" + req.user.info.name + ", uid=" + uid
         + ", data=" + JSON.stringify(req.body, null, 2));
-    // Remove nextIid and nextCid, we don't want to modify that
+    // Remove nextIid, nextOid and nextCid, we don't want to modify that
     // in case of concurrent invoice or customer creation!
     delete req.body.nextCid;
     delete req.body.nextIid;
+    delete req.body.nextOid;
 
     mydb.updateCompany(req.body).then(
         okHandler.bind(null, 'updateCompany', res)).fail(
@@ -651,30 +652,29 @@ app.get("/api/invoices/:companyId", ensureAuthenticated, function(req, res) {
   var companyId = req.params.companyId;
   log.info("Get invoices: user=" + req.user.info.name + ", uid=" + uid
       + ", companyId=" + companyId);
-  mydb.getInvoices(uid, companyId).then(function(docStream) {
+  mydb.getInvoicesOrOffers('invoice', uid, companyId).then(function(docStream) {
     streamJsonResponse(res, docStream, function() {
       docStream.close();
     });
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.get("/api/invoice/:id", ensureAuthenticated,
-    function(req, res) {
-      var uid = req.user._id;
-      var id = req.params.id;
-      log.info("Get invoice: user=" + req.user.info.name + ", uid=" + uid
-          + ", _id=" + id);
-      mydb.getInvoice(uid, id).then(function(invoice) {
-        res.status(200).json(invoice);
-        res.end();
-      }).fail(myFailureHandler.bind(null, res));
-    });
+app.get("/api/invoice/:id", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var id = req.params.id;
+  log.info("Get invoice: user=" + req.user.info.name + ", uid=" + uid
+      + ", _id=" + id);
+  mydb.getInvoiceOrOffer('invoice', uid, id).then(function(invoice) {
+    res.status(200).json(invoice);
+    res.end();
+  }).fail(myFailureHandler.bind(null, res));
+});
 
 app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
-  var okHandler = function(logText, res, invoice) {
-    log.verbose(logText + ": OK, obj=" + JSON.stringify(invoice));
+  var okHandler = function(logText, res, doc) {
+    log.verbose(logText + ": OK, obj=" + JSON.stringify(doc));
     var resData = {
-      'invoice' : invoice
+      'doc' : doc
     };
     res.status(200).json(resData);
     res.end();
@@ -684,14 +684,63 @@ app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
   if (req.params.id === "undefined") {
     log.info("New invoice: user=" + req.user.info.name + ", uid=" + uid
         + ", data=" + JSON.stringify(req.body, null, 2));
-    mydb.addInvoice(uid, companyId, req.body).then(
+    mydb.addInvoiceOrOffer('invoice', uid, companyId, req.body).then(
         okHandler.bind(null, 'addInvoice', res)).fail(
         myFailureHandler.bind(null, res));
   } else {
     log.info("Update invoice: user=" + req.user.info.name + ", uid=" + uid
         + ", data=" + JSON.stringify(req.body, null, 2));
-    mydb.updateInvoice(req.body).then(
+    mydb.updateInvoiceOrOffer('invoice', req.body).then(
         okHandler.bind(null, 'updateInvoice', res)).fail(
+        myFailureHandler.bind(null, res));
+  }
+});
+
+app.get("/api/offers/:companyId", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var companyId = req.params.companyId;
+  log.info("Get offers: user=" + req.user.info.name + ", uid=" + uid
+      + ", companyId=" + companyId);
+  mydb.getInvoicesOrOffers('offer', uid, companyId).then(function(docStream) {
+    streamJsonResponse(res, docStream, function() {
+      docStream.close();
+    });
+  }).fail(myFailureHandler.bind(null, res));
+});
+
+app.get("/api/offer/:id", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var id = req.params.id;
+  log.info("Get offer: user=" + req.user.info.name + ", uid=" + uid
+      + ", _id=" + id);
+  mydb.getInvoiceOrOffer('offer', uid, id).then(function(offer) {
+    res.status(200).json(offer);
+    res.end();
+  }).fail(myFailureHandler.bind(null, res));
+});
+
+app.put("/api/offer/:id", ensureAuthenticated, function(req, res) {
+  var okHandler = function(logText, res, doc) {
+    log.verbose(logText + ": OK, obj=" + JSON.stringify(doc));
+    var resData = {
+      'doc' : doc
+    };
+    res.status(200).json(resData);
+    res.end();
+  };
+  var uid = req.user._id;
+  var companyId = req.body.companyId;
+  if (req.params.id === "undefined") {
+    log.info("New offer: user=" + req.user.info.name + ", uid=" + uid
+        + ", data=" + JSON.stringify(req.body, null, 2));
+    mydb.addInvoiceOrOffer('invoice', uid, companyId, req.body).then(
+        okHandler.bind(null, 'addOffer', res)).fail(
+        myFailureHandler.bind(null, res));
+  } else {
+    log.info("Update offer: user=" + req.user.info.name + ", uid=" + uid
+        + ", data=" + JSON.stringify(req.body, null, 2));
+    mydb.updateInvoiceOrOffer('offer', req.body).then(
+        okHandler.bind(null, 'updateOffer', res)).fail(
         myFailureHandler.bind(null, res));
   }
 });

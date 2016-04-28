@@ -4,29 +4,25 @@
 </script>
 <!DOCTYPE html>
 
-<macro condIcon(cond, icon, tooltip)>
+<macro condIcon(cond, icon, tooltip, extraClass)>
     <span data-bind="if: ${cond}">
-        <span class="glyphicon ${icon}" aria-hidden="true" data-placement="top" title="${tooltip}"/>
+        <span class="glyphicon ${icon} ${extraClass}" aria-hidden="true" data-placement="top" title="${tooltip}"/>
     </span>
 </macro>
 
-<macro condCheckIcon(cond, tooltip)>
-    <condIcon cond="${cond}" icon="glyphicon-ok" tooltip="${tooltip}"/>
+<macro condCheckIcon(cond, tooltip, extraClass)>
+    <condIcon cond="${cond}" icon="glyphicon-ok" tooltip="${tooltip}" extraClass="${extraClass}"/>
 </macro>
 
-<macro condLockIcon(cond, tooltip)>
-    <condIcon cond="${cond}" icon="glyphicon-lock" tooltip="${tooltip}"/>
+<macro condLockIcon(cond, tooltip, extraClass)>
+    <condIcon cond="${cond}" icon="glyphicon-lock" tooltip="${tooltip}" extraClass="${extraClass}"/>
 </macro>
 
 <macro filterLabelToggle(condVar, text, action)>
     <button class="btn btn-xs label-fix" data-bind="css: {'btn-default': !${condVar}(), 'btn-success': ${condVar}},
                                              click: function() { ${condVar}(!${condVar}()); }">
-        <span data-bind="if: ${condVar}">
-            <span class="glyphicon glyphicon-eye-open inline-icon-left-fix" aria-hidden="true"/>
-        </span>
-        <span data-bind="ifnot: ${condVar}">
-            <span class="glyphicon glyphicon-eye-close inline-icon-left-fix" aria-hidden="true"/>
-        </span>
+        <condIcon cond="${condVar}" icon="glyphicon-eye-open" extraClass="inline-icon-left-fix"/>
+        <condIcon cond="!${condVar}()" icon="glyphicon-eye-close" extraClass="inline-icon-left-fix"/>
         ${text}
     </button>
 </macro>
@@ -70,27 +66,20 @@
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle"
-                                data-toggle="dropdown" role="button"
-                                aria-expanded="false">
-
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                                 <span class="glyphicon glyphicon-briefcase inline-icon-left-fix"
                                     aria-hidden="true"/>
                                 <span data-bind="text: activeCompanyName"/>
                                 <span class="caret"/>
-
                             </a>
                             <ul class="dropdown-menu" role="menu">
                                 <html-comment>
                                     ko foreach: companyList
                                 </html-comment>
                                 <li data-bind="css: { active: _id() == $parent.activeCompanyId() }">
-                                    <a href="#"
-                                        data-bind="click: $root.selectCompany">
-
+                                    <a href="#" data-bind="click: $root.selectCompany">
                                         <span data-bind="text: name"/>
-                                        <condCheckIcon cond="_id() == $parent.activeCompanyId()"/>
-
+                                        <condCheckIcon cond="_id() == $parent.activeCompanyId()" extraClass="inline-icon-right-fix"/>
                                     </a>
                                 </li>
                                 <html-comment> /ko </html-comment>
@@ -99,24 +88,18 @@
                                     ko foreach: mainViews
                                 </html-comment>
                                 <li data-bind="if: location == 'companyMenu'">
-                                    <a href="#"
-                                        data-bind="click: $root.selectView">
-
+                                    <a href="#" data-bind="click: $root.selectView">
                                         <span class="glyphicon inline-icon-left-fix"
                                             data-bind="css: icon"
                                             aria-hidden="true"/>
                                         <span data-bind="text: title"/>
-
                                     </a>
                                 </li>
                                 <html-comment> /ko </html-comment>
                             </ul>
                         </li>
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle"
-                                data-toggle="dropdown" role="button"
-                                aria-expanded="false">
-
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                                 <span class="glyphicon glyphicon-user inline-icon-left-fix"
                                     aria-hidden="true"/>
                                 <span data-bind="text: userName"/>
@@ -125,20 +108,16 @@
                                     ${i18n.t('app.navBar.adminUserLbl')}
                                 </span>
                                 <span class="caret"/>
-
                             </a>
                             <ul class="dropdown-menu" role="menu"
                                 data-bind="foreach: mainViews">
 
                                 <li data-bind="if: location == 'userMenu'">
-                                    <a href="#"
-                                        data-bind="click: $root.selectView">
-
+                                    <a href="#" data-bind="click: $root.selectView">
                                         <span class="glyphicon inline-icon-left-fix"
                                             data-bind="css: icon"
                                             aria-hidden="true"/>
                                         <span data-bind="text: title"/>
-
                                     </a>
                                 </li>
                                 <li data-bind="if: location == 'userMenuNoRoute'">
@@ -149,7 +128,6 @@
                                         <span data-bind="text: title"/>
                                     </a>
                                 </li>
-
                             </ul>
                         </li>
                     </ul>
@@ -524,16 +502,11 @@
                                             </span>
                                             <span class="pull-right">
                                                 <span class="form-group form-group-sm">
-                                                    <label for="showLngSelect"
-                                                        class="control-label right7">
-
+                                                    <label for="showLngSelect" class="control-label right7">
                                                         ${i18n.t('app.company.showLngLbl')}
-
                                                     </label>
                                                     <select id="showLngSelect"
                                                         class="form-control" data-bind="options: invoiceLngList, optionsText: getInvoiceLngDesc, value: data.paymentOptPaneLng">
-
-
                                                     </select>
                                                 </span>
                                             </span>
@@ -582,11 +555,8 @@
                                     </div>
                                     <hr/>
                                     <div class="form-group">
-                                        <label for="payCustomText"
-                                            class="col-md-2 control-label">
-
+                                        <label for="payCustomText" class="col-md-2 control-label">
                                             ${i18n.t('app.company.paymentOptCustomTextHeader')}
-
                                         </label>
                                         <div class="col-sm-6">
                                             <textarea rows="4" id="payCustomText"
@@ -594,11 +564,8 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="defNumDaysUntilPayment"
-                                            class="col-md-2 control-label">
-
+                                        <label for="defNumDaysUntilPayment" class="col-md-2 control-label">
                                             ${i18n.t('app.company.paymentOptDefNumDaysUntilPayLbl')}
-
                                         </label>
                                         <div class="col-md-3">
                                             <input type="number"
@@ -639,21 +606,15 @@
                             <div class="panel-body">
                                 <div class="form-horizontal">
                                     <div class="form-group">
-                                        <label for="reverseChargeText"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="reverseChargeText" class="col-sm-2 control-label">
                                             ${i18n.t('app.company.customTextFieldsReverseChargeTextLbl')}
-
                                         </label>
                                         <div class="col-sm-6">
                                             <textarea rows="4"
                                                 id="reverseChargeText"
                                                 class="form-control" data-bind="value: data.reverseChargeText" aria-describedby="reverseChargeTextHelp"/>
-                                            <span id="reverseChargeTextHelp"
-                                                class="help-block">
-
+                                            <span id="reverseChargeTextHelp" class="help-block">
                                                 ${i18n.t('app.company.customTextFieldsReverseChargeHelpText')}
-
                                             </span>
                                             <button class="btn btn-default btn-sm" data-bind="click: setDefaultReverseChargeText">
                                                 ${i18n.t('app.company.customTextFieldsReverseChargeSetDefaultBtn')}
@@ -662,11 +623,8 @@
                                     </div>
                                     <hr/>
                                     <div class="form-group">
-                                        <label for="footerText"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="footerText" class="col-sm-2 control-label">
                                             ${i18n.t('app.company.customTextFieldsFooterTextLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <input type="text" id="footerText"
@@ -733,6 +691,18 @@
                                         <div class="col-sm-4">
                                             <input type="number" id="iid"
                                                 class="form-control" data-bind="value: data.nextIid, disable: currentView() != 'company_new'"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="oid"
+                                            class="col-sm-2 control-label">
+
+                                            ${i18n.t('app.company.countersNextOfferNrLbl')}
+
+                                        </label>
+                                        <div class="col-sm-4">
+                                            <input type="number" id="oid"
+                                                class="form-control" data-bind="value: data.nextOid, disable: currentView() != 'company_new'"/>
                                         </div>
                                     </div>
                                 </div>
@@ -898,11 +868,8 @@
                                 </div>
                                 <div class="panel-body">
                                     <div class="form-group">
-                                        <label for="cid"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="cid" class="col-sm-2 control-label">
                                             ${i18n.t('app.customer.customerNrLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <p id="cid"
@@ -911,11 +878,8 @@
                                     </div>
                                     <hr/>
                                     <div class="form-group">
-                                        <label for="name"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="name" class="col-sm-2 control-label">
                                             ${i18n.t('app.customer.nameLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <input type="text" id="name"
@@ -925,11 +889,8 @@
                                     </div>
                                     <div for(idx in [1,2,3])>
                                         <div class="form-group">
-                                            <label for="addr${idx}"
-                                                class="col-sm-2 control-label">
-
+                                            <label for="addr${idx}" class="col-sm-2 control-label">
                                                 ${i18n.t('app.customer.addrLbl', {nr: (idx)})}
-
                                             </label>
                                             <div class="col-sm-4">
                                                 <input type="text"
@@ -941,11 +902,8 @@
                                     </div>
                                     <hr/>
                                     <div class="form-group">
-                                        <label for="vatNr"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="vatNr" class="col-sm-2 control-label">
                                             ${i18n.t('app.customer.vatNrLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <input type="text" id="vatNr"
@@ -963,11 +921,8 @@
                                 </div>
                                 <div class="panel-body">
                                     <div class="form-group">
-                                        <label for="contact"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="contact" class="col-sm-2 control-label">
                                             ${i18n.t('app.customer.contactLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <input type="text" id="contact"
@@ -977,11 +932,8 @@
                                     </div>
                                     <div for(idx in [1,2,3])>
                                         <div class="form-group">
-                                            <label for="phone${idx}"
-                                                class="col-sm-2 control-label">
-
+                                            <label for="phone${idx}" class="col-sm-2 control-label">
                                                 ${i18n.t('app.customer.phoneLbl', {nr: (idx)})}
-
                                             </label>
                                             <div class="col-sm-4">
                                                 <input type="text"
@@ -992,11 +944,8 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="name"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="name" class="col-sm-2 control-label">
                                             ${i18n.t('app.customer.emailLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <input type="email" id="email"
@@ -1028,32 +977,22 @@
                                     </div>
                                     <hr/>
                                     <div class="form-group">
-                                        <label for="currencySelect"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="currencySelect" class="col-sm-2 control-label">
                                             ${i18n.t('app.currency.selectLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <select id="currencySelect"
                                                 class="form-control" data-bind="options: currencyList, optionsText: getCurrencyDesc, value: data.currency">
-
-
                                             </select>
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="invoiceLngSelect"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="invoiceLngSelect" class="col-sm-2 control-label">
                                             ${i18n.t('app.invoiceLng.selectLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <select id="invoiceLngSelect"
                                                 class="form-control" data-bind="options: invoiceLngList, optionsText: getInvoiceLngDesc, value: data.invoiceLng">
-
-
                                             </select>
                                         </div>
                                     </div>
@@ -1125,9 +1064,7 @@
                     </div>
 
                 </div>
-                <div id="app-invoices"
-                    data-bind="visible: currentView() == 'invoices'"
-                    style="display: none">
+                <div id="app-invoices" data-bind="visible: currentView() == 'invoices' || currentView() == 'offers'" style="display: none">
 
                     <div class="row" data-bind="visible: isFilterPaneExpanded">
                         <div class="col-md-12">
@@ -1142,8 +1079,6 @@
                                             <div class="col-md-3">
                                                 <select class="form-control"
                                                     id="customerFilterCid" data-bind="options: customerList, value: filterOpt.customerFilterCustomer">
-
-
                                                 </select>
                                             </div>
                                         </div>
@@ -1287,13 +1222,13 @@
                                             ${i18n.t('app.invoiceList.colNr')}
                                             <button type="button"
                                                 class="btn btn-default btn-xs"
-                                                data-bind="click: doSortToggle('iid')">
+                                                data-bind="click: doSortToggle('docNr')">
 
-                                                <span data-bind="if: invoiceListSort() !== 'iidAsc'">
+                                                <span data-bind="if: invoiceListSort() !== 'docNrAsc'">
                                                     <span class="glyphicon glyphicon-sort-by-attributes"
                                                         aria-hidden="true"/>
                                                 </span>
-                                                <span data-bind="if: invoiceListSort() === 'iidAsc'">
+                                                <span data-bind="if: invoiceListSort() === 'docNrAsc'">
                                                     <span class="glyphicon glyphicon-sort-by-attributes-alt"
                                                         aria-hidden="true"/>
                                                 </span>
@@ -1396,7 +1331,7 @@
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody data-bind="foreach: invoiceList">
+                                <tbody data-bind="foreach: docList()">
                                     <tr data-bind="if: isVisible(),
                                                    css: { danger: isExpired }">
                                         <td>
@@ -1416,7 +1351,7 @@
                                         </td>
                                         <td>
                                             <p class="form-control-static">
-                                                <span class="right3" data-bind="text: iid"/>
+                                                <span class="right3" data-bind="text: docNr"/>
                                                 <condLockIcon cond="isLocked" tooltip="${i18n.t('app.invoiceList.isLockedIconTooltip')}"/>
                                                 <condIcon cond="isCredit" icon="glyphicon-credit-card" tooltip="${i18n.t('app.invoiceList.isCreditIconTooltip')}"/>
                                                 <condIcon cond="isCanceled" icon="glyphicon-remove" tooltip="${i18n.t('app.invoiceList.isCanceledIconTooltip')}"/>
@@ -1497,7 +1432,8 @@
                     </form>
 
                 </div>
-                <div id="app-invoice_new" data-bind="visible: currentView() == 'invoice_new' || (currentView() != undefined && currentView().search('invoice_show') == 0)"
+                <div id="app-invoice_new" data-bind="visible: currentView() == 'invoice_new' || (currentView() != undefined && currentView().search('invoice_show') == 0) ||
+                                                              currentView() == 'offer_new' || (currentView() != undefined && currentView().search('offer_show') == 0)"
                     style="display: none">
 
                     <macro labelWithEditMode(textVariable, cond)>
@@ -1525,19 +1461,33 @@
                             <div class="panel panel-default">
                                 <div class="panel-heading">
                                     <h3 class="panel-title">
-                                        <span data-bind="if: data.iid() === undefined && !data.isCredit()">
-                                            ${i18n.t('app.invoice.mainPanelHeader', {context: 'newInvoice'})}
+                                        <span data-bind="if: isInvoice">
+                                            <span data-bind="if: data.docNr() === undefined && !data.isCredit()">
+                                                ${i18n.t('app.invoice.mainPanelHeader', {context: 'newInvoice'})}
+                                            </span>
+                                            <span data-bind="if: data.docNr() === undefined && data.isCredit()">
+                                                ${i18n.t('app.invoice.mainPanelHeader', {context: 'newCreditInvoice'})}
+                                            </span>
+                                            <span data-bind="if: data.docNr() != undefined && !data.isCredit()">
+                                                ${i18n.t('app.invoice.mainPanelHeader', {context: 'invoice'})}
+                                                &nbsp;
+                                                <span data-bind="text: data.docNr()"/>
+                                            </span>
+                                            <span data-bind="if: data.docNr() != undefined && data.isCredit()">
+                                                ${i18n.t('app.invoice.mainPanelHeader', {context: 'creditInvoice'})}
+                                                &nbsp;
+                                                <span data-bind="text: data.docNr()"/>
+                                            </span>
                                         </span>
-                                        <span data-bind="if: data.iid() === undefined && data.isCredit()">
-                                            ${i18n.t('app.invoice.mainPanelHeader', {context: 'newCreditInvoice'})}
-                                        </span>
-                                        <span data-bind="if: data.iid() != undefined && !data.isCredit()">
-                                            ${i18n.t('app.invoice.mainPanelHeader', {context: 'invoice'})} #
-                                            <span data-bind="text: data.iid()"/>
-                                        </span>
-                                        <span data-bind="if: data.iid() != undefined && data.isCredit()">
-                                            ${i18n.t('app.invoice.mainPanelHeader', {context: 'creditInvoice'})} #
-                                            <span data-bind="text: data.iid()"/>
+                                        <span data-bind="if: isOffer">
+                                            <span data-bind="if: data.docNr() === undefined">
+                                                ${i18n.t('app.invoice.mainPanelHeader', {context: 'newOffer'})}
+                                            </span>
+                                            <span data-bind="if: data.docNr() != undefined">
+                                                ${i18n.t('app.invoice.mainPanelHeader', {context: 'offer'})}
+                                                &nbsp;
+                                                <span data-bind="text: data.docNr()"/>
+                                            </span>
                                         </span>
                                         <condLockIcon cond="data.isLocked"/>
                                     </h3>
@@ -1546,40 +1496,28 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="input-group">
-                                                <label for="customerId"
-                                                    class="control-label">
-
+                                                <label for="customerId" class="control-label">
                                                     ${i18n.t('app.invoice.customerLbl')}
-
                                                 </label>
                                                 <select class="form-control"
                                                     id="customerId" data-bind="options: customerList, value: selectedCustomer, disable: data.isLocked,
                                                                                optionsCaption: '${i18n.t('app.invoice.customerOptCap')}'">
-
-
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="input-group">
-                                                <label for="date"
-                                                    class="control-label">
-
-                                                    ${i18n.t('app.invoice.dateLbl')}
-
+                                                <label for="date" class="control-label"
+                                                       data-bind="text: t('app.invoice.dateLbl', {context: data.docType()})">
                                                 </label>
-                                                <input type="date"
-                                                    class="form-control"
+                                                <input type="date" class="form-control"
                                                     id="date" data-bind="value: data.date, disable: data.isLocked"/>
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-4" data-bind="if: isInvoice">
                                             <div class="input-group">
-                                                <label for="daysUntilPayment"
-                                                    class="control-label">
-
+                                                <label for="daysUntilPayment" class="control-label">
                                                     ${i18n.t('app.invoice.daysUntilPayLbl')}
-
                                                 </label>
                                                 <input type="number"
                                                     class="form-control"
@@ -1590,11 +1528,8 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="input-group">
-                                                <label for="yourReference"
-                                                    class="control-label">
-
+                                                <label for="yourReference" class="control-label">
                                                     ${i18n.t('app.invoice.yourRefLbl')}
-
                                                 </label>
                                                 <input type="text"
                                                     class="form-control"
@@ -1603,11 +1538,8 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="input-group">
-                                                <label for="ourReference"
-                                                    class="control-label">
-
+                                                <label for="ourReference" class="control-label">
                                                     ${i18n.t('app.invoice.ourRefLbl')}
-
                                                 </label>
                                                 <input type="text"
                                                     class="form-control"
@@ -1616,11 +1548,8 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="input-group">
-                                                <label for="projectId"
-                                                    class="control-label">
-
+                                                <label for="projectId" class="control-label">
                                                     ${i18n.t('app.invoice.projIdLbl')}
-
                                                 </label>
                                                 <input type="text"
                                                     class="form-control"
@@ -1959,7 +1888,7 @@
                                                                         </button>
                                                                         <div class="checkbox input-sm">
                                                                             <label>
-                                                                                <input type="checkbox" data-bind="checked: isTextOnly"/>
+                                                                                <input type="checkbox" data-bind="checked: isTextOnly, disable: $parents[1].data.isLocked"/>
                                                                                 ${i18n.t('app.invoice.detailsIsTextOnlyCheckLbl')}
                                                                             </label>
                                                                         </div>
@@ -2197,7 +2126,7 @@
                                 <div class="panel-body">
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <div class="checkbox top0">
+                                            <div class="checkbox top0" data-bind="if: isInvoice">
                                                 <label>
                                                     <input type="checkbox" value data-bind="checked: data.isCredit, disable: data.isLocked"/>
                                                     ${i18n.t('app.invoice.optIsCreditLbl')}
@@ -2209,7 +2138,7 @@
                                                     ${i18n.t('app.invoice.optIsCanceledLbl')}
                                                 </label>
                                             </div>
-                                            <div class="checkbox bottom0">
+                                            <div class="checkbox bottom0" data-bind="if: isInvoice">
                                                 <label>
                                                     <input type="checkbox" data-bind="checked: data.isPaid"/>
                                                     ${i18n.t('app.invoice.optIsPaidLbl')}
@@ -2230,7 +2159,7 @@
                                                         ${i18n.t('app.invoice.optNoVatLbl')}
                                                     </label>
                                                 </div>
-                                                <div class="checkbox">
+                                                <div class="checkbox" data-bind="if: isInvoice">
                                                     <label>
                                                         <input type="checkbox" data-bind="checked: data.customerMirror_useReverseCharge, disable: data.isLocked() || data.customer() === undefined"/>
                                                         ${i18n.t('app.invoice.optUseReverseChargeLbl')}
@@ -2240,34 +2169,24 @@
                                         </div>
                                         <div class="row top5">
                                             <div class="form-group">
-                                                <label for="invoiceCurrencySelect"
-                                                    class="col-sm-2 control-label">
-
+                                                <label for="invoiceCurrencySelect" class="col-sm-2 control-label">
                                                     ${i18n.t('app.currency.selectLbl')}
-
                                                 </label>
                                                 <div class="col-sm-4">
                                                     <select id="invoiceCurrencySelect"
                                                         class="form-control" data-bind="options: currencyList, optionsText: getCurrencyDesc, value: data.customerMirror_currency, disable: data.isLocked() || data.customer() === undefined">
-
-
                                                     </select>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="row top5">
                                             <div class="form-group">
-                                                <label for="invoiceLngSelect"
-                                                    class="col-sm-2 control-label">
-
-                                                    ${i18n.t('app.invoiceLng.selectLbl')}
-
+                                                <label for="invoiceLngSelect" class="col-sm-2 control-label"
+                                                       data-bind="text: t('app.invoiceLng.selectLbl', {context: data.docType()})">
                                                 </label>
                                                 <div class="col-sm-4">
                                                     <select id="invoiceLngSelect"
                                                         class="form-control" data-bind="options: invoiceLngList, optionsText: getInvoiceLngDesc, value: data.customerMirror_invoiceLng, disable: data.isLocked() || data.customer() === undefined">
-
-
                                                     </select>
                                                 </div>
                                             </div>
@@ -2281,23 +2200,18 @@
                                                 <button class="btn btn-info" data-bind="click: refreshCompanyData, disable: data.isLocked">
                                                     <span class="glyphicon glyphicon-refresh inline-icon-left-fix"
                                                         aria-hidden="true"/>
-                                                    ${i18n.t('app.invoice.refreshCompanyDataBtn')}
+                                                    <span data-bind="text: t('app.invoice.refreshCompanyDataBtn', {context: data.docType()})"></span>
                                                 </button>
                                             </div>
                                         </div>
                                         <div class="row top5">
                                             <div class="form-group">
-                                                <label for="invoiceStyleSelect"
-                                                    class="col-sm-2 control-label">
-
-                                                    ${i18n.t('app.invoiceStyle.selectLbl')}
-
+                                                <label for="invoiceStyleSelect" class="col-sm-2 control-label"
+                                                       data-bind="text: t('app.invoiceStyle.selectLbl', {context: data.docType()})">
                                                 </label>
                                                 <div class="col-sm-4">
                                                     <select id="invoiceStyleSelect"
                                                         class="form-control" data-bind="options: invoiceStyleList, optionsText: getInvoiceStyleDesc, value: data.companyMirror_invoiceStyle, disable: data.isLocked">
-
-
                                                     </select>
                                                 </div>
                                             </div>
@@ -2341,11 +2255,8 @@
                                         </div>
                                         <div class="row top7">
                                             <div class="form-group">
-                                                <label for="payCustomText"
-                                                    class="col-md-2 control-label">
-
+                                                <label for="payCustomText" class="col-md-2 control-label">
                                                     ${i18n.t('app.invoice.paymentOptCustomTextHeader')}
-
                                                 </label>
                                                 <div class="col-sm-6">
                                                     <textarea rows="4"
@@ -2356,11 +2267,8 @@
                                         </div>
                                         <div class="row top7">
                                             <div class="form-group">
-                                                <label for="footerText"
-                                                    class="col-sm-2 control-label">
-
+                                                <label for="footerText" class="col-sm-2 control-label">
                                                     ${i18n.t('app.invoice.customTextFieldsFooterTextLbl')}
-
                                                 </label>
                                                 <div class="col-sm-6">
                                                     <input type="text"
@@ -2369,23 +2277,17 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="row top7">
+                                        <div class="row top7" data-bind="if: isInvoice">
                                             <div class="form-group">
-                                                <label for="reverseChargeText"
-                                                    class="col-sm-2 control-label">
-
+                                                <label for="reverseChargeText" class="col-sm-2 control-label">
                                                     ${i18n.t('app.invoice.customTextFieldsReverseChargeTextLbl')}
-
                                                 </label>
                                                 <div class="col-sm-6">
                                                     <textarea rows="4"
                                                         id="reverseChargeText"
                                                         class="form-control" data-bind="value: data.companyLngMirror_reverseChargeText, disable: data.isLocked" aria-describedby="reverseChargeTextHelp"/>
-                                                    <span id="reverseChargeTextHelp"
-                                                        class="help-block">
-
+                                                    <span id="reverseChargeTextHelp" class="help-block">
                                                         ${i18n.t('app.invoice.customTextFieldsReverseChargeHelpText')}
-
                                                     </span>
                                                 </div>
                                             </div>
@@ -2407,7 +2309,6 @@
                                     <span class="glyphicon glyphicon-save inline-icon-left-fix"
                                         aria-hidden="true"/>
                                     ${i18n.t('app.invoice.saveInvoiceBtn')}
-
                                 </button>
                                 <button type="button" class="btn btn-info"
                                     data-bind="click: doInvoicePrint">
@@ -2415,7 +2316,6 @@
                                     <span class="glyphicon glyphicon-print inline-icon-left-fix"
                                         aria-hidden="true"/>
                                     ${i18n.t('app.invoice.printInvoiceBtn')}
-
                                 </button>
                                 <button type="button" class="btn btn-info"
                                     data-bind="click: doCopyInvoice">
@@ -2423,13 +2323,12 @@
                                     <span class="glyphicon glyphicon-duplicate inline-icon-left-fix"
                                         aria-hidden="true"/>
                                     ${i18n.t('app.invoice.copyInvoiceBtn')}
-
                                 </button>
                                 <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <span class="caret"/>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li>
+                                    <li data-bind="if: isInvoice">
                                         <a href="#" data-bind="click: doInvoiceReminderPrint">
                                         <span class="glyphicon glyphicon-print inline-icon-left-fix"
                                             aria-hidden="true"/>
@@ -2448,6 +2347,7 @@
                     <!-- buttons panel -->
 
                 </div>
+
                 <div id="app-invoice_item_group_templates" data-bind="visible: currentView() == 'invoice_item_group_templates'"
                     style="display: none">
 
