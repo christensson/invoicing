@@ -2556,6 +2556,16 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   // Invoice part
   self.invoiceList = ko.observableArray();
 
+  self.sortMappedCustomersByName = function(a, b) {
+    if (a.getName() < b.getName()) {
+      return -1;
+    } else if (a.getName() > b.getName()) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+
   cache.on('set:' + Cache.INVOICES(), function(invoices, ttl) {
     Log.info("InvoiceListViewModel - event - set:" + Cache.INVOICES());
     var mappedInvoices = $.map(invoices, function(item) {
@@ -2582,6 +2592,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     var mappedCustomers = $.map(customers, function(item) {
       return new InvoiceListCustomerModel(item);
     });
+    mappedCustomers.sort(self.sortMappedCustomersByName);
     // Add wildcard
     mappedCustomers.unshift(new InvoiceListCustomerModel(null, true));
     self.customerList(mappedCustomers);
@@ -2592,6 +2603,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     var mappedCustomers = $.map(customers, function(item) {
       return new InvoiceListCustomerModel(item);
     });
+    mappedCustomers.sort(self.sortMappedCustomersByName);
     // Add wildcard
     mappedCustomers.unshift(new InvoiceListCustomerModel(null, true));
     self.customerList(mappedCustomers);
@@ -2741,8 +2753,11 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
 var InvoiceCustomerModel = function(data) {
   var self = this;
   self.data = data;
+  self.getName = function() {
+    return self.data.name;
+  }
   self.toString = function() {
-    return "" + self.data.cid + " - " + self.data.name;
+    return "" + self.data.name + " ("+ self.data.cid + ")";
   };
 };
 
@@ -2751,11 +2766,14 @@ var InvoiceListCustomerModel = function(data, isWildcard) {
   isWildcard = typeof isWildcard !== 'undefined' ? isWildcard : false;
   self.data = data;
   self.isWildcard = isWildcard;
+  self.getName = function() {
+    return self.data.name;
+  }
   self.toString = function() {
     if (self.isWildcard) {
       return t("app.invoiceList.customerFilterWildcardText");
     } else {
-      return "" + self.data.cid + " - " + self.data.name;
+      return "" + self.data.name + " ("+ self.data.cid + ")";
     }
   };
 };
@@ -2814,6 +2832,16 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     }
   });
 
+  self.sortMappedCustomersByName = function(a, b) {
+    if (a.getName() < b.getName()) {
+      return -1;
+    } else if (a.getName() > b.getName()) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+
   self.selectedCustomer.subscribe(function(newValue) {
     if (newValue !== undefined && newValue.data !== undefined) {
       Log.info("InvoiceNewViewModel - Customer selected (updates data " + self.selectedCustomerUpdatesData + 
@@ -2829,6 +2857,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     var mappedCustomers = $.map(customers, function(item) {
       return new InvoiceCustomerModel(item);
     });
+    mappedCustomers.sort(self.sortMappedCustomersByName);
     self.customerList(mappedCustomers);
   });
 
@@ -2837,6 +2866,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     var mappedCustomers = $.map(customers, function(item) {
       return new InvoiceCustomerModel(item);
     });
+    mappedCustomers.sort(self.sortMappedCustomersByName);
     self.customerList(mappedCustomers);
   });
 
