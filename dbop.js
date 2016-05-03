@@ -248,6 +248,7 @@ var getAllUserData = function(uid) {
   var companies = null;
   var customers = null;
   var invoices = null;
+  var offers = null;
   var itemGroupTemplates = null;
 
   var failureHdlr = function(msg, err) {
@@ -307,6 +308,13 @@ var getAllUserData = function(uid) {
       invoices = doc;
       log.info(invoices.length + " invoices found!");
       log.verbose("Invoices found: " + JSON.stringify(invoices, null, 2));
+      return mydb.getAllDocsPromise('offer', {'uid': ouid})
+    })
+    .fail(failureHdlr.bind("Offers for uid=" + uid + " not found!"))
+    .then(function(doc) {
+      offers = doc;
+      log.info(offers.length + " offers found!");
+      log.verbose("Offers found: " + JSON.stringify(offers, null, 2));
       return mydb.getAllDocsPromise('itemGroupTempl', {'uid': ouid})
     })
     .fail(failureHdlr.bind("ItemGroupTemplates for uid=" + uid + " not found!"))
@@ -322,6 +330,7 @@ var getAllUserData = function(uid) {
         "companies": companies,
         "customers": customers,
         "invoices": invoices,
+        "offers": offers,
         "itemGroupTemplates": itemGroupTemplates
       });
     });
@@ -415,6 +424,19 @@ var rmAllUserData = function(uid, data, dryrun) {
       if (yes && !dryrun) {
         log.info("Removing %d invoices!", data.invoices.length);
         return mydb.deleteAllDocsPromise('invoice', {uid: ouid});
+      } else {
+        return Q.fcall(returnMyArgument.bind(null, undefined));
+      }
+    })
+    .then(logDeleteResult)
+    .then(function() {
+      var numItems = data.offers.length;
+      return queryIfElse(rl, "Remove " + numItems + " offers?", numItems > 0, false);
+    })
+    .then(function(yes) {
+      if (yes && !dryrun) {
+        log.info("Removing %d offers!", data.offers.length);
+        return mydb.deleteAllDocsPromise('offer', {uid: ouid});
       } else {
         return Q.fcall(returnMyArgument.bind(null, undefined));
       }
