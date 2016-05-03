@@ -2557,9 +2557,11 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   self.invoiceList = ko.observableArray();
 
   self.sortMappedCustomersByName = function(a, b) {
-    if (a.getName() < b.getName()) {
+    var aStr = a.getName().toLowerCase();
+    var bStr = b.getName().toLowerCase();
+    if (aStr < bStr) {
       return -1;
-    } else if (a.getName() > b.getName()) {
+    } else if (aStr > bStr) {
       return 1;
     } else {
       return 0;
@@ -2833,9 +2835,11 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   });
 
   self.sortMappedCustomersByName = function(a, b) {
-    if (a.getName() < b.getName()) {
+    var aStr = a.getName().toLowerCase();
+    var bStr = b.getName().toLowerCase();
+    if (aStr < bStr) {
       return -1;
-    } else if (a.getName() > b.getName()) {
+    } else if (aStr > bStr) {
       return 1;
     } else {
       return 0;
