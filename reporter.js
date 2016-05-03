@@ -367,7 +367,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
     var headerList =
       [{cap: getStr("lastPaymentDateCaption"), data: formatDate(invoice.lastPaymentDate), isBold: true, colSize: headerColSize[0]},
        {cap: getStr("invoiceDateCaption"), data: formatDate(invoice.date), isBold: false, colSize: headerColSize[1]},
-       {cap: getStr("invoiceNrCaption"), data: "" + invoice.iid, isBold: false, colSize: headerColSize[2]},
+       {cap: getStr("invoiceNrCaption"), data: "" + invoice.docNr, isBold: false, colSize: headerColSize[2]},
        {cap: getStr("customerNrCaption"), data: "" + invoice.customer.cid, isBold: false, colSize: headerColSize[3]}
        ];
     if (invoice.projId !== undefined && invoice.projId.length > 0) {
@@ -764,7 +764,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
   };
 
   // You don't have to pass in a report name; it will default to "report.pdf"
-  var reportName = i18n.t('app.invoiceReport.fileName', {'cid': invoice.customer.cid, 'iid': invoice.iid});
+  var reportName = i18n.t('app.invoiceReport.fileName', {'cid': invoice.customer.cid, 'docNr': invoice.docNr});
   if (reportName === "") {
     reportName = "report.pdf";
   }
@@ -840,6 +840,11 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
     }
   }
   
+  // Support old invoices without docNr
+  if (invoice.hasOwnProperty('iid') && !invoice.hasOwnProperty('docNr')) {
+      invoice.docNr = invoice.iid;
+  }
+
   // companyId makes directory unique
   var companyId = invoice.company._id;
   var reportDir = tmpDir + "/" + companyId;

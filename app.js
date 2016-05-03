@@ -796,7 +796,7 @@ app.get("/api/invoiceReport/:id/:isReminder", ensureAuthenticated, function(req,
     }
     log.info("Invoice report: user=" + req.user.info.name + ", _id=" + id +
         ", isDemoMode=" + isDemoMode);
-    return mydb.getInvoice(uid, id);
+    return mydb.getInvoiceOrOffer('invoice', uid, id);
   }).then(function(invoice) {
     reporter.doInvoiceReport(invoice, tmpDir, function(reportFilename) {
         log.verbose("onCompletion: reportFilename=" + reportFilename);

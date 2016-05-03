@@ -395,7 +395,7 @@
             "printNok_noId": "Utskriften misslyckades, dokumentet saknar id!"
         },
         "invoiceReport": {
-            "fileName": "faktura-{{iid}}-kund-{{cid}}.pdf",
+            "fileName": "faktura-{{docNr}}-kund-{{cid}}.pdf",
             "decimalSeparator": ",",
             "headerString": "FAKTURA",
             "headerString_isCredit": "KREDITFAKTURA",

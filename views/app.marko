@@ -1226,110 +1226,58 @@
                                         <th/>
                                         <th>
                                             ${i18n.t('app.invoiceList.colNr')}
-                                            <button type="button"
-                                                class="btn btn-default btn-xs"
+                                            <button type="button" class="btn btn-default btn-xs"
                                                 data-bind="click: doSortToggle('docNr')">
-
-                                                <span data-bind="if: invoiceListSort() !== 'docNrAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes"
-                                                        aria-hidden="true"/>
-                                                </span>
-                                                <span data-bind="if: invoiceListSort() === 'docNrAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes-alt"
-                                                        aria-hidden="true"/>
-                                                </span>
+                                                <condIcon cond="invoiceListSort() !== 'docNrAsc'" icon="glyphicon-sort-by-attributes"/>
+                                                <condIcon cond="invoiceListSort() === 'docNrAsc'" icon="glyphicon-sort-by-attributes-alt"/>
                                             </button>
                                         </th>
                                         <th>
                                             ${i18n.t('app.invoiceList.colDate')}
-                                            <button type="button"
-                                                class="btn btn-default btn-xs"
+                                            <button type="button" class="btn btn-default btn-xs"
                                                 data-bind="click: doSortToggle('date')">
-
-                                                <span data-bind="if: invoiceListSort() !== 'dateAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes"
-                                                        aria-hidden="true"/>
-                                                </span>
-                                                <span data-bind="if: invoiceListSort() === 'dateAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes-alt"
-                                                        aria-hidden="true"/>
-                                                </span>
+                                                <condIcon cond="invoiceListSort() !== 'dateAsc'" icon="glyphicon-sort-by-attributes"/>
+                                                <condIcon cond="invoiceListSort() === 'dateAsc'" icon="glyphicon-sort-by-attributes-alt"/>
                                             </button>
                                         </th>
                                         <th>
                                             ${i18n.t('app.invoiceList.colCustomerNr')}
-                                            <button type="button"
-                                                class="btn btn-default btn-xs"
+                                            <button type="button" class="btn btn-default btn-xs"
                                                 data-bind="click: doSortToggle('cid')">
-
-                                                <span data-bind="if: invoiceListSort() !== 'cidAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes"
-                                                        aria-hidden="true"/>
-                                                </span>
-                                                <span data-bind="if: invoiceListSort() === 'cidAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes-alt"
-                                                        aria-hidden="true"/>
-                                                </span>
+                                                <condIcon cond="invoiceListSort() !== 'cidAsc'" icon="glyphicon-sort-by-attributes"/>
+                                                <condIcon cond="invoiceListSort() === 'cidAsc'" icon="glyphicon-sort-by-attributes-alt"/>
                                             </button>
                                         </th>
                                         <th>
                                             ${i18n.t('app.invoiceList.colCustomerName')}
                                             <button type="button"
                                                 class="btn btn-default btn-xs" data-bind="click: doSortToggle('customer')">
-
-                                                <span data-bind="if: invoiceListSort() !== 'customerAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes"
-                                                        aria-hidden="true"/>
-                                                </span>
-                                                <span data-bind="if: invoiceListSort() === 'customerAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes-alt"
-                                                        aria-hidden="true"/>
-                                                </span>
+                                                <condIcon cond="invoiceListSort() !== 'customerAsc'" icon="glyphicon-sort-by-attributes"/>
+                                                <condIcon cond="invoiceListSort() === 'customerAsc'" icon="glyphicon-sort-by-attributes-alt"/>
                                             </button>
                                         </th>
                                         <th>
                                             ${i18n.t('app.invoiceList.colCurrency')}
                                             <button type="button"
                                                 class="btn btn-default btn-xs" data-bind="click: doSortToggle('currency')">
-
-                                                <span data-bind="if: invoiceListSort() !== 'currencyAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes"
-                                                        aria-hidden="true"/>
-                                                </span>
-                                                <span data-bind="if: invoiceListSort() === 'currencyAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes-alt"
-                                                        aria-hidden="true"/>
-                                                </span>
+                                                <condIcon cond="invoiceListSort() !== 'currencyAsc'" icon="glyphicon-sort-by-attributes"/>
+                                                <condIcon cond="invoiceListSort() === 'currencyAsc'" icon="glyphicon-sort-by-attributes-alt"/>
                                             </button>
                                         </th>
                                         <th>
                                             ${i18n.t('app.invoiceList.colTotalExclVat')}
                                             <button type="button"
                                                 class="btn btn-default btn-xs" data-bind="click: doSortToggle('totalExclVat')">
-
-                                                <span data-bind="if: invoiceListSort() !== 'totalExclVatAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes"
-                                                        aria-hidden="true"/>
-                                                </span>
-                                                <span data-bind="if: invoiceListSort() === 'totalExclVatAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes-alt"
-                                                        aria-hidden="true"/>
-                                                </span>
+                                                <condIcon cond="invoiceListSort() !== 'totalExclVatAsc'" icon="glyphicon-sort-by-attributes"/>
+                                                <condIcon cond="invoiceListSort() === 'totalExclVatAsc'" icon="glyphicon-sort-by-attributes-alt"/>
                                             </button>
                                         </th>
                                         <th>
                                             ${i18n.t('app.invoiceList.colTotalVat')}
                                             <button type="button"
                                                 class="btn btn-default btn-xs" data-bind="click: doSortToggle('totalVat')">
-
-                                                <span data-bind="if: invoiceListSort() !== 'totalVatAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes"
-                                                        aria-hidden="true"/>
-                                                </span>
-                                                <span data-bind="if: invoiceListSort() === 'totalVatAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes-alt"
-                                                        aria-hidden="true"/>
-                                                </span>
+                                                <condIcon cond="invoiceListSort() !== 'totalVatAsc'" icon="glyphicon-sort-by-attributes"/>
+                                                <condIcon cond="invoiceListSort() === 'totalVatAsc'" icon="glyphicon-sort-by-attributes-alt"/>
                                             </button>
                                         </th>
                                         <th data-bind="if: docType() == 'invoice'">
@@ -1470,22 +1418,22 @@
                                             <span data-bind="if: data.docNr() != undefined && !data.isCredit()">
                                                 ${i18n.t('app.invoice.mainPanelHeader', {context: 'invoice'})}
                                                 &nbsp;
-                                                <span data-bind="text: data.docNr()"/>
+                                                <span data-bind="text: data.docNr"/>
                                             </span>
                                             <span data-bind="if: data.docNr() != undefined && data.isCredit()">
                                                 ${i18n.t('app.invoice.mainPanelHeader', {context: 'creditInvoice'})}
                                                 &nbsp;
-                                                <span data-bind="text: data.docNr()"/>
+                                                <span data-bind="text: data.docNr"/>
                                             </span>
                                         </span>
                                         <span data-bind="if: isOffer">
                                             <span data-bind="if: data.docNr() === undefined">
                                                 ${i18n.t('app.invoice.mainPanelHeader', {context: 'newOffer'})}
                                             </span>
-                                            <span data-bind="if: data.docNr() != undefined">
+                                            <span data-bind="if: data.docNr() !== undefined">
                                                 ${i18n.t('app.invoice.mainPanelHeader', {context: 'offer'})}
                                                 &nbsp;
-                                                <span data-bind="text: data.docNr()"/>
+                                                <span data-bind="text: data.docNr"/>
                                             </span>
                                         </span>
                                         <condLockIcon cond="data.isLocked"/>
