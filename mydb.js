@@ -338,7 +338,8 @@ function getNextDocNrPerCompanyPromise(uid, companyId, nrField) {
     var ocompanyId = new ObjectID(companyId);
     var query = { _id: ocompanyId, uid: ouid };
     var fieldIncExpr = {};
-    fieldIncExpr[String(nrField)] = 1;
+    var incAmount = 1;
+    fieldIncExpr[String(nrField)] = incAmount;
     coll.findAndModify(
         query,
         [], // sort
@@ -351,8 +352,13 @@ function getNextDocNrPerCompanyPromise(uid, companyId, nrField) {
                   ", nrField=" + nrField + "): " + err));
           } else {
             var value = obj.value[String(nrField)];
+            if (value === undefined) {
+              value = incAmount;
+              log.warn("getNextDocNrPerCompanyPromise(" + JSON.stringify(query) +
+                ", nrField=" + nrField + "): success: docNr=" + value + " set to init value since " + nrField + " missing.");
+            }
             log.verbose("getNextDocNrPerCompanyPromise(" + JSON.stringify(query) +
-              ", nrField=" + nrField + "): success: docNr=" + value);
+                ", nrField=" + nrField + "): success: docNr=" + value);
             deferred.resolve(value);
           }
         }
