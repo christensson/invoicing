@@ -818,6 +818,43 @@ app.get("/api/invoiceReport/:id/:isReminder", ensureAuthenticated, function(req,
   }).fail(myFailureHandler.bind(null, res));
 });
 
+app.get("/api/offerReport/:id", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var id = req.params.id;
+  log.info("Offer report: user=" + req.user.info.name + ", _id=" + id);
+  
+  // Check license in settings
+  var isDemoMode = false;
+  var debug = false;
+  mydb.getSettings(uid).then(function(settings) {
+    if (settings.license === undefined ||
+        settings.license === "demo") {
+      isDemoMode = true;
+    }
+    log.info("Offer report: user=" + req.user.info.name + ", _id=" + id +
+        ", isDemoMode=" + isDemoMode);
+    return mydb.getInvoiceOrOffer('offer', uid, id);
+  }).then(function(offer) {
+    reporter.doInvoiceReport(offer, tmpDir, function(reportFilename) {
+        log.verbose("onCompletion: reportFilename=" + reportFilename);
+        res.type('application/pdf');
+        res.download(reportFilename, reportFilename, function(err) {
+          if (err) {
+            log.error("onCompletion: " + err);
+          } else {
+            res.end();
+          }
+        });
+      },
+      {
+        'isReminder': false,
+        'isDemoMode': isDemoMode,
+        'debug': debug
+      }
+    );
+  }).fail(myFailureHandler.bind(null, res));
+});
+
 app.get("/api/stats/:cid", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var cid = req.params.cid;

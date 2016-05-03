@@ -1448,8 +1448,34 @@ var InvoiceItemGroupTemplatesViewModel = function(currentView) {
 };
 
 // Trick for doing classmethods...
-function InvoiceOps(){};
-InvoiceOps.printInvoice = function(id, opts) {
+function ReportOps(){};
+ReportOps.downloadDoc = function(url) {
+  Log.info("downloadDoc - url=" + url);
+  Notify_showSpinner(true);
+  try {
+    var child = window.open(url);
+    $(child).ready(function() {
+      Log.info("downloadDoc - Download done!");
+      Notify_showSpinner(false);
+    });
+    child.focus();
+  } catch (e) {
+    Log.info("downloadDoc - Failed! error=" + JSON.stringify(e));
+    Notify_showSpinner(false);
+  }
+};
+
+ReportOps.printDoc = function(id, docType) {
+  if (docType == 'invoice') {
+    ReportOps.printInvoice(id);
+  } else if (docType == 'offer') {
+    ReportOps.printOffer(id);
+  } else {
+    Log.info("printDoc - failure, unknown docType=" + docType + " for id=" + id);
+  }
+};
+
+ReportOps.printInvoice = function(id, opts) {
   opts = typeof opts !== 'undefined' ? opts : {};
   // Set default parameters
   if (!opts.isReminder) {
@@ -1457,21 +1483,21 @@ InvoiceOps.printInvoice = function(id, opts) {
   }
   Log.info("printInvoice - id=" + id + ", opts=" + JSON.stringify(opts));
   if (id !== undefined) {
-    Notify_showSpinner(true);
-    try {
-      var reqUrl = "/api/invoiceReport/" + id + "/" + opts.isReminder;
-      var child = window.open(reqUrl);
-      $(child).ready(function() {
-        Log.info("printInvoice - Report done!");
-        Notify_showSpinner(false);
-      });
-      child.focus();
-    } catch (e) {
-      Log.info("printInvoice - Failed!");
-      Notify_showSpinner(false);
-    }
+    var reqUrl = "/api/invoiceReport/" + id + "/" + opts.isReminder;
+    ReportOps.downloadDoc(reqUrl);
   } else {
     Log.info("printInvoice - failure, undefined id");
+  }
+};
+
+ReportOps.printOffer = function(id, opts) {
+  opts = typeof opts !== 'undefined' ? opts : {};
+  Log.info("printOffer - id=" + id + ", opts=" + JSON.stringify(opts));
+  if (id !== undefined) {
+    var reqUrl = "/api/offerReport/" + id;
+    ReportOps.downloadDoc(reqUrl);
+  } else {
+    Log.info("printOffer - failure, undefined id");
   }
 };
 
@@ -2389,7 +2415,7 @@ var InvoiceListDataViewModel = function(data, filterOpt) {
   self.printDoc = function() {
     Log.info("InvoiceListDataViewModel - Report requested");
     if (self._id() !== undefined) {
-      InvoiceOps.printInvoice(self._id());
+      ReportOps.printDoc(self._id(), self.docType());
     } else {
       Notify_showMsg('error', t("app.invoiceList.printNok", {context: "noId"}));
       Log.info("InvoiceListDataViewModel - Invoice has no id.");
@@ -3196,7 +3222,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   self.doDocPrint = function() {
     Log.info("InvoiceNewViewModel - Print requested");
     if (self.data._id() !== undefined) {
-      InvoiceOps.printInvoice(self.data._id());
+      ReportOps.printDoc(self.data._id(), self.data.docType());
     } else {
       Notify_showMsg('info', t("app.invoice.printNok", {context: 'noId'}));
       Log.info("InvoiceNewViewModel - Invoice not saved.");
@@ -3206,7 +3232,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   self.doInvoiceReminderPrint = function() {
     Log.info("InvoiceNewViewModel - Print reminder requested");
     if (self.data._id() !== undefined) {
-      InvoiceOps.printInvoice(self.data._id(), {isReminder: true});
+      ReportOps.printInvoice(self.data._id(), {isReminder: true});
     } else {
       Notify_showMsg('info', t("app.invoice.printNok", {context: 'noId'}));
       Log.info("InvoiceNewViewModel - Invoice not saved.");

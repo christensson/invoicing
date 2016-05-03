@@ -45,6 +45,8 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
    *  }
    * 
    */
+  var docType = invoice.hasOwnProperty('docType')?invoice.docType:'invoice';
+
   var invoiceStyle = defaults.invoiceReportStyle;
   if (invoice.company.invoiceStyle) {
     invoiceStyle = invoice.company.invoiceStyle;
@@ -69,8 +71,9 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
       opt.context = key.slice(contextSepIdx + 1);
       key = key.slice(0, contextSepIdx);
     };
-    var tStr = i18n.t('app.invoiceReport.' + key, opt);
-    log.silly("getStr: translate key=" + key +
+    var transNs = 'app.' + docType + "Report.";
+    var tStr = i18n.t(transNs + key, opt);
+    log.silly("getStr: translate ns=" + transNs + ", key=" + key +
       ", opt=" + JSON.stringify(opt) + " => " + tStr);
     return tStr;
   };
@@ -364,12 +367,16 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
   var mypageheader = function(x) {
     var topY = x.getCurrentY();
     var headerColSize = [80, 60, 50, 50, 90, 90, 90];
-    var headerList =
-      [{cap: getStr("lastPaymentDateCaption"), data: formatDate(invoice.lastPaymentDate), isBold: true, colSize: headerColSize[0]},
-       {cap: getStr("invoiceDateCaption"), data: formatDate(invoice.date), isBold: false, colSize: headerColSize[1]},
-       {cap: getStr("invoiceNrCaption"), data: "" + invoice.docNr, isBold: false, colSize: headerColSize[2]},
-       {cap: getStr("customerNrCaption"), data: "" + invoice.customer.cid, isBold: false, colSize: headerColSize[3]}
-       ];
+    var headerList = [];
+    if (docType == 'invoice') {
+      headerList.push({cap: getStr("lastPaymentDateCaption"), data: formatDate(invoice.lastPaymentDate), isBold: true, colSize: headerColSize[0]});
+      headerList.push({cap: getStr("invoiceDateCaption"), data: formatDate(invoice.date), isBold: false, colSize: headerColSize[1]});
+    } else {
+      // Offers doesn't have a last payment date, instead let the date occupy column 0 and 1
+      headerList.push({cap: getStr("invoiceDateCaption"), data: formatDate(invoice.date), isBold: false, colSize: headerColSize[0] + headerColSize[1]});
+    }
+    headerList.push({cap: getStr("invoiceNrCaption"), data: "" + invoice.docNr, isBold: false, colSize: headerColSize[2]});
+    headerList.push({cap: getStr("customerNrCaption"), data: "" + invoice.customer.cid, isBold: false, colSize: headerColSize[3]});
     if (invoice.projId !== undefined && invoice.projId.length > 0) {
       headerList.push({cap: getStr("projIdCaption"), data: invoice.projId, isBold: false, colSize: headerColSize[4]});
     }
@@ -633,14 +640,14 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
                ], {fontBold: 1, border:0, width: 0, wrap: 1} );
     }
 
-    if (useReverseCharge) {
+    if (docType == 'invoice' && useReverseCharge) {
       x.font(style.summary.customText.font);
       x.fontSize(style.summary.customText.fontSize);
       x.newLine();
       var reverseChargeText = formatTextTemplate(company[invoiceLng].reverseChargeText, cust);
       x.print(reverseChargeText, {fontBold: 0, border: 0, wrap: 1});
     }
-    if (company[invoiceLng].paymentCustomText) {
+    if (docType == 'invoice' && company[invoiceLng].paymentCustomText) {
       x.font(style.summary.customText.font);
       x.fontSize(style.summary.customText.fontSize);
       x.newLine();
