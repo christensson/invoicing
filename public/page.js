@@ -2806,6 +2806,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   self.currentView.subscribe(function(newValue) {
     self.data.init();
     self.selectedCustomer(undefined);
+    $( "#customerId" ).autocomplete( "close" );
     var viewArray = newValue.split("/");
     if (viewArray[0] == 'invoice_new') {
       Log.info("InvoiceNewViewModel - activated");
@@ -3071,6 +3072,11 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
         };
       },
     });
+  };
+
+  self.doShowCustomerList = function() {
+    Log.info("InvoiceNewViewModel - Show customer list requested");
+    $( "#customerId" ).autocomplete( "search", "" );
   };
   
   self.doInvoicePrint = function() {

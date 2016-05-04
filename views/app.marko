@@ -39,6 +39,8 @@
         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
         <title>${i18n.t('app.pageTitle')}</title>
         <link rel="stylesheet" type="text/css" href="bootstrap.min.css"/>
+        <link rel="stylesheet" type="text/css" href="jquery-ui.css"/>
+        <link rel="stylesheet" type="text/css" href="jquery-ui.theme.min.css"/>
         <link rel="stylesheet" type="text/css" href="page.css"/>
     </head>
     <body role="document">
@@ -1552,12 +1554,24 @@
                                                     ${i18n.t('app.invoice.customerLbl')}
 
                                                 </label>
+                                                <div class="input-group">
+                                                    <input class="form-control" id="customerId" data-bind="jqAuto: {value: selectedCustomer, source: customerList, options: {minLength: 0}}"/>
+                                                    <div class="input-group-btn">
+                                                        <button type="button" class="btn btn-default" data-bind="click: doShowCustomerList">
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+
+                                                <!--
                                                 <select class="form-control"
                                                     id="customerId" data-bind="options: customerList, value: selectedCustomer, disable: data.isLocked,
                                                                                optionsCaption: '${i18n.t('app.invoice.customerOptCap')}'">
 
 
                                                 </select>
+                                                -->
                                             </div>
                                         </div>
                                         <div class="col-md-4">
@@ -3199,6 +3213,7 @@
         </div>
     </body>
     <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="jquery-ui.min.js"></script>
     <script type="text/javascript" src="bootstrap.min.js"></script>
     <script type="text/javascript" src="tooltip.js"></script>
     <script type="text/javascript" src="knockout-latest.js"></script>
@@ -3207,6 +3222,7 @@
     <script type="text/javascript" src="i18next.min.js"></script>
     <script type="text/javascript" src="i18nextXHRBackend.min.js"></script>
     <script type="text/javascript" src="cache.js"></script>
+    <script type="text/javascript" src="knockout-jqAutocomplete.min.js"></script>
     <!-- Input to javascripts below -->
     <script type="text/javascript">
         var cfg = {
