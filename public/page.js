@@ -2330,6 +2330,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
 
+  self.isCustomerListExpanded = false;
   self.customerList = ko.observableArray();
   self.invoiceListSort = ko.observable('iidAsc');
 
@@ -2533,7 +2534,17 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
       ", new list=" + JSON.stringify(self.filterOpt.dateFilterCheckedMonthList()));
   };
 
+  $( "#customerFilterCid" ).on( "autocompleteselect", function( event, ui ) {
+    Log.info("Autocomplete customer selected");
+    self.isCustomerListExpanded = false;
+  } );
+
   self.currentView.subscribe(function(newValue) {
+    // Make sure that the autocomplete box is closed
+    // when another view is selected.
+    $( "#customerFilterCid" ).autocomplete( "close" );
+    self.isCustomerListExpanded = false;
+
     if (newValue == 'invoices') {
       Log.info("InvoiceListViewModel - activated");
       self.populatePromise();
@@ -2661,6 +2672,18 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     return deferred.promise();
   };
 
+  self.doShowCustomerList = function() {
+    Log.info("InvoiceListViewModel - Show customer list requested, isExpanded=" + self.isCustomerListExpanded);
+    if (self.isCustomerListExpanded) {
+      // Close if already expanded
+      $( "#customerFilterCid" ).autocomplete( "close" );
+    } else {
+      // Open search
+      $( "#customerFilterCid" ).autocomplete( "search", "" );
+    }
+    self.isCustomerListExpanded = !self.isCustomerListExpanded;
+  };
+
   self.doToggleFilterPaneExpanded = function() {
     self.isFilterPaneExpanded(!self.isFilterPaneExpanded());
     Log.info("InvoiceListViewModel - isFilterPaneExpanded=" + self.isFilterPaneExpanded()
@@ -2755,11 +2778,13 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
 var InvoiceCustomerModel = function(data) {
   var self = this;
   self.data = data;
+  // Save string in object since autocomplete searches all attributes
+  self.description = "" + self.data.name + " ("+ self.data.cid + ")";
   self.getName = function() {
     return self.data.name;
   }
   self.toString = function() {
-    return "" + self.data.name + " ("+ self.data.cid + ")";
+    return self.description;
   };
 };
 
@@ -2768,15 +2793,16 @@ var InvoiceListCustomerModel = function(data, isWildcard) {
   isWildcard = typeof isWildcard !== 'undefined' ? isWildcard : false;
   self.data = data;
   self.isWildcard = isWildcard;
+  if (self.isWildcard) {
+    self.description =  t("app.invoiceList.customerFilterWildcardText");
+  } else {
+    self.description = "" + self.data.name + " ("+ self.data.cid + ")";
+  }
   self.getName = function() {
     return self.data.name;
-  }
+  };
   self.toString = function() {
-    if (self.isWildcard) {
-      return t("app.invoiceList.customerFilterWildcardText");
-    } else {
-      return "" + self.data.name + " ("+ self.data.cid + ")";
-    }
+    return self.description;
   };
 };
 
@@ -2790,6 +2816,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   self.customerList = ko.observableArray();
   self.selectedCustomer = ko.observable();
   self.selectedCustomerUpdatesData = true;
+  self.isCustomerListExpanded = false;
 
   self.itemGroupList = ko.observableArray();
 
@@ -2797,6 +2824,11 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   inheritInvoiceLngModel(self);
   inheritCurrencyModel(self);
   
+  $( "#invoiceNewCustomerId" ).on( "autocompleteselect", function( event, ui ) {
+    Log.info("Autocomplete customer selected");
+    self.isCustomerListExpanded = false;
+  } );
+
   self.newGroup = function(g) {
     var group = ko.toJS(g)
     Log.info("New group name=" + group.name + ", id=" + group._id);
@@ -2804,8 +2836,14 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   };
   
   self.currentView.subscribe(function(newValue) {
+    // Make sure that the autocomplete box is closed
+    // when another view is selected.
+    $( "#invoiceNewCustomerId" ).autocomplete( "close" );
+    self.isCustomerListExpanded = false;
+
     self.data.init();
     self.selectedCustomer(undefined);
+
     var viewArray = newValue.split("/");
     if (viewArray[0] == 'invoice_new') {
       Log.info("InvoiceNewViewModel - activated");
@@ -3071,6 +3109,19 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
         };
       },
     });
+  };
+
+  self.doShowCustomerList = function() {
+    Log.info("InvoiceNewViewModel - Show customer list requested, isExpanded=" + self.isCustomerListExpanded);
+    if (self.isCustomerListExpanded) {
+      // Close if already expanded
+      $( "#invoiceNewCustomerId" ).autocomplete( "close" );
+    } else {
+      // Open search
+      $( "#invoiceNewCustomerId" ).autocomplete( "search", "" );
+    }
+    self.isCustomerListExpanded = !self.isCustomerListExpanded;
+
   };
   
   self.doInvoicePrint = function() {
