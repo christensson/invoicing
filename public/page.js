@@ -2778,11 +2778,13 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
 var InvoiceCustomerModel = function(data) {
   var self = this;
   self.data = data;
+  // Save string in object since autocomplete searches all attributes
+  self.description = "" + self.data.name + " ("+ self.data.cid + ")";
   self.getName = function() {
     return self.data.name;
   }
   self.toString = function() {
-    return "" + self.data.name + " ("+ self.data.cid + ")";
+    return self.description;
   };
 };
 
@@ -2791,15 +2793,16 @@ var InvoiceListCustomerModel = function(data, isWildcard) {
   isWildcard = typeof isWildcard !== 'undefined' ? isWildcard : false;
   self.data = data;
   self.isWildcard = isWildcard;
+  if (self.isWildcard) {
+    self.description =  t("app.invoiceList.customerFilterWildcardText");
+  } else {
+    self.description = "" + self.data.name + " ("+ self.data.cid + ")";
+  }
   self.getName = function() {
     return self.data.name;
-  }
+  };
   self.toString = function() {
-    if (self.isWildcard) {
-      return t("app.invoiceList.customerFilterWildcardText");
-    } else {
-      return "" + self.data.name + " ("+ self.data.cid + ")";
-    }
+    return self.description;
   };
 };
 
