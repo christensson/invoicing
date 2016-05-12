@@ -1556,23 +1556,13 @@
 
                                                 </label>
                                                 <div class="input-group">
-                                                    <input class="form-control" id="invoiceNewCustomerId" data-bind="jqAuto: {value: selectedCustomer, source: customerList, options: {minLength: 0}}"/>
+                                                    <input class="form-control" id="invoiceNewCustomerId" data-bind="jqAuto: {value: selectedCustomer, source: customerList, options: {minLength: 0}}, disable: data.isLocked"/>
                                                     <div class="input-group-btn">
-                                                        <button type="button" class="btn btn-default" data-bind="click: doShowCustomerList">
+                                                        <button type="button" class="btn btn-default" data-bind="click: doShowCustomerList, disable: data.isLocked">
                                                             <span class="caret"></span>
                                                         </button>
                                                     </div>
                                                 </div>
-                                                
-
-                                                <!--
-                                                <select class="form-control"
-                                                    id="customerId" data-bind="options: customerList, value: selectedCustomer, disable: data.isLocked,
-                                                                               optionsCaption: '${i18n.t('app.invoice.customerOptCap')}'">
-
-
-                                                </select>
-                                                -->
                                             </div>
                                         </div>
                                         <div class="col-md-4">
