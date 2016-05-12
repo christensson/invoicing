@@ -1,6 +1,17 @@
 {
   "items": [
     {
+      "date": "2016-05-09",
+      "msgSlogan": {
+        "sv" : "Fakturainmatning",
+        "en" : ""
+      },
+      "msg": {
+        "sv": "Nu enklare att välja kund vid fakturainmatning. En enkel <strong>sökfunktion</strong> kan användas genom att skriva kundens namn eller adress i kundinmatningen.",
+        "en": ""
+      }
+    },
+    {
       "date": "2016-04-20",
       "msgSlogan": {
         "sv" : "Kunder",

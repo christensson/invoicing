@@ -2429,6 +2429,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
 
+  self.isCustomerListExpanded = false;
   self.customerList = ko.observableArray();
   self.invoiceListSort = ko.observable('docNrAsc');
 
@@ -2633,7 +2634,17 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
       ", new list=" + JSON.stringify(self.filterOpt.dateFilterCheckedMonthList()));
   };
 
+  $( "#customerFilterCid" ).on( "autocompleteselect", function( event, ui ) {
+    Log.info("Autocomplete customer selected");
+    self.isCustomerListExpanded = false;
+  } );
+
   self.currentView.subscribe(function(newValue) {
+    // Make sure that the autocomplete box is closed
+    // when another view is selected.
+    $( "#customerFilterCid" ).autocomplete( "close" );
+    self.isCustomerListExpanded = false;
+
     if (newValue == 'invoices') {
       self.docType('invoice');
       Log.info("InvoiceListViewModel - activated - docType=" + self.docType());
@@ -2668,6 +2679,18 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
       return self.invoiceList;
     }
   }, self);
+
+  self.sortMappedCustomersByName = function(a, b) {
+    var aStr = a.getName().toLowerCase();
+    var bStr = b.getName().toLowerCase();
+    if (aStr < bStr) {
+      return -1;
+    } else if (aStr > bStr) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
 
   cache.on('set:' + Cache.INVOICES(), function(invoices, ttl) {
     Log.info("InvoiceListViewModel - event - set:" + Cache.INVOICES());
@@ -2716,6 +2739,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     var mappedCustomers = $.map(customers, function(item) {
       return new InvoiceListCustomerModel(item);
     });
+    mappedCustomers.sort(self.sortMappedCustomersByName);
     // Add wildcard
     mappedCustomers.unshift(new InvoiceListCustomerModel(null, true));
     self.customerList(mappedCustomers);
@@ -2726,6 +2750,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     var mappedCustomers = $.map(customers, function(item) {
       return new InvoiceListCustomerModel(item);
     });
+    mappedCustomers.sort(self.sortMappedCustomersByName);
     // Add wildcard
     mappedCustomers.unshift(new InvoiceListCustomerModel(null, true));
     self.customerList(mappedCustomers);
@@ -2787,6 +2812,18 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
       deferred.reject();
     }
     return deferred.promise();
+  };
+
+  self.doShowCustomerList = function() {
+    Log.info("InvoiceListViewModel - Show customer list requested, isExpanded=" + self.isCustomerListExpanded);
+    if (self.isCustomerListExpanded) {
+      // Close if already expanded
+      $( "#customerFilterCid" ).autocomplete( "close" );
+    } else {
+      // Open search
+      $( "#customerFilterCid" ).autocomplete( "search", "" );
+    }
+    self.isCustomerListExpanded = !self.isCustomerListExpanded;
   };
 
   self.doToggleFilterPaneExpanded = function() {
@@ -2883,8 +2920,13 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
 var InvoiceCustomerModel = function(data) {
   var self = this;
   self.data = data;
+  // Save string in object since autocomplete searches all attributes
+  self.description = "" + self.data.name + " ("+ self.data.cid + ")";
+  self.getName = function() {
+    return self.data.name;
+  }
   self.toString = function() {
-    return "" + self.data.cid + " - " + self.data.name;
+    return self.description;
   };
 };
 
@@ -2893,12 +2935,16 @@ var InvoiceListCustomerModel = function(data, isWildcard) {
   isWildcard = typeof isWildcard !== 'undefined' ? isWildcard : false;
   self.data = data;
   self.isWildcard = isWildcard;
+  if (self.isWildcard) {
+    self.description =  t("app.invoiceList.customerFilterWildcardText");
+  } else {
+    self.description = "" + self.data.name + " ("+ self.data.cid + ")";
+  }
+  self.getName = function() {
+    return self.data.name;
+  };
   self.toString = function() {
-    if (self.isWildcard) {
-      return t("app.invoiceList.customerFilterWildcardText");
-    } else {
-      return "" + self.data.cid + " - " + self.data.name;
-    }
+    return self.description;
   };
 };
 
@@ -2912,6 +2958,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   self.customerList = ko.observableArray();
   self.selectedCustomer = ko.observable();
   self.selectedCustomerUpdatesData = true;
+  self.isCustomerListExpanded = false;
   self.isInvoice = ko.pureComputed(function() {
     return self.data.docType() == 'invoice';
   }, self);
@@ -2925,6 +2972,11 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   inheritInvoiceLngModel(self);
   inheritCurrencyModel(self);
   
+  $( "#invoiceNewCustomerId" ).on( "autocompleteselect", function( event, ui ) {
+    Log.info("Autocomplete customer selected");
+    self.isCustomerListExpanded = false;
+  } );
+
   self.newGroup = function(g) {
     var group = ko.toJS(g)
     Log.info("New group name=" + group.name + ", id=" + group._id);
@@ -2932,8 +2984,14 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   };
   
   self.currentView.subscribe(function(newValue) {
+    // Make sure that the autocomplete box is closed
+    // when another view is selected.
+    $( "#invoiceNewCustomerId" ).autocomplete( "close" );
+    self.isCustomerListExpanded = false;
+
     self.data.init();
     self.selectedCustomer(undefined);
+
     var viewArray = newValue.split("/");
     var docTypeOpArray = viewArray[0].split('_');
     var docType = docTypeOpArray[0];
@@ -2967,6 +3025,18 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     }
   });
 
+  self.sortMappedCustomersByName = function(a, b) {
+    var aStr = a.getName().toLowerCase();
+    var bStr = b.getName().toLowerCase();
+    if (aStr < bStr) {
+      return -1;
+    } else if (aStr > bStr) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+
   self.selectedCustomer.subscribe(function(newValue) {
     if (newValue !== undefined && newValue.data !== undefined) {
       Log.info("InvoiceNewViewModel - Customer selected (updates data " + self.selectedCustomerUpdatesData + 
@@ -2982,6 +3052,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     var mappedCustomers = $.map(customers, function(item) {
       return new InvoiceCustomerModel(item);
     });
+    mappedCustomers.sort(self.sortMappedCustomersByName);
     self.customerList(mappedCustomers);
   });
 
@@ -2990,6 +3061,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     var mappedCustomers = $.map(customers, function(item) {
       return new InvoiceCustomerModel(item);
     });
+    mappedCustomers.sort(self.sortMappedCustomersByName);
     self.customerList(mappedCustomers);
   });
 
@@ -3217,6 +3289,19 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
         };
       },
     });
+  };
+
+  self.doShowCustomerList = function() {
+    Log.info("InvoiceNewViewModel - Show customer list requested, isExpanded=" + self.isCustomerListExpanded);
+    if (self.isCustomerListExpanded) {
+      // Close if already expanded
+      $( "#invoiceNewCustomerId" ).autocomplete( "close" );
+    } else {
+      // Open search
+      $( "#invoiceNewCustomerId" ).autocomplete( "search", "" );
+    }
+    self.isCustomerListExpanded = !self.isCustomerListExpanded;
+
   };
   
   self.doDocPrint = function() {

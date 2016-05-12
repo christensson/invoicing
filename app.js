@@ -115,6 +115,8 @@ app.use(express.static('node_modules/jquery/dist'));
 app.use(express.static('node_modules/js-cache/bundle'));
 app.use(express.static('node_modules/i18next'));
 app.use(express.static('node_modules/i18next-xhr-backend/'));
+app.use(express.static('node_modules/jqueryui/', {index: false}));
+app.use(express.static('node_modules/knockout-jqautocomplete/build/'));
 
 if (smallLag != undefined) {
   app.use(smallLag);
