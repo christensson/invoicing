@@ -1928,8 +1928,8 @@ var InvoiceDataViewModel = function() {
     self.companyLngFieldMirror);
 
   self.hasVat = ko.pureComputed(function() {
-    if (this[this.customerFieldMirrorPrefix + 'useReverseCharge']() ||
-        this[this.customerFieldMirrorPrefix + 'noVat']()) {
+    if (self[self.customerFieldMirrorPrefix + 'useReverseCharge']() ||
+        self[self.customerFieldMirrorPrefix + 'noVat']()) {
       return false;
     } else {
       return true;
@@ -2027,9 +2027,9 @@ var InvoiceDataViewModel = function() {
   
   self.totalExclVat = ko.pureComputed(function() {
     var sum = 0;
-    for ( var i = 0; i < this.invoiceItemGroups().length; i++) {
-      if (this.invoiceItemGroups()[i].isValid()) {
-        sum += this.invoiceItemGroups()[i].totalExclVat();
+    for ( var i = 0; i < self.invoiceItemGroups().length; i++) {
+      if (self.invoiceItemGroups()[i].isValid()) {
+        sum += self.invoiceItemGroups()[i].totalExclVat();
       }
     }
     if (self.isCredit()) {
@@ -2040,9 +2040,9 @@ var InvoiceDataViewModel = function() {
   
   self.totalInclVat = ko.pureComputed(function() {
     var sum = 0;
-    for ( var i = 0; i < this.invoiceItemGroups().length; i++) {
-      if (this.invoiceItemGroups()[i].isValid()) {
-        sum += this.invoiceItemGroups()[i].totalInclVat();
+    for ( var i = 0; i < self.invoiceItemGroups().length; i++) {
+      if (self.invoiceItemGroups()[i].isValid()) {
+        sum += self.invoiceItemGroups()[i].totalInclVat();
       }
     }
     if (self.isCredit()) {
@@ -2233,13 +2233,25 @@ var InvoiceListDataViewModel = function(data, filterOpt) {
   self.daysUntilPayment = ko.observable(data.daysUntilPayment);
   self.projId = ko.observable(data.projId);
   self.currency = ko.observable(defaults.defaultCurrency);
+  self.hasVat = ko.pureComputed(function() {
+    if (self.customer().useReverseCharge ||
+        self.customer().noVat) {
+      return false;
+    } else {
+      return true;
+    }
+  }, self);
   if (data.customer.hasOwnProperty('currency')) {
     self.currency(data.customer.currency);
   }
   self.totalExclVat = ko.observable(data.totalExclVat);
   self.totalInclVat = ko.observable(data.totalInclVat);
   self.totalVat = ko.pureComputed(function() {
-    return self.totalInclVat() - self.totalExclVat();
+    if (self.hasVat()) {
+      return self.totalInclVat() - self.totalExclVat();
+    } else {
+      return 0;
+    }
   }, self);
   self.totalExclVatStr = ko.pureComputed(function() {
     return Util.formatCurrency(self.totalExclVat(), {currencyStr: self.currency()});
