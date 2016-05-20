@@ -27,7 +27,15 @@
     </button>
 </macro>
 
-<macro navbarItem(route, tKey, icon, href)>
+<macro navbarDropdown(tKey, icon)>
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+      <span class="glyphicon ${icon} inline-icon-left-fix" aria-hidden="true"/>
+      <span data-bind="text: t('${tKey}')"></span>
+      <span class="caret"/>
+    </a>
+</macro>
+
+<macro navbarItem(route, tKey, icon)>
     <li data-bind="css: { active : '${route}' == currentView() }">
         <a href="#" data-bind="click: selectViewRoute.bind(null, '${route}')">
             <span class="glyphicon ${icon} inline-icon-left-fix" aria-hidden="true"/>
@@ -36,7 +44,7 @@
     </li>
 </macro>
 
-<macro navbarItemNoRoute(route, tKey, icon)>
+<macro navbarItemServerRoute(route, tKey, icon)>
     <li>
         <a href="${route}">
             <span class="glyphicon ${icon} inline-icon-left-fix" aria-hidden="true"/>
@@ -73,11 +81,34 @@
                 </div>
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                      <navbarItem route="/page/home" tKey="app.navBar.home" icon="glyphicon-home"/>
-                      <navbarItem route="/page/customer_new" tKey="app.navBar.customerNew" icon="glyphicon-user"/>
-                      <navbarItem route="/page/customers" tKey="app.navBar.customerList" icon="glyphicon-user"/>
-                      <navbarItem route="/page/invoice_new" tKey="app.navBar.invoiceNew" icon="glyphicon-file"/>
-                      <navbarItem route="/page/invoices" tKey="app.navBar.invoiceList" icon="glyphicon-th-list"/>
+                        <navbarItem route="/page/home" tKey="app.navBar.home" icon="glyphicon-home"/>
+
+                        <li class="drowdown">
+                            <navbarDropdown tKey="app.navBar.customerMenu" icon="glyphicon-user"/>
+                            <ul class="dropdown-menu" role="menu">
+                                <navbarItem route="/page/customer_new" tKey="app.navBar.customerNew" icon="glyphicon-user"/>
+                                <navbarItem route="/page/customers" tKey="app.navBar.customerList" icon="glyphicon-user"/>
+                            </ul>
+                        </li>
+
+                        <li class="drowdown">
+                            <navbarDropdown tKey="app.navBar.invoiceMenu" icon="glyphicon-file"/>
+                            <ul class="dropdown-menu" role="menu">
+                                <navbarItem route="/page/invoice_new" tKey="app.navBar.invoiceNew" icon="glyphicon-file"/>
+                                <navbarItem route="/page/invoices" tKey="app.navBar.invoiceList" icon="glyphicon-th-list"/>
+                                <li role="separator" class="divider"/>
+                                <navbarItem route="/page/invoice_item_group_templates" tKey="app.navBar.invoiceItemGroupTemplates" icon="glyphicon-list-alt"/>
+                            </ul>
+                        </li>
+
+                        <li class="drowdown">
+                            <navbarDropdown tKey="app.navBar.offerMenu" icon="glyphicon-file"/>
+                            <ul class="dropdown-menu" role="menu">
+                                <navbarItem route="/page/offer_new" tKey="app.navBar.offerNew" icon="glyphicon-file"/>
+                                <navbarItem route="/page/offers" tKey="app.navBar.offerList" icon="glyphicon-th-list"/>
+                            </ul>
+                        </li>
+
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li class="dropdown">
@@ -114,17 +145,17 @@
                                 <span class="caret"/>
                             </a>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/offer_new" tKey="app.navBar.offerNew" icon="glyphicon-file"/>
-                                <navbarItem route="/page/offers" tKey="app.navBar.offerList" icon="glyphicon-th-list"/>
-                                <navbarItem route="/page/invoice_item_group_templates" tKey="app.navBar.invoiceItemGroupTemplates" icon="glyphicon-list-alt"/>
                                 <navbarItem route="/page/settings" tKey="app.navBar.settings" icon="glyphicon-wrench"/>
 
-                                <navbarItem route="/page/debug" tKey="app.navBar.debug" icon="glyphicon-eye-open" if(data.user.isAdmin === true)/>
-                                <navbarItem route="/page/users" tKey="app.navBar.users" icon="glyphicon-user" if(data.user.isAdmin === true)/>
-                                <navbarItem route="/page/invites" tKey="app.navBar.invites" icon="glyphicon-gift" if(data.user.isAdmin === true)/>
+                                <if(data.user.isAdmin === true)>
+                                    <li role="separator" class="divider"/>
+                                    <navbarItem route="/page/debug" tKey="app.navBar.debug" icon="glyphicon-eye-open"/>
+                                    <navbarItem route="/page/users" tKey="app.navBar.users" icon="glyphicon-user"/>
+                                    <navbarItem route="/page/invites" tKey="app.navBar.invites" icon="glyphicon-gift"/>
+                                </if>
 
                                 <li role="separator" class="divider"/>
-                                <navbarItemNoRoute route="/logout" tKey="app.navBar.logout" icon="glyphicon-log-out"/>
+                                <navbarItemServerRoute route="/logout" tKey="app.navBar.logout" icon="glyphicon-log-out"/>
                             </ul>
                         </li>
                     </ul>
