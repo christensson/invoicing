@@ -3649,94 +3649,6 @@ var InviteListViewModel = function(currentView) {
 var NavViewModel = function() {
   var self = this;
   
-  self.mainViews = [];
-  self.mainViews.push({
-    name : '/page/home',
-    title : t("app.navBar.home"),
-    icon : 'glyphicon glyphicon-home',
-    location : 'main'
-  });
-  self.mainViews.push({
-    name : '/page/companies',
-    title : t("app.navBar.companyAdmin"),
-    icon : 'glyphicon glyphicon-wrench',
-    location : 'companyMenu'
-  });
-  self.mainViews.push({
-    name : '/page/customer_new',
-    title : t("app.navBar.customerNew"),
-    icon : 'glyphicon glyphicon-user',
-    location : 'main'
-  });
-  self.mainViews.push({
-    name : '/page/customers',
-    title : t("app.navBar.customerList"),
-    icon : 'glyphicon glyphicon-user',
-    location : 'main'
-  });
-  self.mainViews.push({
-    name : '/page/invoice_new',
-    title : t("app.navBar.invoiceNew"),
-    icon : 'glyphicon glyphicon-file',
-    location : 'main'
-  });
-  self.mainViews.push({
-    name : '/page/invoices',
-    title : t("app.navBar.invoiceList"),
-    icon : 'glyphicon glyphicon-th-list',
-    location : 'main'
-  });
-  self.mainViews.push({
-    name : '/page/offer_new',
-    title : t("app.navBar.offerNew"),
-    icon : 'glyphicon glyphicon-file',
-    location : 'userMenu'
-  });
-  self.mainViews.push({
-    name : '/page/offers',
-    title : t("app.navBar.offerList"),
-    icon : 'glyphicon glyphicon-th-list',
-    location : 'userMenu'
-  });
-  self.mainViews.push({
-    name : '/page/invoice_item_group_templates',
-    title : t("app.navBar.invoiceItemGroupTemplates"),
-    icon : 'glyphicon glyphicon-list-alt',
-    location : 'userMenu'
-  });
-  self.mainViews.push({
-    name : '/page/settings',
-    title : t("app.navBar.settings"),
-    icon : 'glyphicon glyphicon-wrench',
-    location : 'userMenu'
-  });
-  if (cfg.user.isAdmin) {
-    self.mainViews.push({
-      name : '/page/debug',
-      title : t("app.navBar.debug"),
-      icon : 'glyphicon glyphicon-eye-open',
-      location : 'userMenu'
-    });
-    self.mainViews.push({
-      name : '/page/users',
-      title : t("app.navBar.users"),
-      icon : 'glyphicon glyphicon-user',
-      location : 'userMenu'
-    });
-    self.mainViews.push({
-      name : '/page/invites',
-      title : t("app.navBar.invites"),
-      icon : 'glyphicon glyphicon-gift',
-      location : 'userMenu'
-    });
-  }
-  self.mainViews.push({
-    name : '/logout',
-    title : t("app.navBar.logout"),
-    icon : 'glyphicon glyphicon-log-out',
-    location : 'userMenuNoRoute'
-  });
-
   self.currentView = ko.observable("");
   self.activeCompanyId = ko.observable();
   self.activeCompany = ko.observable();
@@ -3748,6 +3660,10 @@ var NavViewModel = function() {
     location.hash = view.name;
   };
   
+  self.selectViewRoute = function(route) {
+    location.hash = route;
+  };
+
   self.activeCompany.subscribe(function(c) {
     if (c != undefined) {
       Log.info("Active company change detected: new=" + JSON.stringify(c) + ", c.name type is " + typeof c.name);
@@ -3780,7 +3696,7 @@ var NavViewModel = function() {
     }
   };
   self.router = Router(self.routes);
-  self.router.init(self.mainViews[0].name);
+  self.router.init(defaults.initialRoute);
 };
 
 var GettingStartedViewModel = function(currentView, activeCompanyId) {

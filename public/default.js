@@ -1,6 +1,7 @@
 'use strict';
 
 var defaults = {
+  initialRoute: '/page/home',
   defaultLng: "sv",
   enabledLngList: ["sv", "en"],
   uiEnabledLngList: ["sv"],

@@ -27,6 +27,24 @@
     </button>
 </macro>
 
+<macro navbarItem(route, tKey, icon, href)>
+    <li data-bind="css: { active : '${route}' == currentView() }">
+        <a href="#" data-bind="click: selectViewRoute.bind(null, '${route}')">
+            <span class="glyphicon ${icon} inline-icon-left-fix" aria-hidden="true"/>
+            <span data-bind="text: t('${tKey}')"></span>
+        </a>
+    </li>
+</macro>
+
+<macro navbarItemNoRoute(route, tKey, icon)>
+    <li>
+        <a href="${route}">
+            <span class="glyphicon ${icon} inline-icon-left-fix" aria-hidden="true"/>
+            <span data-bind="text: t('${tKey}')"></span>
+        </a>
+    </li>
+</macro>
+
 <html>
     <head>
         <meta charset="utf-8"/>
@@ -54,15 +72,12 @@
                     </a>
                 </div>
                 <div class="navbar-collapse collapse">
-                    <ul class="nav navbar-nav" data-bind="foreach: mainViews">
-                        <li data-bind="if: location == 'main', css: { active : name == $root.currentView() }">
-                            <a href="#" data-bind="click: $root.selectView">
-                                <span class="glyphicon inline-icon-left-fix"
-                                    data-bind="css: icon"
-                                    aria-hidden="true"/>
-                                <span data-bind="text: title"/>
-                            </a>
-                        </li>
+                    <ul class="nav navbar-nav">
+                      <navbarItem route="/page/home" tKey="app.navBar.home" icon="glyphicon-home"/>
+                      <navbarItem route="/page/customer_new" tKey="app.navBar.customerNew" icon="glyphicon-user"/>
+                      <navbarItem route="/page/customers" tKey="app.navBar.customerList" icon="glyphicon-user"/>
+                      <navbarItem route="/page/invoice_new" tKey="app.navBar.invoiceNew" icon="glyphicon-file"/>
+                      <navbarItem route="/page/invoices" tKey="app.navBar.invoiceList" icon="glyphicon-th-list"/>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li class="dropdown">
@@ -84,18 +99,7 @@
                                 </li>
                                 <html-comment> /ko </html-comment>
                                 <li role="separator" class="divider"/>
-                                <html-comment>
-                                    ko foreach: mainViews
-                                </html-comment>
-                                <li data-bind="if: location == 'companyMenu'">
-                                    <a href="#" data-bind="click: $root.selectView">
-                                        <span class="glyphicon inline-icon-left-fix"
-                                            data-bind="css: icon"
-                                            aria-hidden="true"/>
-                                        <span data-bind="text: title"/>
-                                    </a>
-                                </li>
-                                <html-comment> /ko </html-comment>
+                                <navbarItem route="/page/companies" tKey="app.navBar.companyAdmin" icon="glyphicon-wrench"/>
                             </ul>
                         </li>
                         <li class="dropdown">
@@ -109,25 +113,18 @@
                                 </span>
                                 <span class="caret"/>
                             </a>
-                            <ul class="dropdown-menu" role="menu"
-                                data-bind="foreach: mainViews">
+                            <ul class="dropdown-menu" role="menu">
+                                <navbarItem route="/page/offer_new" tKey="app.navBar.offerNew" icon="glyphicon-file"/>
+                                <navbarItem route="/page/offers" tKey="app.navBar.offerList" icon="glyphicon-th-list"/>
+                                <navbarItem route="/page/invoice_item_group_templates" tKey="app.navBar.invoiceItemGroupTemplates" icon="glyphicon-list-alt"/>
+                                <navbarItem route="/page/settings" tKey="app.navBar.settings" icon="glyphicon-wrench"/>
 
-                                <li data-bind="if: location == 'userMenu'">
-                                    <a href="#" data-bind="click: $root.selectView">
-                                        <span class="glyphicon inline-icon-left-fix"
-                                            data-bind="css: icon"
-                                            aria-hidden="true"/>
-                                        <span data-bind="text: title"/>
-                                    </a>
-                                </li>
-                                <li data-bind="if: location == 'userMenuNoRoute'">
-                                    <a data-bind="attr: {href: name}">
-                                        <span class="glyphicon inline-icon-left-fix"
-                                            data-bind="css: icon"
-                                            aria-hidden="true"/>
-                                        <span data-bind="text: title"/>
-                                    </a>
-                                </li>
+                                <navbarItem route="/page/debug" tKey="app.navBar.debug" icon="glyphicon-eye-open" if(data.user.isAdmin === true)/>
+                                <navbarItem route="/page/users" tKey="app.navBar.users" icon="glyphicon-user" if(data.user.isAdmin === true)/>
+                                <navbarItem route="/page/invites" tKey="app.navBar.invites" icon="glyphicon-gift" if(data.user.isAdmin === true)/>
+
+                                <li role="separator" class="divider"/>
+                                <navbarItemNoRoute route="/logout" tKey="app.navBar.logout" icon="glyphicon-log-out"/>
                             </ul>
                         </li>
                     </ul>
