@@ -6,7 +6,7 @@
 
 <macro condIcon(cond, icon, tooltip, extraClass)>
     <span data-bind="if: ${cond}">
-        <span class="glyphicon ${icon} ${extraClass}" aria-hidden="true" data-placement="top" title="${tooltip}"/>
+        <span class="glyphicon ${icon} ${extraClass}" aria-hidden="true" data-placement="top" title="${tooltip}"></span>
     </span>
 </macro>
 
@@ -29,16 +29,28 @@
 
 <macro navbarDropdown(tKey, icon)>
     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-      <span class="glyphicon ${icon} inline-icon-left-fix" aria-hidden="true"/>
+      <span class="glyphicon ${icon} inline-icon-left-fix" aria-hidden="true"></span>
       <span data-bind="text: t('${tKey}')"></span>
-      <span class="caret"/>
+      <span class="caret"></span>
     </a>
 </macro>
 
 <macro navbarItem(route, tKey, icon)>
-    <li data-bind="css: { active : '${route}' == currentView() }">
+    <li data-bind="css: { active: '${route}'.split('/').slice(-1)[0] == currentView() }">
         <a href="#" data-bind="click: selectViewRoute.bind(null, '${route}')">
-            <span class="glyphicon ${icon} inline-icon-left-fix" aria-hidden="true"/>
+            <span class="glyphicon ${icon} inline-icon-left-fix" aria-hidden="true"></span>
+            <span data-bind="text: t('${tKey}')"></span>
+        </a>
+    </li>
+</macro>
+
+<macro navbarItem2(route, tKey, icon, iconTop)>
+    <li data-bind="css: { active: '${route}'.split('/').slice(-1)[0] == currentView() }">
+        <a href="#" data-bind="click: selectViewRoute.bind(null, '${route}')">
+            <span class="icon-stack">
+                <span class="glyphicon ${icon}" aria-hidden="true"></span>
+                <span class="glyphicon ${iconTop} text-muted icon-small-top-left" aria-hidden="true"></span>
+            </span>
             <span data-bind="text: t('${tKey}')"></span>
         </a>
     </li>
@@ -47,7 +59,7 @@
 <macro navbarItemServerRoute(route, tKey, icon)>
     <li>
         <a href="${route}">
-            <span class="glyphicon ${icon} inline-icon-left-fix" aria-hidden="true"/>
+            <span class="glyphicon ${icon} inline-icon-left-fix" aria-hidden="true"></span>
             <span data-bind="text: t('${tKey}')"></span>
         </a>
     </li>
@@ -86,26 +98,26 @@
                         <li class="drowdown">
                             <navbarDropdown tKey="app.navBar.customerMenu" icon="glyphicon-user"/>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/customer_new" tKey="app.navBar.customerNew" icon="glyphicon-user"/>
-                                <navbarItem route="/page/customers" tKey="app.navBar.customerList" icon="glyphicon-user"/>
+                                <navbarItem2 route="/page/customer_new" tKey="app.navBar.customerNew" icon="glyphicon-user" iconTop="glyphicon-plus"/>
+                                <navbarItem2 route="/page/customers" tKey="app.navBar.customerList" icon="glyphicon-user" iconTop="glyphicon-eye-open"/>
                             </ul>
                         </li>
 
                         <li class="drowdown">
                             <navbarDropdown tKey="app.navBar.invoiceMenu" icon="glyphicon-file"/>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/invoice_new" tKey="app.navBar.invoiceNew" icon="glyphicon-file"/>
-                                <navbarItem route="/page/invoices" tKey="app.navBar.invoiceList" icon="glyphicon-th-list"/>
+                                <navbarItem2 route="/page/invoice_new" tKey="app.navBar.invoiceNew" icon="glyphicon-file" iconTop="glyphicon-plus"/>
+                                <navbarItem2 route="/page/invoices" tKey="app.navBar.invoiceList" icon="glyphicon-th-list" iconTop="glyphicon-eye-open"/>
                                 <li role="separator" class="divider"/>
-                                <navbarItem route="/page/invoice_item_group_templates" tKey="app.navBar.invoiceItemGroupTemplates" icon="glyphicon-list-alt"/>
+                                <navbarItem2 route="/page/invoice_item_group_templates" tKey="app.navBar.invoiceItemGroupTemplates" icon="glyphicon-list-alt" iconTop="glyphicon-wrench"/>
                             </ul>
                         </li>
 
                         <li class="drowdown">
                             <navbarDropdown tKey="app.navBar.offerMenu" icon="glyphicon-file"/>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/offer_new" tKey="app.navBar.offerNew" icon="glyphicon-file"/>
-                                <navbarItem route="/page/offers" tKey="app.navBar.offerList" icon="glyphicon-th-list"/>
+                                <navbarItem2 route="/page/offer_new" tKey="app.navBar.offerNew" icon="glyphicon-file" iconTop="glyphicon-plus"/>
+                                <navbarItem2 route="/page/offers" tKey="app.navBar.offerList" icon="glyphicon-th-list" iconTop="glyphicon-eye-open"/>
                             </ul>
                         </li>
 
@@ -130,7 +142,7 @@
                                 </li>
                                 <html-comment> /ko </html-comment>
                                 <li role="separator" class="divider"/>
-                                <navbarItem route="/page/companies" tKey="app.navBar.companyAdmin" icon="glyphicon-wrench"/>
+                                <navbarItem2 route="/page/companies" tKey="app.navBar.companyAdmin" icon="glyphicon-briefcase" iconTop="glyphicon-wrench"/>
                             </ul>
                         </li>
                         <li class="dropdown">
