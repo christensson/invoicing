@@ -1,6 +1,7 @@
 <script marko-init>
     var i18n = require("i18next");
     var news = require("../news.json");
+    var navbarUseAnnotatedIcons = false;
 </script>
 <!DOCTYPE html>
 
@@ -47,10 +48,15 @@
 <macro navbarItem2(route, tKey, icon, iconTop)>
     <li data-bind="css: { active: '${route}'.split('/').slice(-1)[0] == currentView() }">
         <a href="#" data-bind="click: selectViewRoute.bind(null, '${route}')">
-            <span class="icon-stack">
-                <span class="glyphicon ${icon}" aria-hidden="true"></span>
-                <span class="glyphicon ${iconTop} text-muted icon-small-top-left" aria-hidden="true"></span>
-            </span>
+            <if (navbarUseAnnotatedIcons == true)>
+                <span class="icon-stack">
+                    <span class="glyphicon ${icon}" aria-hidden="true"></span>
+                    <span class="glyphicon ${iconTop} text-muted icon-small-top-left" aria-hidden="true"></span>
+                </span>
+            </if>
+            <else>
+                <span class="glyphicon ${icon} inline-icon-left-fix" aria-hidden="true"></span>
+            </else>
             <span data-bind="text: t('${tKey}')"></span>
         </a>
     </li>
