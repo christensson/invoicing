@@ -117,6 +117,9 @@ app.use(express.static('node_modules/i18next'));
 app.use(express.static('node_modules/i18next-xhr-backend/'));
 app.use(express.static('node_modules/jqueryui/', {index: false}));
 app.use(express.static('node_modules/knockout-jqautocomplete/build/'));
+app.use(express.static('node_modules/font-awesome'));
+app.use(express.static('node_modules/font-awesome/css'));
+app.use(express.static('node_modules/font-awesome/font'));
 
 if (smallLag != undefined) {
   app.use(smallLag);

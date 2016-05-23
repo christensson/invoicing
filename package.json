@@ -23,6 +23,7 @@
     "express-session": "^1.13.0",
     "express-simulate-latency": "0.0.2",
     "fluentreports": "^1.0.8",
+    "font-awesome": "^4.6.1",
     "helmet": "^1.3.0",
     "i18next": "^2.5.1",
     "i18next-express-middleware": "^0.2.1",
