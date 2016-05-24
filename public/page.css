@@ -221,20 +221,44 @@ body { padding-top: 70px; }
   */
 }
 
-
-.icon-stack {
+.icon-invoice {
     position: relative;
-    margin-right: 1.2em;
-}
-.icon-stack .glyphicon {
-    position: absolute; 
-    margin-right: 1.2em;
 }
 
-.icon-small-top-left {
-  font-size: 0.6em;
-  left: -0.5em;
-  top: -0.5em;
+.icon-invoice:before {
+    content: "\f15b"; /* fa-file */
+    position: relative;
+    font-size: inherit;
+}
+
+.icon-invoice:after {
+    content: "F";
+    position: relative;
+    font-size: 60%;
+    font-weight: bold;
+    top: 0.1em;
+    left: -1.1em;
+    color: white;
+}
+
+.icon-offer {
+    position: relative;
+}
+
+.icon-offer:before {
+    content: "\f15b"; /* fa-file */
+    position: relative;
+    font-size: inherit;
+}
+
+.icon-offer:after {
+    content: "O";
+    position: relative;
+    font-size: 60%;
+    font-weight: bold;
+    top: 0.1em;
+    left: -1.1em;
+    color: white;
 }
 
 /*jQuery UI autocomplete for bootstrap*/

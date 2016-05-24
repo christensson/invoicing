@@ -5,20 +5,25 @@
 </script>
 <!DOCTYPE html>
 
-<macro icon(icon, tooltip, extraClass)>
-    <i class="fa fa-${icon} ${extraClass}" aria-hidden="true" data-placement="top" title="${tooltip}"></i>
+<macro icon(icon, tooltip, extraClass, isExplicitIcon)>
+    <if ("${isExplicitIcon}" == "true")>
+        <i class="fa ${icon} ${extraClass}" aria-hidden="true" data-placement="top" title="${tooltip}"></i>
+    </if>
+    <else>
+        <i class="fa fa-${icon} ${extraClass}" aria-hidden="true" data-placement="top" title="${tooltip}"></i>
+    </else>
 </macro>
 
-<macro iconFw(icon, tooltip, extraClass)>
-    <i class="fa fa-${icon} fa-fw ${extraClass}" aria-hidden="true" data-placement="top" title="${tooltip}"></i>
+<macro iconFw(icon, tooltip, extraClass, isExplicitIcon)>
+    <icon icon="${icon}" tooltip="${tooltip}" extraClass="fa-fw ${extraClass}" isExplicitIcon="${isExplicitIcon}"/>
 </macro>
 
-<macro iconLg(icon, tooltip, extraClass)>
-    <icon icon="${icon}" tooltip="${tooltip}" extraClass="fa-lg ${extraClass}"/>
+<macro iconLg(icon, tooltip, extraClass, isExplicitIcon)>
+    <icon icon="${icon}" tooltip="${tooltip}" extraClass="fa-lg ${extraClass}" isExplicitIcon="${isExplicitIcon}"/>
 </macro>
 
-<macro iconFwLg(icon, tooltip, extraClass)>
-    <iconFw icon="${icon}" tooltip="${tooltip}" extraClass="fa-lg ${extraClass}"/>
+<macro iconFwLg(icon, tooltip, extraClass, isExplicitIcon)>
+    <iconFw icon="${icon}" tooltip="${tooltip}" extraClass="fa-lg ${extraClass}" isExplicitIcon="${isExplicitIcon}"/>
 </macro>
 
 <macro condIcon(cond, icon, tooltip, extraClass)>
@@ -44,44 +49,27 @@
     </button>
 </macro>
 
-<macro navbarDropdown(tKey, icon)>
+<macro navbarDropdown(tKey, icon, isExplicitIcon)>
     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-      <iconFwLg icon="${icon}" extraClass="inline-icon-left-fix"/>
+      <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
       <span data-bind="text: t('${tKey}')"></span>
       <span class="caret"></span>
     </a>
 </macro>
 
-<macro navbarItem(route, tKey, icon)>
+<macro navbarItem(route, tKey, icon, isExplicitIcon)>
     <li data-bind="css: { active: '${route}'.split('/').slice(-1)[0] == currentView() }">
         <a href="#" data-bind="click: selectViewRoute.bind(null, '${route}')">
-            <iconFwLg icon="${icon}" extraClass="inline-icon-left-fix"/>
+            <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
             <span data-bind="text: t('${tKey}')"></span>
         </a>
     </li>
 </macro>
 
-<macro navbarItem2(route, tKey, icon, iconTop)>
-    <li data-bind="css: { active: '${route}'.split('/').slice(-1)[0] == currentView() }">
-        <a href="#" data-bind="click: selectViewRoute.bind(null, '${route}')">
-            <if (navbarUseAnnotatedIcons == true)>
-                <span class="icon-stack">
-                    <iconFwLg icon="${icon}"/>
-                    <iconFwLg icon="${iconTop}" extraClass="text-muted icon-small-top-left"/>
-                </span>
-            </if>
-            <else>
-                <iconFwLg icon="${icon}" extraClass="inline-icon-left-fix"/>
-            </else>
-            <span data-bind="text: t('${tKey}')"></span>
-        </a>
-    </li>
-</macro>
-
-<macro navbarItemServerRoute(route, tKey, icon)>
+<macro navbarItemServerRoute(route, tKey, icon, isExplicitIcon)>
     <li>
         <a href="${route}">
-            <iconFwLg icon="${icon}" extraClass="inline-icon-left-fix"/>
+            <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
             <span data-bind="text: t('${tKey}')"></span>
         </a>
     </li>
@@ -121,26 +109,26 @@
                         <li class="drowdown">
                             <navbarDropdown tKey="app.navBar.customerMenu" icon="user"/>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem2 route="/page/customer_new" tKey="app.navBar.customerNew" icon="user-plus" iconTop="plus"/>
-                                <navbarItem2 route="/page/customers" tKey="app.navBar.customerList" icon="users" iconTop="eye"/>
+                                <navbarItem route="/page/customer_new" tKey="app.navBar.customerNew" icon="user-plus"/>
+                                <navbarItem route="/page/customers" tKey="app.navBar.customerList" icon="users"/>
                             </ul>
                         </li>
 
                         <li class="drowdown">
-                            <navbarDropdown tKey="app.navBar.invoiceMenu" icon="file-text"/>
+                            <navbarDropdown tKey="app.navBar.invoiceMenu" icon="file"/>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem2 route="/page/invoice_new" tKey="app.navBar.invoiceNew" icon="file-text" iconTop="plus"/>
-                                <navbarItem2 route="/page/invoices" tKey="app.navBar.invoiceList" icon="list" iconTop="eye"/>
+                                <navbarItem route="/page/invoice_new" tKey="app.navBar.invoiceNew" icon="file"/>
+                                <navbarItem route="/page/invoices" tKey="app.navBar.invoiceList" icon="list"/>
                                 <li role="separator" class="divider"/>
-                                <navbarItem2 route="/page/invoice_item_group_templates" tKey="app.navBar.invoiceItemGroupTemplates" icon="list-alt" iconTop="wrench"/>
+                                <navbarItem route="/page/invoice_item_group_templates" tKey="app.navBar.invoiceItemGroupTemplates" icon="list-alt"/>
                             </ul>
                         </li>
 
                         <li class="drowdown">
-                            <navbarDropdown tKey="app.navBar.offerMenu" icon="file"/>
+                            <navbarDropdown tKey="app.navBar.offerMenu"  icon="file"/>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem2 route="/page/offer_new" tKey="app.navBar.offerNew" icon="file" iconTop="plus"/>
-                                <navbarItem2 route="/page/offers" tKey="app.navBar.offerList" icon="list" iconTop="eye"/>
+                                <navbarItem route="/page/offer_new" tKey="app.navBar.offerNew" icon="file"/>
+                                <navbarItem route="/page/offers" tKey="app.navBar.offerList" icon="list"/>
                             </ul>
                         </li>
 
@@ -164,7 +152,7 @@
                                 </li>
                                 <html-comment> /ko </html-comment>
                                 <li role="separator" class="divider"/>
-                                <navbarItem2 route="/page/companies" tKey="app.navBar.companyAdmin" icon="briefcase" iconTop="wrench"/>
+                                <navbarItem route="/page/companies" tKey="app.navBar.companyAdmin" icon="briefcase"/>
                             </ul>
                         </li>
                         <li class="dropdown">
@@ -1067,7 +1055,7 @@
                                         </div>
                                         <button type="button" class="btn btn-default"
                                             data-bind="click: transferCustomer, enable: data._id() != undefined">
-                                            <icon icon="copy" extraClass="inline-icon-left-fix"/>
+                                            <icon icon="exchange" extraClass="inline-icon-left-fix"/>
                                             ${i18n.t('app.customer.transferCustomerBtn')}
                                         </button>
                                     </div>
