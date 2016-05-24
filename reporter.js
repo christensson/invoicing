@@ -341,8 +341,13 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
     }
 
     if (invoice.company.logo !== undefined && invoice.company.logo.path !== undefined) {
-      x.image(invoice.company.logo.path, {
-        x: companyLogoX, y: companyLogoY, align: companyLogoAlign, fit: [companyLogoWidth, companyLogoHeight]});
+      if (fs.existsSync(invoice.company.logo.path)) {
+        x.image(invoice.company.logo.path, {
+          x: companyLogoX, y: companyLogoY, align: companyLogoAlign, fit: [companyLogoWidth, companyLogoHeight]});
+      } else {
+        log.warn("doInvoiceReport: Logo file not found. path=" + invoice.company.logo.path +
+          ", companyId=" + invoice.company._id);
+      }
       if (opts.debug) {
         x.box(companyLogoX, companyLogoY, companyLogoWidth, companyLogoHeight);
       }
