@@ -411,7 +411,7 @@
             "footerAdvertismentLbl": "Lätt Fakturering",
             "footerPageLbl": "Page "
         },
-        "invoiceReport": {
+        "offerReport": {
             "fileName": "offer-{{docNr}}-customer-{{cid}}.pdf",
             "decimalSeparator": ".",
             "headerString": "OFFER",
