@@ -1,6 +1,17 @@
 {
   "items": [
     {
+      "date": "2016-05-25",
+      "msgSlogan": {
+        "sv" : "Offert",
+        "en" : ""
+      },
+      "msg": {
+        "sv": "Lätt Fakturering har nu stöd för <strong>offerter</strong>! I samband med detta så har huvudmenyn strukturerats om.",
+        "en": ""
+      }
+    },
+    {
       "date": "2016-05-09",
       "msgSlogan": {
         "sv" : "Fakturainmatning",
