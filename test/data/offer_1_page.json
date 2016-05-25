@@ -1,7 +1,7 @@
 {
   "_id": "56bb8cfc9eab24191694fd98",
-  "docType": "invoice",
-  "docNr": 100,
+  "docType": "offer",  
+  "docNr": 105,
   "uid": "56ba53ecaf82211b4ef31d22",
   "companyId": "56ba5426af82211b4ef31d2a",
   "company": {

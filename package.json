@@ -1,6 +1,6 @@
 {
   "name": "Invoicing",
-  "version": "0.2.43",
+  "version": "0.2.44",
   "description": "Invoicing made easy",
   "main": "app.js",
   "scripts": {
@@ -23,6 +23,7 @@
     "express-session": "^1.13.0",
     "express-simulate-latency": "0.0.2",
     "fluentreports": "^1.0.8",
+    "font-awesome": "^4.6.3",
     "helmet": "^1.3.0",
     "i18next": "^2.5.1",
     "i18next-express-middleware": "^0.2.1",
@@ -36,7 +37,7 @@
     "knockout-jqautocomplete": "^0.4.4",
     "marko": "^3.3.0",
     "method-override": "^2.3.5",
-    "mongodb": "^2.1.19",
+    "mongodb": "^2.1.20",
     "morgan": "^1.7.0",
     "multer": "^1.1.0",
     "passport": "^0.3.2",

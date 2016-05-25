@@ -1,6 +1,7 @@
 'use strict';
 
 var defaults = {
+  initialRoute: '/page/home',
   defaultLng: "sv",
   enabledLngList: ["sv", "en"],
   uiEnabledLngList: ["sv"],
@@ -19,6 +20,7 @@ var defaults = {
   },
   firstCid: 100,
   firstIid: 100,
+  firstOid: 100,
   minPwdLen: 8,
   invoiceListFilter: {
     isPaneExpanded: true,

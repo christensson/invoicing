@@ -117,6 +117,9 @@ app.use(express.static('node_modules/i18next'));
 app.use(express.static('node_modules/i18next-xhr-backend/'));
 app.use(express.static('node_modules/jqueryui/', {index: false}));
 app.use(express.static('node_modules/knockout-jqautocomplete/build/'));
+app.use(express.static('node_modules/font-awesome'));
+app.use(express.static('node_modules/font-awesome/css'));
+app.use(express.static('node_modules/font-awesome/font'));
 
 if (smallLag != undefined) {
   app.use(smallLag);
@@ -511,10 +514,11 @@ app.put("/api/company/:id", ensureAuthenticated, function(req, res) {
   } else {
     log.info("Update company: user=" + req.user.info.name + ", uid=" + uid
         + ", data=" + JSON.stringify(req.body, null, 2));
-    // Remove nextIid and nextCid, we don't want to modify that
+    // Remove nextIid, nextOid and nextCid, we don't want to modify that
     // in case of concurrent invoice or customer creation!
     delete req.body.nextCid;
     delete req.body.nextIid;
+    delete req.body.nextOid;
 
     mydb.updateCompany(req.body).then(
         okHandler.bind(null, 'updateCompany', res)).fail(
@@ -653,30 +657,29 @@ app.get("/api/invoices/:companyId", ensureAuthenticated, function(req, res) {
   var companyId = req.params.companyId;
   log.info("Get invoices: user=" + req.user.info.name + ", uid=" + uid
       + ", companyId=" + companyId);
-  mydb.getInvoices(uid, companyId).then(function(docStream) {
+  mydb.getInvoicesOrOffers('invoice', uid, companyId).then(function(docStream) {
     streamJsonResponse(res, docStream, function() {
       docStream.close();
     });
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.get("/api/invoice/:id", ensureAuthenticated,
-    function(req, res) {
-      var uid = req.user._id;
-      var id = req.params.id;
-      log.info("Get invoice: user=" + req.user.info.name + ", uid=" + uid
-          + ", _id=" + id);
-      mydb.getInvoice(uid, id).then(function(invoice) {
-        res.status(200).json(invoice);
-        res.end();
-      }).fail(myFailureHandler.bind(null, res));
-    });
+app.get("/api/invoice/:id", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var id = req.params.id;
+  log.info("Get invoice: user=" + req.user.info.name + ", uid=" + uid
+      + ", _id=" + id);
+  mydb.getInvoiceOrOffer('invoice', uid, id).then(function(invoice) {
+    res.status(200).json(invoice);
+    res.end();
+  }).fail(myFailureHandler.bind(null, res));
+});
 
 app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
-  var okHandler = function(logText, res, invoice) {
-    log.verbose(logText + ": OK, obj=" + JSON.stringify(invoice));
+  var okHandler = function(logText, res, doc) {
+    log.verbose(logText + ": OK, obj=" + JSON.stringify(doc));
     var resData = {
-      'invoice' : invoice
+      'doc' : doc
     };
     res.status(200).json(resData);
     res.end();
@@ -686,14 +689,63 @@ app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
   if (req.params.id === "undefined") {
     log.info("New invoice: user=" + req.user.info.name + ", uid=" + uid
         + ", data=" + JSON.stringify(req.body, null, 2));
-    mydb.addInvoice(uid, companyId, req.body).then(
+    mydb.addInvoiceOrOffer('invoice', uid, companyId, req.body).then(
         okHandler.bind(null, 'addInvoice', res)).fail(
         myFailureHandler.bind(null, res));
   } else {
     log.info("Update invoice: user=" + req.user.info.name + ", uid=" + uid
         + ", data=" + JSON.stringify(req.body, null, 2));
-    mydb.updateInvoice(req.body).then(
+    mydb.updateInvoiceOrOffer('invoice', req.body).then(
         okHandler.bind(null, 'updateInvoice', res)).fail(
+        myFailureHandler.bind(null, res));
+  }
+});
+
+app.get("/api/offers/:companyId", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var companyId = req.params.companyId;
+  log.info("Get offers: user=" + req.user.info.name + ", uid=" + uid
+      + ", companyId=" + companyId);
+  mydb.getInvoicesOrOffers('offer', uid, companyId).then(function(docStream) {
+    streamJsonResponse(res, docStream, function() {
+      docStream.close();
+    });
+  }).fail(myFailureHandler.bind(null, res));
+});
+
+app.get("/api/offer/:id", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var id = req.params.id;
+  log.info("Get offer: user=" + req.user.info.name + ", uid=" + uid
+      + ", _id=" + id);
+  mydb.getInvoiceOrOffer('offer', uid, id).then(function(offer) {
+    res.status(200).json(offer);
+    res.end();
+  }).fail(myFailureHandler.bind(null, res));
+});
+
+app.put("/api/offer/:id", ensureAuthenticated, function(req, res) {
+  var okHandler = function(logText, res, doc) {
+    log.verbose(logText + ": OK, obj=" + JSON.stringify(doc));
+    var resData = {
+      'doc' : doc
+    };
+    res.status(200).json(resData);
+    res.end();
+  };
+  var uid = req.user._id;
+  var companyId = req.body.companyId;
+  if (req.params.id === "undefined") {
+    log.info("New offer: user=" + req.user.info.name + ", uid=" + uid
+        + ", data=" + JSON.stringify(req.body, null, 2));
+    mydb.addInvoiceOrOffer('offer', uid, companyId, req.body).then(
+        okHandler.bind(null, 'addOffer', res)).fail(
+        myFailureHandler.bind(null, res));
+  } else {
+    log.info("Update offer: user=" + req.user.info.name + ", uid=" + uid
+        + ", data=" + JSON.stringify(req.body, null, 2));
+    mydb.updateInvoiceOrOffer('offer', req.body).then(
+        okHandler.bind(null, 'updateOffer', res)).fail(
         myFailureHandler.bind(null, res));
   }
 });
@@ -749,7 +801,7 @@ app.get("/api/invoiceReport/:id/:isReminder", ensureAuthenticated, function(req,
     }
     log.info("Invoice report: user=" + req.user.info.name + ", _id=" + id +
         ", isDemoMode=" + isDemoMode);
-    return mydb.getInvoice(uid, id);
+    return mydb.getInvoiceOrOffer('invoice', uid, id);
   }).then(function(invoice) {
     reporter.doInvoiceReport(invoice, tmpDir, function(reportFilename) {
         log.verbose("onCompletion: reportFilename=" + reportFilename);
@@ -764,6 +816,43 @@ app.get("/api/invoiceReport/:id/:isReminder", ensureAuthenticated, function(req,
       },
       {
         'isReminder': isReminder,
+        'isDemoMode': isDemoMode,
+        'debug': debug
+      }
+    );
+  }).fail(myFailureHandler.bind(null, res));
+});
+
+app.get("/api/offerReport/:id", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var id = req.params.id;
+  log.info("Offer report: user=" + req.user.info.name + ", _id=" + id);
+  
+  // Check license in settings
+  var isDemoMode = false;
+  var debug = false;
+  mydb.getSettings(uid).then(function(settings) {
+    if (settings.license === undefined ||
+        settings.license === "demo") {
+      isDemoMode = true;
+    }
+    log.info("Offer report: user=" + req.user.info.name + ", _id=" + id +
+        ", isDemoMode=" + isDemoMode);
+    return mydb.getInvoiceOrOffer('offer', uid, id);
+  }).then(function(offer) {
+    reporter.doInvoiceReport(offer, tmpDir, function(reportFilename) {
+        log.verbose("onCompletion: reportFilename=" + reportFilename);
+        res.type('application/pdf');
+        res.download(reportFilename, reportFilename, function(err) {
+          if (err) {
+            log.error("onCompletion: " + err);
+          } else {
+            res.end();
+          }
+        });
+      },
+      {
+        'isReminder': false,
         'isDemoMode': isDemoMode,
         'debug': debug
       }

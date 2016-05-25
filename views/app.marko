@@ -1,34 +1,78 @@
 <script marko-init>
     var i18n = require("i18next");
     var news = require("../news.json");
+    var navbarUseAnnotatedIcons = false;
 </script>
 <!DOCTYPE html>
 
-<macro condIcon(cond, icon, tooltip)>
+<macro icon(icon, tooltip, extraClass, isExplicitIcon)>
+    <if ("${isExplicitIcon}" == "true")>
+        <i class="fa ${icon} ${extraClass}" aria-hidden="true" data-placement="top" title="${tooltip}"></i>
+    </if>
+    <else>
+        <i class="fa fa-${icon} ${extraClass}" aria-hidden="true" data-placement="top" title="${tooltip}"></i>
+    </else>
+</macro>
+
+<macro iconFw(icon, tooltip, extraClass, isExplicitIcon)>
+    <icon icon="${icon}" tooltip="${tooltip}" extraClass="fa-fw ${extraClass}" isExplicitIcon="${isExplicitIcon}"/>
+</macro>
+
+<macro iconLg(icon, tooltip, extraClass, isExplicitIcon)>
+    <icon icon="${icon}" tooltip="${tooltip}" extraClass="fa-lg ${extraClass}" isExplicitIcon="${isExplicitIcon}"/>
+</macro>
+
+<macro iconFwLg(icon, tooltip, extraClass, isExplicitIcon)>
+    <iconFw icon="${icon}" tooltip="${tooltip}" extraClass="fa-lg ${extraClass}" isExplicitIcon="${isExplicitIcon}"/>
+</macro>
+
+<macro condIcon(cond, icon, tooltip, extraClass)>
     <span data-bind="if: ${cond}">
-        <span class="glyphicon ${icon}" aria-hidden="true" data-placement="top" title="${tooltip}"/>
+        <icon icon="${icon}" tooltip="${tooltip}" extraClass="${extraClass}"/>
     </span>
 </macro>
 
-<macro condCheckIcon(cond, tooltip)>
-    <condIcon cond="${cond}" icon="glyphicon-ok" tooltip="${tooltip}"/>
+<macro condCheckIcon(cond, tooltip, extraClass)>
+    <condIcon cond="${cond}" icon="check" tooltip="${tooltip}" extraClass="${extraClass}"/>
 </macro>
 
-<macro condLockIcon(cond, tooltip)>
-    <condIcon cond="${cond}" icon="glyphicon-lock" tooltip="${tooltip}"/>
+<macro condLockIcon(cond, tooltip, extraClass)>
+    <condIcon cond="${cond}" icon="lock" tooltip="${tooltip}" extraClass="${extraClass}"/>
 </macro>
 
 <macro filterLabelToggle(condVar, text, action)>
     <button class="btn btn-xs label-fix" data-bind="css: {'btn-default': !${condVar}(), 'btn-success': ${condVar}},
                                              click: function() { ${condVar}(!${condVar}()); }">
-        <span data-bind="if: ${condVar}">
-            <span class="glyphicon glyphicon-eye-open inline-icon-left-fix" aria-hidden="true"/>
-        </span>
-        <span data-bind="ifnot: ${condVar}">
-            <span class="glyphicon glyphicon-eye-close inline-icon-left-fix" aria-hidden="true"/>
-        </span>
+        <condIcon cond="${condVar}" icon="eye" extraClass="inline-icon-left-fix"/>
+        <condIcon cond="!${condVar}()" icon="eye-slash" extraClass="inline-icon-left-fix"/>
         ${text}
     </button>
+</macro>
+
+<macro navbarDropdown(tKey, icon, isExplicitIcon)>
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+      <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
+      <span data-bind="text: t('${tKey}')"></span>
+      <span class="caret"></span>
+    </a>
+</macro>
+
+<macro navbarItem(route, tKey, icon, isExplicitIcon)>
+    <li data-bind="css: { active: '${route}'.split('/').slice(-1)[0] == currentView() }">
+        <a href="#" data-bind="click: selectViewRoute.bind(null, '${route}')">
+            <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
+            <span data-bind="text: t('${tKey}')"></span>
+        </a>
+    </li>
+</macro>
+
+<macro navbarItemServerRoute(route, tKey, icon, isExplicitIcon)>
+    <li>
+        <a href="${route}">
+            <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
+            <span data-bind="text: t('${tKey}')"></span>
+        </a>
+    </li>
 </macro>
 
 <html>
@@ -39,6 +83,7 @@
         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
         <title>${i18n.t('app.pageTitle')}</title>
         <link rel="stylesheet" type="text/css" href="bootstrap.min.css"/>
+        <link rel="stylesheet" type="text/css" href="font-awesome.min.css"/>
         <link rel="stylesheet" type="text/css" href="page.css"/>
     </head>
     <body role="document">
@@ -58,98 +103,80 @@
                     </a>
                 </div>
                 <div class="navbar-collapse collapse">
-                    <ul class="nav navbar-nav" data-bind="foreach: mainViews">
-                        <li data-bind="if: location == 'main', css: { active : name == $root.currentView() }">
-                            <a href="#" data-bind="click: $root.selectView">
-                                <span class="glyphicon inline-icon-left-fix"
-                                    data-bind="css: icon"
-                                    aria-hidden="true"/>
-                                <span data-bind="text: title"/>
-                            </a>
+                    <ul class="nav navbar-nav">
+                        <navbarItem route="/page/home" tKey="app.navBar.home" icon="home"/>
+
+                        <li class="drowdown">
+                            <navbarDropdown tKey="app.navBar.customerMenu" icon="user"/>
+                            <ul class="dropdown-menu" role="menu">
+                                <navbarItem route="/page/customer_new" tKey="app.navBar.customerNew" icon="user-plus"/>
+                                <navbarItem route="/page/customers" tKey="app.navBar.customerList" icon="users"/>
+                            </ul>
                         </li>
+
+                        <li class="drowdown">
+                            <navbarDropdown tKey="app.navBar.invoiceMenu" icon="file-text"/>
+                            <ul class="dropdown-menu" role="menu">
+                                <navbarItem route="/page/invoice_new" tKey="app.navBar.invoiceNew" icon="file-text"/>
+                                <navbarItem route="/page/invoices" tKey="app.navBar.invoiceList" icon="list"/>
+                                <li role="separator" class="divider"/>
+                                <navbarItem route="/page/invoice_item_group_templates" tKey="app.navBar.invoiceItemGroupTemplates" icon="list-alt"/>
+                            </ul>
+                        </li>
+
+                        <li class="drowdown">
+                            <navbarDropdown tKey="app.navBar.offerMenu" icon="file-text"/>
+                            <ul class="dropdown-menu" role="menu">
+                                <navbarItem route="/page/offer_new" tKey="app.navBar.offerNew" icon="file-text"/>
+                                <navbarItem route="/page/offers" tKey="app.navBar.offerList" icon="list"/>
+                            </ul>
+                        </li>
+
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle"
-                                data-toggle="dropdown" role="button"
-                                aria-expanded="false">
-
-                                <span class="glyphicon glyphicon-briefcase inline-icon-left-fix"
-                                    aria-hidden="true"/>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                <iconFwLg icon="briefcase" extraClass="inline-icon-left-fix"/>
                                 <span data-bind="text: activeCompanyName"/>
                                 <span class="caret"/>
-
                             </a>
                             <ul class="dropdown-menu" role="menu">
                                 <html-comment>
                                     ko foreach: companyList
                                 </html-comment>
                                 <li data-bind="css: { active: _id() == $parent.activeCompanyId() }">
-                                    <a href="#"
-                                        data-bind="click: $root.selectCompany">
-
+                                    <a href="#" data-bind="click: $root.selectCompany">
                                         <span data-bind="text: name"/>
-                                        <condCheckIcon cond="_id() == $parent.activeCompanyId()"/>
-
+                                        <condCheckIcon cond="_id() == $parent.activeCompanyId()" extraClass="inline-icon-right-fix"/>
                                     </a>
                                 </li>
                                 <html-comment> /ko </html-comment>
                                 <li role="separator" class="divider"/>
-                                <html-comment>
-                                    ko foreach: mainViews
-                                </html-comment>
-                                <li data-bind="if: location == 'companyMenu'">
-                                    <a href="#"
-                                        data-bind="click: $root.selectView">
-
-                                        <span class="glyphicon inline-icon-left-fix"
-                                            data-bind="css: icon"
-                                            aria-hidden="true"/>
-                                        <span data-bind="text: title"/>
-
-                                    </a>
-                                </li>
-                                <html-comment> /ko </html-comment>
+                                <navbarItem route="/page/companies" tKey="app.navBar.companyAdmin" icon="briefcase"/>
                             </ul>
                         </li>
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle"
-                                data-toggle="dropdown" role="button"
-                                aria-expanded="false">
-
-                                <span class="glyphicon glyphicon-user inline-icon-left-fix"
-                                    aria-hidden="true"/>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                <iconFwLg icon="user" extraClass="inline-icon-left-fix"/>
                                 <span data-bind="text: userName"/>
                                 <span if(data.user.isAdmin === true)
                                     class="label label-primary label-fix">
                                     ${i18n.t('app.navBar.adminUserLbl')}
                                 </span>
                                 <span class="caret"/>
-
                             </a>
-                            <ul class="dropdown-menu" role="menu"
-                                data-bind="foreach: mainViews">
+                            <ul class="dropdown-menu" role="menu">
+                                <navbarItem route="/page/settings" tKey="app.navBar.settings" icon="wrench"/>
 
-                                <li data-bind="if: location == 'userMenu'">
-                                    <a href="#"
-                                        data-bind="click: $root.selectView">
+                                <if(data.user.isAdmin === true)>
+                                    <li role="separator" class="divider"/>
+                                    <navbarItem route="/page/debug" tKey="app.navBar.debug" icon="eye"/>
+                                    <navbarItem route="/page/users" tKey="app.navBar.users" icon="users"/>
+                                    <navbarItem route="/page/invites" tKey="app.navBar.invites" icon="gift"/>
+                                </if>
 
-                                        <span class="glyphicon inline-icon-left-fix"
-                                            data-bind="css: icon"
-                                            aria-hidden="true"/>
-                                        <span data-bind="text: title"/>
-
-                                    </a>
-                                </li>
-                                <li data-bind="if: location == 'userMenuNoRoute'">
-                                    <a data-bind="attr: {href: name}">
-                                        <span class="glyphicon inline-icon-left-fix"
-                                            data-bind="css: icon"
-                                            aria-hidden="true"/>
-                                        <span data-bind="text: title"/>
-                                    </a>
-                                </li>
-
+                                <li role="separator" class="divider"/>
+                                <navbarItemServerRoute route="/logout" tKey="app.navBar.logout" icon="sign-out"/>
                             </ul>
                         </li>
                     </ul>
@@ -192,9 +219,7 @@
                                                         <a href="#/page/company_new"
                                                             type="button"
                                                             class="btn btn-success">
-
-                                                            <span class="glyphicon glyphicon-plus inline-icon-left-fix"
-                                                                aria-hidden="true"/>
+                                                            <icon icon="plus" extraClass="inline-icon-left-fix"/>
                                                             ${i18n.t('app.gettingStarted.companiesNewCompanyBtn')}
 
                                                         </a>
@@ -215,19 +240,11 @@
                                                         <p>
                                                             <span data-bind="html: customersTextTrans"/>
                                                         </p>
-                                                        <div class="btn-group"
-                                                            role="group">
-
-                                                            <a href="#/page/customer_new"
-                                                                type="button"
-                                                                class="btn btn-success">
-
-                                                                <span class="glyphicon glyphicon-plus inline-icon-left-fix"
-                                                                    aria-hidden="true"/>
+                                                        <div class="btn-group" role="group">
+                                                            <a href="#/page/customer_new" type="button" class="btn btn-success">
+                                                                <icon icon="plus" extraClass="inline-icon-left-fix"/>
                                                                 ${i18n.t('app.gettingStarted.customersNewCustomerBtn')}
-
                                                             </a>
-
                                                         </div>
                                                     </div>
                                                 </div>
@@ -245,19 +262,11 @@
                                                         <p>
                                                             <span data-bind="html: invoicesTextTrans"/>
                                                         </p>
-                                                        <div class="btn-group"
-                                                            role="group">
-
-                                                            <a href="#/page/invoice_new"
-                                                                type="button"
-                                                                class="btn btn-success">
-
-                                                                <span class="glyphicon glyphicon-plus inline-icon-left-fix"
-                                                                    aria-hidden="true"/>
+                                                        <div class="btn-group" role="group">
+                                                            <a href="#/page/invoice_new" type="button" class="btn btn-success">
+                                                                <icon icon="plus" extraClass="inline-icon-left-fix"/>
                                                                 ${i18n.t('app.gettingStarted.invoicesNewInvoiceBtn')}
-
                                                             </a>
-
                                                         </div>
                                                     </div>
                                                 </div>
@@ -341,17 +350,13 @@
                                 <tbody data-bind="foreach: companyList">
                                     <tr data-bind="css: { info: _id() == $parent.activeCompanyId() }">
                                         <td>
-                                            <div class="btn-group" role="group">
+                                            <div class="btn-group btn-group-sm" role="group">
                                                 <a class="btn btn-info" data-bind="attr: { href: '#/page/company_show/' + _id() }">
-                                                    <span class="glyphicon glyphicon-pencil"
-                                                        aria-hidden="true"/>
+                                                    <icon icon="pencil"/>
                                                 </a>
                                                 <button type="button"
                                                     class="btn btn-info" data-bind="click: $parent.activateCompany, disable: _id() == $parent.activeCompanyId()">
-
-                                                    <span class="glyphicon glyphicon-check"
-                                                        aria-hidden="true"/>
-
+                                                    <icon icon="check"/>
                                                 </button>
                                             </div>
                                         </td>
@@ -376,13 +381,9 @@
                             </table>
                         </p>
                         <div class="btn-group" role="group">
-                            <a href="#/page/company_new" type="button"
-                                class="btn btn-success">
-
-                                <span class="glyphicon glyphicon-plus inline-icon-left-fix"
-                                    aria-hidden="true"/>
+                            <a href="#/page/company_new" type="button" class="btn btn-success">
+                                <icon icon="plus" extraClass="inline-icon-left-fix"/>
                                 ${i18n.t('app.companyList.newCompanyBtn')}
-
                             </a>
                         </div>
                     </form>
@@ -524,16 +525,11 @@
                                             </span>
                                             <span class="pull-right">
                                                 <span class="form-group form-group-sm">
-                                                    <label for="showLngSelect"
-                                                        class="control-label right7">
-
+                                                    <label for="showLngSelect" class="control-label right7">
                                                         ${i18n.t('app.company.showLngLbl')}
-
                                                     </label>
                                                     <select id="showLngSelect"
                                                         class="form-control" data-bind="options: invoiceLngList, optionsText: getInvoiceLngDesc, value: data.paymentOptPaneLng">
-
-
                                                     </select>
                                                 </span>
                                             </span>
@@ -582,11 +578,8 @@
                                     </div>
                                     <hr/>
                                     <div class="form-group">
-                                        <label for="payCustomText"
-                                            class="col-md-2 control-label">
-
+                                        <label for="payCustomText" class="col-md-2 control-label">
                                             ${i18n.t('app.company.paymentOptCustomTextHeader')}
-
                                         </label>
                                         <div class="col-sm-6">
                                             <textarea rows="4" id="payCustomText"
@@ -594,11 +587,8 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="defNumDaysUntilPayment"
-                                            class="col-md-2 control-label">
-
+                                        <label for="defNumDaysUntilPayment" class="col-md-2 control-label">
                                             ${i18n.t('app.company.paymentOptDefNumDaysUntilPayLbl')}
-
                                         </label>
                                         <div class="col-md-3">
                                             <input type="number"
@@ -639,21 +629,15 @@
                             <div class="panel-body">
                                 <div class="form-horizontal">
                                     <div class="form-group">
-                                        <label for="reverseChargeText"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="reverseChargeText" class="col-sm-2 control-label">
                                             ${i18n.t('app.company.customTextFieldsReverseChargeTextLbl')}
-
                                         </label>
                                         <div class="col-sm-6">
                                             <textarea rows="4"
                                                 id="reverseChargeText"
                                                 class="form-control" data-bind="value: data.reverseChargeText" aria-describedby="reverseChargeTextHelp"/>
-                                            <span id="reverseChargeTextHelp"
-                                                class="help-block">
-
+                                            <span id="reverseChargeTextHelp" class="help-block">
                                                 ${i18n.t('app.company.customTextFieldsReverseChargeHelpText')}
-
                                             </span>
                                             <button class="btn btn-default btn-sm" data-bind="click: setDefaultReverseChargeText">
                                                 ${i18n.t('app.company.customTextFieldsReverseChargeSetDefaultBtn')}
@@ -662,11 +646,8 @@
                                     </div>
                                     <hr/>
                                     <div class="form-group">
-                                        <label for="footerText"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="footerText" class="col-sm-2 control-label">
                                             ${i18n.t('app.company.customTextFieldsFooterTextLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <input type="text" id="footerText"
@@ -735,6 +716,18 @@
                                                 class="form-control" data-bind="value: data.nextIid, disable: currentView() != 'company_new'"/>
                                         </div>
                                     </div>
+                                    <div class="form-group">
+                                        <label for="oid"
+                                            class="col-sm-2 control-label">
+
+                                            ${i18n.t('app.company.countersNextOfferNrLbl')}
+
+                                        </label>
+                                        <div class="col-sm-4">
+                                            <input type="number" id="oid"
+                                                class="form-control" data-bind="value: data.nextOid, disable: currentView() != 'company_new'"/>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -768,8 +761,7 @@
                                                             <button class="btn btn-default"
                                                                 type="submit" data-bind="css: {'btn-primary': companyLogoInput() != ''}">
 
-                                                                <span class="glyphicon glyphicon-upload inline-icon-left-fix"
-                                                                    aria-hidden="true"/>
+                                                                <icon icon="upload" extraClass="inline-icon-left-fix"/>
                                                                 ${i18n.t('app.company.logoUploadBtn')}
 
                                                             </button>
@@ -794,11 +786,8 @@
                     <div class="btn-group" role="group">
                         <button type="button" class="btn btn-success"
                             data-bind="click: saveCompany">
-
-                            <span class="glyphicon glyphicon-save inline-icon-left-fix"
-                                aria-hidden="true"/>
+                            <icon icon="save" extraClass="inline-icon-left-fix"/>
                             ${i18n.t('app.company.companySaveBtn')}
-
                         </button>
                     </div>
 
@@ -839,10 +828,9 @@
                                 <tbody data-bind="foreach: customerList">
                                     <tr>
                                         <td>
-                                            <div class="btn-group" role="group">
+                                            <div class="btn-group btn-group-sm" role="group">
                                                 <a class="btn btn-info" data-bind="attr: { href: '#/page/customer_show/' + _id() }">
-                                                    <span class="glyphicon glyphicon-pencil"
-                                                        aria-hidden="true"/>
+                                                    <icon icon="pencil"/>
                                                 </a>
                                             </div>
                                         </td>
@@ -875,11 +863,8 @@
                         <div class="btn-group" role="group">
                             <a href="#/page/customer_new" type="button"
                                 class="btn btn-success">
-
-                                <span class="glyphicon glyphicon-plus inline-icon-left-fix"
-                                    aria-hidden="true"/>
+                                <icon icon="plus" extraClass="inline-icon-left-fix"/>
                                 ${i18n.t('app.customerList.newCustomerBtn')}
-
                             </a>
                         </div>
                     </form>
@@ -898,11 +883,8 @@
                                 </div>
                                 <div class="panel-body">
                                     <div class="form-group">
-                                        <label for="cid"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="cid" class="col-sm-2 control-label">
                                             ${i18n.t('app.customer.customerNrLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <p id="cid"
@@ -911,11 +893,8 @@
                                     </div>
                                     <hr/>
                                     <div class="form-group">
-                                        <label for="name"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="name" class="col-sm-2 control-label">
                                             ${i18n.t('app.customer.nameLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <input type="text" id="name"
@@ -925,11 +904,8 @@
                                     </div>
                                     <div for(idx in [1,2,3])>
                                         <div class="form-group">
-                                            <label for="addr${idx}"
-                                                class="col-sm-2 control-label">
-
+                                            <label for="addr${idx}" class="col-sm-2 control-label">
                                                 ${i18n.t('app.customer.addrLbl', {nr: (idx)})}
-
                                             </label>
                                             <div class="col-sm-4">
                                                 <input type="text"
@@ -941,11 +917,8 @@
                                     </div>
                                     <hr/>
                                     <div class="form-group">
-                                        <label for="vatNr"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="vatNr" class="col-sm-2 control-label">
                                             ${i18n.t('app.customer.vatNrLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <input type="text" id="vatNr"
@@ -963,11 +936,8 @@
                                 </div>
                                 <div class="panel-body">
                                     <div class="form-group">
-                                        <label for="contact"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="contact" class="col-sm-2 control-label">
                                             ${i18n.t('app.customer.contactLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <input type="text" id="contact"
@@ -977,11 +947,8 @@
                                     </div>
                                     <div for(idx in [1,2,3])>
                                         <div class="form-group">
-                                            <label for="phone${idx}"
-                                                class="col-sm-2 control-label">
-
+                                            <label for="phone${idx}" class="col-sm-2 control-label">
                                                 ${i18n.t('app.customer.phoneLbl', {nr: (idx)})}
-
                                             </label>
                                             <div class="col-sm-4">
                                                 <input type="text"
@@ -992,11 +959,8 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="name"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="name" class="col-sm-2 control-label">
                                             ${i18n.t('app.customer.emailLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <input type="email" id="email"
@@ -1028,32 +992,22 @@
                                     </div>
                                     <hr/>
                                     <div class="form-group">
-                                        <label for="currencySelect"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="currencySelect" class="col-sm-2 control-label">
                                             ${i18n.t('app.currency.selectLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <select id="currencySelect"
                                                 class="form-control" data-bind="options: currencyList, optionsText: getCurrencyDesc, value: data.currency">
-
-
                                             </select>
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="invoiceLngSelect"
-                                            class="col-sm-2 control-label">
-
+                                        <label for="invoiceLngSelect" class="col-sm-2 control-label">
                                             ${i18n.t('app.invoiceLng.selectLbl')}
-
                                         </label>
                                         <div class="col-sm-4">
                                             <select id="invoiceLngSelect"
                                                 class="form-control" data-bind="options: invoiceLngList, optionsText: getInvoiceLngDesc, value: data.invoiceLng">
-
-
                                             </select>
                                         </div>
                                     </div>
@@ -1065,18 +1019,14 @@
                                     <li>
                                         <a href="#" data-bind="click: toggleIsExtraOptVisible">
                                             <span data-bind="ifnot: isExtraOptVisible">
-                                                <span class="glyphicon glyphicon-chevron-down inline-icon-left-fix"
-                                                    aria-hidden="true"/>
+                                                <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
                                                 ${i18n.t('app.customer.extraOptToggleLbl', {context: 'show'})}
-                                                <span class="glyphicon glyphicon-chevron-down inline-icon-right-fix"
-                                                    aria-hidden="true"/>
+                                                <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
                                             </span>
                                             <span data-bind="if: isExtraOptVisible">
-                                                <span class="glyphicon glyphicon-chevron-up inline-icon-left-fix"
-                                                    aria-hidden="true"/>
+                                                <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
                                                 ${i18n.t('app.customer.extraOptToggleLbl', {context: 'hide'})}
-                                                <span class="glyphicon glyphicon-chevron-up inline-icon-right-fix"
-                                                    aria-hidden="true"/>
+                                                <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
                                             </span>
                                         </a>
                                     </li>
@@ -1105,8 +1055,7 @@
                                         </div>
                                         <button type="button" class="btn btn-default"
                                             data-bind="click: transferCustomer, enable: data._id() != undefined">
-                                            <span class="glyphicon glyphicon-transfer inline-icon-left-fix"
-                                                aria-hidden="true"/>
+                                            <icon icon="exchange" extraClass="inline-icon-left-fix"/>
                                             ${i18n.t('app.customer.transferCustomerBtn')}
                                         </button>
                                     </div>
@@ -1116,18 +1065,14 @@
                         <div class="btn-group" role="group">
                             <button type="button" class="btn btn-success"
                                 data-bind="click: saveCustomer">
-
-                                <span class="glyphicon glyphicon-save inline-icon-left-fix"
-                                    aria-hidden="true"/>
+                                <icon icon="save" extraClass="inline-icon-left-fix"/>
                                 ${i18n.t('app.customer.saveBtn')}
                             </button>
                         </div>
                     </div>
 
                 </div>
-                <div id="app-invoices"
-                    data-bind="visible: currentView() == 'invoices'"
-                    style="display: none">
+                <div id="app-invoices" data-bind="visible: currentView() == 'invoices' || currentView() == 'offers'" style="display: none">
 
                     <div class="row" data-bind="visible: isFilterPaneExpanded">
                         <div class="col-md-12">
@@ -1165,7 +1110,7 @@
                                                 <div class="btn-group btn-group-xs left3" role="group" id="dateFilterYearGrp">
                                                     <!-- Add more years to low end -->
                                                     <button class="btn btn-default" data-bind="click: dateFilterAddYears.bind(null, -3)">
-                                                        <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"/>
+                                                        <icon icon="chevron-left"/>
                                                     </button>
                                                     <!-- Show available years -->
                                                     <html-comment> ko foreach: dateFilterYearList </html-comment>
@@ -1176,7 +1121,7 @@
                                                     <html-comment> /ko </html-comment>
                                                     <!-- Add more years to high end -->
                                                     <button class="btn btn-default" data-bind="click: dateFilterAddYears.bind(null, 3)">
-                                                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"/>
+                                                        <icon icon="chevron-right"/>
                                                     </button>
                                                 </div>
                                             </div>
@@ -1215,19 +1160,25 @@
                                             <label class="col-md-1 control-label" for="invoiceOptFilter">
                                                 ${i18n.t('app.invoiceList.propFilterLbl')}
                                             </label>
-                                            <div id="invoiceOptFilter">
+                                            <div id="invoiceOptFilter" data-bind="if: docType() == 'invoice'">
                                               <div class="col-md-11">
-                                                      <filterLabelToggle condVar="filterOpt.showNotCredit" text="${i18n.t('app.invoiceList.showNotCreditFilterLbl')}"/>
-                                                      <filterLabelToggle condVar="filterOpt.showCredit" text="${i18n.t('app.invoiceList.showCreditFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showNotCredit" text="${i18n.t('app.invoiceList.showNotCreditFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showCredit" text="${i18n.t('app.invoiceList.showCreditFilterLbl')}"/>
                                               </div>
                                               <div class="col-md-offset-1 col-md-11">
-                                                      <filterLabelToggle condVar="filterOpt.showPaid" text="${i18n.t('app.invoiceList.showPaidFilterLbl')}"/>
-                                                      <filterLabelToggle condVar="filterOpt.showUnpaid" text="${i18n.t('app.invoiceList.showUnpaidFilterLbl')}"/>
-                                                      <filterLabelToggle condVar="filterOpt.showUnpaidExpired" text="${i18n.t('app.invoiceList.showUnpaidExpiredFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showPaid" text="${i18n.t('app.invoiceList.showPaidFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showUnpaid" text="${i18n.t('app.invoiceList.showUnpaidFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showUnpaidExpired" text="${i18n.t('app.invoiceList.showUnpaidExpiredFilterLbl')}"/>
                                               </div>
                                               <div class="col-md-offset-1 col-md-11">
-                                                      <filterLabelToggle condVar="filterOpt.showNotCanceled" text="${i18n.t('app.invoiceList.showNotCanceledFilterLbl')}"/>
-                                                      <filterLabelToggle condVar="filterOpt.showCanceled" text="${i18n.t('app.invoiceList.showCanceledFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showNotCanceled" text="${i18n.t('app.invoiceList.showNotCanceledFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showCanceled" text="${i18n.t('app.invoiceList.showCanceledFilterLbl')}"/>
+                                              </div>
+                                            </div>
+                                            <div id="invoiceOptFilter" data-bind="if: docType() == 'offer'">
+                                              <div class="col-md-11">
+                                                  <filterLabelToggle condVar="filterOpt.showNotCanceled" text="${i18n.t('app.invoiceList.showNotCanceledFilterLbl')}"/>
+                                                  <filterLabelToggle condVar="filterOpt.showCanceled" text="${i18n.t('app.invoiceList.showCanceledFilterLbl')}"/>
                                               </div>
                                             </div>
                                         </div>
@@ -1242,18 +1193,14 @@
                             <li>
                                 <a href="#" data-bind="click: doToggleFilterPaneExpanded">
                                     <span data-bind="ifnot: isFilterPaneExpanded">
-                                        <span class="glyphicon glyphicon-chevron-down inline-icon-left-fix"
-                                            aria-hidden="true"/>
+                                        <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
                                         ${i18n.t('app.invoiceList.filterPaneToggleLbl', {context: 'show'})}
-                                        <span class="glyphicon glyphicon-chevron-down inline-icon-right-fix"
-                                            aria-hidden="true"/>
+                                        <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
                                     </span>
                                     <span data-bind="if: isFilterPaneExpanded">
-                                        <span class="glyphicon glyphicon-chevron-up inline-icon-left-fix"
-                                            aria-hidden="true"/>
+                                        <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
                                         ${i18n.t('app.invoiceList.filterPaneToggleLbl', {context: 'hide'})}
-                                        <span class="glyphicon glyphicon-chevron-up inline-icon-right-fix"
-                                            aria-hidden="true"/>
+                                        <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
                                     </span>
                                 </a>
                             </li>
@@ -1288,169 +1235,105 @@
                                         <th/>
                                         <th>
                                             ${i18n.t('app.invoiceList.colNr')}
-                                            <button type="button"
-                                                class="btn btn-default btn-xs"
-                                                data-bind="click: doSortToggle('iid')">
-
-                                                <span data-bind="if: invoiceListSort() !== 'iidAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes"
-                                                        aria-hidden="true"/>
-                                                </span>
-                                                <span data-bind="if: invoiceListSort() === 'iidAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes-alt"
-                                                        aria-hidden="true"/>
-                                                </span>
+                                            <button type="button" class="btn btn-default btn-xs"
+                                                data-bind="click: doSortToggle('docNr')">
+                                                <condIcon cond="invoiceListSort() !== 'docNrAsc'" icon="sort-amount-asc"/>
+                                                <condIcon cond="invoiceListSort() === 'docNrAsc'" icon="sort-amount-desc"/>
                                             </button>
                                         </th>
                                         <th>
                                             ${i18n.t('app.invoiceList.colDate')}
-                                            <button type="button"
-                                                class="btn btn-default btn-xs"
+                                            <button type="button" class="btn btn-default btn-xs"
                                                 data-bind="click: doSortToggle('date')">
-
-                                                <span data-bind="if: invoiceListSort() !== 'dateAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes"
-                                                        aria-hidden="true"/>
-                                                </span>
-                                                <span data-bind="if: invoiceListSort() === 'dateAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes-alt"
-                                                        aria-hidden="true"/>
-                                                </span>
+                                                <condIcon cond="invoiceListSort() !== 'dateAsc'" icon="sort-amount-asc"/>
+                                                <condIcon cond="invoiceListSort() === 'dateAsc'" icon="sort-amount-desc"/>
                                             </button>
                                         </th>
                                         <th>
                                             ${i18n.t('app.invoiceList.colCustomerNr')}
-                                            <button type="button"
-                                                class="btn btn-default btn-xs"
+                                            <button type="button" class="btn btn-default btn-xs"
                                                 data-bind="click: doSortToggle('cid')">
-
-                                                <span data-bind="if: invoiceListSort() !== 'cidAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes"
-                                                        aria-hidden="true"/>
-                                                </span>
-                                                <span data-bind="if: invoiceListSort() === 'cidAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes-alt"
-                                                        aria-hidden="true"/>
-                                                </span>
+                                                <condIcon cond="invoiceListSort() !== 'cidAsc'" icon="sort-amount-asc"/>
+                                                <condIcon cond="invoiceListSort() === 'cidAsc'" icon="sort-amount-desc"/>
                                             </button>
                                         </th>
                                         <th>
                                             ${i18n.t('app.invoiceList.colCustomerName')}
                                             <button type="button"
                                                 class="btn btn-default btn-xs" data-bind="click: doSortToggle('customer')">
-
-                                                <span data-bind="if: invoiceListSort() !== 'customerAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes"
-                                                        aria-hidden="true"/>
-                                                </span>
-                                                <span data-bind="if: invoiceListSort() === 'customerAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes-alt"
-                                                        aria-hidden="true"/>
-                                                </span>
+                                                <condIcon cond="invoiceListSort() !== 'customerAsc'" icon="sort-amount-asc"/>
+                                                <condIcon cond="invoiceListSort() === 'customerAsc'" icon="sort-amount-desc"/>
                                             </button>
                                         </th>
                                         <th>
                                             ${i18n.t('app.invoiceList.colCurrency')}
                                             <button type="button"
                                                 class="btn btn-default btn-xs" data-bind="click: doSortToggle('currency')">
-
-                                                <span data-bind="if: invoiceListSort() !== 'currencyAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes"
-                                                        aria-hidden="true"/>
-                                                </span>
-                                                <span data-bind="if: invoiceListSort() === 'currencyAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes-alt"
-                                                        aria-hidden="true"/>
-                                                </span>
+                                                <condIcon cond="invoiceListSort() !== 'currencyAsc'" icon="sort-amount-asc"/>
+                                                <condIcon cond="invoiceListSort() === 'currencyAsc'" icon="sort-amount-desc"/>
                                             </button>
                                         </th>
                                         <th>
                                             ${i18n.t('app.invoiceList.colTotalExclVat')}
                                             <button type="button"
                                                 class="btn btn-default btn-xs" data-bind="click: doSortToggle('totalExclVat')">
-
-                                                <span data-bind="if: invoiceListSort() !== 'totalExclVatAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes"
-                                                        aria-hidden="true"/>
-                                                </span>
-                                                <span data-bind="if: invoiceListSort() === 'totalExclVatAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes-alt"
-                                                        aria-hidden="true"/>
-                                                </span>
+                                                <condIcon cond="invoiceListSort() !== 'totalExclVatAsc'" icon="sort-amount-asc"/>
+                                                <condIcon cond="invoiceListSort() === 'totalExclVatAsc'" icon="sort-amount-desc"/>
                                             </button>
                                         </th>
                                         <th>
                                             ${i18n.t('app.invoiceList.colTotalVat')}
                                             <button type="button"
                                                 class="btn btn-default btn-xs" data-bind="click: doSortToggle('totalVat')">
-
-                                                <span data-bind="if: invoiceListSort() !== 'totalVatAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes"
-                                                        aria-hidden="true"/>
-                                                </span>
-                                                <span data-bind="if: invoiceListSort() === 'totalVatAsc'">
-                                                    <span class="glyphicon glyphicon-sort-by-attributes-alt"
-                                                        aria-hidden="true"/>
-                                                </span>
+                                                <condIcon cond="invoiceListSort() !== 'totalVatAsc'" icon="sort-amount-asc"/>
+                                                <condIcon cond="invoiceListSort() === 'totalVatAsc'" icon="sort-amount-desc"/>
                                             </button>
                                         </th>
-                                        <th>
+                                        <th data-bind="if: docType() == 'invoice'">
                                             ${i18n.t('app.invoiceList.colIsPaid')}
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody data-bind="foreach: invoiceList">
-                                    <tr data-bind="if: isVisible(),
-                                                   css: { danger: isExpired }">
+                                <tbody data-bind="foreach: docList()">
+                                    <tr data-bind="if: isVisible(), css: { danger: isExpired }">
                                         <td>
-                                            <div class="btn-group" role="group">
-                                                <a class="btn btn-info" data-bind="attr: { href: '#/page/invoice_show/' + _id() }">
-                                                    <span class="glyphicon glyphicon-pencil"
-                                                        aria-hidden="true"/>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a class="btn btn-info" data-bind="attr: { href: '#/page/' + docType() + '_show/' + _id() }">
+                                                    <icon icon="pencil"/>
                                                 </a>
-                                                <a class="btn btn-info"
-                                                    data-bind="click: printInvoice">
-
-                                                    <span class="glyphicon glyphicon-print"
-                                                        aria-hidden="true"/>
-
+                                                <a class="btn btn-info" data-bind="click: printDoc">
+                                                    <icon icon="print"/>
                                                 </a>
                                             </div>
                                         </td>
                                         <td>
                                             <p class="form-control-static">
-                                                <span class="right3" data-bind="text: iid"/>
+                                                <span class="right3" data-bind="text: docNr"/>
                                                 <condLockIcon cond="isLocked" tooltip="${i18n.t('app.invoiceList.isLockedIconTooltip')}"/>
-                                                <condIcon cond="isCredit" icon="glyphicon-credit-card" tooltip="${i18n.t('app.invoiceList.isCreditIconTooltip')}"/>
-                                                <condIcon cond="isCanceled" icon="glyphicon-remove" tooltip="${i18n.t('app.invoiceList.isCanceledIconTooltip')}"/>
-                                                <condIcon cond="isExpired" icon="glyphicon-warning-sign" tooltip="${i18n.t('app.invoiceList.isExpiredIconTooltip')}"/>
+                                                <condIcon cond="isCredit" icon="credit-card" tooltip="${i18n.t('app.invoiceList.isCreditIconTooltip')}"/>
+                                                <condIcon cond="isCanceled" icon="remove" tooltip="${i18n.t('app.invoiceList.isCanceledIconTooltip')}"/>
+                                                <condIcon cond="isExpired" icon="warning" tooltip="${i18n.t('app.invoiceList.isExpiredIconTooltip')}"/>
                                             </p>
                                         </td>
                                         <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: date"/>
+                                            <p class="form-control-static" data-bind="text: date"/>
                                         </td>
                                         <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: customer().cid"/>
+                                            <p class="form-control-static" data-bind="text: customer().cid"/>
                                         </td>
                                         <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: customer().name"/>
+                                            <p class="form-control-static" data-bind="text: customer().name"/>
                                         </td>
                                         <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: currency"/>
+                                            <p class="form-control-static" data-bind="text: currency"/>
                                         </td>
                                         <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: totalExclVatStr"/>
+                                            <p class="form-control-static" data-bind="text: totalExclVatStr"/>
                                         </td>
                                         <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: totalVatStr"/>
+                                            <p class="form-control-static" data-bind="text: totalVatStr"/>
                                         </td>
-                                        <td>
+                                        <td data-bind="if: docType() == 'invoice'">
                                             <p class="form-control-static">
                                                 <condCheckIcon cond="isPaid"/>
                                             </p>
@@ -1483,24 +1366,30 @@
                                                 <html-comment> /ko </html-comment>
                                               </p>
                                         </td>
-                                        <td></td>
+                                        <td data-bind="if: docType() == 'invoice'"></td>
                                     </tr>
                                 </tfoot>
                             </table>
                         </p>
                         <div class="btn-group" role="group">
-                            <a href="#/page/invoice_new" type="button"
-                                class="btn btn-success">
-
-                                <span class="glyphicon glyphicon-plus inline-icon-left-fix"
-                                    aria-hidden="true"/>
-                                ${i18n.t('app.invoiceList.newInvoiceBtn')}
-                            </a>
+                            <html-comment> ko if: docType() == 'invoice' </html-comment>
+                                <a href="#/page/invoice_new" type="button" class="btn btn-success">
+                                    <icon icon="plus" extraClass="inline-icon-left-fix"/>
+                                    ${i18n.t('app.invoiceList.newDocBtn', {context: 'invoice'})}
+                                </a>
+                            <html-comment> /ko </html-comment>
+                            <html-comment> ko if: docType() == 'offer' </html-comment>
+                                <a href="#/page/offer_new" type="button" class="btn btn-success">
+                                    <icon icon="plus" extraClass="inline-icon-left-fix"/>
+                                    ${i18n.t('app.invoiceList.newDocBtn', {context: 'offer'})}
+                                </a>
+                            <html-comment> /ko </html-comment>
                         </div>
                     </form>
 
                 </div>
-                <div id="app-invoice_new" data-bind="visible: currentView() == 'invoice_new' || (currentView() != undefined && currentView().search('invoice_show') == 0)"
+                <div id="app-invoice_new" data-bind="visible: currentView() == 'invoice_new' || (currentView() != undefined && currentView().search('invoice_show') == 0) ||
+                                                              currentView() == 'offer_new' || (currentView() != undefined && currentView().search('offer_show') == 0)"
                     style="display: none">
 
                     <macro labelWithEditMode(textVariable, cond)>
@@ -1528,19 +1417,33 @@
                             <div class="panel panel-default">
                                 <div class="panel-heading">
                                     <h3 class="panel-title">
-                                        <span data-bind="if: data.iid() === undefined && !data.isCredit()">
-                                            ${i18n.t('app.invoice.mainPanelHeader', {context: 'newInvoice'})}
+                                        <span data-bind="if: isInvoice">
+                                            <span data-bind="if: data.docNr() === undefined && !data.isCredit()">
+                                                ${i18n.t('app.invoice.mainPanelHeader', {context: 'newInvoice'})}
+                                            </span>
+                                            <span data-bind="if: data.docNr() === undefined && data.isCredit()">
+                                                ${i18n.t('app.invoice.mainPanelHeader', {context: 'newCreditInvoice'})}
+                                            </span>
+                                            <span data-bind="if: data.docNr() != undefined && !data.isCredit()">
+                                                ${i18n.t('app.invoice.mainPanelHeader', {context: 'invoice'})}
+                                                &nbsp;
+                                                <span data-bind="text: data.docNr"/>
+                                            </span>
+                                            <span data-bind="if: data.docNr() != undefined && data.isCredit()">
+                                                ${i18n.t('app.invoice.mainPanelHeader', {context: 'creditInvoice'})}
+                                                &nbsp;
+                                                <span data-bind="text: data.docNr"/>
+                                            </span>
                                         </span>
-                                        <span data-bind="if: data.iid() === undefined && data.isCredit()">
-                                            ${i18n.t('app.invoice.mainPanelHeader', {context: 'newCreditInvoice'})}
-                                        </span>
-                                        <span data-bind="if: data.iid() != undefined && !data.isCredit()">
-                                            ${i18n.t('app.invoice.mainPanelHeader', {context: 'invoice'})} #
-                                            <span data-bind="text: data.iid()"/>
-                                        </span>
-                                        <span data-bind="if: data.iid() != undefined && data.isCredit()">
-                                            ${i18n.t('app.invoice.mainPanelHeader', {context: 'creditInvoice'})} #
-                                            <span data-bind="text: data.iid()"/>
+                                        <span data-bind="if: isOffer">
+                                            <span data-bind="if: data.docNr() === undefined">
+                                                ${i18n.t('app.invoice.mainPanelHeader', {context: 'newOffer'})}
+                                            </span>
+                                            <span data-bind="if: data.docNr() !== undefined">
+                                                ${i18n.t('app.invoice.mainPanelHeader', {context: 'offer'})}
+                                                &nbsp;
+                                                <span data-bind="text: data.docNr"/>
+                                            </span>
                                         </span>
                                         <condLockIcon cond="data.isLocked"/>
                                     </h3>
@@ -1551,9 +1454,7 @@
                                             <div class="input-group">
                                                 <label for="invoiceNewCustomerId"
                                                     class="control-label">
-
                                                     ${i18n.t('app.invoice.customerLbl')}
-
                                                 </label>
                                                 <div class="input-group">
                                                     <input class="form-control" id="invoiceNewCustomerId" data-bind="jqAuto: {value: selectedCustomer, source: customerList, options: {minLength: 0}}, disable: data.isLocked"/>
@@ -1567,24 +1468,17 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="input-group">
-                                                <label for="date"
-                                                    class="control-label">
-
-                                                    ${i18n.t('app.invoice.dateLbl')}
-
+                                                <label for="date" class="control-label"
+                                                       data-bind="text: t('app.invoice.dateLbl', {context: data.docType()})">
                                                 </label>
-                                                <input type="date"
-                                                    class="form-control"
+                                                <input type="date" class="form-control"
                                                     id="date" data-bind="value: data.date, disable: data.isLocked"/>
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-4" data-bind="if: isInvoice">
                                             <div class="input-group">
-                                                <label for="daysUntilPayment"
-                                                    class="control-label">
-
+                                                <label for="daysUntilPayment" class="control-label">
                                                     ${i18n.t('app.invoice.daysUntilPayLbl')}
-
                                                 </label>
                                                 <input type="number"
                                                     class="form-control"
@@ -1595,11 +1489,8 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="input-group">
-                                                <label for="yourReference"
-                                                    class="control-label">
-
+                                                <label for="yourReference" class="control-label">
                                                     ${i18n.t('app.invoice.yourRefLbl')}
-
                                                 </label>
                                                 <input type="text"
                                                     class="form-control"
@@ -1608,11 +1499,8 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="input-group">
-                                                <label for="ourReference"
-                                                    class="control-label">
-
+                                                <label for="ourReference" class="control-label">
                                                     ${i18n.t('app.invoice.ourRefLbl')}
-
                                                 </label>
                                                 <input type="text"
                                                     class="form-control"
@@ -1621,11 +1509,8 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="input-group">
-                                                <label for="projectId"
-                                                    class="control-label">
-
+                                                <label for="projectId" class="control-label">
                                                     ${i18n.t('app.invoice.projIdLbl')}
-
                                                 </label>
                                                 <input type="text"
                                                     class="form-control"
@@ -1651,12 +1536,10 @@
                                                                                                    css: {'btn-default': !data.customerAddrIsEditMode(), 'btn-success': data.customerAddrIsEditMode},
                                                                                                    disable: data.isLocked() || data.customer() === undefined">
                                                     <div data-bind="ifnot: data.customerAddrIsEditMode">
-                                                        <span class="glyphicon glyphicon-pencil"
-                                                            aria-hidden="true"/>
+                                                        <icon icon="pencil"/>
                                                     </div>
                                                     <div data-bind="if: data.customerAddrIsEditMode">
-                                                        <span class="glyphicon glyphicon-ok"
-                                                            aria-hidden="true"/>
+                                                        <icon icon="check"/>
                                                     </div>
                                                 </button>
                                             </div>
@@ -1749,7 +1632,7 @@
                                                                         role="group">
 
                                                                         <button type="button" class="btn btn-default btn-sm" data-bind="click: updateServerForceNew, disable: $parent.data.isLocked">
-                                                                            <span class="glyphicon glyphicon-plus inline-icon-left-fix" aria-hidden="true"/>
+                                                                            <icon icon="plus" extraClass="inline-icon-left-fix"/>
                                                                             ${i18n.t('app.invoice.groupEditSaveAsNewBtn')}
                                                                         </button>
                                                                         <button type="button" class="btn btn-default btn-sm dropdown-toggle right5" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-bind="disable: $parent.data.isLocked">
@@ -1758,7 +1641,7 @@
                                                                         <ul class="dropdown-menu">
                                                                             <li>
                                                                                 <a href="#" data-bind="click: updateServer">
-                                                                                    <span class="glyphicon glyphicon-save inline-icon-left-fix" aria-hidden="true"/>
+                                                                                    <icon icon="save" extraClass="inline-icon-left-fix"/>
                                                                                     ${i18n.t('app.invoice.groupEditUpdateExistingBtn')}
                                                                                 </a>
                                                                             </li>
@@ -1770,25 +1653,23 @@
                                                                                                       css: {'btn-default': !isEditMode(), 'btn-success': isEditMode},
                                                                                                       disable: $parent.data.isLocked">
                                                                     <div data-bind="ifnot: isEditMode">
-                                                                        <span class="glyphicon glyphicon-pencil" aria-hidden="true"/>
+                                                                        <icon icon="pencil"/>
                                                                     </div>
                                                                     <div data-bind="if: isEditMode">
-                                                                        <span class="glyphicon glyphicon-ok" aria-hidden="true"/>
+                                                                        <icon icon="check"/>
                                                                     </div>
                                                                 </button>
                                                                 <button class="btn btn-danger right5" data-bind="click: $parent.data.deleteGroup, disable: $parent.data.isLocked">
-                                                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"/>
+                                                                    <icon icon="trash"/>
                                                                 </button>
-                                                                <div class="btn-group-vertical top0 bottom0"
-                                                                    role="group">
+                                                                <div class="btn-group-vertical top0 bottom0" role="group">
 
                                                                     <button class="btn btn-default btn-xs" data-bind="click: $parent.data.moveGroupUp, disable: $parent.data.isLocked">
-                                                                        <span class="glyphicon glyphicon-arrow-up" aria-hidden="true"/>
+                                                                        <icon icon="arrow-up"/>
                                                                     </button>
                                                                     <button class="btn btn-default btn-xs" data-bind="click: $parent.data.moveGroupDown, disable: $parent.data.isLocked">
-                                                                        <span class="glyphicon glyphicon-arrow-down" aria-hidden="true"/>
+                                                                        <icon icon="arrow-down"/>
                                                                     </button>
-
                                                                 </div>
                                                             </span>
                                                         </span>
@@ -1960,11 +1841,11 @@
                                                                 <div class="form-inline">
                                                                     <div class="form-group">
                                                                         <button class="btn btn-danger btn-sm" data-bind="click: $parent.deleteInvoiceItem, disable: $parents[1].data.isLocked">
-                                                                            <span class="glyphicon glyphicon-trash" aria-hidden="true"/>
+                                                                            <icon icon="trash"/>
                                                                         </button>
                                                                         <div class="checkbox input-sm">
                                                                             <label>
-                                                                                <input type="checkbox" data-bind="checked: isTextOnly"/>
+                                                                                <input type="checkbox" data-bind="checked: isTextOnly, disable: $parents[1].data.isLocked"/>
                                                                                 ${i18n.t('app.invoice.detailsIsTextOnlyCheckLbl')}
                                                                             </label>
                                                                         </div>
@@ -2061,8 +1942,7 @@
                                                     <tfoot>
                                                         <td colspan="3">
                                                             <button class="btn btn-success" data-bind="click: newInvoiceItem, disable: $parent.data.isLocked">
-                                                                <span class="glyphicon glyphicon-plus inline-icon-left-fix"
-                                                                    aria-hidden="true"/>
+                                                                <icon icon="plus" extraClass="inline-icon-left-fix"/>
                                                                 ${i18n.t('app.invoice.detailsNewRowBtn')}
                                                             </button>
                                                         </td>
@@ -2095,10 +1975,8 @@
                                                 <button type="button"
                                                     class="btn btn-primary" data-bind="click: $parent.newGroup.bind($data), disable: $parent.data.isLocked">
 
-                                                    <span class="glyphicon glyphicon-plus inline-icon-left-fix"
-                                                        aria-hidden="true"/>
+                                                    <icon icon="plus" extraClass="inline-icon-left-fix"/>
                                                     <span data-bind="text: name"/>
-
                                                 </button>
                                                 <html-comment>
                                                     /ko
@@ -2121,8 +1999,7 @@
                                                         </html-comment>
                                                         <li>
                                                             <a href="#" data-bind="click: $parent.newGroup.bind($data)">
-                                                                <span class="glyphicon glyphicon-plus inline-icon-left-fix"
-                                                                    aria-hidden="true"/>
+                                                                <icon icon="plus" extraClass="inline-icon-left-fix"/>
                                                                 <span data-bind="text: name"/>
                                                             </a>
                                                         </li>
@@ -2176,18 +2053,14 @@
                                 <a href="#" data-bind="click: data.toggleExtraOptionExpanded,
                                                        disable: data.isLocked">
                                     <span data-bind="ifnot: data.extraOptionExpanded">
-                                        <span class="glyphicon glyphicon-chevron-down inline-icon-left-fix"
-                                            aria-hidden="true"/>
+                                        <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
                                         ${i18n.t('app.invoice.extraOptToggleLbl', {context: 'show'})}
-                                        <span class="glyphicon glyphicon-chevron-down inline-icon-right-fix"
-                                            aria-hidden="true"/>
+                                        <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
                                     </span>
                                     <span data-bind="if: data.extraOptionExpanded">
-                                        <span class="glyphicon glyphicon-chevron-up inline-icon-left-fix"
-                                            aria-hidden="true"/>
+                                        <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
                                         ${i18n.t('app.invoice.extraOptToggleLbl', {context: 'hide'})}
-                                        <span class="glyphicon glyphicon-chevron-up inline-icon-right-fix"
-                                            aria-hidden="true"/>
+                                        <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
                                     </span>
                                 </a>
                             </li>
@@ -2202,7 +2075,7 @@
                                 <div class="panel-body">
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <div class="checkbox top0">
+                                            <div class="checkbox top0" data-bind="if: isInvoice">
                                                 <label>
                                                     <input type="checkbox" value data-bind="checked: data.isCredit, disable: data.isLocked"/>
                                                     ${i18n.t('app.invoice.optIsCreditLbl')}
@@ -2214,7 +2087,7 @@
                                                     ${i18n.t('app.invoice.optIsCanceledLbl')}
                                                 </label>
                                             </div>
-                                            <div class="checkbox bottom0">
+                                            <div class="checkbox bottom0" data-bind="if: isInvoice">
                                                 <label>
                                                     <input type="checkbox" data-bind="checked: data.isPaid"/>
                                                     ${i18n.t('app.invoice.optIsPaidLbl')}
@@ -2235,7 +2108,7 @@
                                                         ${i18n.t('app.invoice.optNoVatLbl')}
                                                     </label>
                                                 </div>
-                                                <div class="checkbox">
+                                                <div class="checkbox" data-bind="if: isInvoice">
                                                     <label>
                                                         <input type="checkbox" data-bind="checked: data.customerMirror_useReverseCharge, disable: data.isLocked() || data.customer() === undefined"/>
                                                         ${i18n.t('app.invoice.optUseReverseChargeLbl')}
@@ -2245,34 +2118,24 @@
                                         </div>
                                         <div class="row top5">
                                             <div class="form-group">
-                                                <label for="invoiceCurrencySelect"
-                                                    class="col-sm-2 control-label">
-
+                                                <label for="invoiceCurrencySelect" class="col-sm-2 control-label">
                                                     ${i18n.t('app.currency.selectLbl')}
-
                                                 </label>
                                                 <div class="col-sm-4">
                                                     <select id="invoiceCurrencySelect"
                                                         class="form-control" data-bind="options: currencyList, optionsText: getCurrencyDesc, value: data.customerMirror_currency, disable: data.isLocked() || data.customer() === undefined">
-
-
                                                     </select>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="row top5">
                                             <div class="form-group">
-                                                <label for="invoiceLngSelect"
-                                                    class="col-sm-2 control-label">
-
-                                                    ${i18n.t('app.invoiceLng.selectLbl')}
-
+                                                <label for="invoiceLngSelect" class="col-sm-2 control-label"
+                                                       data-bind="text: t('app.invoiceLng.selectLbl', {context: data.docType()})">
                                                 </label>
                                                 <div class="col-sm-4">
                                                     <select id="invoiceLngSelect"
                                                         class="form-control" data-bind="options: invoiceLngList, optionsText: getInvoiceLngDesc, value: data.customerMirror_invoiceLng, disable: data.isLocked() || data.customer() === undefined">
-
-
                                                     </select>
                                                 </div>
                                             </div>
@@ -2284,25 +2147,19 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <button class="btn btn-info" data-bind="click: refreshCompanyData, disable: data.isLocked">
-                                                    <span class="glyphicon glyphicon-refresh inline-icon-left-fix"
-                                                        aria-hidden="true"/>
-                                                    ${i18n.t('app.invoice.refreshCompanyDataBtn')}
+                                                    <icon icon="refresh" extraClass="inline-icon-left-fix"/>
+                                                    <span data-bind="text: t('app.invoice.refreshCompanyDataBtn', {context: data.docType()})"></span>
                                                 </button>
                                             </div>
                                         </div>
                                         <div class="row top5">
                                             <div class="form-group">
-                                                <label for="invoiceStyleSelect"
-                                                    class="col-sm-2 control-label">
-
-                                                    ${i18n.t('app.invoiceStyle.selectLbl')}
-
+                                                <label for="invoiceStyleSelect" class="col-sm-2 control-label"
+                                                       data-bind="text: t('app.invoiceStyle.selectLbl', {context: data.docType()})">
                                                 </label>
                                                 <div class="col-sm-4">
                                                     <select id="invoiceStyleSelect"
                                                         class="form-control" data-bind="options: invoiceStyleList, optionsText: getInvoiceStyleDesc, value: data.companyMirror_invoiceStyle, disable: data.isLocked">
-
-
                                                     </select>
                                                 </div>
                                             </div>
@@ -2346,51 +2203,36 @@
                                         </div>
                                         <div class="row top7">
                                             <div class="form-group">
-                                                <label for="payCustomText"
-                                                    class="col-md-2 control-label">
-
+                                                <label for="payCustomText" class="col-md-2 control-label">
                                                     ${i18n.t('app.invoice.paymentOptCustomTextHeader')}
-
                                                 </label>
                                                 <div class="col-sm-6">
-                                                    <textarea rows="4"
-                                                        id="payCustomText"
+                                                    <textarea rows="4" id="payCustomText"
                                                         class="form-control" data-bind="value: data.companyLngMirror_paymentCustomText, disable: data.isLocked"/>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="row top7">
                                             <div class="form-group">
-                                                <label for="footerText"
-                                                    class="col-sm-2 control-label">
-
+                                                <label for="footerText" class="col-sm-2 control-label">
                                                     ${i18n.t('app.invoice.customTextFieldsFooterTextLbl')}
-
                                                 </label>
                                                 <div class="col-sm-6">
-                                                    <input type="text"
-                                                        id="footerText"
+                                                    <input type="text" id="footerText"
                                                         class="form-control" data-bind="value: data.companyLngMirror_vatNrCustomText, disable: data.isLocked"/>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="row top7">
+                                        <div class="row top7" data-bind="if: isInvoice">
                                             <div class="form-group">
-                                                <label for="reverseChargeText"
-                                                    class="col-sm-2 control-label">
-
+                                                <label for="reverseChargeText" class="col-sm-2 control-label">
                                                     ${i18n.t('app.invoice.customTextFieldsReverseChargeTextLbl')}
-
                                                 </label>
                                                 <div class="col-sm-6">
-                                                    <textarea rows="4"
-                                                        id="reverseChargeText"
+                                                    <textarea rows="4" id="reverseChargeText"
                                                         class="form-control" data-bind="value: data.companyLngMirror_reverseChargeText, disable: data.isLocked" aria-describedby="reverseChargeTextHelp"/>
-                                                    <span id="reverseChargeTextHelp"
-                                                        class="help-block">
-
+                                                    <span id="reverseChargeTextHelp" class="help-block">
                                                         ${i18n.t('app.invoice.customTextFieldsReverseChargeHelpText')}
-
                                                     </span>
                                                 </div>
                                             </div>
@@ -2406,46 +2248,32 @@
                         <!-- buttons panel -->
                         <div class="col-md-12">
                             <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-success"
-                                    data-bind="click: saveInvoice">
-
-                                    <span class="glyphicon glyphicon-save inline-icon-left-fix"
-                                        aria-hidden="true"/>
-                                    ${i18n.t('app.invoice.saveInvoiceBtn')}
-
+                                <button type="button" class="btn btn-success" data-bind="click: doSaveDoc">
+                                    <icon icon="save" extraClass="inline-icon-left-fix"/>
+                                    ${i18n.t('app.invoice.saveDocBtn')}
                                 </button>
-                                <button type="button" class="btn btn-info"
-                                    data-bind="click: doInvoicePrint">
-
-                                    <span class="glyphicon glyphicon-print inline-icon-left-fix"
-                                        aria-hidden="true"/>
-                                    ${i18n.t('app.invoice.printInvoiceBtn')}
-
+                                <button type="button" class="btn btn-info" data-bind="click: doDocPrint, disable: data._id() === undefined">
+                                    <icon icon="print" extraClass="inline-icon-left-fix"/>
+                                    ${i18n.t('app.invoice.printDocBtn')}
                                 </button>
-                                <button type="button" class="btn btn-info"
-                                    data-bind="click: doCopyInvoice">
-
-                                    <span class="glyphicon glyphicon-duplicate inline-icon-left-fix"
-                                        aria-hidden="true"/>
-                                    ${i18n.t('app.invoice.copyInvoiceBtn')}
-
+                                <button type="button" class="btn btn-info" data-bind="click: doCopyDoc, disable: data._id() === undefined">
+                                    <icon icon="copy" extraClass="inline-icon-left-fix"/>
+                                    ${i18n.t('app.invoice.copyDocBtn')}
                                 </button>
                                 <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <span class="caret"/>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="#" data-bind="click: doInvoiceReminderPrint">
-                                        <span class="glyphicon glyphicon-print inline-icon-left-fix"
-                                            aria-hidden="true"/>
-                                        ${i18n.t('app.invoice.printInvoiceReminderBtn')}
+                                    <li data-bind="if: isInvoice">
+                                        <a href="#" data-bind="click: doInvoiceReminderPrint, disable: data._id() === undefined">
+                                            <icon icon="print" extraClass="inline-icon-left-fix"/>
+                                            ${i18n.t('app.invoice.printInvoiceReminderBtn')}
                                         </a>
                                     </li>
                                 </ul>
                             </div>
                             <label class="checkbox-inline left7">
-                                <input type="checkbox"
-                                    data-bind="checked: data.isLocked"/>
+                                <input type="checkbox" data-bind="checked: data.isLocked"/>
                                 ${i18n.t('app.invoice.optIsLockedLbl')}
                             </label>
                         </div>
@@ -2453,6 +2281,7 @@
                     <!-- buttons panel -->
 
                 </div>
+
                 <div id="app-invoice_item_group_templates" data-bind="visible: currentView() == 'invoice_item_group_templates'"
                     style="display: none">
 
@@ -2543,19 +2372,16 @@
                                         </div>
                                         <div class="col-md-1">
                                             <div class="pull-right">
-                                                <div class="btn-group"
-                                                    role="group">
+                                                <div class="btn-group btn-group-sm" role="group">
 
                                                     <button type="button"
                                                         class="btn btn-primary btn-sm" data-bind="click: toggleEditMode">
 
                                                         <span data-bind="if: isEditMode">
-                                                            <span class="glyphicon glyphicon-chevron-up"
-                                                                aria-hidden="true"/>
+                                                            <icon icon="chevron-up"/>
                                                         </span>
                                                         <span data-bind="ifnot: isEditMode">
-                                                            <span class="glyphicon glyphicon-pencil"
-                                                                aria-hidden="true"/>
+                                                            <icon icon="pencil"/>
                                                         </span>
 
                                                     </button>
@@ -2570,8 +2396,7 @@
                                                     <ul class="dropdown-menu">
                                                         <li>
                                                             <a href="#" data-bind="click: $parent.deleteGroup">
-                                                                <span class="glyphicon glyphicon-trash inline-icon-left-fix"
-                                                                    aria-hidden="true"/>
+                                                                <icon icon="trash" extraClass="inline-icon-left-fix"/>
                                                                 ${i18n.t('app.groupTemplates.deleteGroupBtn')}
                                                             </a>
                                                         </li>
@@ -2681,11 +2506,8 @@
                                             <div class="btn-group" role="group">
                                                 <button type="button"
                                                     class="btn btn-success" data-bind="click: updateServer, visible: isEditMode">
-
-                                                    <span class="glyphicon glyphicon-save inline-icon-left-fix"
-                                                        aria-hidden="true"/>
+                                                    <icon icon="save" extraClass="inline-icon-left-fix"/>
                                                     ${i18n.t('app.groupTemplates.saveGroupBtn')}
-
                                                 </button>
                                             </div>
                                         </div>
@@ -2699,10 +2521,8 @@
                             <button type="button" class="btn btn-success"
                                 data-bind="click: newGroup">
 
-                                <span class="glyphicon glyphicon-plus inline-icon-left-fix"
-                                    aria-hidden="true"/>
+                                <icon icon="plus" extraClass="inline-icon-left-fix"/>
                                 ${i18n.t('app.groupTemplates.newTemplateBtn')}
-
                             </button>
                         </div>
                     </form>
@@ -2795,10 +2615,8 @@
                                             class="btn btn-success"
                                             data-bind="click: updateUser">
 
-                                            <span class="glyphicon glyphicon-save inline-icon-left-fix"
-                                                aria-hidden="true"/>
+                                            <icon icon="save" extraClass="inline-icon-left-fix"/>
                                             ${i18n.t('app.settings.updateUserBtn')}
-
                                         </button>
                                     </div>
                                 </div>
@@ -2870,10 +2688,8 @@
                                                 <button type="submit"
                                                     class="btn btn-warning">
 
-                                                    <span class="glyphicon glyphicon-lock inline-icon-left-fix"
-                                                        aria-hidden="true"/>
+                                                    <icon icon="lock" extraClass="inline-icon-left-fix"/>
                                                     ${i18n.t('app.settings.updatePwdBtn')}
-
                                                 </button>
                                             </div>
                                         </div>
@@ -2888,10 +2704,8 @@
                                 <button type="button" class="btn btn-warning"
                                     data-bind="click: invalidateCache">
 
-                                    <span class="glyphicon glyphicon-trash inline-icon-left-fix"
-                                        aria-hidden="true"/>
+                                    <icon icon="trash" extraClass="inline-icon-left-fix"/>
                                     ${i18n.t('app.settings.invalidateCacheBtn')}
-
                                 </button>
                             </div>
                         </div>
@@ -3048,14 +2862,11 @@
                                                     class="btn btn-default" data-bind="click: toggleDetailedInfo">
 
                                                     <span data-bind="if: isDetailsVisible">
-                                                        <span class="glyphicon glyphicon-chevron-up"
-                                                            aria-hidden="true"/>
+                                                        <icon icon="chevron-up"/>
                                                     </span>
                                                     <span data-bind="ifnot: isDetailsVisible">
-                                                        <span class="glyphicon glyphicon-chevron-down"
-                                                            aria-hidden="true"/>
+                                                        <icon icon="chevron-down"/>
                                                     </span>
-
                                                 </button>
                                             </div>
                                         </div>
@@ -3118,7 +2929,7 @@
 
                                                             <div class="col-md-12">
                                                                 <a type="button" class="btn btn-warning" data-bind="attr: {href: '/loginAs/' + _id()}">
-                                                                    <span class="glyphicon glyphicon-log-in inline-icon-left-fix" aria-hidden="true"/>
+                                                                    <icon icon="sign-in" extraClass="inline-icon-left-fix"/>
                                                                     ${i18n.t('app.userList.loginAsOtherUserBtn')}
                                                                 </a>
                                                             </div>
@@ -3137,10 +2948,8 @@
                                 <button type="button" class="btn btn-default"
                                     data-bind="click: refresh">
 
-                                    <span class="glyphicon glyphicon-refresh inline-icon-left-fix"
-                                        aria-hidden="true"/>
+                                    <icon icon="refresh" extraClass="inline-icon-left-fix"/>
                                     ${i18n.t('app.userList.refreshBtn')}
-
                                 </button>
                             </div>
                         </form>
@@ -3189,10 +2998,8 @@
                                 <button type="button" class="btn btn-default"
                                     data-bind="click: refresh">
 
-                                    <span class="glyphicon glyphicon-refresh inline-icon-left-fix"
-                                        aria-hidden="true"/>
+                                    <icon icon="refresh" extraClass="inline-icon-left-fix"/>
                                     ${i18n.t('app.inviteList.refreshBtn')}
-
                                 </button>
                             </div>
                         </form>

@@ -78,12 +78,12 @@ body { padding-top: 70px; }
 
 .inline-icon-left-fix {
   display: inline-block;
-  margin-right: 5px;
+  margin-right: 0.2em;
 }
 
 .inline-icon-right-fix {
   display: inline-block;
-  margin-left: 5px;
+  margin-left: 0.2em;
 }
 
 .button-signin-google {
@@ -221,6 +221,45 @@ body { padding-top: 70px; }
   */
 }
 
+.icon-invoice {
+    position: relative;
+}
+
+.icon-invoice:before {
+    content: "\f15b"; /* fa-file */
+    position: relative;
+    font-size: inherit;
+}
+
+.icon-invoice:after {
+    content: "F";
+    position: relative;
+    font-size: 60%;
+    font-weight: bold;
+    top: 0.1em;
+    left: -1.1em;
+    color: white;
+}
+
+.icon-offer {
+    position: relative;
+}
+
+.icon-offer:before {
+    content: "\f15b"; /* fa-file */
+    position: relative;
+    font-size: inherit;
+}
+
+.icon-offer:after {
+    content: "O";
+    position: relative;
+    font-size: 60%;
+    font-weight: bold;
+    top: 0.1em;
+    left: -1.1em;
+    color: white;
+}
 
 /*jQuery UI autocomplete for bootstrap*/
 .ui-autocomplete {

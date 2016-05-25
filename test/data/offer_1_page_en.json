@@ -1,7 +1,7 @@
 {
   "_id": "56bb8cfc9eab24191694fd98",
-  "docType": "invoice",
-  "docNr": 100,
+  "docType": "offer",
+  "docNr": 101,
   "uid": "56ba53ecaf82211b4ef31d22",
   "companyId": "56ba5426af82211b4ef31d2a",
   "company": {
@@ -49,7 +49,7 @@
     "cid": 100,
     "uid": "56ba53ecaf82211b4ef31d22",
     "companyId": "56ba5426af82211b4ef31d2a",
-    "name": "Pelle Persson Industrial Services Sweden AB",
+    "name": "Pelle Persson",
     "addr1": "Södra Liden 23",
     "addr2": "123 99 Halstahammars Sjöstad",
     "addr3": "Sweden",
@@ -60,8 +60,8 @@
     "email": "",
     "useReverseCharge": true,
     "contact": "",
-    "currency": "SEK",
-    "isValid": true
+    "isValid": true,
+    "invoiceLng": "en"
   },
   "yourRef": "Pelle",
   "ourRef": "Marcus",
@@ -69,6 +69,7 @@
   "daysUntilPayment": 30,
   "lastPaymentDate": "2016-03-11T00:00:00.000Z",
   "projId": "Testprojekt",
+  "currency": "GBP",
   "invoiceItemGroups": [
     {
       "_id": "56ba53ecaf82211b4ef31d24",
@@ -88,40 +89,24 @@
       "hasDesc": true,
       "hasPrice": true,
       "hasCount": true,
-      "hasDiscount": true,
+      "hasDiscount": false,
       "negateDiscount": false,
       "hasVat": true,
       "hasTotal": true,
       "invoiceItems": [
         {
-          "description": "Endast text test",
-          "price": 100,
+          "description": "Test",
+          "price": "100",
           "count": 1,
           "vat": 25,
-          "discount": 0.05,
+          "discount": 0,
           "total": 0,
           "isTextOnly": true,
           "hasDesc": true,
           "hasPrice": true,
           "hasCount": true,
           "hasVat": true,
-          "hasDiscount": true,
-          "hasTotal": true,
-          "isValid": true
-        },
-        {
-          "description": "Rad med rabatt",
-          "price": 100,
-          "count": 1,
-          "vat": 25,
-          "discount": 5.1,
-          "total": 0,
-          "isTextOnly": false,
-          "hasDesc": true,
-          "hasPrice": true,
-          "hasCount": true,
-          "hasVat": true,
-          "hasDiscount": true,
+          "hasDiscount": false,
           "hasTotal": true,
           "isValid": true
         }
@@ -154,11 +139,27 @@
       "invoiceItems": [
         {
           "description": "Testtimmar",
-          "price": 1002.1,
+          "price": 1002.005,
           "count": "25",
           "vat": 25,
           "discount": 0,
-          "total": 25050.25,
+          "total": 25050.125,
+          "isTextOnly": false,
+          "hasDesc": true,
+          "hasPrice": true,
+          "hasCount": true,
+          "hasVat": true,
+          "hasDiscount": false,
+          "hasTotal": true,
+          "isValid": true
+        },
+        {
+          "description": "T",
+          "price": 0,
+          "count": 1,
+          "vat": 25,
+          "discount": 0,
+          "total": 0,
           "isTextOnly": false,
           "hasDesc": true,
           "hasPrice": true,
@@ -169,8 +170,8 @@
           "isValid": true
         }
       ],
-      "totalExclVat": 25050.25,
-      "totalInclVat": 31312.8125
+      "totalExclVat": 25050.125,
+      "totalInclVat": 31312.65625
     },
     {
       "_id": "56ba53ecaf82211b4ef31d29",
@@ -275,6 +276,6 @@
       "totalInclVat": 0
     }
   ],
-  "totalExclVat": 25050.25,
-  "totalInclVat": 31312.8125
+  "totalExclVat": 25050.125,
+  "totalInclVat": 31312.65625
 }

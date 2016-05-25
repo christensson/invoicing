@@ -1,5 +1,14 @@
 <script marko-init>var i18n = require("i18next");</script>
 <!DOCTYPE html>
+
+<macro icon(icon, tooltip, extraClass)>
+    <i class="fa fa-${icon} ${extraClass}" aria-hidden="true" data-placement="top" title="${tooltip}"></i>
+</macro>
+
+<macro iconLg(icon, tooltip, extraClass)>
+    <icon icon="${icon}" tooltip="${tooltip}" extraClass="fa-lg ${extraClass}"/>
+</macro>
+
 <html>
     <head>
         <meta charset="utf-8"/>
@@ -8,6 +17,7 @@
         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
         <title>${i18n.t('signin.pageTitle')}</title>
         <link rel="stylesheet" type="text/css" href="bootstrap.min.css"/>
+        <link rel="stylesheet" type="text/css" href="font-awesome.min.css"/>
         <link rel="stylesheet" type="text/css" href="page.css"/>
     </head>
     <body role="document">
@@ -100,8 +110,7 @@
                                                         <button type="submit"
                                                             class="btn btn-success">
 
-                                                            <span class="glyphicon glyphicon-log-in inline-icon-left-fix"
-                                                                aria-hidden="true"/>
+                                                            <icon icon="sign-in" extraClass="inline-icon-left-fix"/>
                                                             <strong>
                                                                 ${i18n.t('signin.signinBtn')}
                                                             </strong>
@@ -168,8 +177,7 @@
                                                         <button type="submit"
                                                             class="btn btn-primary">
 
-                                                            <span class="glyphicon glyphicon-plus inline-icon-left-fix"
-                                                                aria-hidden="true"/>
+                                                            <icon icon="plus" extraClass="inline-icon-left-fix"/>
                                                             ${i18n.t('signin.registerBtn')}
 
                                                         </button>
