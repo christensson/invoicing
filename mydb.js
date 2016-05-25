@@ -542,7 +542,8 @@ var initCollectionsDevel = function(inviteList) {
                          phone: "031-123132",
                          isValid: true,
                          nextCid: 1000,
-                         nextIid: 2000
+                         nextIid: 2000,
+                         nextOid: 3000,
                        },
                        {
                          uid: testUserId,
@@ -569,7 +570,8 @@ var initCollectionsDevel = function(inviteList) {
                          "logo" : { "mimetype" : "image/png", "path" : "uploads/pepsi-logo.png", "originalname" : "pepsi-logo.png" },
                          isValid: true,
                          nextCid: 3000,
-                         nextIid: 4000
+                         nextIid: 4000,
+                         nextOid: 5000,
                        },
                        {
                          uid: testUserId,
@@ -579,7 +581,8 @@ var initCollectionsDevel = function(inviteList) {
                          phone: "031-123132",
                          isValid: true,
                          nextCid: 5000,
-                         nextIid: 6000
+                         nextIid: 6000,
+                         nextOid: 7000,
                        },
                        ];
     return insertDataPromise("company", companyList);
