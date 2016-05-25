@@ -3018,7 +3018,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
           self.data.setCompanyId(self.activeCompany()._id());
           self.populatePromise().done(self.syncCustomerIdInput);
         } else {
-          Notify_showMsg('info', t("app.invoice.newNok", {context: "noCompany"}));
+          Notify_showMsg('info', t("app.invoice." + docType + ".newNok", {context: "noCompany"}));
           browserNavigateBack();
         }
       } else if (docOp == 'show' && viewArray.length > 1) {
@@ -3220,7 +3220,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
       }).fail(function(err) {
         Log.info("InvoiceNewViewModel - getInvoice - failed, type=" + self.docType());
         Notify_showSpinner(false);
-        Notify_showMsg('error', t("app.invoice.getNok"));
+        Notify_showMsg('error', t("app.invoice." + docType + ".getNok"));
         deferred.reject(err);
       });
     });
@@ -3244,16 +3244,17 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   };
 
   self.doSaveDoc = function() {
+    var docTypeTransNs = "app.invoice." + self.data.docType() + ".";
     if ((self.data._id() === undefined) && !self.data.isValid()) {
-      Notify_showMsg('error', t("app.invoice.saveNok"));
+      Notify_showMsg('error', t(docTypeTransNs + "saveNok"));
       Log.info("doSaveDoc: Nothing to do (invalid entry without _id)");
       return;
     } else if (self.data.customer() === undefined) {
-      Notify_showMsg('error', t("app.invoice.saveNok", {context: 'invalidCustomer'}));
+      Notify_showMsg('error', t(docTypeTransNs + "saveNok", {context: 'invalidCustomer'}));
       Log.info("No customer selected: " + JSON.stringify(self.data.customer()));
       return;
     } else if (self.data.date() === undefined) {
-      Notify_showMsg('error', t("app.invoice.saveNok", {context: 'invalidDate'}));
+      Notify_showMsg('error', t(docTypeTransNs + "saveNok", {context: 'invalidDate'}));
       return;
     }
     var isNewDoc = (self.data._id() == undefined) ? true : false;
@@ -3261,7 +3262,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     var ajaxUrl = "/api/" + self.data.docType() + "/" + self.data._id();
     Log.info("doSaveDoc: AJAX PUT (url=" + ajaxUrl + "): JSON="
         + ajaxData);
-    Notify_showSpinner(true, t("app.invoice.saveTicker"));
+    Notify_showSpinner(true, t(docTypeTransNs + "saveTicker"));
     return $.ajax({
       url : ajaxUrl,
       type : "PUT",
@@ -3276,7 +3277,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
         }
         Notify_showSpinner(false);
         Notify_showMsg('success',
-            t("app.invoice.saveOk",
+            t(docTypeTransNs + "saveOk",
                    {context: tContext, docNr: data.doc.docNr}));
         // Set params set from server
         self.data._id(data.doc._id);
@@ -3321,7 +3322,8 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     if (self.data._id() !== undefined) {
       ReportOps.printDoc(self.data._id(), self.data.docType());
     } else {
-      Notify_showMsg('info', t("app.invoice.printNok", {context: 'noId'}));
+      Notify_showMsg('info', t("app.invoice." + self.data.docType() + ".printNok",
+        {context: 'noId'}));
       Log.info("InvoiceNewViewModel - Invoice not saved.");
     }
   };
@@ -3331,7 +3333,8 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     if (self.data._id() !== undefined) {
       ReportOps.printInvoice(self.data._id(), {isReminder: true});
     } else {
-      Notify_showMsg('info', t("app.invoice.printNok", {context: 'noId'}));
+      Notify_showMsg('info', t("app.invoice." + self.data.docType() + ".printNok",
+        {context: 'noId'}));
       Log.info("InvoiceNewViewModel - Invoice not saved.");
     }
   };
