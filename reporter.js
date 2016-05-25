@@ -776,7 +776,8 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
   };
 
   // You don't have to pass in a report name; it will default to "report.pdf"
-  var reportName = i18n.t('app.invoiceReport.fileName', {'cid': invoice.customer.cid, 'docNr': invoice.docNr});
+  var reportName = i18n.t('app.' + docType + 'Report.fileName',
+    {'cid': invoice.customer.cid, 'docNr': invoice.docNr, 'lng': invoiceLng});
   if (reportName === "") {
     reportName = "report.pdf";
   }
