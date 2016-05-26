@@ -899,12 +899,14 @@ module.exports.getStats = function(uid, companyId) {
         "numCompanies": 0,
         "numCustomers": 0,
         "numInvoices": 0,
+        "numOffers": 0,
         "numItemGroupTemplates": 0,
       },
       "activeCompany": {
         "isSet": false,
         "numCustomers": 0,
         "numInvoices": 0,
+        "numOffers": 0,
       }
   };
   
@@ -912,6 +914,7 @@ module.exports.getStats = function(uid, companyId) {
     countAllDocsPromise('company', {'isValid': true, 'uid': ouid}),
     countAllDocsPromise('customer', {'isValid': true, 'uid': ouid}),
     countAllDocsPromise('invoice', {'isValid': true, 'uid': ouid}),
+    countAllDocsPromise('offer', {'isValid': true, 'uid': ouid}),
     countAllDocsPromise('itemGroupTempl', {'isValid': true, 'uid': ouid}),
   ];
   
@@ -920,6 +923,7 @@ module.exports.getStats = function(uid, companyId) {
     var ocompanyId = new ObjectID(companyId);
     jobs.push(countAllDocsPromise('customer', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId}));
     jobs.push(countAllDocsPromise('invoice', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId}));
+    jobs.push(countAllDocsPromise('offer', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId}));
   }
   
   Q.all(jobs).then(function(results) {
@@ -927,11 +931,13 @@ module.exports.getStats = function(uid, companyId) {
     res.total.numCompanies = results[i++];
     res.total.numCustomers = results[i++];
     res.total.numInvoices = results[i++];
+    res.total.numOffers = results[i++];
     res.total.numItemGroupTemplates = results[i++];
     
     if (results.length > i) {
       res.activeCompany.numCustomers = results[i++];
       res.activeCompany.numInvoices = results[i++];
+      res.activeCompany.numOffers = results[i++];
     }
     deferred.resolve(res);
   })

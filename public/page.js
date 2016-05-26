@@ -3532,6 +3532,7 @@ var UserViewModel = function() {
       "numCompanies": 0,
       "numCustomers": 0,
       "numInvoices": 0,
+      "numOffers": 0,
       "numItemGroupTemplates": 0
     });
 
@@ -3795,6 +3796,15 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
     }
   }, self);
   
+  self.numOffers = ko.pureComputed(function() {
+    if ((self.activeCompanyId() === undefined) || (self.activeCompanyId() === null) ||
+        (self.stats() === undefined)) {
+      return 0;
+    } else {
+      return self.stats().activeCompany.numOffers;
+    }
+  }, self);
+
   self.companiesTextTrans = ko.pureComputed(function() {
     if (self.numCompanies() > 0) {
       return t("app.gettingStarted.companiesText", {count: self.numCompanies()});
