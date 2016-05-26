@@ -170,7 +170,7 @@
 
                                 <if(data.user.isAdmin === true)>
                                     <li role="separator" class="divider"/>
-                                    <navbarItem route="/page/debug" tKey="app.navBar.debug" icon="eye"/>
+                                    <navbarItem route="/page/debug" tKey="app.navBar.debug" icon="bug"/>
                                     <navbarItem route="/page/users" tKey="app.navBar.users" icon="users"/>
                                     <navbarItem route="/page/invites" tKey="app.navBar.invites" icon="gift"/>
                                 </if>
@@ -2268,6 +2268,12 @@
                                         <a href="#" data-bind="click: doInvoiceReminderPrint, disable: data._id() === undefined">
                                             <icon icon="print" extraClass="inline-icon-left-fix"/>
                                             ${i18n.t('app.invoice.printInvoiceReminderBtn')}
+                                        </a>
+                                    </li>
+                                    <li data-bind="if: isOffer">
+                                        <a href="#" data-bind="click: doCreateInvoiceFromOffer, disable: data._id() === undefined">
+                                            <icon icon="cogs" extraClass="inline-icon-left-fix"/>
+                                            ${i18n.t('app.invoice.createInvoiceFromOfferBtn')}
                                         </a>
                                     </li>
                                 </ul>

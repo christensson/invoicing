@@ -332,6 +332,7 @@
             "saveDocBtn": "Spara",
             "printDocBtn": "Skriv ut",
             "printInvoiceReminderBtn": "Skriv ut påminnelsefaktura",
+            "createInvoiceFromOfferBtn": "Skapa faktura baserat på offert",
             "copyDocBtn": "Duplicera",
             "getCustomersNok": "Misslyckades med att hämta kunder!",
             "getCustomersNok_noCompany": "Misslyckades med att hämta kunder! Företag ej valt eller ogiltigt.",
@@ -359,6 +360,11 @@
                 "saveNok_invalidCustomer": "Ingen kund vald!",
                 "saveNok_invalidDate": "Ingen datum angiven!",
                 "printNok_noId": "Utskriften misslyckades, offerten ej sparad!"
+            },
+            "convertOffer": {
+              "groupName": "Offertreferens",
+              "groupTitle": "Offertreferens",
+              "offerRefText": "Faktura avser Offer Nr {{offerDocNr}}."
             }
         },
         "invoiceList": {

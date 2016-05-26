@@ -318,6 +318,7 @@
             "saveDocBtn": "Save",
             "printDocBtn": "Print",
             "printInvoiceReminderBtn": "Print invoice reminder",
+            "createInvoiceFromOfferBtn": "Create invoice based on offer",
             "copyDocBtn": "Duplicate",
             "getCustomersNok": "Failed to get customers!",
             "getCustomersNok_noCompany": "Cannot get customers! Company not selected or doesn't exist.",
@@ -345,7 +346,12 @@
                 "saveNok_invalidCustomer": "Customer must be selected!",
                 "saveNok_invalidDate": "Date must be set!",
                 "printNok_noId": "Cannot print unsaved offer, please save it first!"
-            }
+            },
+            "convertOffer": {
+              "groupName": "Offer reference",
+              "groupTitle": "Offer reference",
+              "offerRefText": "Invoice related to Offer Nr {{offerDocNr}}."
+            }            
         },
         "invoiceList": {
             "filterPaneToggleLbl_show": "Show filter",
