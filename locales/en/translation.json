@@ -482,6 +482,7 @@
             "numCompaniesLbl": "Companies",
             "numCustomersLbl": "Customers",
             "numInvoicesLbl": "Invoices",
+            "numOffersLbl": "Offers",
             "numItemGroupTemplatesLbl": "Detail group templates",
             "loginAsOtherUserBtn": "Login as user",
             "refreshBtn": "Refresh",

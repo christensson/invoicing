@@ -364,7 +364,7 @@
             "convertOffer": {
               "groupName": "Offertreferens",
               "groupTitle": "Offertreferens",
-              "offerRefText": "Faktura avser Offer Nr {{offerDocNr}}."
+              "offerRefText": "Faktura avser offert nr {{offerDocNr}}."
             }
         },
         "invoiceList": {
@@ -498,6 +498,7 @@
             "numCompaniesLbl": "Företag",
             "numCustomersLbl": "Kunder",
             "numInvoicesLbl": "Fakturor",
+            "numOffersLbl": "Offerter",
             "numItemGroupTemplatesLbl": "Detaljgruppmallar",
             "loginAsOtherUserBtn": "Logga in som användare",
             "refreshBtn": "Uppdatera",
