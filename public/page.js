@@ -2154,6 +2154,60 @@ var InvoiceDataViewModel = function() {
     self.docNr(undefined);
   };
 
+  self.convertToInvoice = function() {
+    // Remember old docNr
+    var offerDocNr = self.docNr();
+
+    self.forceMarkAsNew();
+
+    self.docType('invoice');
+    // Set invoice date to current date
+    self.date(new Date().toISOString().split("T")[0]);
+
+    // Add text description refering to offer
+    var invoiceLng = self.customerMirror_invoiceLng();
+    var offerRefGroupData = {
+      _id: undefined,
+      name: t("app.invoice.convertOffer.groupName", {lng: invoiceLng}),
+      title: t("app.invoice.convertOffer.groupTitle", {lng: invoiceLng}),
+      isValid: true,
+      isQuickButton: false,
+      isTextOnlyDefault: true,
+      descColLbl: "",
+      priceColLbl: "",
+      countColLbl: "",
+      discountColLbl: "",
+      vatColLbl: "",
+      totalColLbl: "",
+      hasDesc: true,
+      hasPrice: false,
+      hasCount: false,
+      hasDiscount: false,
+      negateDiscount: false,
+      hasVat: false,
+      hasTotal: false,
+      invoiceItems: [{
+        description: t("app.invoice.convertOffer.offerRefText", {offerDocNr: offerDocNr, lng: invoiceLng}),
+        price : 0,
+        count : 0,
+        vat : 0,
+        discount : 0,
+        total : 0,
+        isTextOnly : true,
+        hasDesc : true,
+        hasPrice : false,
+        hasCount : false,
+        hasVat : false,
+        hasDiscount : false,
+        hasTotal : false,
+        isValid : true
+      }]
+    };
+    var groupToAdd = new InvoiceItemGroupViewModel(true, self.currency, self.isLocked);
+    groupToAdd.setData(offerRefGroupData);
+    self.invoiceItemGroups.push(groupToAdd);
+  };
+
   self.addGroup = function(g) {
     var groupToAdd = new InvoiceItemGroupViewModel(true, self.currency, self.isLocked);
     groupToAdd.setData(g);
@@ -3337,6 +3391,11 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
         {context: 'noId'}));
       Log.info("InvoiceNewViewModel - Invoice not saved.");
     }
+  };
+
+  self.doCreateInvoiceFromOffer = function() {
+    Log.info("InvoiceNewViewModel - Create invoice from offer requested");
+    self.data.convertToInvoice();
   };
 
   self.doCopyDoc = function() {
