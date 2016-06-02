@@ -5,6 +5,7 @@ var defaults = {
   defaultLng: "sv",
   enabledLngList: ["sv", "en"],
   uiEnabledLngList: ["sv"],
+  defaultVatPercent: 25,
   invoiceLng: "sv",
   invoiceLngList: ["sv", "en"],
   invoiceReportStyle: "right",

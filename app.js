@@ -785,6 +785,45 @@ app.put("/api/itemGroupTemplate/:id", ensureAuthenticated, function(req, res) {
   }
 });
 
+app.get("/api/articles/:companyId", ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var companyId = req.params.companyId;
+  log.info("Get articles: user=" + req.user.info.name + ", uid=" + uid
+    + ", companyId=" + companyId);
+  mydb.getArticles(uid, companyId).then(function(docs) {
+    res.status(200).json(docs);
+    res.end();
+  }).fail(myFailureHandler.bind(null, res));
+});
+
+app.put("/api/article/:id", ensureAuthenticated, function(req, res) {
+  var okHandler = function(logText, res, article) {
+    log.verbose(logText + ": OK, obj=" + JSON.stringify(article));
+    var resData = {
+      'article' : article
+    };
+    res.status(200).json(resData);
+    res.end();
+  };
+  var uid = req.user._id;
+  var companyId = req.body.companyId;
+  if (req.params.id === "undefined") {
+    log.info("New article: user=" + req.user.info.name +
+      ", uid=" + uid + ", companyId=" + companyId +
+      ", data=" + JSON.stringify(req.body, null, 2));
+    mydb.addArticle(uid, companyId, req.body)
+        .then(okHandler.bind(null, 'addArticle', res)).fail(
+            myFailureHandler.bind(null, res));
+  } else {
+    log.info("Update article: user=" + req.user.info.name +
+      ", uid=" + uid + ", companyId=" + companyId +
+      ", data=" + JSON.stringify(req.body, null, 2));
+    mydb.updateArticle(req.body).then(
+        okHandler.bind(null, 'updateArticle', res)).fail(
+        myFailureHandler.bind(null, res));
+  }
+});
+
 app.get("/api/invoiceReport/:id/:isReminder", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var id = req.params.id;

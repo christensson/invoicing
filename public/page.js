@@ -88,6 +88,10 @@ var CacheOp = function() {
     return 'item_group_templates';
   };
 
+  self.ARTICLES = function() {
+    return 'articles';
+  };
+
   self._findArrayFieldIndex = function(arr, item, field) {
     for (var i = 0; i < arr.length; i++) {
       if (arr[i][field] === item[field]) {
@@ -156,6 +160,9 @@ var CacheOp = function() {
     }
   };
 
+  /*
+   * Companies
+   */
   self.fetchCompanies = function() {
     return $.getJSON("/api/companies", function(data) {
       cache.set(self.COMPANIES(), data);
@@ -178,6 +185,9 @@ var CacheOp = function() {
     self._arrayAddItem(self.COMPANIES(), company);
   };
 
+  /*
+   * Item group templates
+   */
   self.fetchItemGroupTemplates = function() {
     return $.getJSON("/api/itemGroupTemplates", function(data) {
       cache.set(self.ITEM_GROUP_TEMPLATES(), data);
@@ -213,6 +223,41 @@ var CacheOp = function() {
     self._arrayRemoveItem(self.ITEM_GROUP_TEMPLATES(), groupTempl);
   };
 
+  /*
+   * Articles
+   */
+  self.fetchArticlesPromise = function(companyId) {
+    var deferred = $.Deferred();
+    return $.getJSON("/api/articles/" + companyId, function(data) {
+      cache.set(self.ARTICLES(), data);
+      deferred.resolve(data);
+    });
+    return deferred.promise();
+  };
+
+  self.getArticle = function(id, callback) {
+    self._arrayGetItem(self.ARTICLES(), '_id', id, callback);
+  };
+
+  self.invalidateArticles = function() {
+    cache.del(self.ARTICLES());
+  };
+  
+  self.updateArticle = function(article) {
+    self._arrayUpdateItem(self.ARTICLES(), article);
+  };
+
+  self.addArticle = function(article) {
+    self._arrayAddItem(self.ARTICLES(), article);
+  };
+
+  self.deleteArticle = function(article) {
+    self._arrayRemoveItem(self.ARTICLES(), article);
+  };
+
+  /*
+   * Customers
+   */
   self.fetchCustomers = function(companyId) {
     return $.getJSON("/api/customers/" + companyId, function(data) {
       cache.set(self.CUSTOMERS(), data);
@@ -246,6 +291,9 @@ var CacheOp = function() {
     self._arrayAddItem(self.CUSTOMERS(), customer);
   };
 
+  /*
+   * Invoices
+   */
   self.fetchInvoicesPromise = function(companyId) {
     var deferred = $.Deferred();
     $.getJSON("/api/invoices/" + companyId).done(function(data) {
@@ -295,6 +343,9 @@ var CacheOp = function() {
     self._arrayAddItem(self.INVOICES(), invoice);
   };
 
+  /*
+   * Offers
+   */
   self.fetchOffersPromise = function(companyId) {
     var deferred = $.Deferred();
     $.getJSON("/api/offers/" + companyId).done(function(data) {
@@ -1447,6 +1498,344 @@ var InvoiceItemGroupTemplatesViewModel = function(currentView) {
   };
 };
 
+var ArticleViewModel = function(groupList) {
+  var self = this;
+  self.groupList = groupList;
+
+  self.articleIdError = ko.observable(false);
+  self.isEditMode = ko.observable(false);
+  self.selectedItemGroupTemplate = ko.observable();
+
+  self._id = ko.observable();
+  self.uid = ko.observable();
+  self.companyId = ko.observable();
+  self.articleId = ko.observable();
+  self.isValid = ko.observable();
+
+  self.desc = ko.observable();
+  self.price = ko.observable();
+  self.count = ko.observable();
+  self.discount = ko.observable();
+  self.vat = ko.observable();
+
+  self.hasPrice = ko.observable();
+  self.hasCount = ko.observable();
+  self.hasDiscount = ko.observable();
+  self.hasVat = ko.observable();
+
+  self.prependArticleIdToDesc = ko.observable();
+
+  self.itemGroupTemplateRef = {
+    _id: undefined,
+    name: undefined,
+  };
+
+  self.itemGroupTemplateRefLbl = ko.pureComputed(function() {
+    if (self.selectedItemGroupTemplate() != undefined) {
+      return self.selectedItemGroupTemplate().name;
+    } else if (self.itemGroupTemplateRef.name != undefined) {
+      return self.itemGroupTemplateRef.name;
+    } else {
+      return "";
+    }
+
+  }, this);
+
+  self.setData = function(data) {
+    self.isEditMode(false);
+    self.articleIdError(false);
+
+    self._id(data._id);
+    self.companyId(data.companyId)
+    self.uid(data.uid);
+    self.articleId(data.articleId);
+    self.isValid(data.isValid);
+
+    self.desc(data.desc);
+    self.price(data.price);
+    self.count(data.count);
+    self.discount(data.discount);
+    self.vat(data.vat);
+
+    self.hasPrice(data.hasPrice);
+    self.hasCount(data.hasCount);
+    self.hasDiscount(data.hasDiscount);
+    self.hasVat(data.hasVat);
+
+    self.prependArticleIdToDesc(data.prependArticleIdToDesc);
+
+    // Store for later use when syncing select
+    self.itemGroupTemplateRef._id = data.itemGroupTemplateRef._id;
+    self.itemGroupTemplateRef.name = data.itemGroupTemplateRef.name;
+
+    self.selectedItemGroupTemplate(undefined);
+  };
+
+  self.initNew = function(companyId) {
+    var data = {
+      uid: undefined,
+      companyId : companyId,
+      articleId: "",
+      isValid: true,
+      desc: "",
+      price: 0.0,
+      count: 1.0,
+      discount: 0.0,
+      vat: defaults.defaultVatPercent,
+      hasPrice: true,
+      hasCount: false,
+      hasDiscount: false,
+      hasVat: false,
+      prependArticleIdToDesc: false,
+      itemGroupTemplateRef: {
+        _id: undefined,
+        name: undefined,
+      },
+    };
+    self.setData(data);
+  };
+
+  self.toggleEditMode = function() {
+    var newEditMode = !self.isEditMode();
+    Log.info("Edit toggled for article=" + self.articleId() + ", isEditMode=" +
+        newEditMode + " (new)");
+    self.isEditMode(newEditMode);
+
+    if (newEditMode) {
+      if (self.itemGroupTemplateRef._id != undefined) {
+        // Edit mode enabled, sync select input
+        Log.info("Locating itemGroupTempl with _id=" + self.itemGroupTemplateRef._id +
+          " for article _id" + self._id());
+        for (var i = 0; i < self.groupList().length; i++) {
+          if (self.itemGroupTemplateRef._id == self.groupList()[i]._id) {
+            self.selectedItemGroupTemplate(self.groupList()[i]);
+            Log.info("Found itemGroupTempl with _id=" + self.itemGroupTemplateRef._id);
+          }
+        }
+      } else {
+        self.selectedItemGroupTemplate(undefined);
+      }
+    }
+  };
+
+  self.updateServer = function() {
+    if (self.companyId() == null) {
+      Notify_showMsg('error', t("app.articles.saveNok", {context: "noCompany"}));
+      return;
+    } else if ((self._id() === undefined) && !self.isValid()) {
+      Notify_showMsg('error', t("app.articles.saveNok"));
+      return;
+    } else if (self.selectedItemGroupTemplate() == undefined) {
+      Notify_showMsg('error', t("app.articles.saveNok", {context: "noItemGroupTemplate"}));
+      return;
+    } else if (self.articleId().length == 0) {
+      Notify_showMsg('error', t("app.articles.saveNok", {context: "noArticleId"}));
+      self.articleIdError(true);
+      return;
+    }
+
+    self.articleIdError(false);
+    var isNew = (self._id() == undefined) ? true : false;
+    Notify_showSpinner(true, t("app.articles.saveTicker"));
+    return $.ajax({
+      url : "/api/article/" + self._id(),
+      type : "PUT",
+      contentType : "application/json",
+      data : JSON.stringify(self.toJSON()),
+      dataType : "json",
+      success : function(data) {
+        Log.info("updateServer: response: " + JSON.stringify(data));
+        var tContext = "";
+        var isDelete = !isNew && !data.article.isValid;
+        if (!isNew) {
+          tContext = isDelete ? 'delete' : 'update';
+        }
+        Notify_showSpinner(false);
+        Notify_showMsg('success', t("app.articles.saveOk",
+            {context: tContext, articleId: data.article.articleId}));
+        self._id(data.article._id);
+        self.uid(data.article.uid);
+        self.isValid(data.article.isValid);
+        if (isNew) {
+          Cache.addArticle(data.article);
+        } else if (isDelete) {
+          Cache.deleteArticle(data.article);
+        } else {
+          Cache.updateArticle(data.article);
+        };
+      },
+    });
+  };
+
+  self.updateServerForceNew = function() {
+    self._id(undefined);
+    self.updateServer();
+  };
+
+  self.updateServerDelete = function() {
+    self.isValid(false);
+    if (self._id() !== undefined) {
+      self.updateServer();
+    }
+  };
+
+  self.toJSON = function() {
+    var res = {
+      _id : self._id(),
+      uid : self.uid(),
+      companyId : self.companyId(),
+      articleId : self.articleId(),
+      isValid : self.isValid(),
+      desc : self.desc(),
+      price : self.price(),
+      count : self.count(),
+      discount : self.discount(),
+      vat : self.vat(),
+      hasPrice : self.hasPrice(),
+      hasCount : self.hasCount(),
+      hasDiscount : self.hasDiscount(),
+      hasVat : self.hasVat(),
+      prependArticleIdToDesc: self.prependArticleIdToDesc(),
+      itemGroupTemplateRef: {
+        _id: self.selectedItemGroupTemplate()._id,
+        name: self.selectedItemGroupTemplate().name,
+      }
+    };
+    return res;
+  };
+};
+
+var ArticlesViewModel = function(currentView, activeCompanyId) {
+  var self = this;
+
+  self.currentView = currentView;
+  self.activeCompanyId = activeCompanyId;
+
+  self.currentView.subscribe(function(newValue) {
+    if (newValue == 'articles') {
+      Log.info("ArticlesViewModel - activated");
+      if (self.activeCompanyId() != null) {
+        self.populatePromise();
+      } else {
+        Notify_showMsg('info', t("app.articles.openNok", {context: "noCompany"}));
+        browserNavigateBack();
+      }
+    }
+  });
+
+  self.activeCompanyId.subscribe(function(newValue) {
+    Log.info("ArticlesViewModel - activeCompanyId.subscribe: value="
+        + newValue);
+    if (self.currentView() == 'articles') {
+      self.populatePromise();
+    } else {
+      Cache.invalidateArticles();
+    }
+  });
+
+  self.articleList = ko.observableArray();
+  self.groupList = ko.observableArray();
+
+  cache.on('set:' + Cache.ITEM_GROUP_TEMPLATES(), function(groupTemplates, ttl) {
+    Log.info("ArticlesViewModel - event - set:" + Cache.ITEM_GROUP_TEMPLATES());
+    Log.info("ArticlesViewModel - populate: Got " + groupTemplates.length
+        + " group templates");
+    self.groupList(groupTemplates);
+  });
+
+  cache.on('update:' + Cache.ITEM_GROUP_TEMPLATES(), function(groupTemplates, ttl) {
+    Log.info("ArticlesViewModel - event - update:" + Cache.ITEM_GROUP_TEMPLATES());
+    self.groupList(groupTemplates);
+  });
+
+  cache.on('del:' + Cache.ITEM_GROUP_TEMPLATES(), function() {
+    Log.info("ArticlesViewModel - event - del:" + Cache.ITEM_GROUP_TEMPLATES());
+    self.groupList.removeAll();
+  });
+
+  cache.on('set:' + Cache.ARTICLES(), function(articles, ttl) {
+    Log.info("ArticlesViewModel - event - set:" + Cache.ARTICLES());
+    Log.info("ArticlesViewModel - populate: Got " + articles.length
+        + " articles");
+    var mappedArticles = $.map(articles, function(item) {
+      var article = new ArticleViewModel(self.groupList);
+      article.setData(item);
+      return article;
+    });
+    self.articleList(mappedArticles);
+  });
+
+  cache.on('update:' + Cache.ARTICLES(), function(articles, ttl) {
+    Log.info("ArticlesViewModel - event - update:" + Cache.ARTICLES());
+    var mappedArticles = $.map(articles, function(item) {
+      var article = new ArticleViewModel(self.groupList);
+      article.setData(item);
+      return article;
+    });
+    self.articleList(mappedArticles);
+  });
+
+  cache.on('del:' + Cache.ARTICLES(), function() {
+    Log.info("ArticlesViewModel - event - del:" + Cache.ARTICLES());
+    self.articleList.removeAll();
+  });
+
+  self.populatePromise = function(force) {
+    var deferred = $.Deferred();
+    force = typeof force !== 'undefined' ? force : false;
+
+    var companyId = self.activeCompanyId();
+    if (companyId != null) {
+      var articlesJob = undefined;
+      var groupTemplatesJob = undefined;
+
+      if (force || !cache.get(Cache.ARTICLES())) {
+        articlesJob = Cache.fetchArticlesPromise(companyId);
+      } else {
+        Log.info("ArticlesViewModel - populate - article data is cached!");
+        articlesJob = $.Deferred();
+        articlesJob.resolve();
+      }
+
+      if (force || !cache.get(Cache.ITEM_GROUP_TEMPLATES())) {
+        groupTemplatesJob = Cache.fetchItemGroupTemplatesPromise();
+      } else {
+        Log.info("ArticlesViewModel - populate - groupTemplate data is cached!");
+        groupTemplatesJob = $.Deferred();
+        groupTemplatesJob.resolve();
+      }
+
+      Notify_showSpinner(true);
+      $.when(articlesJob, groupTemplatesJob).then(function(articlesRes, groupTemplatesRes) {
+        Notify_showSpinner(false);
+        deferred.resolve();
+      }).fail(function() {
+         Log.info("ArticlesViewModel - populate - failed");
+         Notify_showSpinner(false);
+         Notify_showMsg('error', t("app.articles.getNok"));
+         deferred.reject();
+      });
+    } else {
+      Notify_showMsg('info', t("app.articles.getNok", {context: "noCompany"}));
+      browserNavigateBack();
+      deferred.reject();
+    }
+    return deferred.promise();
+  };
+
+  self.deleteArticle = function(article) {
+    article.updateServerDelete();
+    self.articleList.destroy(article);
+  };
+
+  self.newArticle = function() {
+    var article = new ArticleViewModel();
+    article.initNew(self.activeCompanyId());
+    article.isEditMode(true);
+    self.articleList.push(article);
+  };
+};
+
 // Trick for doing classmethods...
 function ReportOps(){};
 ReportOps.downloadDoc = function(url) {
@@ -1669,7 +2058,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
           description : "",
           price : 0.0,
           count : 1.0,
-          vat : 25,
+          vat : defaults.defaultVatPercent,
           discount : 0.0,
           isValid : true,
           isTextOnly: self.isTextOnlyDefault(),
@@ -1794,6 +2183,7 @@ var InvoiceItemViewModel = function(data, parent) {
   self.negateDiscount = parent.negateDiscount;
   self.hasVat = parent.hasVat;
   self.hasTotal = parent.hasTotal;
+  self.selectedArticle = ko.observable();
 
   self.description = ko.observable(data.description);
   self.price = ko.observable(data.price);
@@ -1839,6 +2229,23 @@ var InvoiceItemViewModel = function(data, parent) {
     }
     return colspan;
   }, self);
+
+  self.selectedArticle.subscribe(function(article) {
+    Log.info("article selected: " + JSON.stringify(article));
+    var a = article.data;
+    if (a.hasPrice) {
+      self.price(a.price);
+    }
+    if (a.hasCount) {
+      self.count(a.count);
+    }
+    if (a.hasDiscount) {
+      self.discount(a.discount);
+    }
+    if (a.hasVat) {
+      self.vat(a.vat);
+    }
+  });
 
   self.toJSON = function() {
     var res = {
@@ -2451,7 +2858,7 @@ var InvoiceListDataViewModel = function(data, filterOpt) {
 
     var customerMatch = true;
     var custToMatch = this.filterOpt.customerFilterCustomer();
-    if (custToMatch !== undefined) {
+    if (custToMatch != undefined) {
       if (custToMatch.isWildcard) {
         customerMatch = true;
         Log.info("InvoiceListDataViewModel - customerMatch=" + customerMatch +
@@ -2495,7 +2902,6 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
 
-  self.isCustomerListExpanded = false;
   self.customerList = ko.observableArray();
   self.invoiceListSort = ko.observable('docNrAsc');
 
@@ -2700,17 +3106,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
       ", new list=" + JSON.stringify(self.filterOpt.dateFilterCheckedMonthList()));
   };
 
-  $( "#customerFilterCid" ).on( "autocompleteselect", function( event, ui ) {
-    Log.info("Autocomplete customer selected");
-    self.isCustomerListExpanded = false;
-  } );
-
   self.currentView.subscribe(function(newValue) {
-    // Make sure that the autocomplete box is closed
-    // when another view is selected.
-    $( "#customerFilterCid" ).autocomplete( "close" );
-    self.isCustomerListExpanded = false;
-
     if (newValue == 'invoices') {
       self.docType('invoice');
       Log.info("InvoiceListViewModel - activated - docType=" + self.docType());
@@ -2881,15 +3277,17 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   };
 
   self.doShowCustomerList = function() {
-    Log.info("InvoiceListViewModel - Show customer list requested, isExpanded=" + self.isCustomerListExpanded);
-    if (self.isCustomerListExpanded) {
-      // Close if already expanded
+    var isMenuOpen =
+      $( "#customerFilterCid" ).autocomplete( "widget" ).is(":visible");
+    Log.info("InvoiceListViewModel - Show customer list requested, isMenuOpen=" +
+      isMenuOpen);
+    if (isMenuOpen) {
       $( "#customerFilterCid" ).autocomplete( "close" );
     } else {
       // Open search
       $( "#customerFilterCid" ).autocomplete( "search", "" );
+      $( "#customerFilterCid" ).focus();
     }
-    self.isCustomerListExpanded = !self.isCustomerListExpanded;
   };
 
   self.doToggleFilterPaneExpanded = function() {
@@ -3014,6 +3412,26 @@ var InvoiceListCustomerModel = function(data, isWildcard) {
   };
 };
 
+var InvoiceArticleModel = function(data) {
+  var self = this;
+  self.data = data;
+  self.value = "";
+  if (self.data.prependArticleIdToDesc) {
+    self.value = self.value + self.data.articleId + ": ";
+  }
+  self.value = self.value + self.data.desc;
+
+  self.getGroupId = function() {
+    return self.data.itemGroupTemplateRef._id;
+  };
+  self.toString = function() {
+    return "" + self.data.articleId + ": "+ self.data.desc;
+  };
+  self.sortString = function() {
+    return "" + self.data.itemGroupTemplateRef._id + self.data.articleId + self.data.desc;
+  };
+};
+
 var InvoiceNewViewModel = function(currentView, activeCompany) {
   var self = this;
 
@@ -3024,7 +3442,6 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   self.customerList = ko.observableArray();
   self.selectedCustomer = ko.observable();
   self.selectedCustomerUpdatesData = true;
-  self.isCustomerListExpanded = false;
   self.isInvoice = ko.pureComputed(function() {
     return self.data.docType() == 'invoice';
   }, self);
@@ -3033,15 +3450,27 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   }, self);
 
   self.itemGroupList = ko.observableArray();
+  self.articleListPerGroup = ko.observableArray();
 
   inheritInvoiceStyleModel(self);
   inheritInvoiceLngModel(self);
   inheritCurrencyModel(self);
-  
-  $( "#invoiceNewCustomerId" ).on( "autocompleteselect", function( event, ui ) {
-    Log.info("Autocomplete customer selected");
-    self.isCustomerListExpanded = false;
-  } );
+
+  self.getArticleList = function(groupId, searchTerm, callback) {
+    // Find group and return article list
+    for (var i = 0; i < self.articleListPerGroup().length; i++) {
+      var groupEntry = self.articleListPerGroup()[i];
+      if (groupEntry.groupId == groupId) {
+        Log.info("getArticleList - Found articles for group id=" + groupId);
+        callback(groupEntry.articleList);
+        return;
+      }
+    }
+    // Not found, return undefined
+    Log.info("getArticleList - No articles found for group id=" + groupId);
+    callback([]);
+    return;
+  };
 
   self.newGroup = function(g) {
     var group = ko.toJS(g)
@@ -3050,11 +3479,6 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   };
   
   self.currentView.subscribe(function(newValue) {
-    // Make sure that the autocomplete box is closed
-    // when another view is selected.
-    $( "#invoiceNewCustomerId" ).autocomplete( "close" );
-    self.isCustomerListExpanded = false;
-
     self.data.init();
     self.selectedCustomer(undefined);
 
@@ -3094,6 +3518,18 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   self.sortMappedCustomersByName = function(a, b) {
     var aStr = a.getName().toLowerCase();
     var bStr = b.getName().toLowerCase();
+    if (aStr < bStr) {
+      return -1;
+    } else if (aStr > bStr) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+
+  self.sortMappedArticlesByGroupIdAndDesc = function(a, b) {
+    var aStr = a.sortString().toLowerCase();
+    var bStr = b.sortString().toLowerCase();
     if (aStr < bStr) {
       return -1;
     } else if (aStr > bStr) {
@@ -3161,6 +3597,54 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     self.itemGroupList.removeAll();
   });
 
+  self.setArticles = function(articles) {
+    var mappedArticles = $.map(articles, function(item) {
+      return new InvoiceArticleModel(item);
+    });
+    mappedArticles.sort(self.sortMappedArticlesByGroupIdAndDesc);
+
+    // Assume sorted by groupId
+    var groupId = undefined;
+    var currentGroupEntry = undefined;
+    for (var i = 0; i < mappedArticles.length; i++) {
+      var article = mappedArticles[i];
+      var numGroupsProcessed = self.articleListPerGroup().length;
+      if (groupId != article.getGroupId()) {
+        groupId = article.getGroupId();
+        // First item creates entry
+        currentGroupEntry = {
+          groupId: article.getGroupId(),
+          articleList: ko.observableArray(),
+        };
+        self.articleListPerGroup.push(currentGroupEntry);
+      }
+
+      if (currentGroupEntry != undefined) {
+        if (currentGroupEntry.groupId == article.getGroupId()) {
+          currentGroupEntry.articleList.push(article);
+        } else {
+          Log.warn("InvoiceNewViewModel - group id=" + article.getGroupId() +
+            " unexpected (expected " + groupEntry.groupId + ") while processing articles");
+        }
+      }
+    }
+  };
+
+  cache.on('set:' + Cache.ARTICLES(), function(articles, ttl) {
+    Log.info("InvoiceNewViewModel - event - set:" + Cache.ARTICLES());
+    self.setArticles(articles);
+  });
+
+  cache.on('update:' + Cache.ARTICLES(), function(articles, ttl) {
+    Log.info("InvoiceNewViewModel - event - update:" + Cache.ARTICLES());
+    self.setArticles(articles);
+  });
+
+  cache.on('del:' + Cache.ARTICLES(), function() {
+    Log.info("InvoiceNewViewModel - event - del:" + Cache.ARTICLES());
+    self.articleListPerGroup.removeAll();
+  });
+
   self.populatePromise = function(force) {
     var deferred = $.Deferred();
     force = typeof force !== 'undefined' ? force : false;
@@ -3168,6 +3652,8 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     if (companyId != null) {
       var customersJob = undefined;
       var groupTemplatesJob = undefined;
+      var articlesJob = undefined;
+
       // Do nothing if object exists in cache
       if (force || !cache.get(Cache.CUSTOMERS())) {
         customersJob = Cache.fetchCustomersPromise(companyId);
@@ -3185,17 +3671,26 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
         groupTemplatesJob.resolve();
       }
 
+      if (force || !cache.get(Cache.ARTICLES())) {
+        articlesJob = Cache.fetchArticlesPromise(companyId);
+      } else {
+        Log.info("InvoiceNewViewModel - populate - article data is cached!");
+        articlesJob = $.Deferred();
+        articlesJob.resolve();
+      }
+
       Notify_showSpinner(true);
-      $.when(customersJob, groupTemplatesJob).then(function(customersRes, groupTemplatesRes) {
-        Notify_showSpinner(false);
-        deferred.resolve();
-      }).fail(function() {
-         Log.info("InvoiceNewViewModel - populate - failed");
-         Notify_showSpinner(false);
-         Notify_showMsg('error', t("app.invoice.getGroupTemplatesNok"));
-         Notify_showMsg('error', t("app.invoice.getCustomersNok"));
-         deferred.reject();
-      });
+      $.when(customersJob, groupTemplatesJob, articlesJob)
+        .then(function(customersRes, groupTemplatesRes, articlesRes) {
+          Notify_showSpinner(false);
+          deferred.resolve();
+        }).fail(function() {
+          Log.info("InvoiceNewViewModel - populate - failed");
+          Notify_showSpinner(false);
+          Notify_showMsg('error', t("app.invoice.getGroupTemplatesNok"));
+          Notify_showMsg('error', t("app.invoice.getCustomersNok"));
+          deferred.reject();
+        });
     } else {
       Notify_showMsg('info', t("app.invoice.getCustomersNok", {context: "noCompany"}));
       browserNavigateBack();
@@ -3359,18 +3854,34 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   };
 
   self.doShowCustomerList = function() {
-    Log.info("InvoiceNewViewModel - Show customer list requested, isExpanded=" + self.isCustomerListExpanded);
-    if (self.isCustomerListExpanded) {
-      // Close if already expanded
+    var isMenuOpen =
+      $( "#invoiceNewCustomerId" ).autocomplete( "widget" ).is(":visible");
+    Log.info("InvoiceNewViewModel - Show customer list requested, isMenuOpen=" +
+      isMenuOpen);
+    if (isMenuOpen) {
       $( "#invoiceNewCustomerId" ).autocomplete( "close" );
     } else {
       // Open search
       $( "#invoiceNewCustomerId" ).autocomplete( "search", "" );
+      $( "#invoiceNewCustomerId" ).focus();
     }
-    self.isCustomerListExpanded = !self.isCustomerListExpanded;
-
   };
   
+  self.doShowArticleList = function(itemName) {
+    var itemSelector = 'textarea[name=' + itemName + ']';
+    var isMenuOpen =
+      $( itemSelector ).autocomplete( "widget" ).is(":visible");
+    Log.info("Show option list requested for " + itemSelector +
+      ", isMenuOpen=" + isMenuOpen);
+    if (isMenuOpen) {
+      $( itemSelector ).autocomplete( "close" );
+    } else {
+      // Open search
+      $( itemSelector ).autocomplete( "search", "" );
+      $( itemSelector ).focus();
+    }
+  };
+
   self.doDocPrint = function() {
     Log.info("InvoiceNewViewModel - Print requested");
     if (self.data._id() !== undefined) {
@@ -3952,6 +4463,7 @@ var setupKo = function() {
   var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView, navViewModel.activeCompany);
   var invoiceItemGroupTemplatesViewModel = new InvoiceItemGroupTemplatesViewModel(
       navViewModel.currentView);
+  var articlesViewModel = new ArticlesViewModel(navViewModel.currentView, navViewModel.activeCompanyId);
 
   ko.applyBindings(navViewModel, document.getElementById("app-navbar"));
 
@@ -3975,6 +4487,8 @@ var setupKo = function() {
       .getElementById("app-invoice_new"));
 
   ko.applyBindings(invoiceItemGroupTemplatesViewModel,document.getElementById("app-invoice_item_group_templates"));
+
+  ko.applyBindings(articlesViewModel,document.getElementById("app-articles"));
 
   ko.applyBindings(settingsViewModel, document.getElementById("app-settings"));
   if (cfg.user.isAdmin) {
