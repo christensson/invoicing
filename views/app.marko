@@ -75,7 +75,7 @@
     </li>
 </macro>
 
-<macro itemTextWithEditMode(textVariable, cond, editModeVariable)>
+<macro itemTextWithEditMode(textVariable, cond, editModeVariable, useTextarea)>
     <div data-bind="ifnot: ${editModeVariable}">
         <div data-bind="if: ${cond}">
             <p class="list-group-item-text"
@@ -83,8 +83,16 @@
         </div>
     </div>
     <div data-bind="if: ${editModeVariable}">
-        <input type="text"
-            class="form-control input-sm" data-bind="value: ${textVariable}, enable: ${cond}"/>
+        <if ("${useTextarea}" == "true")>
+          <textarea type="text"
+              class="form-control input-sm"
+              data-bind="value: ${textVariable}, enable: ${cond}"/>
+        </if>
+        <else>
+          <input type="text"
+              class="form-control input-sm"
+              data-bind="value: ${textVariable}, enable: ${cond}"/>
+        </else>
     </div>
 </macro>
 
@@ -1108,7 +1116,7 @@
                                                                       }"/>
                                                     <div class="input-group-btn">
                                                         <button type="button" class="btn btn-default"
-                                                                data-bind="click: doShowCustomerList">
+                                                                data-bind="click: Ui.doShowAutocompleteList.bind(null, 'input', 'id', 'customerFilterCid')">
                                                             <span class="caret"></span>
                                                         </button>
                                                     </div>
@@ -1487,7 +1495,8 @@
                                                                       disable: data.isLocked"/>
                                                     <div class="input-group-btn">
                                                         <button type="button" class="btn btn-default"
-                                                                data-bind="click: doShowCustomerList, disable: data.isLocked">
+                                                                data-bind="click: Ui.doShowAutocompleteList.bind(null, 'input', 'id', 'invoiceNewCustomerId'),
+                                                                           disable: data.isLocked">
                                                             <span class="caret"></span>
                                                         </button>
                                                     </div>
@@ -1893,14 +1902,16 @@
                                                                                          jqAuto: {
                                                                                            value: description,
                                                                                            inputProp: 'value',
+                                                                                           valueProp: 'value',
+                                                                                           labelProp: 'label',
                                                                                            dataValue: selectedArticle,
-                                                                                           source: $parents[1].getArticleList.bind(null, $parents[0]._id()),
+                                                                                           source: $parents[1].searchArticleList.bind(null, $parents[0]._id()),
                                                                                            options: {minLength: 0}
                                                                                          },
                                                                                          disable: $parents[1].data.isLocked"/>
                                                                     <div class="input-group-btn">
                                                                         <button type="button" class="btn btn-default"
-                                                                                data-bind="click: $parents[1].doShowArticleList.bind(null, 'itemDescAutocomplete_' + $parentContext.$index() + '_' + $index()),
+                                                                                data-bind="click: Ui.doShowAutocompleteList.bind(null, 'textarea', 'name', 'itemDescAutocomplete_' + $parentContext.$index() + '_' + $index()),
                                                                                            disable: $parents[1].data.isLocked">
                                                                             <span class="caret"></span>
                                                                         </button>
@@ -2300,11 +2311,11 @@
                                     <icon icon="save" extraClass="inline-icon-left-fix"/>
                                     ${i18n.t('app.invoice.saveDocBtn')}
                                 </button>
-                                <button type="button" class="btn btn-info" data-bind="click: doDocPrint, disable: data._id() === undefined">
+                                <button type="button" class="btn btn-info" data-bind="click: doDocPrint, disable: data._id() == undefined">
                                     <icon icon="print" extraClass="inline-icon-left-fix"/>
                                     ${i18n.t('app.invoice.printDocBtn')}
                                 </button>
-                                <button type="button" class="btn btn-info" data-bind="click: doCopyDoc, disable: data._id() === undefined">
+                                <button type="button" class="btn btn-info" data-bind="click: doCopyDoc, disable: data._id() == undefined">
                                     <icon icon="copy" extraClass="inline-icon-left-fix"/>
                                     ${i18n.t('app.invoice.copyDocBtn')}
                                 </button>
@@ -2312,14 +2323,14 @@
                                     <span class="caret"/>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li data-bind="if: isInvoice">
-                                        <a href="#" data-bind="click: doInvoiceReminderPrint, disable: data._id() === undefined">
+                                    <li data-bind="if: isInvoice() && data._id() != undefined">
+                                        <a href="#" data-bind="click: doInvoiceReminderPrint">
                                             <icon icon="print" extraClass="inline-icon-left-fix"/>
                                             ${i18n.t('app.invoice.printInvoiceReminderBtn')}
                                         </a>
                                     </li>
-                                    <li data-bind="if: isOffer">
-                                        <a href="#" data-bind="click: doCreateInvoiceFromOffer, disable: data._id() === undefined">
+                                    <li data-bind="if: isOffer() && data._id() != undefined">
+                                        <a href="#" data-bind="click: doCreateInvoiceFromOffer">
                                             <icon icon="cogs" extraClass="inline-icon-left-fix"/>
                                             ${i18n.t('app.invoice.createInvoiceFromOfferBtn')}
                                         </a>
@@ -2626,7 +2637,7 @@
                                         </div>
                                         <div class="col-md-3">
                                             <itemTextWithEditMode textVariable="desc"
-                                                cond="true" editModeVariable="isEditMode"/>
+                                                cond="true" editModeVariable="isEditMode" useTextarea="true"/>
                                         </div>
                                         <div class="col-md-1">
                                             <itemTextWithEditMode textVariable="count"

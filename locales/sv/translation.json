@@ -142,7 +142,6 @@
         },
         "articles": {
             "articleIdCol": "Artikelid",
-            "descCol": "Beskrivning",
             "groupTemplateRefCol": "Gruppmall",
             "descCol": "Beskrivning",
             "countCol": "Antal",

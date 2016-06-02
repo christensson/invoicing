@@ -49,6 +49,26 @@ function t(key, opt) {
   }
 }
 
+var UiOp = function() {
+  var self = this;
+  self.doShowAutocompleteList = function(tag, property, propValue) {
+    var itemSelector = tag + '[' + property + '=' + propValue + ']';
+    var isMenuOpen =
+      $( itemSelector ).autocomplete( "widget" ).is(":visible");
+    Log.info("Show option list requested for " + itemSelector +
+      ", isMenuOpen=" + isMenuOpen);
+    if (isMenuOpen) {
+      $( itemSelector ).autocomplete( "close" );
+    } else {
+      // Open search
+      $( itemSelector ).autocomplete( "search", "" );
+      $( itemSelector ).focus();
+    }
+  };
+};
+
+var Ui = new UiOp();
+
 var CacheOp = function() {
   var self = this;
 
@@ -1541,6 +1561,13 @@ var ArticleViewModel = function(groupList) {
 
   }, this);
 
+  self.selectedItemGroupTemplate.subscribe(function(newVal) {
+    if (newVal != undefined) {
+      self.itemGroupTemplateRef._id = newVal._id;
+      self.itemGroupTemplateRef.name = newVal.name;
+    }
+  });
+
   self.setData = function(data) {
     self.isEditMode(false);
     self.articleIdError(false);
@@ -1564,11 +1591,11 @@ var ArticleViewModel = function(groupList) {
 
     self.prependArticleIdToDesc(data.prependArticleIdToDesc);
 
+    self.selectedItemGroupTemplate(undefined);
+
     // Store for later use when syncing select
     self.itemGroupTemplateRef._id = data.itemGroupTemplateRef._id;
     self.itemGroupTemplateRef.name = data.itemGroupTemplateRef.name;
-
-    self.selectedItemGroupTemplate(undefined);
   };
 
   self.initNew = function(companyId) {
@@ -1610,6 +1637,7 @@ var ArticleViewModel = function(groupList) {
           if (self.itemGroupTemplateRef._id == self.groupList()[i]._id) {
             self.selectedItemGroupTemplate(self.groupList()[i]);
             Log.info("Found itemGroupTempl with _id=" + self.itemGroupTemplateRef._id);
+            break;
           }
         }
       } else {
@@ -1625,7 +1653,7 @@ var ArticleViewModel = function(groupList) {
     } else if ((self._id() === undefined) && !self.isValid()) {
       Notify_showMsg('error', t("app.articles.saveNok"));
       return;
-    } else if (self.selectedItemGroupTemplate() == undefined) {
+    } else if (self.itemGroupTemplateRef._id == undefined) {
       Notify_showMsg('error', t("app.articles.saveNok", {context: "noItemGroupTemplate"}));
       return;
     } else if (self.articleId().length == 0) {
@@ -1645,8 +1673,8 @@ var ArticleViewModel = function(groupList) {
       dataType : "json",
       success : function(data) {
         Log.info("updateServer: response: " + JSON.stringify(data));
-        var tContext = "";
         var isDelete = !isNew && !data.article.isValid;
+        var tContext = "";
         if (!isNew) {
           tContext = isDelete ? 'delete' : 'update';
         }
@@ -1697,8 +1725,8 @@ var ArticleViewModel = function(groupList) {
       hasVat : self.hasVat(),
       prependArticleIdToDesc: self.prependArticleIdToDesc(),
       itemGroupTemplateRef: {
-        _id: self.selectedItemGroupTemplate()._id,
-        name: self.selectedItemGroupTemplate().name,
+        _id: self.itemGroupTemplateRef._id,
+        name: self.itemGroupTemplateRef.name,
       }
     };
     return res;
@@ -3276,20 +3304,6 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     return deferred.promise();
   };
 
-  self.doShowCustomerList = function() {
-    var isMenuOpen =
-      $( "#customerFilterCid" ).autocomplete( "widget" ).is(":visible");
-    Log.info("InvoiceListViewModel - Show customer list requested, isMenuOpen=" +
-      isMenuOpen);
-    if (isMenuOpen) {
-      $( "#customerFilterCid" ).autocomplete( "close" );
-    } else {
-      // Open search
-      $( "#customerFilterCid" ).autocomplete( "search", "" );
-      $( "#customerFilterCid" ).focus();
-    }
-  };
-
   self.doToggleFilterPaneExpanded = function() {
     self.isFilterPaneExpanded(!self.isFilterPaneExpanded());
     Log.info("InvoiceListViewModel - isFilterPaneExpanded=" + self.isFilterPaneExpanded()
@@ -3420,12 +3434,16 @@ var InvoiceArticleModel = function(data) {
     self.value = self.value + self.data.articleId + ": ";
   }
   self.value = self.value + self.data.desc;
+  self.label = self.data.articleId + ": "+ self.data.desc;
 
   self.getGroupId = function() {
     return self.data.itemGroupTemplateRef._id;
   };
   self.toString = function() {
-    return "" + self.data.articleId + ": "+ self.data.desc;
+    return self.label;
+  };
+  self.searchString = function() {
+    return self.data.articleId + " " + self.data.desc;
   };
   self.sortString = function() {
     return "" + self.data.itemGroupTemplateRef._id + self.data.articleId + self.data.desc;
@@ -3456,18 +3474,30 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   inheritInvoiceLngModel(self);
   inheritCurrencyModel(self);
 
-  self.getArticleList = function(groupId, searchTerm, callback) {
+  self.searchArticleList = function(groupId, searchTerm, callback) {
     // Find group and return article list
     for (var i = 0; i < self.articleListPerGroup().length; i++) {
       var groupEntry = self.articleListPerGroup()[i];
       if (groupEntry.groupId == groupId) {
-        Log.info("getArticleList - Found articles for group id=" + groupId);
-        callback(groupEntry.articleList);
+        Log.info("getArticleList - Found articles for search term=" + searchTerm +
+          ", group id=" + groupId);
+        // Search for articles that contains all terms (separated by ' ')
+        var terms = searchTerm.toLowerCase().split(' ');
+        var filteredList = ko.utils.arrayFilter(groupEntry.articleList(), function(item) {
+          var searchString = item.toString().toLowerCase();
+          var allTermsMatch = true;
+          for (var i = 0; i < terms.length; i++) {
+            allTermsMatch = allTermsMatch && (searchString.indexOf(terms[i]) > -1);
+          }
+          return allTermsMatch;
+        });
+        callback(filteredList);
         return;
       }
     }
     // Not found, return undefined
-    Log.info("getArticleList - No articles found for group id=" + groupId);
+    Log.info("getArticleList - No articles found for search term=" + searchTerm +
+      " group id=" + groupId);
     callback([]);
     return;
   };
@@ -3602,6 +3632,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
       return new InvoiceArticleModel(item);
     });
     mappedArticles.sort(self.sortMappedArticlesByGroupIdAndDesc);
+    self.articleListPerGroup.removeAll();
 
     // Assume sorted by groupId
     var groupId = undefined;
@@ -3851,35 +3882,6 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
         };
       },
     });
-  };
-
-  self.doShowCustomerList = function() {
-    var isMenuOpen =
-      $( "#invoiceNewCustomerId" ).autocomplete( "widget" ).is(":visible");
-    Log.info("InvoiceNewViewModel - Show customer list requested, isMenuOpen=" +
-      isMenuOpen);
-    if (isMenuOpen) {
-      $( "#invoiceNewCustomerId" ).autocomplete( "close" );
-    } else {
-      // Open search
-      $( "#invoiceNewCustomerId" ).autocomplete( "search", "" );
-      $( "#invoiceNewCustomerId" ).focus();
-    }
-  };
-  
-  self.doShowArticleList = function(itemName) {
-    var itemSelector = 'textarea[name=' + itemName + ']';
-    var isMenuOpen =
-      $( itemSelector ).autocomplete( "widget" ).is(":visible");
-    Log.info("Show option list requested for " + itemSelector +
-      ", isMenuOpen=" + isMenuOpen);
-    if (isMenuOpen) {
-      $( itemSelector ).autocomplete( "close" );
-    } else {
-      // Open search
-      $( itemSelector ).autocomplete( "search", "" );
-      $( itemSelector ).focus();
-    }
   };
 
   self.doDocPrint = function() {
