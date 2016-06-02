@@ -2260,18 +2260,20 @@ var InvoiceItemViewModel = function(data, parent) {
 
   self.selectedArticle.subscribe(function(article) {
     Log.info("article selected: " + JSON.stringify(article));
-    var a = article.data;
-    if (a.hasPrice) {
-      self.price(a.price);
-    }
-    if (a.hasCount) {
-      self.count(a.count);
-    }
-    if (a.hasDiscount) {
-      self.discount(a.discount);
-    }
-    if (a.hasVat) {
-      self.vat(a.vat);
+    if (article != undefined) {
+      var a = article.data;
+      if (a.hasPrice) {
+        self.price(a.price);
+      }
+      if (a.hasCount) {
+        self.count(a.count);
+      }
+      if (a.hasDiscount) {
+        self.discount(a.discount);
+      }
+      if (a.hasVat) {
+        self.vat(a.vat);
+      }
     }
   });
 
