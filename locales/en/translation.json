@@ -132,6 +132,10 @@
           "saveNok_noName": "Group template name is required!"
         },
         "articles": {
+            "itemTemplGroupFilterLbl": "Group template",
+            "itemTemplGroupFilterWildcardText": "All",
+            "filterPaneToggleLbl_show": "Show filter",
+            "filterPaneToggleLbl_hide": "Hide filter",
             "articleIdCol": "Article Id",
             "groupTemplateRefCol": "Group template",
             "descCol": "Description",

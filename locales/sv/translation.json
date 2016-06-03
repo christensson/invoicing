@@ -141,6 +141,10 @@
             "saveNok_noName": "Gruppmallnamn måste anges!"
         },
         "articles": {
+            "itemTemplGroupFilterLbl": "Gruppmall",
+            "itemTemplGroupFilterWildcardText": "Alla",
+            "filterPaneToggleLbl_show": "Visa filter",
+            "filterPaneToggleLbl_hide": "Dölj filter",
             "articleIdCol": "Artikelid",
             "groupTemplateRefCol": "Gruppmall",
             "descCol": "Beskrivning",

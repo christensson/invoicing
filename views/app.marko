@@ -1906,7 +1906,10 @@
                                                                                            labelProp: 'label',
                                                                                            dataValue: selectedArticle,
                                                                                            source: $parents[1].searchArticleList.bind(null, $parents[0]._id()),
-                                                                                           options: {minLength: 0}
+                                                                                           options: {
+                                                                                             minLength: 0,
+                                                                                             autoFocus: false,
+                                                                                           }
                                                                                          },
                                                                                          disable: $parents[1].data.isLocked"/>
                                                                     <div class="input-group-btn">
@@ -2585,6 +2588,60 @@
                 <div id="app-articles" data-bind="visible: currentView() == 'articles'"
                     style="display: none">
 
+                    <div class="row" data-bind="visible: isFilterPaneExpanded">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <form class="form-horizontal">
+                                        <!-- Item template group filter -->
+                                        <div class="form-group form-group-sm">
+                                            <label class="col-md-1 control-label" for="itemTemplGroupFilter">
+                                                ${i18n.t('app.articles.itemTemplGroupFilterLbl')}
+                                            </label>
+                                            <div class="col-md-3">
+                                                <div class="input-group input-group-sm">
+                                                    <input class="form-control" id="itemTemplGroupFilter"
+                                                           data-bind="jqAuto: {
+                                                                        value: itemGroupTemplateFilter,
+                                                                        source: searchGroupList,
+                                                                        inputProp: 'name',
+                                                                        labelProp: 'name',
+                                                                        options: {minLength: 0}
+                                                                      }"/>
+                                                    <div class="input-group-btn">
+                                                        <button type="button" class="btn btn-default"
+                                                                data-bind="click: Ui.doShowAutocompleteList.bind(null, 'input', 'id', 'itemTemplGroupFilter')">
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                   </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <nav>
+                        <ul class="pager top0 bottom0">
+                            <li>
+                                <a href="#" data-bind="click: doToggleFilterPaneExpanded">
+                                    <span data-bind="ifnot: isFilterPaneExpanded">
+                                        <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
+                                        ${i18n.t('app.articles.filterPaneToggleLbl', {context: 'show'})}
+                                        <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
+                                    </span>
+                                    <span data-bind="if: isFilterPaneExpanded">
+                                        <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
+                                        ${i18n.t('app.articles.filterPaneToggleLbl', {context: 'hide'})}
+                                        <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+
                     <form>
                         <p>
                             <ul class="list-group">
@@ -2616,7 +2673,11 @@
                                 <html-comment>
                                     ko foreach: articleList
                                 </html-comment>
-                                <li class="list-group-item" data-bind="css: {'list-group-item-warning': isEditMode}">
+                                <li class="list-group-item"
+                                    data-bind="css: {
+                                                 'list-group-item-warning': isEditMode
+                                               },
+                                               visible: isVisible">
                                     <div class="row">
                                         <div class="col-md-2">
                                             <div data-bind="if: isEditMode">

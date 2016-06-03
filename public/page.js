@@ -1518,9 +1518,10 @@ var InvoiceItemGroupTemplatesViewModel = function(currentView) {
   };
 };
 
-var ArticleViewModel = function(groupList) {
+var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
   var self = this;
   self.groupList = groupList;
+  self.itemGroupTemplateFilter = itemGroupTemplateFilter;
 
   self.articleIdError = ko.observable(false);
   self.isEditMode = ko.observable(false);
@@ -1549,6 +1550,23 @@ var ArticleViewModel = function(groupList) {
     _id: undefined,
     name: undefined,
   };
+
+  self.isVisible = ko.pureComputed(function() {
+    var isVisible = true;
+
+    // Only hide saved articles
+    if (self._id() != undefined &&
+        self.itemGroupTemplateFilter() != undefined) {
+      // if item has field isWildcard, then it's the wildcard!
+      if (self.itemGroupTemplateFilter().hasOwnProperty('isWildcard') &&
+        self.itemGroupTemplateFilter().isWildcard) {
+        isVisible = true;
+      } else {
+        isVisible = self.itemGroupTemplateRef._id == self.itemGroupTemplateFilter()._id;
+      }
+    }
+    return isVisible;
+  }, self);
 
   self.itemGroupTemplateRefLbl = ko.pureComputed(function() {
     if (self.selectedItemGroupTemplate() != undefined) {
@@ -1739,9 +1757,22 @@ var ArticlesViewModel = function(currentView, activeCompanyId) {
   self.currentView = currentView;
   self.activeCompanyId = activeCompanyId;
 
+  self.itemGroupWildcard = {
+    isWildcard: true,
+    _id: "wildcard",
+    name: t("app.articles.itemTemplGroupFilterWildcardText"),
+  };
+
+  self.articleList = ko.observableArray();
+  self.groupList = ko.observableArray();
+  self.itemGroupTemplateFilter = ko.observable(self.itemGroupWildcard);
+
+  self.isFilterPaneExpanded = ko.observable(true);
+
   self.currentView.subscribe(function(newValue) {
     if (newValue == 'articles') {
       Log.info("ArticlesViewModel - activated");
+      self.itemGroupTemplateFilter(self.itemGroupWildcard);
       if (self.activeCompanyId() != null) {
         self.populatePromise();
       } else {
@@ -1760,9 +1791,6 @@ var ArticlesViewModel = function(currentView, activeCompanyId) {
       Cache.invalidateArticles();
     }
   });
-
-  self.articleList = ko.observableArray();
-  self.groupList = ko.observableArray();
 
   cache.on('set:' + Cache.ITEM_GROUP_TEMPLATES(), function(groupTemplates, ttl) {
     Log.info("ArticlesViewModel - event - set:" + Cache.ITEM_GROUP_TEMPLATES());
@@ -1786,7 +1814,7 @@ var ArticlesViewModel = function(currentView, activeCompanyId) {
     Log.info("ArticlesViewModel - populate: Got " + articles.length
         + " articles");
     var mappedArticles = $.map(articles, function(item) {
-      var article = new ArticleViewModel(self.groupList);
+      var article = new ArticleViewModel(self.groupList, self.itemGroupTemplateFilter);
       article.setData(item);
       return article;
     });
@@ -1796,7 +1824,7 @@ var ArticlesViewModel = function(currentView, activeCompanyId) {
   cache.on('update:' + Cache.ARTICLES(), function(articles, ttl) {
     Log.info("ArticlesViewModel - event - update:" + Cache.ARTICLES());
     var mappedArticles = $.map(articles, function(item) {
-      var article = new ArticleViewModel(self.groupList);
+      var article = new ArticleViewModel(self.groupList, self.itemGroupTemplateFilter);
       article.setData(item);
       return article;
     });
@@ -1851,6 +1879,28 @@ var ArticlesViewModel = function(currentView, activeCompanyId) {
     return deferred.promise();
   };
 
+  self.searchGroupList = function(searchTerm, callback) {
+    Log.info("searchGroupList - search term=" + searchTerm);
+    // Search for group that contains all terms (separated by ' ')
+    var terms = searchTerm.toLowerCase().split(' ');
+    var filteredList = ko.utils.arrayFilter(self.groupList(), function(item) {
+      // Search name, title and titleExtraField if any
+      var searchString = item.name.toLowerCase() + item.title.toLowerCase();
+      if (item.hasTitleExtraField) {
+        searchString = searchString + item.titleExtraField.toLowerCase();
+      }
+      var allTermsMatch = true;
+      for (var i = 0; i < terms.length; i++) {
+        allTermsMatch = allTermsMatch && (searchString.indexOf(terms[i]) > -1);
+      }
+      return allTermsMatch;
+    });
+    // Always add wildcard entry first
+    filteredList.unshift(self.itemGroupWildcard);
+    callback(filteredList);
+    return;
+  };
+
   self.deleteArticle = function(article) {
     article.updateServerDelete();
     self.articleList.destroy(article);
@@ -1861,6 +1911,12 @@ var ArticlesViewModel = function(currentView, activeCompanyId) {
     article.initNew(self.activeCompanyId());
     article.isEditMode(true);
     self.articleList.push(article);
+  };
+
+  self.doToggleFilterPaneExpanded = function() {
+    self.isFilterPaneExpanded(!self.isFilterPaneExpanded());
+    Log.info("ArticlesViewModel - isFilterPaneExpanded=" + self.isFilterPaneExpanded()
+        + " (new state)");
   };
 };
 
