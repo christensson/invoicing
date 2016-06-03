@@ -380,7 +380,7 @@ function getNextOidPromise(uid, companyId) {
 }
 
 var colls = [
-  "invite", "users", "company", "settings", "customer", "invoice", "offer", "itemGroupTempl"
+  "invite", "users", "company", "settings", "customer", "invoice", "offer", "itemGroupTempl", "article"
 ];
 
 var indexes = [
@@ -415,6 +415,14 @@ var indexes = [
   {
     collection: "itemGroupTempl",
     specifier: {"isValid": 1, "uid": 1},
+  },
+  {
+    collection: "article",
+    specifier: {"isValid": 1, "uid": 1},
+  },
+  {
+    collection: "article",
+    specifier: {"isValid": 1, "uid": 1, "companyId": 1},
   },
   {
     collection: "settings",
@@ -1058,6 +1066,12 @@ module.exports.getItemGroupTemplates = function(uid) {
   return getAllDocsPromise('itemGroupTempl', {'isValid': true, 'uid': ouid});
 };
 
+module.exports.getArticles = function(uid, companyId) {
+  var ouid = new ObjectID(uid);
+  var ocompanyId = new ObjectID(companyId);
+  return getAllDocsPromise('article', {'isValid': true, 'uid': ouid, 'companyId': ocompanyId});
+};
+
 module.exports.addInvoiceOrOffer = function(docType, uid, companyId, doc) {
   var deferred = Q.defer();
   var ouid = new ObjectID(uid);
@@ -1200,6 +1214,30 @@ module.exports.updateItemGroupTemplate = function(groupTempl) {
   groupTempl.uid = new ObjectID(groupTempl.uid);
   var increment = {updateCount: 1};
   return updateDataPromise('itemGroupTempl', groupTempl, increment);
+};
+
+module.exports.addArticle = function(uid, companyId, article) {
+  var deferred = Q.defer();
+  article.uid = new ObjectID(uid);
+  article.companyId = new ObjectID(companyId);
+  article.updateCount = 0;
+  insertDataPromise('article', article).then(function() {
+    deferred.resolve(article);
+  }).fail(function(err) {
+    deferred.reject(err);
+  });
+  return deferred.promise;
+};
+
+module.exports.addArticleRaw = function(article) {
+  return insertDataPromise('article', article);
+};
+
+module.exports.updateArticle = function(article) {
+  article.uid = new ObjectID(article.uid);
+  article.companyId = new ObjectID(article.companyId);
+  var increment = {updateCount: 1};
+  return updateDataPromise('article', article, increment);
 };
 
 module.exports.getUsers = function() {

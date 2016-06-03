@@ -1,6 +1,17 @@
 {
   "items": [
     {
+      "date": "2016-06-02",
+      "msgSlogan": {
+        "sv" : "Artikelregister",
+        "en" : ""
+      },
+      "msg": {
+        "sv": "Lätt Fakturering har nu ett <strong>artikelregister</strong>! Skapa dina egna artiklar under menyval Faktura->Hantera Artikelregister.",
+        "en": ""
+      }
+    },
+    {
       "date": "2016-05-25",
       "msgSlogan": {
         "sv" : "Offert",

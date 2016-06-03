@@ -75,6 +75,27 @@
     </li>
 </macro>
 
+<macro itemTextWithEditMode(textVariable, cond, editModeVariable, useTextarea)>
+    <div data-bind="ifnot: ${editModeVariable}">
+        <div data-bind="if: ${cond}">
+            <p class="list-group-item-text"
+                data-bind="text: ${textVariable}"/>
+        </div>
+    </div>
+    <div data-bind="if: ${editModeVariable}">
+        <if ("${useTextarea}" == "true")>
+          <textarea type="text"
+              class="form-control input-sm"
+              data-bind="value: ${textVariable}, enable: ${cond}"/>
+        </if>
+        <else>
+          <input type="text"
+              class="form-control input-sm"
+              data-bind="value: ${textVariable}, enable: ${cond}"/>
+        </else>
+    </div>
+</macro>
+
 <html>
     <head>
         <meta charset="utf-8"/>
@@ -121,6 +142,7 @@
                                 <navbarItem route="/page/invoices" tKey="app.navBar.invoiceList" icon="list"/>
                                 <li role="separator" class="divider"/>
                                 <navbarItem route="/page/invoice_item_group_templates" tKey="app.navBar.invoiceItemGroupTemplates" icon="list-alt"/>
+                                <navbarItem route="/page/articles" tKey="app.navBar.articles" icon="cubes"/>
                             </ul>
                         </li>
 
@@ -1086,9 +1108,15 @@
                                             </label>
                                             <div class="col-md-3">
                                                 <div class="input-group input-group-sm">
-                                                    <input class="form-control" id="customerFilterCid" data-bind="jqAuto: {value: filterOpt.customerFilterCustomer, source: customerList, options: {minLength: 0}}"/>
+                                                    <input class="form-control" id="customerFilterCid"
+                                                           data-bind="jqAuto: {
+                                                                        value: filterOpt.customerFilterCustomer,
+                                                                        source: customerList,
+                                                                        options: {minLength: 0}
+                                                                      }"/>
                                                     <div class="input-group-btn">
-                                                        <button type="button" class="btn btn-default" data-bind="click: doShowCustomerList">
+                                                        <button type="button" class="btn btn-default"
+                                                                data-bind="click: Ui.doShowAutocompleteList.bind(null, 'input', 'id', 'customerFilterCid')">
                                                             <span class="caret"></span>
                                                         </button>
                                                     </div>
@@ -1388,6 +1416,7 @@
                     </form>
 
                 </div>
+
                 <div id="app-invoice_new" data-bind="visible: currentView() == 'invoice_new' || (currentView() != undefined && currentView().search('invoice_show') == 0) ||
                                                               currentView() == 'offer_new' || (currentView() != undefined && currentView().search('offer_show') == 0)"
                     style="display: none">
@@ -1457,9 +1486,17 @@
                                                     ${i18n.t('app.invoice.customerLbl')}
                                                 </label>
                                                 <div class="input-group">
-                                                    <input class="form-control" id="invoiceNewCustomerId" data-bind="jqAuto: {value: selectedCustomer, source: customerList, options: {minLength: 0}}, disable: data.isLocked"/>
+                                                    <input class="form-control" id="invoiceNewCustomerId"
+                                                           data-bind="jqAuto: {
+                                                                        value: selectedCustomer,
+                                                                        source: customerList,
+                                                                        options: {minLength: 0}
+                                                                      },
+                                                                      disable: data.isLocked"/>
                                                     <div class="input-group-btn">
-                                                        <button type="button" class="btn btn-default" data-bind="click: doShowCustomerList, disable: data.isLocked">
+                                                        <button type="button" class="btn btn-default"
+                                                                data-bind="click: Ui.doShowAutocompleteList.bind(null, 'input', 'id', 'invoiceNewCustomerId'),
+                                                                           disable: data.isLocked">
                                                             <span class="caret"></span>
                                                         </button>
                                                     </div>
@@ -1856,8 +1893,33 @@
                                                                 <html-comment>
                                                                     ko if: hasDesc
                                                                 </html-comment>
-                                                                <textarea class="form-control" data-bind="textInput: description, disable: $parents[1].data.isLocked,
-                                                                                                          attr: {rows: descriptionNumRows}"/>
+                                                                <div class="input-group" style="width: 100%;">
+                                                                    <textarea class="form-control"
+                                                                              data-bind="attr: {
+                                                                                           rows: descriptionNumRows,
+                                                                                           name: 'itemDescAutocomplete_' + $parentContext.$index() + '_' + $index()
+                                                                                         },
+                                                                                         jqAuto: {
+                                                                                           value: description,
+                                                                                           inputProp: 'value',
+                                                                                           valueProp: 'value',
+                                                                                           labelProp: 'label',
+                                                                                           dataValue: selectedArticle,
+                                                                                           source: $parents[1].searchArticleList.bind(null, $parents[0]._id()),
+                                                                                           options: {
+                                                                                             minLength: 0,
+                                                                                             autoFocus: false,
+                                                                                           }
+                                                                                         },
+                                                                                         disable: $parents[1].data.isLocked"/>
+                                                                    <div class="input-group-btn">
+                                                                        <button type="button" class="btn btn-default"
+                                                                                data-bind="click: Ui.doShowAutocompleteList.bind(null, 'textarea', 'name', 'itemDescAutocomplete_' + $parentContext.$index() + '_' + $index()),
+                                                                                           disable: $parents[1].data.isLocked">
+                                                                            <span class="caret"></span>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
                                                                 <html-comment>
                                                                     /ko
                                                                 </html-comment>
@@ -2252,11 +2314,11 @@
                                     <icon icon="save" extraClass="inline-icon-left-fix"/>
                                     ${i18n.t('app.invoice.saveDocBtn')}
                                 </button>
-                                <button type="button" class="btn btn-info" data-bind="click: doDocPrint, disable: data._id() === undefined">
+                                <button type="button" class="btn btn-info" data-bind="click: doDocPrint, disable: data._id() == undefined">
                                     <icon icon="print" extraClass="inline-icon-left-fix"/>
                                     ${i18n.t('app.invoice.printDocBtn')}
                                 </button>
-                                <button type="button" class="btn btn-info" data-bind="click: doCopyDoc, disable: data._id() === undefined">
+                                <button type="button" class="btn btn-info" data-bind="click: doCopyDoc, disable: data._id() == undefined">
                                     <icon icon="copy" extraClass="inline-icon-left-fix"/>
                                     ${i18n.t('app.invoice.copyDocBtn')}
                                 </button>
@@ -2264,14 +2326,14 @@
                                     <span class="caret"/>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li data-bind="if: isInvoice">
-                                        <a href="#" data-bind="click: doInvoiceReminderPrint, disable: data._id() === undefined">
+                                    <li data-bind="if: isInvoice() && data._id() != undefined">
+                                        <a href="#" data-bind="click: doInvoiceReminderPrint">
                                             <icon icon="print" extraClass="inline-icon-left-fix"/>
                                             ${i18n.t('app.invoice.printInvoiceReminderBtn')}
                                         </a>
                                     </li>
-                                    <li data-bind="if: isOffer">
-                                        <a href="#" data-bind="click: doCreateInvoiceFromOffer, disable: data._id() === undefined">
+                                    <li data-bind="if: isOffer() && data._id() != undefined">
+                                        <a href="#" data-bind="click: doCreateInvoiceFromOffer">
                                             <icon icon="cogs" extraClass="inline-icon-left-fix"/>
                                             ${i18n.t('app.invoice.createInvoiceFromOfferBtn')}
                                         </a>
@@ -2327,18 +2389,6 @@
                                         </h4>
                                     </div>
                                 </li>
-                                <macro itemTextWithEditMode(textVariable, cond)>
-                                    <div data-bind="ifnot: isEditMode">
-                                        <div data-bind="if: ${cond}">
-                                            <p class="list-group-item-text"
-                                                data-bind="text: ${textVariable}"/>
-                                        </div>
-                                    </div>
-                                    <div data-bind="if: isEditMode">
-                                        <input type="text"
-                                            class="form-control input-sm" data-bind="value: ${textVariable}, enable: ${cond}"/>
-                                    </div>
-                                </macro>
                                 <html-comment>
                                     ko foreach: groupList
                                 </html-comment>
@@ -2346,35 +2396,35 @@
                                     <div class="row">
                                         <div class="col-md-2">
                                             <itemTextWithEditMode textVariable="name"
-                                                cond="true"/>
+                                                cond="true" editModeVariable="isEditMode"/>
                                         </div>
                                         <div class="col-md-2">
                                             <itemTextWithEditMode textVariable="title"
-                                                cond="true"/>
+                                                cond="true" editModeVariable="isEditMode"/>
                                         </div>
                                         <div class="col-md-2">
                                             <itemTextWithEditMode textVariable="descColLbl"
-                                                cond="hasDesc"/>
+                                                cond="hasDesc" editModeVariable="isEditMode"/>
                                         </div>
                                         <div class="col-md-1">
                                             <itemTextWithEditMode textVariable="countColLbl"
-                                                cond="hasCount"/>
+                                                cond="hasCount" editModeVariable="isEditMode"/>
                                         </div>
                                         <div class="col-md-1">
                                             <itemTextWithEditMode textVariable="priceColLbl"
-                                                cond="hasPrice"/>
+                                                cond="hasPrice" editModeVariable="isEditMode"/>
                                         </div>
                                         <div class="col-md-1">
                                             <itemTextWithEditMode textVariable="discountColLbl"
-                                                cond="hasDiscount"/>
+                                                cond="hasDiscount" editModeVariable="isEditMode"/>
                                         </div>
                                         <div class="col-md-1">
                                             <itemTextWithEditMode textVariable="vatColLbl"
-                                                cond="hasVat"/>
+                                                cond="hasVat" editModeVariable="isEditMode"/>
                                         </div>
                                         <div class="col-md-1">
                                             <itemTextWithEditMode textVariable="totalColLbl"
-                                                cond="hasTotal"/>
+                                                cond="hasTotal" editModeVariable="isEditMode"/>
                                         </div>
                                         <div class="col-md-1">
                                             <div class="pull-right">
@@ -2534,6 +2584,255 @@
                     </form>
 
                 </div>
+
+                <div id="app-articles" data-bind="visible: currentView() == 'articles'"
+                    style="display: none">
+
+                    <div class="row" data-bind="visible: isFilterPaneExpanded">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <form class="form-horizontal">
+                                        <!-- Item template group filter -->
+                                        <div class="form-group form-group-sm">
+                                            <label class="col-md-1 control-label" for="itemTemplGroupFilter">
+                                                ${i18n.t('app.articles.itemTemplGroupFilterLbl')}
+                                            </label>
+                                            <div class="col-md-3">
+                                                <div class="input-group input-group-sm">
+                                                    <input class="form-control" id="itemTemplGroupFilter"
+                                                           data-bind="jqAuto: {
+                                                                        value: itemGroupTemplateFilter,
+                                                                        source: searchGroupList,
+                                                                        inputProp: 'name',
+                                                                        labelProp: 'name',
+                                                                        options: {minLength: 0}
+                                                                      }"/>
+                                                    <div class="input-group-btn">
+                                                        <button type="button" class="btn btn-default"
+                                                                data-bind="click: Ui.doShowAutocompleteList.bind(null, 'input', 'id', 'itemTemplGroupFilter')">
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                   </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <nav>
+                        <ul class="pager top0 bottom0">
+                            <li>
+                                <a href="#" data-bind="click: doToggleFilterPaneExpanded">
+                                    <span data-bind="ifnot: isFilterPaneExpanded">
+                                        <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
+                                        ${i18n.t('app.articles.filterPaneToggleLbl', {context: 'show'})}
+                                        <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
+                                    </span>
+                                    <span data-bind="if: isFilterPaneExpanded">
+                                        <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
+                                        ${i18n.t('app.articles.filterPaneToggleLbl', {context: 'hide'})}
+                                        <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+
+                    <form>
+                        <p>
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <div class="row">
+                                        <h4 class="col-md-2 list-group-item-heading">
+                                            ${i18n.t('app.articles.groupTemplateRefCol')}
+                                        </h4>
+                                        <h4 class="col-md-2 list-group-item-heading">
+                                            ${i18n.t('app.articles.articleIdCol')}
+                                        </h4>
+                                        <h4 class="col-md-3 list-group-item-heading">
+                                            ${i18n.t('app.articles.descCol')}
+                                        </h4>
+                                        <h4 class="col-md-1 list-group-item-heading">
+                                            ${i18n.t('app.articles.countCol')}
+                                        </h4>
+                                        <h4 class="col-md-1 list-group-item-heading">
+                                            ${i18n.t('app.articles.priceCol')}
+                                        </h4>
+                                        <h4 class="col-md-1 list-group-item-heading">
+                                            ${i18n.t('app.articles.discountCol')}
+                                        </h4>
+                                        <h4 class="col-md-1 list-group-item-heading">
+                                            ${i18n.t('app.articles.vatCol')}
+                                        </h4>
+                                    </div>
+                                </li>
+                                <html-comment>
+                                    ko foreach: articleList
+                                </html-comment>
+                                <li class="list-group-item"
+                                    data-bind="css: {
+                                                 'list-group-item-warning': isEditMode
+                                               },
+                                               visible: isVisible">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <div data-bind="if: isEditMode">
+                                                <select class="form-control" id="articleGroupTemplateIdSelect"
+                                                    data-bind="options: $parent.groupList,
+                                                               optionsText: 'name',
+                                                               value: selectedItemGroupTemplate,
+                                                               optionsCaption: t('app.articles.groupTemplateRefSelectNoEntry'),
+                                                               enable: isEditMode"/>
+                                            </div>
+                                            <div data-bind="ifnot: isEditMode">
+                                                <p class="list-group-item-text" data-bind="text: itemGroupTemplateRefLbl"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <itemTextWithEditMode textVariable="articleId"
+                                                cond="true" editModeVariable="isEditMode"/>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <itemTextWithEditMode textVariable="desc"
+                                                cond="true" editModeVariable="isEditMode" useTextarea="true"/>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <itemTextWithEditMode textVariable="count"
+                                                cond="hasCount" editModeVariable="isEditMode"/>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <itemTextWithEditMode textVariable="price"
+                                                cond="hasPrice" editModeVariable="isEditMode"/>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <itemTextWithEditMode textVariable="discount"
+                                                cond="hasDiscount" editModeVariable="isEditMode"/>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <itemTextWithEditMode textVariable="vat"
+                                                cond="hasVat" editModeVariable="isEditMode"/>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="pull-right">
+                                                <div class="btn-group btn-group-sm" role="group">
+
+                                                    <button type="button"
+                                                        class="btn btn-primary btn-sm" data-bind="click: toggleEditMode">
+
+                                                        <span data-bind="if: isEditMode">
+                                                            <icon icon="chevron-up"/>
+                                                        </span>
+                                                        <span data-bind="ifnot: isEditMode">
+                                                            <icon icon="pencil"/>
+                                                        </span>
+
+                                                    </button>
+                                                    <button type="button" class="btn btn-default btn-sm dropdown-toggle"
+                                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+                                                        <span class="caret"/>
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li>
+                                                            <a href="#" data-bind="click: $parent.deleteArticle">
+                                                                <icon icon="trash" extraClass="inline-icon-left-fix"/>
+                                                                ${i18n.t('app.articles.deleteArticleBtn')}
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" data-bind="visible: isEditMode">
+                                        <div class="col-md-2">
+                                        </div>
+                                        <div class="col-md-2">
+                                        </div>
+                                        <div class="col-md-3">
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="checkbox input-sm bottom0 top0">
+                                                <label>
+                                                    <input type="checkbox"
+                                                        data-bind="checked: hasCount"/>
+                                                    ${i18n.t('app.articles.hasCountCheckLbl')}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="checkbox input-sm bottom0 top0">
+                                                <label>
+                                                    <input type="checkbox"
+                                                        data-bind="checked: hasPrice"/>
+                                                    ${i18n.t('app.articles.hasPriceCheckLbl')}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="checkbox input-sm bottom0 top0">
+                                                <label>
+                                                    <input type="checkbox" data-bind="checked: hasDiscount"/>
+                                                    ${i18n.t('app.articles.hasDiscountCheckLbl')}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="checkbox input-sm bottom0 top0">
+                                                <label>
+                                                    <input type="checkbox"
+                                                        data-bind="checked: hasVat"/>
+                                                    ${i18n.t('app.articles.hasVatCheckLbl')}
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="row" data-bind="visible: isEditMode">
+                                        <div class="col-md-12">
+                                            <div class="checkbox input-sm bottom0 top0">
+                                                <label>
+                                                    <input type="checkbox" data-bind="checked: prependArticleIdToDesc"/>
+                                                    ${i18n.t('app.articles.prependArticleIdToDescCheckLbl')}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row" data-bind="visible: isEditMode">
+
+                                        <div class="col-md-12">
+                                            <div class="btn-group" role="group">
+                                                <button type="button"
+                                                    class="btn btn-success" data-bind="click: updateServer, visible: isEditMode">
+                                                    <icon icon="save" extraClass="inline-icon-left-fix"/>
+                                                    ${i18n.t('app.articles.saveArticleBtn')}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </li>
+                                <html-comment> /ko </html-comment>
+                            </ul>
+                        </p>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-success"
+                                data-bind="click: newArticle">
+
+                                <icon icon="plus" extraClass="inline-icon-left-fix"/>
+                                ${i18n.t('app.articles.newArticleBtn')}
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+
                 <div id="app-settings"
                     data-bind="visible: currentView() == 'settings'"
                     style="display: none">

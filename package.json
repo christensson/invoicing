@@ -1,6 +1,6 @@
 {
   "name": "Invoicing",
-  "version": "0.2.46",
+  "version": "0.2.47",
   "description": "Invoicing made easy",
   "main": "app.js",
   "scripts": {
@@ -15,8 +15,8 @@
     "bootstrap": "^3.3.6",
     "commander": "^2.9.0",
     "connect-flash": "^0.1.1",
-    "cookie-parser": "^1.4.1",
-    "csvtojson": "^0.5.12",
+    "cookie-parser": "^1.4.3",
+    "csvtojson": "^0.5.14",
     "director": "^1.2.8",
     "express": "^4.13.4",
     "express-enforces-ssl": "^1.1.0",
@@ -37,7 +37,7 @@
     "knockout-jqautocomplete": "^0.4.4",
     "marko": "^3.4.3",
     "method-override": "^2.3.5",
-    "mongodb": "^2.1.20",
+    "mongodb": "^2.1.21",
     "morgan": "^1.7.0",
     "multer": "^1.1.0",
     "passport": "^0.3.2",
