@@ -250,6 +250,7 @@ var getAllUserData = function(uid) {
   var invoices = null;
   var offers = null;
   var itemGroupTemplates = null;
+  var articles = null;
 
   var failureHdlr = function(msg, err) {
     deferred.reject({
@@ -322,6 +323,13 @@ var getAllUserData = function(uid) {
       itemGroupTemplates = doc;
       log.info(itemGroupTemplates.length + " ItemGroupTemplates found!");
       log.verbose("ItemGroupTemplates found: " + JSON.stringify(itemGroupTemplates, null, 2));
+      return mydb.getAllDocsPromise('article', {'uid': ouid})
+    })
+    .fail(failureHdlr.bind("Articles for uid=" + uid + " not found!"))
+    .then(function(doc) {
+      articles = doc;
+      log.info(articles.length + " Articles found!");
+      log.verbose("Articles found: " + JSON.stringify(articles, null, 2));
     })
     .done(function() {
       deferred.resolve({
@@ -331,7 +339,8 @@ var getAllUserData = function(uid) {
         "customers": customers,
         "invoices": invoices,
         "offers": offers,
-        "itemGroupTemplates": itemGroupTemplates
+        "itemGroupTemplates": itemGroupTemplates,
+        "articles": articles,
       });
     });
   
@@ -403,6 +412,19 @@ var rmAllUserData = function(uid, data, dryrun) {
   }
 
   Q()
+    .then(function() {
+      var numItems = data.articles.length;
+      return queryIfElse(rl, "Remove " + numItems + " articles?", numItems > 0, false);
+    })
+    .then(function(yes) {
+      if (yes && !dryrun) {
+        log.info("Removing %d articles!", data.articles.length);
+        return mydb.deleteAllDocsPromise('article', {uid: ouid});
+      } else {
+        return Q.fcall(returnMyArgument.bind(null, undefined));
+      }
+    })
+    .then(logDeleteResult)
     .then(function() {
       var numItems = data.itemGroupTemplates.length;
       return queryIfElse(rl, "Remove " + numItems + " itemGroupTemplates?", numItems > 0, false);
