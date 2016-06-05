@@ -1546,10 +1546,7 @@ var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
 
   self.prependArticleIdToDesc = ko.observable();
 
-  self.itemGroupTemplateRef = {
-    _id: undefined,
-    name: undefined,
-  };
+  self.itemGroupTemplateRef = ko.observableArray();
 
   self.isVisible = ko.pureComputed(function() {
     var isVisible = true;
@@ -1562,29 +1559,43 @@ var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
         self.itemGroupTemplateFilter().isWildcard) {
         isVisible = true;
       } else {
-        isVisible = self.itemGroupTemplateRef._id == self.itemGroupTemplateFilter()._id;
+        isVisible = false;
+        self.itemGroupTemplateRef().forEach(function(item) {
+          if (item._id == self.itemGroupTemplateFilter()._id) {
+            isVisible = true;
+          }
+        });
       }
     }
     return isVisible;
   }, self);
 
-  self.itemGroupTemplateRefLbl = ko.pureComputed(function() {
-    if (self.selectedItemGroupTemplate() != undefined) {
-      return self.selectedItemGroupTemplate().name;
-    } else if (self.itemGroupTemplateRef.name != undefined) {
-      return self.itemGroupTemplateRef.name;
-    } else {
-      return "";
-    }
-
-  }, this);
-
   self.selectedItemGroupTemplate.subscribe(function(newVal) {
     if (newVal != undefined) {
-      self.itemGroupTemplateRef._id = newVal._id;
-      self.itemGroupTemplateRef.name = newVal.name;
+      // Check that entry isn't a duplicate
+      var itemExist = false;
+      self.itemGroupTemplateRef().forEach(function(item) {
+        if (item._id == newVal._id) {
+          itemExist = true;
+        }
+      })
+      if (!itemExist) {
+        self.itemGroupTemplateRef.push({
+          _id: newVal._id,
+          name: newVal.name
+        });
+      }
     }
   });
+
+  self.removeItemGroupTemplate = function(itemGroupTemplate) {
+    Log.info("Remove itemGroupTemplate for article id=" + self.articleId() +
+      ", itemGroupTemplate=" + JSON.stringify(itemGroupTemplate));
+    var newArray = ko.utils.arrayFilter(self.itemGroupTemplateRef(), function(item) {
+      return item._id != itemGroupTemplate._id;
+    });
+    self.itemGroupTemplateRef(newArray);
+  };
 
   self.setData = function(data) {
     self.isEditMode(false);
@@ -1608,12 +1619,10 @@ var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
     self.hasVat(data.hasVat);
 
     self.prependArticleIdToDesc(data.prependArticleIdToDesc);
+    self.itemGroupTemplateRef(data.itemGroupTemplateRef.slice(0));
 
+    // Reset select
     self.selectedItemGroupTemplate(undefined);
-
-    // Store for later use when syncing select
-    self.itemGroupTemplateRef._id = data.itemGroupTemplateRef._id;
-    self.itemGroupTemplateRef.name = data.itemGroupTemplateRef.name;
   };
 
   self.initNew = function(companyId) {
@@ -1632,10 +1641,7 @@ var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
       hasDiscount: false,
       hasVat: false,
       prependArticleIdToDesc: false,
-      itemGroupTemplateRef: {
-        _id: undefined,
-        name: undefined,
-      },
+      itemGroupTemplateRef: [],
     };
     self.setData(data);
   };
@@ -1647,6 +1653,10 @@ var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
     self.isEditMode(newEditMode);
 
     if (newEditMode) {
+      /*
+      for (var i = 0; i < self.itemGroupTemplateRef().length; i++) {
+
+      }
       if (self.itemGroupTemplateRef._id != undefined) {
         // Edit mode enabled, sync select input
         Log.info("Locating itemGroupTempl with _id=" + self.itemGroupTemplateRef._id +
@@ -1661,6 +1671,7 @@ var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
       } else {
         self.selectedItemGroupTemplate(undefined);
       }
+      */
     }
   };
 
@@ -1671,7 +1682,7 @@ var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
     } else if ((self._id() === undefined) && !self.isValid()) {
       Notify_showMsg('error', t("app.articles.saveNok"));
       return;
-    } else if (self.itemGroupTemplateRef._id == undefined) {
+    } else if (self.itemGroupTemplateRef().length == 0) {
       Notify_showMsg('error', t("app.articles.saveNok", {context: "noItemGroupTemplate"}));
       return;
     } else if (self.articleId().length == 0) {
@@ -1742,11 +1753,12 @@ var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
       hasDiscount : self.hasDiscount(),
       hasVat : self.hasVat(),
       prependArticleIdToDesc: self.prependArticleIdToDesc(),
-      itemGroupTemplateRef: {
-        _id: self.itemGroupTemplateRef._id,
-        name: self.itemGroupTemplateRef.name,
-      }
+      itemGroupTemplateRef: [],
     };
+    self.itemGroupTemplateRef().forEach(function(item) {
+      res.itemGroupTemplateRef.push(item);
+    });
+    
     return res;
   };
 };
@@ -1907,7 +1919,7 @@ var ArticlesViewModel = function(currentView, activeCompanyId) {
   };
 
   self.newArticle = function() {
-    var article = new ArticleViewModel();
+    var article = new ArticleViewModel(self.groupList, self.itemGroupTemplateFilter);
     article.initNew(self.activeCompanyId());
     article.isEditMode(true);
     self.articleList.push(article);
@@ -3494,8 +3506,12 @@ var InvoiceArticleModel = function(data) {
   self.value = self.value + self.data.desc;
   self.label = self.data.articleId + ": "+ self.data.desc;
 
-  self.getGroupId = function() {
-    return self.data.itemGroupTemplateRef._id;
+  self.getGroupIds = function() {
+    var ids = [];
+    self.data.itemGroupTemplateRef.forEach(function(item) {
+      ids.push(item._id);
+    });
+    return ids;
   };
   self.toString = function() {
     return self.label;
@@ -3526,7 +3542,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   }, self);
 
   self.itemGroupList = ko.observableArray();
-  self.articleListPerGroup = ko.observableArray();
+  self.articleListPerGroup = ko.observable();
 
   inheritInvoiceStyleModel(self);
   inheritInvoiceLngModel(self);
@@ -3534,30 +3550,27 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
 
   self.searchArticleList = function(groupId, searchTerm, callback) {
     // Find group and return article list
-    for (var i = 0; i < self.articleListPerGroup().length; i++) {
-      var groupEntry = self.articleListPerGroup()[i];
-      if (groupEntry.groupId == groupId) {
-        Log.info("getArticleList - Found articles for search term=" + searchTerm +
-          ", group id=" + groupId);
-        // Search for articles that contains all terms (separated by ' ')
-        var terms = searchTerm.toLowerCase().split(' ');
-        var filteredList = ko.utils.arrayFilter(groupEntry.articleList(), function(item) {
-          var searchString = item.toString().toLowerCase();
-          var allTermsMatch = true;
-          for (var i = 0; i < terms.length; i++) {
-            allTermsMatch = allTermsMatch && (searchString.indexOf(terms[i]) > -1);
-          }
-          return allTermsMatch;
-        });
-        callback(filteredList);
-        return;
-      }
+    if (groupId in self.articleListPerGroup()) {
+      var articleList = self.articleListPerGroup()[groupId]();
+      Log.info("getArticleList - Found " + articleList.length + " articles for search term=" + searchTerm +
+        ", group id=" + groupId);
+      // Search for articles that contains all terms (separated by ' ')
+      var terms = searchTerm.toLowerCase().split(' ');
+      var filteredList = ko.utils.arrayFilter(articleList, function(item) {
+        var searchString = item.toString().toLowerCase();
+        var allTermsMatch = true;
+        for (var i = 0; i < terms.length; i++) {
+          allTermsMatch = allTermsMatch && (searchString.indexOf(terms[i]) > -1);
+        }
+        return allTermsMatch;
+      });
+      callback(filteredList);
+    } else {
+      // Not found, return undefined
+      Log.info("getArticleList - No articles found for search term=" + searchTerm +
+        " group id=" + groupId);
+      callback([]);
     }
-    // Not found, return undefined
-    Log.info("getArticleList - No articles found for search term=" + searchTerm +
-      " group id=" + groupId);
-    callback([]);
-    return;
   };
 
   self.newGroup = function(g) {
@@ -3686,37 +3699,23 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   });
 
   self.setArticles = function(articles) {
-    var mappedArticles = $.map(articles, function(item) {
-      return new InvoiceArticleModel(item);
-    });
-    mappedArticles.sort(self.sortMappedArticlesByGroupIdAndDesc);
-    self.articleListPerGroup.removeAll();
-
-    // Assume sorted by groupId
-    var groupId = undefined;
-    var currentGroupEntry = undefined;
-    for (var i = 0; i < mappedArticles.length; i++) {
-      var article = mappedArticles[i];
-      var numGroupsProcessed = self.articleListPerGroup().length;
-      if (groupId != article.getGroupId()) {
-        groupId = article.getGroupId();
-        // First item creates entry
-        currentGroupEntry = {
-          groupId: article.getGroupId(),
-          articleList: ko.observableArray(),
-        };
-        self.articleListPerGroup.push(currentGroupEntry);
-      }
-
-      if (currentGroupEntry != undefined) {
-        if (currentGroupEntry.groupId == article.getGroupId()) {
-          currentGroupEntry.articleList.push(article);
+    var articleListPerGroup = {};
+    for (var i = 0; i < articles.length; i++) {
+      var a = new InvoiceArticleModel(articles[i]);
+      // If article is linked to multiple item group templates,
+      // one entry is added per group in it's respective list
+      var groupIds = a.getGroupIds();
+      for (var j = 0; j < groupIds.length; j++) {
+        var id = groupIds[j];
+        if (id in articleListPerGroup) {
+          articleListPerGroup[id].push(a);
         } else {
-          Log.warn("InvoiceNewViewModel - group id=" + article.getGroupId() +
-            " unexpected (expected " + groupEntry.groupId + ") while processing articles");
+          articleListPerGroup[id] = ko.observableArray([a]);
         }
       }
     }
+
+    self.articleListPerGroup(articleListPerGroup);
   };
 
   cache.on('set:' + Cache.ARTICLES(), function(articles, ttl) {
@@ -3731,7 +3730,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
 
   cache.on('del:' + Cache.ARTICLES(), function() {
     Log.info("InvoiceNewViewModel - event - del:" + Cache.ARTICLES());
-    self.articleListPerGroup.removeAll();
+    self.articleListPerGroup({});
   });
 
   self.populatePromise = function(force) {

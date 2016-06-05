@@ -75,7 +75,7 @@
     </li>
 </macro>
 
-<macro itemTextWithEditMode(textVariable, cond, editModeVariable, useTextarea)>
+<macro itemTextWithEditMode(textVariable, type, cond, editModeVariable, useTextarea, label)>
     <div data-bind="ifnot: ${editModeVariable}">
         <div data-bind="if: ${cond}">
             <p class="list-group-item-text"
@@ -83,14 +83,17 @@
         </div>
     </div>
     <div data-bind="if: ${editModeVariable}">
+        <label for="${textVariable}Id">${label}</label>
         <if ("${useTextarea}" == "true")>
-          <textarea type="text"
+          <textarea type="${type}"
               class="form-control input-sm"
+              id="${textVariable}Id"
               data-bind="value: ${textVariable}, enable: ${cond}"/>
         </if>
         <else>
-          <input type="text"
+          <input type="${type}"
               class="form-control input-sm"
+              id="${textVariable}Id"
               data-bind="value: ${textVariable}, enable: ${cond}"/>
         </else>
     </div>
@@ -2395,36 +2398,119 @@
                                 <li class="list-group-item" data-bind="css: {'list-group-item-warning': isEditMode}">
                                     <div class="row">
                                         <div class="col-md-2">
-                                            <itemTextWithEditMode textVariable="name"
-                                                cond="true" editModeVariable="isEditMode"/>
+                                            <itemTextWithEditMode
+                                                type="text"
+                                                textVariable="name"
+                                                cond="true" editModeVariable="isEditMode"
+                                                label="${i18n.t('app.groupTemplates.nameCol')}"/>
                                         </div>
                                         <div class="col-md-2">
-                                            <itemTextWithEditMode textVariable="title"
-                                                cond="true" editModeVariable="isEditMode"/>
+                                            <itemTextWithEditMode
+                                                type="text"
+                                                textVariable="title"
+                                                cond="true" editModeVariable="isEditMode"
+                                                label="${i18n.t('app.groupTemplates.titleCol')}"/>
                                         </div>
                                         <div class="col-md-2">
-                                            <itemTextWithEditMode textVariable="descColLbl"
-                                                cond="hasDesc" editModeVariable="isEditMode"/>
+                                            <itemTextWithEditMode
+                                                type="text"
+                                                textVariable="descColLbl"
+                                                cond="hasDesc" editModeVariable="isEditMode"
+                                                label="${i18n.t('app.groupTemplates.descCol')}"/>
+                                            <div data-bind="if: isEditMode">
+                                                <div class="checkbox input-sm bottom0 top0">
+                                                    <label>
+                                                        <input type="checkbox"
+                                                            data-bind="checked: hasDesc"/>
+                                                        ${i18n.t('app.groupTemplates.hasDescCheckLbl')}
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="col-md-1">
-                                            <itemTextWithEditMode textVariable="countColLbl"
-                                                cond="hasCount" editModeVariable="isEditMode"/>
+                                            <itemTextWithEditMode
+                                                type="text"
+                                                textVariable="countColLbl"
+                                                cond="hasCount" editModeVariable="isEditMode"
+                                                label="${i18n.t('app.groupTemplates.countCol')}"/>
+                                            <div data-bind="if: isEditMode">
+                                                <div class="checkbox input-sm bottom0 top0">
+                                                    <label>
+                                                        <input type="checkbox"
+                                                            data-bind="checked: hasCount"/>
+                                                        ${i18n.t('app.groupTemplates.hasCountCheckLbl')}
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="col-md-1">
-                                            <itemTextWithEditMode textVariable="priceColLbl"
-                                                cond="hasPrice" editModeVariable="isEditMode"/>
+                                            <itemTextWithEditMode
+                                                type="text"
+                                                textVariable="priceColLbl"
+                                                cond="hasPrice" editModeVariable="isEditMode"
+                                                label="${i18n.t('app.groupTemplates.priceCol')}"/>
+                                            <div data-bind="if: isEditMode">
+                                                <div class="checkbox input-sm bottom0 top0">
+                                                    <label>
+                                                        <input type="checkbox"
+                                                            data-bind="checked: hasPrice"/>
+                                                        ${i18n.t('app.groupTemplates.hasPriceCheckLbl')}
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="col-md-1">
-                                            <itemTextWithEditMode textVariable="discountColLbl"
-                                                cond="hasDiscount" editModeVariable="isEditMode"/>
+                                            <itemTextWithEditMode
+                                                type="text"
+                                                textVariable="discountColLbl"
+                                                cond="hasDiscount" editModeVariable="isEditMode"
+                                                label="${i18n.t('app.groupTemplates.discountCol')}"/>
+                                            <div data-bind="if: isEditMode">
+                                                <div class="checkbox input-sm bottom0 top0">
+                                                    <label>
+                                                        <input type="checkbox" data-bind="checked: hasDiscount"/>
+                                                        ${i18n.t('app.groupTemplates.hasDiscountCheckLbl')}
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox input-sm bottom0 top0">
+                                                    <label>
+                                                        <input type="checkbox" data-bind="checked: negateDiscount"/>
+                                                        ${i18n.t('app.groupTemplates.negateDiscountCheckLbl')}
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="col-md-1">
-                                            <itemTextWithEditMode textVariable="vatColLbl"
-                                                cond="hasVat" editModeVariable="isEditMode"/>
+                                            <itemTextWithEditMode
+                                                type="text"
+                                                textVariable="vatColLbl"
+                                                cond="hasVat" editModeVariable="isEditMode"
+                                                label="${i18n.t('app.groupTemplates.vatCol')}"/>
+                                            <div data-bind="if: isEditMode">
+                                                <div class="checkbox input-sm bottom0 top0">
+                                                    <label>
+                                                        <input type="checkbox"
+                                                            data-bind="checked: hasVat"/>
+                                                        ${i18n.t('app.groupTemplates.hasVatCheckLbl')}
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="col-md-1">
-                                            <itemTextWithEditMode textVariable="totalColLbl"
-                                                cond="hasTotal" editModeVariable="isEditMode"/>
+                                            <itemTextWithEditMode
+                                                type="text"
+                                                textVariable="totalColLbl"
+                                                cond="hasTotal" editModeVariable="isEditMode"
+                                                label="${i18n.t('app.groupTemplates.totalCol')}"/>
+                                            <div data-bind="if: isEditMode">
+                                                <div class="checkbox input-sm bottom0 top0">
+                                                    <label>
+                                                        <input type="checkbox"
+                                                            data-bind="checked: hasTotal"/>
+                                                        ${i18n.t('app.groupTemplates.hasTotalCheckLbl')}
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="col-md-1">
                                             <div class="pull-right">
@@ -2461,74 +2547,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="row"
-                                        data-bind="visible: isEditMode">
-
-                                        <div class="col-md-2">
-                                        </div>
-                                        <div class="col-md-2">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <div class="checkbox input-sm bottom0 top0">
-                                                <label>
-                                                    <input type="checkbox"
-                                                        data-bind="checked: hasDesc"/>
-                                                    ${i18n.t('app.groupTemplates.hasDescCheckLbl')}
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-1">
-                                            <div class="checkbox input-sm bottom0 top0">
-                                                <label>
-                                                    <input type="checkbox"
-                                                        data-bind="checked: hasCount"/>
-                                                    ${i18n.t('app.groupTemplates.hasCountCheckLbl')}
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-1">
-                                            <div class="checkbox input-sm bottom0 top0">
-                                                <label>
-                                                    <input type="checkbox"
-                                                        data-bind="checked: hasPrice"/>
-                                                    ${i18n.t('app.groupTemplates.hasPriceCheckLbl')}
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-1">
-                                            <div class="checkbox input-sm bottom0 top0">
-                                                <label>
-                                                    <input type="checkbox" data-bind="checked: hasDiscount"/>
-                                                    ${i18n.t('app.groupTemplates.hasDiscountCheckLbl')}
-                                                </label>
-                                            </div>
-                                            <div class="checkbox input-sm bottom0 top0">
-                                                <label>
-                                                    <input type="checkbox" data-bind="checked: negateDiscount"/>
-                                                    ${i18n.t('app.groupTemplates.negateDiscountCheckLbl')}
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-1">
-                                            <div class="checkbox input-sm bottom0 top0">
-                                                <label>
-                                                    <input type="checkbox"
-                                                        data-bind="checked: hasVat"/>
-                                                    ${i18n.t('app.groupTemplates.hasVatCheckLbl')}
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-1">
-                                            <div class="checkbox input-sm bottom0 top0">
-                                                <label>
-                                                    <input type="checkbox"
-                                                        data-bind="checked: hasTotal"/>
-                                                    ${i18n.t('app.groupTemplates.hasTotalCheckLbl')}
-                                                </label>
-                                            </div>
-                                        </div>
-
                                     </div>
                                     <div class="row"
                                         data-bind="visible: isEditMode">
@@ -2681,55 +2699,121 @@
                                     <div class="row">
                                         <div class="col-md-2">
                                             <div data-bind="if: isEditMode">
-                                                <select class="form-control" id="articleGroupTemplateIdSelect"
-                                                    data-bind="options: $parent.groupList,
-                                                               optionsText: 'name',
-                                                               value: selectedItemGroupTemplate,
-                                                               optionsCaption: t('app.articles.groupTemplateRefSelectNoEntry'),
-                                                               enable: isEditMode"/>
+                                                <label>${i18n.t('app.articles.groupTemplateRefCol')}</label>
+                                                <p class="list-group-item-text" data-bind="foreach: itemGroupTemplateRef">
+                                                    <span>
+                                                        <span class="label label-default label-fix"
+                                                              data-bind="text: name"></span>
+                                                        <span class="label label-danger label-fix-no-left-margin"
+                                                              title="${i18n.t('app.articles.groupTemplateRefRemoveTooltip')}"
+                                                              data-bind="click: $parent.removeItemGroupTemplate.bind(null, $data)">
+                                                            &times;
+                                                        </span>
+                                                    </span>
+                                                </p>
+                                                <div class="form-group form-group-sm top5">
+                                                    <select class="form-control" id="articleGroupTemplateIdSelect"
+                                                            data-bind="options: $parent.groupList,
+                                                                       optionsText: 'name',
+                                                                       value: selectedItemGroupTemplate,
+                                                                       optionsCaption: t('app.articles.groupTemplateRefSelectNoEntry')"/>
+                                                </div>
                                             </div>
                                             <div data-bind="ifnot: isEditMode">
-                                                <p class="list-group-item-text" data-bind="text: itemGroupTemplateRefLbl"/>
+                                                <p class="list-group-item-text" data-bind="foreach: itemGroupTemplateRef">
+                                                    <span class="label label-default label-fix" data-bind="text: name"></span>
+                                                </p>
                                             </div>
                                         </div>
                                         <div class="col-md-2">
-                                            <itemTextWithEditMode textVariable="articleId"
-                                                cond="true" editModeVariable="isEditMode"/>
+                                            <itemTextWithEditMode
+                                                type="text"
+                                                textVariable="articleId"
+                                                cond="true" editModeVariable="isEditMode"
+                                                label="${i18n.t('app.articles.articleIdCol')}"/>
                                         </div>
                                         <div class="col-md-3">
-                                            <itemTextWithEditMode textVariable="desc"
-                                                cond="true" editModeVariable="isEditMode" useTextarea="true"/>
+                                            <itemTextWithEditMode
+                                                type="text"
+                                                textVariable="desc"
+                                                cond="true" editModeVariable="isEditMode" useTextarea="true"
+                                                label="${i18n.t('app.articles.descCol')}"/>
                                         </div>
                                         <div class="col-md-1">
-                                            <itemTextWithEditMode textVariable="count"
-                                                cond="hasCount" editModeVariable="isEditMode"/>
+                                            <itemTextWithEditMode
+                                                type="number"
+                                                textVariable="count"
+                                                cond="hasCount" editModeVariable="isEditMode"
+                                                label="${i18n.t('app.articles.countCol')}"/>
+                                            <div data-bind="if: isEditMode">
+                                                <div class="checkbox input-sm bottom0 top0">
+                                                    <label>
+                                                        <input type="checkbox"
+                                                            data-bind="checked: hasCount"/>
+                                                        ${i18n.t('app.articles.hasCountCheckLbl')}
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="col-md-1">
-                                            <itemTextWithEditMode textVariable="price"
-                                                cond="hasPrice" editModeVariable="isEditMode"/>
+                                            <itemTextWithEditMode
+                                                type="number"
+                                                textVariable="price"
+                                                cond="hasPrice" editModeVariable="isEditMode"
+                                                label="${i18n.t('app.articles.priceCol')}"/>
+                                            <div data-bind="if: isEditMode">
+                                                <div class="checkbox input-sm bottom0 top0">
+                                                    <label>
+                                                        <input type="checkbox"
+                                                            data-bind="checked: hasPrice"/>
+                                                        ${i18n.t('app.articles.hasPriceCheckLbl')}
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="col-md-1">
-                                            <itemTextWithEditMode textVariable="discount"
-                                                cond="hasDiscount" editModeVariable="isEditMode"/>
+                                            <itemTextWithEditMode
+                                                type="number"
+                                                textVariable="discount"
+                                                cond="hasDiscount" editModeVariable="isEditMode"
+                                                label="${i18n.t('app.articles.discountCol')}"/>
+                                            <div data-bind="if: isEditMode">
+                                                <div class="checkbox input-sm bottom0 top0">
+                                                    <label>
+                                                        <input type="checkbox"
+                                                            data-bind="checked: hasDiscount"/>
+                                                        ${i18n.t('app.articles.hasDiscountCheckLbl')}
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="col-md-1">
-                                            <itemTextWithEditMode textVariable="vat"
-                                                cond="hasVat" editModeVariable="isEditMode"/>
+                                            <itemTextWithEditMode
+                                                type="number"
+                                                textVariable="vat"
+                                                cond="hasVat" editModeVariable="isEditMode"
+                                                label="${i18n.t('app.articles.vatCol')}"/>
+                                            <div data-bind="if: isEditMode">
+                                                <div class="checkbox input-sm bottom0 top0">
+                                                    <label>
+                                                        <input type="checkbox"
+                                                            data-bind="checked: hasVat"/>
+                                                        ${i18n.t('app.articles.hasVatCheckLbl')}
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="col-md-1">
                                             <div class="pull-right">
                                                 <div class="btn-group btn-group-sm" role="group">
-
                                                     <button type="button"
                                                         class="btn btn-primary btn-sm" data-bind="click: toggleEditMode">
-
                                                         <span data-bind="if: isEditMode">
                                                             <icon icon="chevron-up"/>
                                                         </span>
                                                         <span data-bind="ifnot: isEditMode">
                                                             <icon icon="pencil"/>
                                                         </span>
-
                                                     </button>
                                                     <button type="button" class="btn btn-default btn-sm dropdown-toggle"
                                                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -2744,55 +2828,11 @@
                                                             </a>
                                                         </li>
                                                     </ul>
-
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row" data-bind="visible: isEditMode">
-                                        <div class="col-md-2">
-                                        </div>
-                                        <div class="col-md-2">
-                                        </div>
-                                        <div class="col-md-3">
-                                        </div>
-                                        <div class="col-md-1">
-                                            <div class="checkbox input-sm bottom0 top0">
-                                                <label>
-                                                    <input type="checkbox"
-                                                        data-bind="checked: hasCount"/>
-                                                    ${i18n.t('app.articles.hasCountCheckLbl')}
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-1">
-                                            <div class="checkbox input-sm bottom0 top0">
-                                                <label>
-                                                    <input type="checkbox"
-                                                        data-bind="checked: hasPrice"/>
-                                                    ${i18n.t('app.articles.hasPriceCheckLbl')}
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-1">
-                                            <div class="checkbox input-sm bottom0 top0">
-                                                <label>
-                                                    <input type="checkbox" data-bind="checked: hasDiscount"/>
-                                                    ${i18n.t('app.articles.hasDiscountCheckLbl')}
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-1">
-                                            <div class="checkbox input-sm bottom0 top0">
-                                                <label>
-                                                    <input type="checkbox"
-                                                        data-bind="checked: hasVat"/>
-                                                    ${i18n.t('app.articles.hasVatCheckLbl')}
-                                                </label>
-                                            </div>
-                                        </div>
 
-                                    </div>
                                     <div class="row" data-bind="visible: isEditMode">
                                         <div class="col-md-12">
                                             <div class="checkbox input-sm bottom0 top0">
@@ -2805,7 +2845,6 @@
                                     </div>
 
                                     <div class="row" data-bind="visible: isEditMode">
-
                                         <div class="col-md-12">
                                             <div class="btn-group" role="group">
                                                 <button type="button"
