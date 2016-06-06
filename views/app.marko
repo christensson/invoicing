@@ -1050,25 +1050,13 @@
                                 </div>
                             </div>
 
-                            <nav>
-                                <ul class="pager">
-                                    <li>
-                                        <a href="#" data-bind="click: toggleIsExtraOptVisible">
-                                            <span data-bind="ifnot: isExtraOptVisible">
-                                                <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
-                                                ${i18n.t('app.customer.extraOptToggleLbl', {context: 'show'})}
-                                                <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
-                                            </span>
-                                            <span data-bind="if: isExtraOptVisible">
-                                                <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
-                                                ${i18n.t('app.customer.extraOptToggleLbl', {context: 'hide'})}
-                                                <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
-                                            </span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
 
+                            <pagerShowHide
+                              clickHdlr="toggleIsExtraOptVisible"
+                              isVisibleVariable="isExtraOptVisible"
+                              textShow="${i18n.t('app.customer.extraOptToggleLbl', {context: 'show'})}"
+                              textHide="${i18n.t('app.customer.extraOptToggleLbl', {context: 'hide'})}"
+                              extraClass=""/>
 
                             <div class="panel panel-default" data-bind="visible: isExtraOptVisible">
                                 <div class="panel-heading">
