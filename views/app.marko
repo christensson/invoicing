@@ -49,28 +49,28 @@
     </button>
 </macro>
 
-<macro navbarDropdown(tKey, icon, isExplicitIcon)>
+<macro navbarDropdown(text, icon, isExplicitIcon)>
     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
       <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
-      <span data-bind="text: t('${tKey}')"></span>
+      ${text}
       <span class="caret"></span>
     </a>
 </macro>
 
-<macro navbarItem(route, tKey, icon, isExplicitIcon)>
+<macro navbarItem(route, text, icon, isExplicitIcon)>
     <li data-bind="css: { active: '${route}'.split('/').slice(-1)[0] == currentView() }">
         <a href="#" data-bind="click: selectViewRoute.bind(null, '${route}')">
             <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
-            <span data-bind="text: t('${tKey}')"></span>
+            ${text}
         </a>
     </li>
 </macro>
 
-<macro navbarItemServerRoute(route, tKey, icon, isExplicitIcon)>
+<macro navbarItemServerRoute(route, text, icon, isExplicitIcon)>
     <li>
         <a href="${route}">
             <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
-            <span data-bind="text: t('${tKey}')"></span>
+            ${text}
         </a>
     </li>
 </macro>
@@ -149,32 +149,32 @@
                 </div>
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <navbarItem route="/page/home" tKey="app.navBar.home" icon="home"/>
+                        <navbarItem route="/page/home" text="${i18n.t('app.navBar.home')}" icon="home"/>
 
                         <li class="drowdown">
-                            <navbarDropdown tKey="app.navBar.customerMenu" icon="user"/>
+                            <navbarDropdown text="${i18n.t('app.navBar.customerMenu')}" icon="user"/>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/customer_new" tKey="app.navBar.customerNew" icon="user-plus"/>
-                                <navbarItem route="/page/customers" tKey="app.navBar.customerList" icon="users"/>
+                                <navbarItem route="/page/customer_new" text="${i18n.t('app.navBar.customerNew')}" icon="user-plus"/>
+                                <navbarItem route="/page/customers" text="${i18n.t('app.navBar.customerList')}" icon="users"/>
                             </ul>
                         </li>
 
                         <li class="drowdown">
-                            <navbarDropdown tKey="app.navBar.invoiceMenu" icon="file-text"/>
+                            <navbarDropdown text="${i18n.t('app.navBar.invoiceMenu')}" icon="file-text"/>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/invoice_new" tKey="app.navBar.invoiceNew" icon="file-text"/>
-                                <navbarItem route="/page/invoices" tKey="app.navBar.invoiceList" icon="list"/>
+                                <navbarItem route="/page/invoice_new" text="${i18n.t('app.navBar.invoiceNew')}" icon="file-text"/>
+                                <navbarItem route="/page/invoices" text="${i18n.t('app.navBar.invoiceList')}" icon="list"/>
                                 <li role="separator" class="divider"/>
-                                <navbarItem route="/page/invoice_item_group_templates" tKey="app.navBar.invoiceItemGroupTemplates" icon="list-alt"/>
-                                <navbarItem route="/page/articles" tKey="app.navBar.articles" icon="cubes"/>
+                                <navbarItem route="/page/invoice_item_group_templates" text="${i18n.t('app.navBar.invoiceItemGroupTemplates')}" icon="list-alt"/>
+                                <navbarItem route="/page/articles" text="${i18n.t('app.navBar.articles')}" icon="cubes"/>
                             </ul>
                         </li>
 
                         <li class="drowdown">
-                            <navbarDropdown tKey="app.navBar.offerMenu" icon="file-text"/>
+                            <navbarDropdown text="${i18n.t('app.navBar.offerMenu')}" icon="file-text"/>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/offer_new" tKey="app.navBar.offerNew" icon="file-text"/>
-                                <navbarItem route="/page/offers" tKey="app.navBar.offerList" icon="list"/>
+                                <navbarItem route="/page/offer_new" text="${i18n.t('app.navBar.offerNew')}" icon="file-text"/>
+                                <navbarItem route="/page/offers" text="${i18n.t('app.navBar.offerList')}" icon="list"/>
                             </ul>
                         </li>
 
@@ -198,7 +198,7 @@
                                 </li>
                                 <html-comment> /ko </html-comment>
                                 <li role="separator" class="divider"/>
-                                <navbarItem route="/page/companies" tKey="app.navBar.companyAdmin" icon="briefcase"/>
+                                <navbarItem route="/page/companies" text="${i18n.t('app.navBar.companyAdmin')}" icon="briefcase"/>
                             </ul>
                         </li>
                         <li class="dropdown">
@@ -212,17 +212,17 @@
                                 <span class="caret"/>
                             </a>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/settings" tKey="app.navBar.settings" icon="wrench"/>
+                                <navbarItem route="/page/settings" text="${i18n.t('app.navBar.settings')}" icon="wrench"/>
 
                                 <if(data.user.isAdmin === true)>
                                     <li role="separator" class="divider"/>
-                                    <navbarItem route="/page/debug" tKey="app.navBar.debug" icon="bug"/>
-                                    <navbarItem route="/page/users" tKey="app.navBar.users" icon="users"/>
-                                    <navbarItem route="/page/invites" tKey="app.navBar.invites" icon="gift"/>
+                                    <navbarItem route="/page/debug" text="${i18n.t('app.navBar.debug')}" icon="bug"/>
+                                    <navbarItem route="/page/users" text="${i18n.t('app.navBar.users')}" icon="users"/>
+                                    <navbarItem route="/page/invites" text="${i18n.t('app.navBar.invites')}" icon="gift"/>
                                 </if>
 
                                 <li role="separator" class="divider"/>
-                                <navbarItemServerRoute route="/logout" tKey="app.navBar.logout" icon="sign-out"/>
+                                <navbarItemServerRoute route="/logout" text="${i18n.t('app.navBar.logout')}" icon="sign-out"/>
                             </ul>
                         </li>
                     </ul>
