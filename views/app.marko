@@ -99,6 +99,27 @@
     </div>
 </macro>
 
+<macro pagerShowHide(clickHdlr, isVisibleVariable, textShow, textHide, extraClass)>
+    <nav>
+        <ul class="pager ${extraClass}">
+            <li>
+                <a href="#" data-bind="click: ${clickHdlr}">
+                    <span data-bind="ifnot: ${isVisibleVariable}">
+                        <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
+                        ${textShow}
+                        <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
+                    </span>
+                    <span data-bind="if: ${isVisibleVariable}">
+                        <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
+                        ${textHide}
+                        <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</macro>
+
 <html>
     <head>
         <meta charset="utf-8"/>
@@ -1219,24 +1240,12 @@
                         </div>
                     </div>
 
-                    <nav>
-                        <ul class="pager top0 bottom0">
-                            <li>
-                                <a href="#" data-bind="click: doToggleFilterPaneExpanded">
-                                    <span data-bind="ifnot: isFilterPaneExpanded">
-                                        <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
-                                        ${i18n.t('app.invoiceList.filterPaneToggleLbl', {context: 'show'})}
-                                        <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
-                                    </span>
-                                    <span data-bind="if: isFilterPaneExpanded">
-                                        <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
-                                        ${i18n.t('app.invoiceList.filterPaneToggleLbl', {context: 'hide'})}
-                                        <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
-                                    </span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
+                    <pagerShowHide
+                      clickHdlr="doToggleFilterPaneExpanded"
+                      isVisibleVariable="isFilterPaneExpanded"
+                      textShow="${i18n.t('app.invoiceList.filterPaneToggleLbl', {context: 'show'})}"
+                      textHide="${i18n.t('app.invoiceList.filterPaneToggleLbl', {context: 'hide'})}"
+                      extraClass="top0 bottom0"/>
 
                     <form>
                         <p>
@@ -2112,25 +2121,14 @@
                         </div>
                     </div>
                     <!-- invoice items panel -->
-                    <nav>
-                        <ul class="pager top0">
-                            <li>
-                                <a href="#" data-bind="click: data.toggleExtraOptionExpanded,
-                                                       disable: data.isLocked">
-                                    <span data-bind="ifnot: data.extraOptionExpanded">
-                                        <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
-                                        ${i18n.t('app.invoice.extraOptToggleLbl', {context: 'show'})}
-                                        <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
-                                    </span>
-                                    <span data-bind="if: data.extraOptionExpanded">
-                                        <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
-                                        ${i18n.t('app.invoice.extraOptToggleLbl', {context: 'hide'})}
-                                        <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
-                                    </span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
+
+                    <pagerShowHide
+                      clickHdlr="data.toggleExtraOptionExpanded"
+                      isVisibleVariable="data.extraOptionExpanded"
+                      textShow="${i18n.t('app.invoice.extraOptToggleLbl', {context: 'show'})}"
+                      textHide="${i18n.t('app.invoice.extraOptToggleLbl', {context: 'hide'})}"
+                      extraClass="top0"/>
+
                     <div class="row"
                         data-bind="visible: data.extraOptionExpanded">
 
@@ -2641,24 +2639,12 @@
                         </div>
                     </div>
 
-                    <nav>
-                        <ul class="pager top0 bottom0">
-                            <li>
-                                <a href="#" data-bind="click: doToggleFilterPaneExpanded">
-                                    <span data-bind="ifnot: isFilterPaneExpanded">
-                                        <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
-                                        ${i18n.t('app.articles.filterPaneToggleLbl', {context: 'show'})}
-                                        <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
-                                    </span>
-                                    <span data-bind="if: isFilterPaneExpanded">
-                                        <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
-                                        ${i18n.t('app.articles.filterPaneToggleLbl', {context: 'hide'})}
-                                        <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
-                                    </span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
+                    <pagerShowHide
+                      clickHdlr="doToggleFilterPaneExpanded"
+                      isVisibleVariable="isFilterPaneExpanded"
+                      textShow="${i18n.t('app.articles.filterPaneToggleLbl', {context: 'show'})}"
+                      textHide="${i18n.t('app.articles.filterPaneToggleLbl', {context: 'hide'})}"
+                      extraClass="top0 bottom0"/>
 
                     <form>
                         <p>
