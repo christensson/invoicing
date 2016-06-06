@@ -33,6 +33,16 @@ var defaults = {
     showNotCanceled: true,
     showCanceled: false,
   },
+  textTemplate: {
+    itemPrefix: "%",
+    itemSuffix: "%",
+    objFieldSeparator: ".",
+    customerIdentifier: "c",
+    customerAllowedFields: [
+      "name", "addr1", "addr2", "addr3",
+      "vatNr",
+    ],
+  },
   logFile: 'log/log.txt'
 };
 

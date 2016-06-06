@@ -139,6 +139,64 @@ var range = function(low, high) {
   return list;
 };
 
+/**
+ * @param data Array containing {objId, allowedFields}
+ * @param parserOpts.itemPrefix (Default '%')
+ * @param parserOpts.itemSuffix (Default '%')
+ * @param parserOpts.itemObjFieldSep (Default '.')
+ */
+var formatTextTemplate = function(text, data, parserOpts) {
+  parserOpts = typeof parserOpts !== 'undefined' ? parserOpts : {};
+  if (!parserOpts.itemPrefix) {
+    parserOpts.itemPrefix = '%';
+  }
+  if (!parserOpts.itemSuffix) {
+    parserOpts.itemSuffix = '%';
+  }
+  if (!parserOpts.itemObjFieldSep) {
+    parserOpts.itemObjFieldSep = '.';
+  }
+
+  var itemObjFieldSepEscaped = parserOpts.itemObjFieldSep;
+  if (['.', '*', '\\'].indexOf(itemObjFieldSepEscaped) != -1) {
+    itemObjFieldSepEscaped = "\\" + itemObjFieldSepEscaped;
+  }
+
+  var replItemRegEx = new RegExp(parserOpts.itemPrefix + "(\\w+" + parserOpts.itemObjFieldSep +
+    "\\w+)" + parserOpts.itemSuffix, "g");
+
+  console.log("Regex: " + replItemRegEx);
+
+  var formatedText = text;
+  var result;
+
+  while (result = replItemRegEx.exec(formatedText)) {
+    var match = result[0];
+    var objAndFieldsStr = result[1];
+    console.log("Found match: " + match + ", containing " + objAndFieldsStr);
+    var objAndFields = objAndFieldsStr.split(parserOpts.itemObjFieldSep);
+    var obj = objAndFields[0];
+    var field1 = objAndFields[1];
+    var isReplaced = false;
+    for (var i = 0; i < data.length; i++) {
+      var dataElem = data[i];
+      if (obj == dataElem.objId) {
+        if (dataElem.allowedFields.indexOf(field1) != -1) {
+          // Valid match which we will replace!
+          var replacement = dataElem.data[field1];
+          formatedText = formatedText.replace(match, replacement);
+          isReplaced = true;
+        }
+      }
+    }
+    if (!isReplaced) {
+      console.log("Match: " + match + " not replaced!");
+    }
+  }
+
+  return formatedText;
+};
+
 // Hack to get module.exports working on server side and namespace Util working on client side
 (typeof module !== "undefined" && module !== null ? module : {}).exports = this.Util = {
   formatCurrency: formatCurrency,
@@ -146,5 +204,6 @@ var range = function(low, high) {
   calcPaymentAdjustment: calcPaymentAdjustment,
   dateAddDays: dateAddDays,
   range: range,
+  formatTextTemplate: formatTextTemplate,
 };
 
