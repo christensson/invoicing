@@ -1430,6 +1430,7 @@
                                 data-bind="value: ${textVariable}"/>
                         </span>
                     </macro>
+
                     <div class="row">
                         <!-- top panel -->
                         <div class="col-md-8">
@@ -1728,8 +1729,8 @@
                                                 </div>
                                                 <table class="table table-striped table-condensed">
                                                     <colgroup>
-                                                        <col class="col-md-2"/>
-                                                        <col class="col-md-3"/>
+                                                        <col class="col-md-1"/>
+                                                        <col class="col-md-4"/>
                                                         <col class="col-md-1"/>
                                                         <col class="col-md-2"/>
                                                         <col class="col-md-1"/>
@@ -1866,16 +1867,30 @@
                                                         <tr>
                                                             <td>
                                                                 <div class="form-inline">
-                                                                    <div class="form-group">
-                                                                        <button class="btn btn-danger btn-sm" data-bind="click: $parent.deleteInvoiceItem, disable: $parents[1].data.isLocked">
+                                                                    <div class="btn-group btn-group-sm">
+                                                                        <button class="btn btn-danger"
+                                                                            data-bind="click: $parent.deleteInvoiceItem,
+                                                                                     disable: $parents[1].data.isLocked">
                                                                             <icon icon="trash"/>
                                                                         </button>
-                                                                        <div class="checkbox input-sm">
-                                                                            <label>
-                                                                                <input type="checkbox" data-bind="checked: isTextOnly, disable: $parents[1].data.isLocked"/>
-                                                                                ${i18n.t('app.invoice.detailsIsTextOnlyCheckLbl')}
-                                                                            </label>
-                                                                        </div>
+                                                                        <button type="button" class="btn btn-default dropdown-toggle"
+                                                                            data-toggle="dropdown"
+                                                                            aria-haspopup="true"
+                                                                            aria-expanded="false" data-bind="disable: $parents[1].data.isLocked">
+                                                                            <span class="caret"/>
+                                                                        </button>
+                                                                        <ul class="dropdown-menu">
+                                                                            <li data-bind="if: isTextOnly">
+                                                                                <a href="#" data-bind="click: toggleIsTextOnly">
+                                                                                    ${i18n.t('app.invoice.detailsIsTextOnlyToggleLbl', {context: 'toNormal'})}
+                                                                                </a>
+                                                                            </li>
+                                                                            <li data-bind="ifnot: isTextOnly">
+                                                                                <a href="#" data-bind="click: toggleIsTextOnly">
+                                                                                    ${i18n.t('app.invoice.detailsIsTextOnlyToggleLbl', {context: 'toText'})}
+                                                                                </a>
+                                                                            </li>
+                                                                        </ul>
                                                                     </div>
                                                                 </div>
                                                             </td>
@@ -1908,6 +1923,26 @@
                                                                                            disable: $parents[1].data.isLocked">
                                                                             <span class="caret"></span>
                                                                         </button>
+                                                                        <button type="button" class="btn btn-default dropdown-toggle"
+                                                                                data-toggle="dropdown"
+                                                                                aria-haspopup="true"
+                                                                                aria-expanded="false"
+                                                                                data-bind="disable: $parents[1].data.isLocked">
+                                                                            <icon icon="support"/>
+                                                                        </button>
+                                                                        <ul class="dropdown-menu">
+                                                                            <html-comment>
+                                                                                ko foreach: $parents[1].insertTextMenuItems
+                                                                            </html-comment>
+                                                                            <li>
+                                                                                <a href="#" data-bind="click: $parent.descriptionInsertText.bind(null, $data),
+                                                                                                       text: $parents[2].getInsertTextDesc($data)">
+                                                                                </a>
+                                                                            </li>
+                                                                            <html-comment>
+                                                                                /ko
+                                                                            </html-comment>
+                                                                        </ul>
                                                                     </div>
                                                                 </div>
                                                                 <html-comment>

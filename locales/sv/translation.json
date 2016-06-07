@@ -332,8 +332,11 @@
             "projIdLbl": "Projektid",
             "customerDetailsPaneHeader": "Kunduppgifter",
             "customerDetailsCustomerNrLbl": "Kundnr:",
+            "insertTextMenuItemLbl": "Infoga text: ",
+            "insertTextMenuItemLbl_APA": "Infoga texten",
             "detailsNewRowBtn": "Ny rad",
-            "detailsIsTextOnlyCheckLbl": "Fritext",
+            "detailsIsTextOnlyToggleLbl_toNormal": "Ändra till normal fakturarad",
+            "detailsIsTextOnlyToggleLbl_toText": "Ändra till fritext",
             "groupNumInvoiceItemsText": "{{count}} rad",
             "groupNumInvoiceItemsText_plural": "{{count}} rader",
             "groupEditNameLbl": "Gruppnamn (fakturainmatning)",
@@ -567,6 +570,25 @@
             "description_EUR": "EUR - Euro",
             "description_USD": "USD - Dollar (USA)",
             "description_GBP": "GBP - Britiska Pund"
+        },
+        "textTempl" : {
+          "description": "Infoga text för {{context}}",
+          "description_c-cid": "Infoga kundens kundnr ({{rawText}})",
+          "description_c-name": "Infoga kundens namn ({{rawText}})",
+          "description_c-addr1": "Infoga kundens adressrad 1 ({{rawText}})",
+          "description_c-addr2": "Infoga kundens adressrad 2 ({{rawText}})",
+          "description_c-addr3": "Infoga kundens adressrad 3 ({{rawText}})",
+          "description_c-phone1": "Infoga kundens telefonnr 1 ({{rawText}})",
+          "description_c-phone2": "Infoga kundens telefonnr 2 ({{rawText}})",
+          "description_c-phone3": "Infoga kundens telefonnr 3 ({{rawText}})",
+          "description_c-email": "Infoga kundens epost ({{rawText}})",
+          "description_c-vatNr": "Infoga kundens momsregnr ({{rawText}})",
+          "description_company-name": "Infoga företagets namn ({{rawText}})",
+          "description_company-addr1": "Infoga företagets adressrad 1 ({{rawText}})",
+          "description_company-addr2": "Infoga företagets adressrad 2 ({{rawText}})",
+          "description_company-addr3": "Infoga företagets adressrad 3 ({{rawText}})",
+          "description_company-vatNr": "Infoga företagets momsregnr ({{rawText}})",
+          "description_company-orgNr": "Infoga företagets organisationsnr ({{rawText}})"
         }
     }
 }

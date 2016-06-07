@@ -2345,6 +2345,14 @@ var InvoiceItemViewModel = function(data, parent) {
     }
   });
 
+  self.toggleIsTextOnly = function() {
+    self.isTextOnly(!self.isTextOnly());
+  };
+
+  self.descriptionInsertText = function(textToInsert) {
+    self.description(self.description() + textToInsert);
+  };
+
   self.toJSON = function() {
     var res = {
       description : self.description(),
@@ -3543,6 +3551,19 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
 
   self.itemGroupList = ko.observableArray();
   self.articleListPerGroup = ko.observable();
+  self.insertTextMenuItems = ko.observableArray(
+    defaults.textTemplate.allowedFields.c.map(function(v) {return "%c."+v+"%";}).concat(
+      defaults.textTemplate.allowedFields.company.map(function(v) {return "%company."+v+"%";})
+    )
+  );
+
+  self.getInsertTextDesc = function(text) {
+    var tContext = text;
+    tContext = tContext.replace(/%/g, "");
+    tContext = tContext.replace(".", "-");
+
+    return t('app.textTempl.description', {context: tContext, rawText: text});
+  };
 
   inheritInvoiceStyleModel(self);
   inheritInvoiceLngModel(self);
@@ -3578,7 +3599,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     Log.info("New group name=" + group.name + ", id=" + group._id);
     self.data.addGroup(group);
   };
-  
+
   self.currentView.subscribe(function(newValue) {
     self.data.init();
     self.selectedCustomer(undefined);
@@ -4519,7 +4540,8 @@ var setupKo = function() {
       navViewModel.activeCompanyId, navViewModel.companyList);
   var invoiceListViewModel = new InvoiceListViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId);
-  var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView, navViewModel.activeCompany);
+  var invoiceNewViewModel = new InvoiceNewViewModel(navViewModel.currentView,
+      navViewModel.activeCompany);
   var invoiceItemGroupTemplatesViewModel = new InvoiceItemGroupTemplatesViewModel(
       navViewModel.currentView);
   var articlesViewModel = new ArticlesViewModel(navViewModel.currentView, navViewModel.activeCompanyId);
