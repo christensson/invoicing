@@ -299,11 +299,14 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
     return dateStr;
   };
   
-  var formatTextTemplate = function(text, cust) {
-    var formatedText = text;
-    if (formatedText !== undefined && cust.vatNr !== undefined) {
-      formatedText = formatedText.replace("%c.vatNr%", cust.vatNr);
-    }
+  var formatTextTemplate = function(text, cust, company) {
+    var data = {
+      c: cust,
+      company: company,
+    };
+    var parserOpt = defaults.textTemplate.parserOpt;
+    var allowedFields = defaults.textTemplate.allowedFields;
+    var formatedText = util.formatTextTemplate(text, data, allowedFields, parserOpt);
     log.debug("formatTextTemplate(): Formated text: " + formatedText);
     return formatedText;
   };
@@ -527,13 +530,14 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
       };
       var bandOpts = {border: 0, addY: detailsRowSpacing, wrap: 1, font: style.details.items.font, padding: 2};
       var y1 = x.getCurrentY();
+      var formatedDesc = formatTextTemplate(r.description, invoice.customer, invoice.company);
       if (r.isTextOnly) {
         x.band( [
-          styleColData(r.description, detailsWidth, x.left),
+          styleColData(formatedDesc, detailsWidth, x.left),
         ], bandOpts);
       } else {
         var detailsColLbl = [
-          r.hasDesc ? r.description : "",
+          r.hasDesc ? formatedDesc : "",
           r.hasCount ? util.formatNumber(r.count, fmtNumOpt) : "",
           r.hasPrice ? util.formatCurrency(r.price, fmtCurrencyOpt) : "",
           r.hasDiscount ? util.formatNumber(r.discount, fmtNumOpt) + '%' : "",
@@ -649,7 +653,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
       x.font(style.summary.customText.font);
       x.fontSize(style.summary.customText.fontSize);
       x.newLine();
-      var reverseChargeText = formatTextTemplate(company[invoiceLng].reverseChargeText, cust);
+      var reverseChargeText = formatTextTemplate(company[invoiceLng].reverseChargeText, cust, company);
       x.print(reverseChargeText, {fontBold: 0, border: 0, wrap: 1});
     }
     if (docType == 'invoice' && company[invoiceLng].paymentCustomText) {

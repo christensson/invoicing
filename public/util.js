@@ -141,12 +141,14 @@ var range = function(low, high) {
 
 /**
  * @param data Array containing {objId, allowedFields}
- * @param parserOpts.itemPrefix (Default '%')
- * @param parserOpts.itemSuffix (Default '%')
- * @param parserOpts.itemObjFieldSep (Default '.')
+ * @param parserOpts.itemPrefix (Default: '%')
+ * @param parserOpts.itemSuffix (Default: '%')
+ * @param parserOpts.itemObjFieldSep (Default: '.')
+ * @param parserOpts.debug (Default: False)
  */
-var formatTextTemplate = function(text, data, parserOpts) {
+var formatTextTemplate = function(text, data, allowedFields, parserOpts) {
   parserOpts = typeof parserOpts !== 'undefined' ? parserOpts : {};
+  allowedFields = typeof allowedFields !== 'undefined' ? allowedFields : false;
   if (!parserOpts.itemPrefix) {
     parserOpts.itemPrefix = '%';
   }
@@ -156,6 +158,9 @@ var formatTextTemplate = function(text, data, parserOpts) {
   if (!parserOpts.itemObjFieldSep) {
     parserOpts.itemObjFieldSep = '.';
   }
+  if (!parserOpts.debug) {
+    parserOpts.debug = false;
+  }
 
   var itemObjFieldSepEscaped = parserOpts.itemObjFieldSep;
   if (['.', '*', '\\'].indexOf(itemObjFieldSepEscaped) != -1) {
@@ -163,9 +168,11 @@ var formatTextTemplate = function(text, data, parserOpts) {
   }
 
   var replItemRegEx = new RegExp(parserOpts.itemPrefix + "(\\w+" + parserOpts.itemObjFieldSep +
-    "\\w+)" + parserOpts.itemSuffix, "g");
+    "\\w+)" + parserOpts.itemSuffix, "m");
 
-  console.log("Regex: " + replItemRegEx);
+  if (parserOpts.debug) {
+    console.log("formatTextTemplate: Regex=" + replItemRegEx);
+  }
 
   var formatedText = text;
   var result;
@@ -173,24 +180,33 @@ var formatTextTemplate = function(text, data, parserOpts) {
   while (result = replItemRegEx.exec(formatedText)) {
     var match = result[0];
     var objAndFieldsStr = result[1];
-    console.log("Found match: " + match + ", containing " + objAndFieldsStr);
+    if (parserOpts.debug) {
+      console.log("formatTextTemplate: Found match: " + match + ", containing " + objAndFieldsStr);
+    }
     var objAndFields = objAndFieldsStr.split(parserOpts.itemObjFieldSep);
     var obj = objAndFields[0];
     var field1 = objAndFields[1];
     var isReplaced = false;
-    for (var i = 0; i < data.length; i++) {
-      var dataElem = data[i];
-      if (obj == dataElem.objId) {
-        if (dataElem.allowedFields.indexOf(field1) != -1) {
-          // Valid match which we will replace!
-          var replacement = dataElem.data[field1];
-          formatedText = formatedText.replace(match, replacement);
-          isReplaced = true;
+    if (obj in data) {
+      var dataElem = data[obj];
+      var isAllowed = true;
+      // If allowed fields given, check if replacement is allowed
+      if (allowedFields) {
+        isAllowed = false;
+        if (obj in allowedFields) {
+          isAllowed = (allowedFields[obj].indexOf(field1)) != -1;
         }
       }
+      var replacement = "";
+      if (isAllowed) {
+        // Valid match which we will replace!
+        replacement = dataElem[field1];
+      }
+      formatedText = formatedText.replace(match, replacement);
+      isReplaced = isAllowed;
     }
-    if (!isReplaced) {
-      console.log("Match: " + match + " not replaced!");
+    if (parserOpts.debug && !isReplaced) {
+      console.log("formatTextTemplate: match=" + match + " not allowed and removed!");
     }
   }
 

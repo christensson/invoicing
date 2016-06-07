@@ -48,34 +48,45 @@ test
     test.assert(util.formatNumber(1000.101999, opt) === "1 000,101");
   })
   .case('formatTextTemplate', function() {
-    var text = "Hello %c.name%!\nYour VAT nr is %c.vatNr%.\n\nRegards %u.name%";
-    var data = [
-      {
-        objId: "c",
-        allowedFields: [
-          "name", "addr1", "addr2", "addr3", "vatNr"
-        ],
-        data: {
-          name: "Per Persson",
-          addr1: "Storgatan 4",
-          addr2: "123 43 Mönsterås",
-          addr3: "",
-          vatNr: "SE1131231232101"
-        }
+    var text = "Hello %c.name%!\nYour VAT nr is %c.vatNr%.\n" +
+      "Do not replace this %c.notAllowedField%.\n\nRegards %company.name% test\ntest";
+    var allowedFields = {
+      c: [
+        "cid", "name", "addr1", "addr2", "addr3", "vatNr", "phone1", "phone2", "phone3", "email"
+      ],
+      company: [
+        "name", "addr1", "addr2", "addr3", "vatNr", "orgNr"
+      ]
+    };
+    var data = {
+      c: {
+        name: "Per Persson",
+        addr1: "Storgatan 4",
+        addr2: "123 43 Mönsterås",
+        addr3: "",
+        vatNr: "SE1131231232101",
+        notAllowedField: "WARNING"
       },
-      {
-        objId: "u",
-        allowedFields: [
-          "name",
-        ],
-        data: {
-          name: "Marcus",
-        }
+      company: {
+        name: "Marcus",
       }
-    ];
-    var textOut = util.formatTextTemplate(text, data);
-    console.log("-------\nIn:\n" + text);
-    console.log("-------\nOut:\n" + textOut);
+    };
+    // Test with allowed fields
+    var textOut = util.formatTextTemplate(text, data, allowedFields);
+    var textExpected = text;
+    textExpected = textExpected.replace("%c.name%", data["c"].name);
+    textExpected = textExpected.replace("%c.vatNr%", data["c"].vatNr);
+    textExpected = textExpected.replace("%c.notAllowedField%", "");
+    textExpected = textExpected.replace("%company.name%", data["company"].name);
+    test.assert(textOut == textExpected);
+
+    // Test without allowed fields
+    textOut = util.formatTextTemplate(text, data);
+    textExpected = text;
+    textExpected = textExpected.replace("%c.name%", data["c"].name);
+    textExpected = textExpected.replace("%c.vatNr%", data["c"].vatNr);
+    textExpected = textExpected.replace("%c.notAllowedField%", data["c"].notAllowedField);
+    textExpected = textExpected.replace("%company.name%", data["company"].name);
   })
 
 

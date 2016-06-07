@@ -28,7 +28,7 @@
     "vatNr": "SE123456123401",
     "orgNr": "1234561234",
     "vatNrCustomText": "Innehar F-skattebevis",
-    "reverseChargeText": "Moms på byggtjänster har inte debiterats enligt Mervärdesskattelagen 1 kap 2§.\nKöparens momsregistreringsnr: %c.vatNr%\n\nTest",
+    "reverseChargeText": "Moms på byggtjänster har inte debiterats enligt Mervärdesskattelagen 1 kap 2§.\nKöparens momsregistreringsnr: %c.vatNr%\n\nTest:%c.name%",
     "isValid": true,
     "nextCid": 101,
     "nextIid": 101,
@@ -57,7 +57,7 @@
     "phone2": "",
     "phone3": "",
     "vatNr": "SE231451523423401",
-    "email": "",
+    "email": "test@test.se",
     "useReverseCharge": true,
     "contact": "",
     "currency": "SEK",
@@ -153,7 +153,7 @@
       "hasTotal": true,
       "invoiceItems": [
         {
-          "description": "Testtimmar",
+          "description": "Testtimmar för kund %c.name%",
           "price": 1002.1,
           "count": "25",
           "vat": 25,
@@ -196,7 +196,7 @@
       "hasTotal": false,
       "invoiceItems": [
         {
-          "description": "Detta är endast en text som jag har lagt till för att testa. Detta är endast en text som jag har lagt till för att testa. Detta är endast en text som jag har lagt till för att testa. Detta är endast en text som jag har lagt till för att testa. Detta är endast en text som jag har lagt till för att testa. Detta är endast en text som jag har lagt till för att testa.\n\nDetta är endast en text som jag har lagt till för att testa.\nDetta är endast en text som jag har lagt till för att testa.\n\nMvh Marcus",
+          "description": "Hej %c.name%!\nDetta är endast en text som jag har lagt till för att testa. Detta är endast en text som jag har lagt till för att testa.\nDetta är endast en text som jag har lagt till för att testa.\n\nJag mailar dig på %c.email%\n\nMvh %company.name%",
           "price": 0,
           "count": 1,
           "vat": 25,

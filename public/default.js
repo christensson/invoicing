@@ -34,14 +34,19 @@ var defaults = {
     showCanceled: false,
   },
   textTemplate: {
-    itemPrefix: "%",
-    itemSuffix: "%",
-    objFieldSeparator: ".",
-    customerIdentifier: "c",
-    customerAllowedFields: [
-      "name", "addr1", "addr2", "addr3",
-      "vatNr",
-    ],
+    parserOpt: {
+      itemPrefix: "%",
+      itemSuffix: "%",
+      itemObjFieldSep: ".",
+    },
+    allowedFields: {
+      c: [
+        "cid", "name", "addr1", "addr2", "addr3", "vatNr", "phone1", "phone2", "phone3", "email"
+      ],
+      company: [
+        "name", "addr1", "addr2", "addr3", "vatNr", "orgNr"
+      ]
+    },
   },
   logFile: 'log/log.txt'
 };
