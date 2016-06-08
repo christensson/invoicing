@@ -519,6 +519,7 @@
             "numInvoicesLbl": "Invoices",
             "numOffersLbl": "Offers",
             "numItemGroupTemplatesLbl": "Detail group templates",
+            "numArticlesLbl": "Articles",
             "loginAsOtherUserBtn": "Login as user",
             "refreshBtn": "Refresh",
             "getNok": "Failed to get users!"

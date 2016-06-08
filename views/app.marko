@@ -49,28 +49,28 @@
     </button>
 </macro>
 
-<macro navbarDropdown(tKey, icon, isExplicitIcon)>
+<macro navbarDropdown(text, icon, isExplicitIcon)>
     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
       <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
-      <span data-bind="text: t('${tKey}')"></span>
+      ${text}
       <span class="caret"></span>
     </a>
 </macro>
 
-<macro navbarItem(route, tKey, icon, isExplicitIcon)>
+<macro navbarItem(route, text, icon, isExplicitIcon)>
     <li data-bind="css: { active: '${route}'.split('/').slice(-1)[0] == currentView() }">
         <a href="#" data-bind="click: selectViewRoute.bind(null, '${route}')">
             <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
-            <span data-bind="text: t('${tKey}')"></span>
+            ${text}
         </a>
     </li>
 </macro>
 
-<macro navbarItemServerRoute(route, tKey, icon, isExplicitIcon)>
+<macro navbarItemServerRoute(route, text, icon, isExplicitIcon)>
     <li>
         <a href="${route}">
             <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
-            <span data-bind="text: t('${tKey}')"></span>
+            ${text}
         </a>
     </li>
 </macro>
@@ -97,6 +97,27 @@
               data-bind="value: ${textVariable}, enable: ${cond}"/>
         </else>
     </div>
+</macro>
+
+<macro pagerShowHide(clickHdlr, isVisibleVariable, textShow, textHide, extraClass)>
+    <nav>
+        <ul class="pager ${extraClass}">
+            <li>
+                <a href="#" data-bind="click: ${clickHdlr}">
+                    <span data-bind="ifnot: ${isVisibleVariable}">
+                        <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
+                        ${textShow}
+                        <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
+                    </span>
+                    <span data-bind="if: ${isVisibleVariable}">
+                        <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
+                        ${textHide}
+                        <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 </macro>
 
 <html>
@@ -128,32 +149,32 @@
                 </div>
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <navbarItem route="/page/home" tKey="app.navBar.home" icon="home"/>
+                        <navbarItem route="/page/home" text="${i18n.t('app.navBar.home')}" icon="home"/>
 
                         <li class="drowdown">
-                            <navbarDropdown tKey="app.navBar.customerMenu" icon="user"/>
+                            <navbarDropdown text="${i18n.t('app.navBar.customerMenu')}" icon="user"/>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/customer_new" tKey="app.navBar.customerNew" icon="user-plus"/>
-                                <navbarItem route="/page/customers" tKey="app.navBar.customerList" icon="users"/>
+                                <navbarItem route="/page/customer_new" text="${i18n.t('app.navBar.customerNew')}" icon="user-plus"/>
+                                <navbarItem route="/page/customers" text="${i18n.t('app.navBar.customerList')}" icon="users"/>
                             </ul>
                         </li>
 
                         <li class="drowdown">
-                            <navbarDropdown tKey="app.navBar.invoiceMenu" icon="file-text"/>
+                            <navbarDropdown text="${i18n.t('app.navBar.invoiceMenu')}" icon="file-text"/>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/invoice_new" tKey="app.navBar.invoiceNew" icon="file-text"/>
-                                <navbarItem route="/page/invoices" tKey="app.navBar.invoiceList" icon="list"/>
+                                <navbarItem route="/page/invoice_new" text="${i18n.t('app.navBar.invoiceNew')}" icon="file-text"/>
+                                <navbarItem route="/page/invoices" text="${i18n.t('app.navBar.invoiceList')}" icon="list"/>
                                 <li role="separator" class="divider"/>
-                                <navbarItem route="/page/invoice_item_group_templates" tKey="app.navBar.invoiceItemGroupTemplates" icon="list-alt"/>
-                                <navbarItem route="/page/articles" tKey="app.navBar.articles" icon="cubes"/>
+                                <navbarItem route="/page/invoice_item_group_templates" text="${i18n.t('app.navBar.invoiceItemGroupTemplates')}" icon="list-alt"/>
+                                <navbarItem route="/page/articles" text="${i18n.t('app.navBar.articles')}" icon="cubes"/>
                             </ul>
                         </li>
 
                         <li class="drowdown">
-                            <navbarDropdown tKey="app.navBar.offerMenu" icon="file-text"/>
+                            <navbarDropdown text="${i18n.t('app.navBar.offerMenu')}" icon="file-text"/>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/offer_new" tKey="app.navBar.offerNew" icon="file-text"/>
-                                <navbarItem route="/page/offers" tKey="app.navBar.offerList" icon="list"/>
+                                <navbarItem route="/page/offer_new" text="${i18n.t('app.navBar.offerNew')}" icon="file-text"/>
+                                <navbarItem route="/page/offers" text="${i18n.t('app.navBar.offerList')}" icon="list"/>
                             </ul>
                         </li>
 
@@ -177,7 +198,7 @@
                                 </li>
                                 <html-comment> /ko </html-comment>
                                 <li role="separator" class="divider"/>
-                                <navbarItem route="/page/companies" tKey="app.navBar.companyAdmin" icon="briefcase"/>
+                                <navbarItem route="/page/companies" text="${i18n.t('app.navBar.companyAdmin')}" icon="briefcase"/>
                             </ul>
                         </li>
                         <li class="dropdown">
@@ -191,17 +212,17 @@
                                 <span class="caret"/>
                             </a>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/settings" tKey="app.navBar.settings" icon="wrench"/>
+                                <navbarItem route="/page/settings" text="${i18n.t('app.navBar.settings')}" icon="wrench"/>
 
                                 <if(data.user.isAdmin === true)>
                                     <li role="separator" class="divider"/>
-                                    <navbarItem route="/page/debug" tKey="app.navBar.debug" icon="bug"/>
-                                    <navbarItem route="/page/users" tKey="app.navBar.users" icon="users"/>
-                                    <navbarItem route="/page/invites" tKey="app.navBar.invites" icon="gift"/>
+                                    <navbarItem route="/page/debug" text="${i18n.t('app.navBar.debug')}" icon="bug"/>
+                                    <navbarItem route="/page/users" text="${i18n.t('app.navBar.users')}" icon="users"/>
+                                    <navbarItem route="/page/invites" text="${i18n.t('app.navBar.invites')}" icon="gift"/>
                                 </if>
 
                                 <li role="separator" class="divider"/>
-                                <navbarItemServerRoute route="/logout" tKey="app.navBar.logout" icon="sign-out"/>
+                                <navbarItemServerRoute route="/logout" text="${i18n.t('app.navBar.logout')}" icon="sign-out"/>
                             </ul>
                         </li>
                     </ul>
@@ -329,16 +350,6 @@
                                                         </td>
                                                     </tr>
                                                 </table>
-                                                <!--
-                                                <div class="panel-body">
-                                                  <dl>
-                                                    <for each="item in news.items">
-                                                      <dt>${item.date} - ${item.msgSlogan.sv}</dt>
-                                                      <dd>$!{item.msg.sv}</dd>
-                                                    </for>
-                                                  </dl>
-                                                </div>
-                                                -->
                                             </div>
                                         </div>
                                     </div>
@@ -1039,25 +1050,13 @@
                                 </div>
                             </div>
 
-                            <nav>
-                                <ul class="pager">
-                                    <li>
-                                        <a href="#" data-bind="click: toggleIsExtraOptVisible">
-                                            <span data-bind="ifnot: isExtraOptVisible">
-                                                <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
-                                                ${i18n.t('app.customer.extraOptToggleLbl', {context: 'show'})}
-                                                <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
-                                            </span>
-                                            <span data-bind="if: isExtraOptVisible">
-                                                <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
-                                                ${i18n.t('app.customer.extraOptToggleLbl', {context: 'hide'})}
-                                                <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
-                                            </span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
 
+                            <pagerShowHide
+                              clickHdlr="toggleIsExtraOptVisible"
+                              isVisibleVariable="isExtraOptVisible"
+                              textShow="${i18n.t('app.customer.extraOptToggleLbl', {context: 'show'})}"
+                              textHide="${i18n.t('app.customer.extraOptToggleLbl', {context: 'hide'})}"
+                              extraClass=""/>
 
                             <div class="panel panel-default" data-bind="visible: isExtraOptVisible">
                                 <div class="panel-heading">
@@ -1219,24 +1218,12 @@
                         </div>
                     </div>
 
-                    <nav>
-                        <ul class="pager top0 bottom0">
-                            <li>
-                                <a href="#" data-bind="click: doToggleFilterPaneExpanded">
-                                    <span data-bind="ifnot: isFilterPaneExpanded">
-                                        <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
-                                        ${i18n.t('app.invoiceList.filterPaneToggleLbl', {context: 'show'})}
-                                        <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
-                                    </span>
-                                    <span data-bind="if: isFilterPaneExpanded">
-                                        <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
-                                        ${i18n.t('app.invoiceList.filterPaneToggleLbl', {context: 'hide'})}
-                                        <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
-                                    </span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
+                    <pagerShowHide
+                      clickHdlr="doToggleFilterPaneExpanded"
+                      isVisibleVariable="isFilterPaneExpanded"
+                      textShow="${i18n.t('app.invoiceList.filterPaneToggleLbl', {context: 'show'})}"
+                      textHide="${i18n.t('app.invoiceList.filterPaneToggleLbl', {context: 'hide'})}"
+                      extraClass="top0 bottom0"/>
 
                     <form>
                         <p>
@@ -2112,25 +2099,14 @@
                         </div>
                     </div>
                     <!-- invoice items panel -->
-                    <nav>
-                        <ul class="pager top0">
-                            <li>
-                                <a href="#" data-bind="click: data.toggleExtraOptionExpanded,
-                                                       disable: data.isLocked">
-                                    <span data-bind="ifnot: data.extraOptionExpanded">
-                                        <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
-                                        ${i18n.t('app.invoice.extraOptToggleLbl', {context: 'show'})}
-                                        <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
-                                    </span>
-                                    <span data-bind="if: data.extraOptionExpanded">
-                                        <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
-                                        ${i18n.t('app.invoice.extraOptToggleLbl', {context: 'hide'})}
-                                        <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
-                                    </span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
+
+                    <pagerShowHide
+                      clickHdlr="data.toggleExtraOptionExpanded"
+                      isVisibleVariable="data.extraOptionExpanded"
+                      textShow="${i18n.t('app.invoice.extraOptToggleLbl', {context: 'show'})}"
+                      textHide="${i18n.t('app.invoice.extraOptToggleLbl', {context: 'hide'})}"
+                      extraClass="top0"/>
+
                     <div class="row"
                         data-bind="visible: data.extraOptionExpanded">
 
@@ -2641,24 +2617,12 @@
                         </div>
                     </div>
 
-                    <nav>
-                        <ul class="pager top0 bottom0">
-                            <li>
-                                <a href="#" data-bind="click: doToggleFilterPaneExpanded">
-                                    <span data-bind="ifnot: isFilterPaneExpanded">
-                                        <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
-                                        ${i18n.t('app.articles.filterPaneToggleLbl', {context: 'show'})}
-                                        <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
-                                    </span>
-                                    <span data-bind="if: isFilterPaneExpanded">
-                                        <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
-                                        ${i18n.t('app.articles.filterPaneToggleLbl', {context: 'hide'})}
-                                        <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
-                                    </span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
+                    <pagerShowHide
+                      clickHdlr="doToggleFilterPaneExpanded"
+                      isVisibleVariable="isFilterPaneExpanded"
+                      textShow="${i18n.t('app.articles.filterPaneToggleLbl', {context: 'show'})}"
+                      textHide="${i18n.t('app.articles.filterPaneToggleLbl', {context: 'hide'})}"
+                      extraClass="top0 bottom0"/>
 
                     <form>
                         <p>
@@ -3270,6 +3234,12 @@
                                                                     </dt>
                                                                     <dd>
                                                                         <span data-bind="text: totalStats().numItemGroupTemplates"/>
+                                                                    </dd>
+                                                                    <dt>
+                                                                        ${i18n.t('app.userList.numArticlesLbl')}
+                                                                    </dt>
+                                                                    <dd>
+                                                                        <span data-bind="text: totalStats().numArticles"/>
                                                                     </dd>
                                                                 </dl>
                                                             </div>

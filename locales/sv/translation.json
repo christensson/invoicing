@@ -535,6 +535,7 @@
             "numInvoicesLbl": "Fakturor",
             "numOffersLbl": "Offerter",
             "numItemGroupTemplatesLbl": "Detaljgruppmallar",
+            "numArticlesLbl": "Artiklar",
             "loginAsOtherUserBtn": "Logga in som användare",
             "refreshBtn": "Uppdatera",
             "getNok": "Misslyckades med att hämta användare!"

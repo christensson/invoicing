@@ -4103,7 +4103,8 @@ var UserViewModel = function() {
       "numCustomers": 0,
       "numInvoices": 0,
       "numOffers": 0,
-      "numItemGroupTemplates": 0
+      "numItemGroupTemplates": 0,
+      "numArticles": 0,
     });
 
     cache.on('set:' + USER_STATS_KEY(), function(stats, ttl) {
@@ -4372,6 +4373,15 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
       return 0;
     } else {
       return self.stats().activeCompany.numOffers;
+    }
+  }, self);
+
+  self.numArticles = ko.pureComputed(function() {
+    if ((self.activeCompanyId() === undefined) || (self.activeCompanyId() === null) ||
+        (self.stats() === undefined)) {
+      return 0;
+    } else {
+      return self.stats().activeCompany.numArticles;
     }
   }, self);
 
