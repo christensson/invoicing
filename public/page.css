@@ -145,7 +145,6 @@ body { padding-top: 70px; }
 
 .notification-area-center {
   position: fixed;
-  width: 300px;
   left: 50%;
   margin-left: -150px;
   text-align: center;
@@ -154,7 +153,6 @@ body { padding-top: 70px; }
 
 .notification-area-right {
   position: fixed;
-  width: 30%;
   top: 70px;
   right: 7px;
   text-align: left;

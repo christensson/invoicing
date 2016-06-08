@@ -18,7 +18,7 @@ var NotifyViewModel = function() {
       if (cfg.notificationAreaPlacement === 'center-inline') {
         return "col-md-6 col-md-offset-3 notification-area-center-inline";
       } else {
-        return "notification-area-" + cfg.notificationAreaPlacement;
+        return "col-md-4 notification-area-" + cfg.notificationAreaPlacement;
       }
     }, self);
 
