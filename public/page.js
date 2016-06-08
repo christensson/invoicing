@@ -1651,28 +1651,6 @@ var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
     Log.info("Edit toggled for article=" + self.articleId() + ", isEditMode=" +
         newEditMode + " (new)");
     self.isEditMode(newEditMode);
-
-    if (newEditMode) {
-      /*
-      for (var i = 0; i < self.itemGroupTemplateRef().length; i++) {
-
-      }
-      if (self.itemGroupTemplateRef._id != undefined) {
-        // Edit mode enabled, sync select input
-        Log.info("Locating itemGroupTempl with _id=" + self.itemGroupTemplateRef._id +
-          " for article _id" + self._id());
-        for (var i = 0; i < self.groupList().length; i++) {
-          if (self.itemGroupTemplateRef._id == self.groupList()[i]._id) {
-            self.selectedItemGroupTemplate(self.groupList()[i]);
-            Log.info("Found itemGroupTempl with _id=" + self.itemGroupTemplateRef._id);
-            break;
-          }
-        }
-      } else {
-        self.selectedItemGroupTemplate(undefined);
-      }
-      */
-    }
   };
 
   self.updateServer = function() {
@@ -1688,6 +1666,9 @@ var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
     } else if (self.articleId().length == 0) {
       Notify_showMsg('error', t("app.articles.saveNok", {context: "noArticleId"}));
       self.articleIdError(true);
+      return;
+    } else if (self.desc().length == 0) {
+      Notify_showMsg('error', t("app.articles.saveNok", {context: "noDesc"}));
       return;
     }
 
@@ -3519,9 +3500,6 @@ var InvoiceArticleModel = function(data) {
   self.searchString = function() {
     return self.data.articleId + " " + self.data.desc;
   };
-  self.sortString = function() {
-    return "" + self.data.itemGroupTemplateRef._id + self.data.articleId + self.data.desc;
-  };
 };
 
 var InvoiceNewViewModel = function(currentView, activeCompany) {
@@ -3619,18 +3597,6 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   self.sortMappedCustomersByName = function(a, b) {
     var aStr = a.getName().toLowerCase();
     var bStr = b.getName().toLowerCase();
-    if (aStr < bStr) {
-      return -1;
-    } else if (aStr > bStr) {
-      return 1;
-    } else {
-      return 0;
-    }
-  };
-
-  self.sortMappedArticlesByGroupIdAndDesc = function(a, b) {
-    var aStr = a.sortString().toLowerCase();
-    var bStr = b.sortString().toLowerCase();
     if (aStr < bStr) {
       return -1;
     } else if (aStr > bStr) {

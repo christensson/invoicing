@@ -172,6 +172,7 @@
             "saveNok": "Misslyckades att spara artikel!",
             "saveNok_noItemGroupTemplate": "Detaljgruppmall måste anges!",
             "saveNok_noArticleId": "Artikelid måste anges!",
+            "saveNok_noDesc": "Beskrivning måste anges!",
             "saveNok_noCompany": "Misslyckades att spara artikel! Inget företag valt."
         },
         "settings": {

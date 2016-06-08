@@ -163,6 +163,7 @@
             "saveNok": "Failed to save article!",
             "saveNok_noItemGroupTemplate": "Item group template must be specified!",
             "saveNok_noArticleId": "Article Id must be specified!",
+            "saveNok_noDesc": "Description must be specified!",
             "saveNok_noCompany": "Failed to save article! Company not selected."
         },
         "settings": {
