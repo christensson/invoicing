@@ -2993,6 +2993,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   inheritCurrencyModel(self, true);
 
   self.isFilterPaneExpanded = ko.observable(defaults.invoiceListFilter.isPaneExpanded);
+  self.selectedRow = ko.observable();
 
   self.numInvoicesText = ko.pureComputed(function() {
     var count = 0;
@@ -3363,6 +3364,10 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     self.isFilterPaneExpanded(!self.isFilterPaneExpanded());
     Log.info("InvoiceListViewModel - isFilterPaneExpanded=" + self.isFilterPaneExpanded()
         + " (new state)");
+  };
+
+  self.selectRow = function(data) {
+    self.selectedRow(data);
   };
   
   self.doSortToggle = function(field) {
