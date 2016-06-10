@@ -1322,7 +1322,7 @@
                                     </tr>
                                 </thead>
                                 <tbody data-bind="foreach: docList()">
-                                    <tr data-bind="if: isVisible(), css: { danger: isExpired }">
+                                    <tr data-bind="if: isVisible(), css: { danger: isExpired, success: isPaid }">
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">
                                                 <a class="btn btn-info" data-bind="attr: { href: '#/page/' + docType() + '_show/' + _id() }">
