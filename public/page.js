@@ -3415,6 +3415,31 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     // Get selected doc Ids
     var docIds = self.selectedDocIdList();
     Log.info("On selected ids=" + JSON.stringify(docIds) + ", op=" + op);
+
+    if (op == "pay" || op == "lock") {
+      var reqUrl = "/api/" + self.docType() + "_" + op;
+
+      var reqData = {
+        op: op,
+        docType: self.docType(),
+        idList: docIds,
+      };
+    
+      Notify_showSpinner(true);
+      $.ajax({
+        url : reqUrl,
+        type : "PUT",
+        contentType : "application/json",
+        data : JSON.stringify(reqData),
+        dataType : "json",
+        success : function(data) {
+          Log.info("updateServer: response: " + JSON.stringify(data));
+          Notify_showSpinner(false);
+        },
+      });
+    } else {
+      Log.error("Invalid op=" + op);
+    }
   };
 
   self.doSortToggle = function(field) {
