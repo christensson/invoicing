@@ -2847,6 +2847,7 @@ var InvoiceListDataViewModel = function(data, filterOpt) {
   var self = this;
 
   self.filterOpt = filterOpt;
+  self.isSelected = ko.observable(false);
 
   self._id = ko.observable(data._id);
   self.docType = ko.observable('invoice'); // Invoice is default for old documents
@@ -2977,6 +2978,10 @@ var InvoiceListDataViewModel = function(data, filterOpt) {
       Log.info("InvoiceListDataViewModel - Invoice has no id.");
     }
   };
+
+  self.toggleSelected = function() {
+    self.isSelected(!self.isSelected());
+  };
 };
 
 var InvoiceListViewModel = function(currentView, activeCompanyId) {
@@ -2993,17 +2998,40 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   inheritCurrencyModel(self, true);
 
   self.isFilterPaneExpanded = ko.observable(defaults.invoiceListFilter.isPaneExpanded);
-  self.selectedRow = ko.observable();
+  self.hoveredDocId = ko.observable();
+  self.lastSelectedDocId = ko.observable();
 
-  self.numInvoicesText = ko.pureComputed(function() {
+  self.numDocs = ko.pureComputed(function() {
     var count = 0;
     for (var i = 0; i < self.docList()().length; i++) {
-      var invoice = self.docList()()[i];
-      if (invoice.isVisible()) {
+      var doc = self.docList()()[i];
+      if (doc.isVisible()) {
         count++;
       }
     }
-    return t('app.invoiceList.numDocsLbl', {count: count, context: self.docType()});
+    return count;
+  }, self);
+
+  self.selectedDocIdList = ko.pureComputed(function() {
+    var idList = [];
+    for (var i = 0; i < self.docList()().length; i++) {
+      var doc = self.docList()()[i];
+      if (doc.isVisible() && doc.isSelected()) {
+        idList.push(doc._id());
+      }
+    }
+    return idList;
+  }, self);
+
+  self.numSelectedDocs = ko.pureComputed(function() {
+    return self.selectedDocIdList().length;
+  }, self);
+
+  self.numDocsText = ko.pureComputed(function() {
+    var text = t('app.invoiceList.numDocsLbl',
+      {count: self.numDocs(), context: self.docType()}) + " " +
+      t('app.invoiceList.numSelectedDocsLbl', {count: self.numSelectedDocs()});
+    return text;
   }, self);
 
   self.invoiceCurrencyList = ko.pureComputed(function() {
@@ -3191,6 +3219,8 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   };
 
   self.currentView.subscribe(function(newValue) {
+    self.hoveredDocId("");
+    self.lastSelectedDocId("");
     if (newValue == 'invoices') {
       self.docType('invoice');
       Log.info("InvoiceListViewModel - activated - docType=" + self.docType());
@@ -3366,10 +3396,27 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
         + " (new state)");
   };
 
-  self.selectRow = function(data) {
-    self.selectedRow(data);
+  self.hoverRow = function(data) {
+    self.hoveredDocId(data._id());
   };
-  
+
+  self.selectRow = function(data) {
+    data.toggleSelected();
+    if (data.isSelected()) {
+      self.lastSelectedDocId(data._id());
+    } else {
+      self.lastSelectedDocId("");
+    }
+    // Run default handlers
+    return true;
+  };
+
+  self.doSelectedRowsOp = function(op) {
+    // Get selected doc Ids
+    var docIds = self.selectedDocIdList();
+    Log.info("On selected ids=" + JSON.stringify(docIds) + ", op=" + op);
+  };
+
   self.doSortToggle = function(field) {
     if (self.invoiceListSort() === field + 'Asc') {
       self.invoiceListSort(field + 'Desc');
