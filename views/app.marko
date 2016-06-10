@@ -876,6 +876,9 @@
                                         </td>
                                         <td>
                                             <p class="form-control-static" data-bind="text: name, visible: isValid"/>
+                                            <span data-bind="if: isInactive" class="label label-default label-fix">
+                                                ${i18n.t('app.customerList.inactiveLbl')}
+                                            </span>
                                         </td>
                                         <td>
                                             <p class="form-control-static" data-bind="text: addr1, visible: isValid"/>
@@ -1024,6 +1027,12 @@
                                         <label>
                                             <input type="checkbox" data-bind="checked: data.useReverseCharge" aria-label=" ${i18n.t('app.customer.optionUseReverseChargeLbl')}"/>
                                             ${i18n.t('app.customer.optionUseReverseChargeLbl')}
+                                        </label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" data-bind="checked: data.isInactive" aria-label=" ${i18n.t('app.customer.optionIsInactiveLbl')}"/>
+                                            ${i18n.t('app.customer.optionIsInactiveLbl')}
                                         </label>
                                     </div>
                                     <hr/>

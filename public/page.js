@@ -1121,6 +1121,7 @@ var CustomerViewModel = function() {
   self.vatNr = ko.observable();
   self.noVat = ko.observable();
   self.useReverseCharge = ko.observable();
+  self.isInactive = ko.observable();
   self.contact = ko.observable();
   self.isValid = ko.observable();
   self.companyId = ko.observable();
@@ -1148,6 +1149,7 @@ var CustomerViewModel = function() {
     self.vatNr(data.vatNr);
     self.noVat(data.noVat);
     self.useReverseCharge(data.useReverseCharge);
+    self.isInactive(data.isInactive);
     self.contact(data.contact);
     self.isValid(data.isValid);
     self.companyId(data.companyId);
@@ -1178,6 +1180,7 @@ var CustomerViewModel = function() {
       vatNr : "",
       noVat : false,
       useReverseCharge : false,
+      isInactive: false,
       contact : "",
       isValid : true,
       invoiceLng : defaults.invoiceLng,
@@ -1288,6 +1291,7 @@ var CustomerViewModel = function() {
       email : self.email(),
       noVat : self.noVat(),
       useReverseCharge : self.useReverseCharge(),
+      isInactive : self.isInactive(),
       contact : self.contact(),
       isValid : self.isValid(),
       invoiceLng : self.invoiceLng(),

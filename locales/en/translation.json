@@ -270,6 +270,7 @@
             "optionPaneHeader": "Options",
             "optionNoVatLbl": "Do not include VAT on invoices",
             "optionUseReverseChargeLbl": "Use reverse charge",
+            "optionIsInactiveLbl": "Inactive customer",
             "transferPaneHeader": "Transfer customer",
             "transferCompanySelectLbl": "Destination company",
             "transferCustomerBtn": "Copy customer",
@@ -298,6 +299,7 @@
             "nameCol": "Name",
             "addrCol": "Address {{nr}}",
             "phoneCol": "Phone {{nr}}",
+            "inactiveLbl": "Inactive",
             "newCustomerBtn": "New customer",
             "getNok": "Failed to get customers!",
             "getNok_noCompany": "Cannot get customers! Company not selected or doesn't exist."

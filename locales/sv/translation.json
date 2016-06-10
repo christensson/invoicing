@@ -284,6 +284,7 @@
             "optionPaneHeader": "Alternativ",
             "optionNoVatLbl": "Fakturera exklusive moms",
             "optionUseReverseChargeLbl": "Använd omvänd skattskylldighet för byggtjänster",
+            "optionIsInactiveLbl": "Inaktiv kund",
             "transferPaneHeader": "Överför kund",
             "transferCompanySelectLbl": "Destinationsföretag",
             "transferCustomerBtn": "Kopiera kund",
@@ -312,6 +313,7 @@
             "nameCol": "Namn",
             "addrCol": "Adress {{nr}}",
             "phoneCol": "Telefon {{nr}}",
+            "inactiveLbl": "Inaktiv",
             "newCustomerBtn": "Ny kund",
             "getNok": "Misslyckades med att hämta kunder!",
             "getNok_noCompany": "Misslyckades med att hämta kunder! Företag ej valt eller ogiltigt."
