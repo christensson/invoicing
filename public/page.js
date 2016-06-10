@@ -3622,18 +3622,24 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
 
   cache.on('set:' + Cache.CUSTOMERS(), function(customers, ttl) {
     Log.info("InvoiceNewViewModel - event - set:" + Cache.CUSTOMERS());
-    var mappedCustomers = $.map(customers, function(item) {
-      return new InvoiceCustomerModel(item);
-    });
+    var mappedCustomers = [];
+    for (var i = 0; i < customers.length; i++) {
+      if (!customers[i].isInactive) {
+        mappedCustomers.push(new InvoiceCustomerModel(customers[i]));
+      }
+    }
     mappedCustomers.sort(self.sortMappedCustomersByName);
     self.customerList(mappedCustomers);
   });
 
   cache.on('update:' + Cache.CUSTOMERS(), function(customers, ttl) {
     Log.info("InvoiceNewViewModel - event - update:" + Cache.CUSTOMERS());
-    var mappedCustomers = $.map(customers, function(item) {
-      return new InvoiceCustomerModel(item);
-    });
+    var mappedCustomers = [];
+    for (var i = 0; i < customers.length; i++) {
+      if (!customers[i].isInactive) {
+        mappedCustomers.push(new InvoiceCustomerModel(customers[i]));
+      }
+    }
     mappedCustomers.sort(self.sortMappedCustomersByName);
     self.customerList(mappedCustomers);
   });
