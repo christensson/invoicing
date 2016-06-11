@@ -129,6 +129,15 @@ var CacheOp = function() {
     });
   };
 
+  self._arrayUpdateMap = function(arrayCacheKey, cb) {
+    cache.get(arrayCacheKey, function(items) {
+      for (var i = 0; i < items.length; i++) {
+        cb(items[i]);
+      }
+      cache.set(arrayCacheKey, items);
+    });
+  };
+
   self._arrayUpdateItem = function(arrayCacheKey, item) {
     cache.get(arrayCacheKey, function(items) {
       var updateIndex = self._findArrayFieldIndex(items, item, '_id');
@@ -361,6 +370,10 @@ var CacheOp = function() {
 
   self.addInvoice = function(invoice) {
     self._arrayAddItem(self.INVOICES(), invoice);
+  };
+
+  self.updateInvoiceMap = function(cb) {
+    self._arrayUpdateMap(self.INVOICES(), cb);
   };
 
   /*
@@ -3416,7 +3429,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     var docIds = self.selectedDocIdList();
     Log.info("On selected ids=" + JSON.stringify(docIds) + ", op=" + op);
 
-    if (op == "pay" || op == "lock") {
+    if (op == 'pay' || op == 'lock') {
       var reqUrl = "/api/" + self.docType() + "_" + op;
 
       var reqData = {
@@ -3433,7 +3446,39 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
         data : JSON.stringify(reqData),
         dataType : "json",
         success : function(data) {
-          Log.info("updateServer: response: " + JSON.stringify(data));
+          Log.info("doSelectedRowsOp: response: " + JSON.stringify(data));
+
+          var doOpOnInvoice = undefined;
+          switch (op) {
+            case 'pay':
+              doOpOnInvoice = function(item) {
+                item.isPaid = true;
+              };
+              break;
+            case 'lock': 
+              doOpOnInvoice = function(item) {
+                item.isLocked = true;
+              };
+              break;
+            default:
+              Log.error("Invalid op, op=" + op);
+              break;
+          }
+
+          if (doOpOnInvoice != undefined &&
+              data.res.ok &&
+              data.res.nModified <= docIds.length &&
+              data.res.n == docIds.length) {
+            Cache.updateInvoiceMap(function(item) {
+              if (docIds.indexOf(item._id) != -1) {
+                doOpOnInvoice(item);
+              }
+            });
+            Notify_showMsg('success',
+              t("app.invoiceList.bulkOpOk", {context: op, count: data.res.nModified}));
+          } else {
+            Log.warn("Update not successfull: requested nr of docs to update is " + docIds.length);
+          }
           Notify_showSpinner(false);
         },
       });

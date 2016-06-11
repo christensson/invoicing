@@ -702,10 +702,10 @@ app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
 });
 
 app.put(/^\/api\/(invoice|offer)_(lock|pay)$/, ensureAuthenticated, function(req, res) {
-  var okHandler = function(logText, res, doc) {
-    log.verbose(logText + ": OK, obj=" + JSON.stringify(doc));
+  var okHandler = function(logText, res, result) {
+    log.verbose(logText + ": OK, obj=" + JSON.stringify(result));
     var resData = {
-      'doc' : doc
+      'res' : result
     };
     res.status(200).json(resData);
     res.end();
@@ -717,8 +717,9 @@ app.put(/^\/api\/(invoice|offer)_(lock|pay)$/, ensureAuthenticated, function(req
   log.info("Doc bulk op: user=" + req.user.info.name + ", uid=" + uid +
       ", docType=" + docType + ", op=" + op +
       ", data=" + JSON.stringify(req.body, null, 2));
-
-  okHandler(docType + "_" + op, res, req.body);
+  mydb.invoiceOrOfferBulkOp(docType, op, req.body.idList)
+    .then(okHandler.bind(null, docType+'_bulkOp:' + op, res))
+    .fail(myFailureHandler.bind(null, res));
 });
 
 app.get("/api/offers/:companyId", ensureAuthenticated, function(req, res) {

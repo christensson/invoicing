@@ -287,6 +287,38 @@ function insertDataPromise(collectionName, data) {
 
 function updateDataPromise(collectionName, data, incFields) {
   incFields = typeof incFields !== 'undefined' ? incFields : false;
+  log.verbose("updateData(" + collectionName + "): _id=" + data._id + ", data=" + JSON.stringify(data, null, 4));
+  // _id in db is really an ObjectId, but it got lost in all the JSON
+  // mangling...
+  data._id = new ObjectID(data._id);
+  
+  var updateData = undefined;
+  if (incFields === false) {
+    updateData = {
+      $set: data
+    };
+  } else {
+    updateData = {
+      $set: data,
+      $inc: incFields
+    };
+  }
+
+  var query = {_id: data._id};
+  var deferred = Q.defer();
+  updateQueryPromise(collectionName, query, updateData)
+    .fail(function(err) {
+      deferred.reject(err);
+    })
+    .then(function(obj) {
+      // Respond with data instead
+      deferred.resolve(data);
+    });
+  return deferred.promise;
+}
+
+function updateQueryPromise(collectionName, query, update, multi) {
+  multi = typeof multi !== 'undefined' ? multi : false;
   return dbopPromise().then(function (db) {
     var deferred = Q.defer();
     db.collection(collectionName, function(err, coll) {
@@ -294,33 +326,21 @@ function updateDataPromise(collectionName, data, incFields) {
         deferred.reject(
             new Error("updateData(" + collectionName + "): " + err));
       } else {
-        log.verbose("updateData(" + collectionName + "): _id=" + data._id + ", data=" + JSON.stringify(data, null, 4));
-        // _id in db is really an ObjectId, but it got lost in all the JSON
-        // mangling...
-        data._id = new ObjectID(data._id);
+        log.verbose("updateData(" + collectionName + "): query=" + JSON.stringify(query) +
+          ", update=" + JSON.stringify(update));
         
-        var updateData = undefined;
-        if (incFields === false) {
-          updateData = {
-            $set: data
-          };
-        } else {
-          updateData = {
-            $set: data,
-            $inc: incFields
-          };
-        }
-
         coll.update(
-            {_id: data._id}, // query
-            updateData, // update
-            {}, // options
+            query,
+            update,
+            {
+              multi: multi
+            },
             function(err, obj) {
               if (err) {
                 deferred.reject(
                     new Error("updateData(" + collectionName + "): " + err));
               } else {
-                deferred.resolve(data);
+                deferred.resolve(obj);
               }
             }
         );
@@ -1147,6 +1167,56 @@ module.exports.updateInvoiceOrOffer = function(docType, doc) {
     log.error("updateInvoiceOrOffer: Error: " + err.body);
     deferred.reject(err);
   });
+  return deferred.promise;
+};
+
+module.exports.invoiceOrOfferBulkOp = function(docType, op, idList) {
+  var deferred = Q.defer();
+  var collection = undefined;
+  if (docType == 'invoice' || docType == 'offer') {
+    collection = docType;
+  } else {
+    deferred.reject(new Error("invoiceOrOfferBulkOp: unsupported docType=" + docType));
+    return deferred.promise;
+  }
+  var oidList = [];
+  idList.forEach(function(id) {
+    oidList.push(new ObjectID(id));
+  });
+  var query = {
+    "_id": {
+      $in: oidList
+    }
+  };
+  var update = undefined;
+  switch(op) {
+    case 'pay':
+      update = {
+        $set: {
+          isPaid: true
+        }
+      };
+      break;
+    case 'lock':
+      update = {
+        $set: {
+          isLocked: true
+        }
+      };
+      break;
+    default:
+      break;
+  }
+  if (update != undefined) {
+    updateQueryPromise(collection, query, update, true).then(function(data) {
+      deferred.resolve(data);
+    }).fail(function(err) {
+      log.error("invoiceOrOfferBulkOp: Error: " + err.body);
+      deferred.reject(err);
+    });
+  } else {
+    deferred.reject(new Error("invoiceOrOfferBulkOp: Invalid op=" + op));
+  }
   return deferred.promise;
 };
 
