@@ -253,7 +253,7 @@
         },
         "companyList": {
             "nameCol": "Company Name",
-            "addrCol": "Address {{nr}}",
+            "addrCol": "Address",
             "newCompanyBtn": "New company",
             "getNok": "Failed to get companies!"
         },
@@ -297,9 +297,11 @@
         "customerList": {
             "cidCol": "Nr",
             "nameCol": "Name",
-            "addrCol": "Address {{nr}}",
-            "phoneCol": "Phone {{nr}}",
+            "addrCol": "Address",
+            "phoneCol": "Phone",
             "inactiveLbl": "Inactive",
+            "noVatLbl": "Excl VAT",
+            "useReverseChargeLbl": "Reverse charge",
             "newCustomerBtn": "New customer",
             "getNok": "Failed to get customers!",
             "getNok_noCompany": "Cannot get customers! Company not selected or doesn't exist."

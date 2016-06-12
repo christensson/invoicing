@@ -1,5 +1,8 @@
 /* Required by navbar-fixed-top */
-body { padding-top: 70px; }
+body {
+  padding-top: 70px;
+  padding-bottom: 70px;
+}
 
 .top0 { margin-top:0px; }
 .top5 { margin-top:5px; }

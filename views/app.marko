@@ -73,7 +73,7 @@
 
 <macro navbarItem(route, text, icon, isExplicitIcon)>
     <li data-bind="css: { active: '${route}'.split('/').slice(-1)[0] == currentView() }">
-        <a href="#" data-bind="click: selectViewRoute.bind(null, '${route}')">
+        <a href="#" data-bind="click: Ui.selectRoute.bind(null, '${route}')">
             <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
             ${text}
         </a>
@@ -134,6 +134,17 @@
     </nav>
 </macro>
 
+<macro navbarCollapseToggleBtn(target)>
+    <button type="button" class="navbar-toggle collapsed"
+        data-toggle="collapse" data-target="${target}">
+
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"/>
+        <span class="icon-bar"/>
+        <span class="icon-bar"/>
+    </button>
+</macro>
+
 <html>
     <head>
         <meta charset="utf-8"/>
@@ -149,19 +160,12 @@
         <nav class="navbar navbar-default navbar-fixed-top" id="app-navbar">
             <div class="container">
                 <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed"
-                        data-toggle="collapse" data-target=".navbar-collapse">
-
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"/>
-                        <span class="icon-bar"/>
-                        <span class="icon-bar"/>
-                    </button>
+                    <navbarCollapseToggleBtn target="#app-navbar-collapse"/>
                     <a class="navbar-brand" href="#/page/home">
                         ${i18n.t('app.navBar.title')}
                     </a>
                 </div>
-                <div class="navbar-collapse collapse">
+                <div class="navbar-collapse collapse" id="app-navbar-collapse">
                     <ul class="nav navbar-nav">
                         <navbarItem route="/page/home" text="${i18n.t('app.navBar.home')}" icon="home"/>
 
@@ -194,6 +198,7 @@
 
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
+                        <!-- Company menu -->
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                                 <iconFwLg icon="briefcase" extraClass="inline-icon-left-fix"/>
@@ -215,6 +220,8 @@
                                 <navbarItem route="/page/companies" text="${i18n.t('app.navBar.companyAdmin')}" icon="briefcase"/>
                             </ul>
                         </li>
+
+                        <!-- User menu -->
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
                                 <iconFwLg icon="user" extraClass="inline-icon-left-fix"/>
@@ -273,16 +280,13 @@
                                                     <p>
                                                         <span data-bind="html: companiesTextTrans"/>
                                                     </p>
-                                                    <div class="btn-group"
-                                                        role="group">
+                                                    <div class="btn-group" role="group">
 
-                                                        <a href="#/page/company_new"
-                                                            type="button"
-                                                            class="btn btn-success">
+                                                        <button type="button" class="btn btn-success"
+                                                            data-bind="click: Ui.selectRoute.bind(null, '/page/company_new')">
                                                             <icon icon="plus" extraClass="inline-icon-left-fix"/>
                                                             ${i18n.t('app.gettingStarted.companiesNewCompanyBtn')}
-
-                                                        </a>
+                                                        </button>
 
                                                     </div>
                                                 </div>
@@ -301,10 +305,11 @@
                                                             <span data-bind="html: customersTextTrans"/>
                                                         </p>
                                                         <div class="btn-group" role="group">
-                                                            <a href="#/page/customer_new" type="button" class="btn btn-success">
+                                                            <button type="button"  class="btn btn-success"
+                                                                    data-bind="click: Ui.selectRoute.bind(null, '/page/customer_new')">
                                                                 <icon icon="plus" extraClass="inline-icon-left-fix"/>
                                                                 ${i18n.t('app.gettingStarted.customersNewCustomerBtn')}
-                                                            </a>
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -323,10 +328,11 @@
                                                             <span data-bind="html: invoicesTextTrans"/>
                                                         </p>
                                                         <div class="btn-group" role="group">
-                                                            <a href="#/page/invoice_new" type="button" class="btn btn-success">
+                                                            <button type="button" class="btn btn-success"
+                                                                data-bind="click: Ui.selectRoute.bind(null, '/page/invoice_new')">
                                                                 <icon icon="plus" extraClass="inline-icon-left-fix"/>
                                                                 ${i18n.t('app.gettingStarted.invoicesNewInvoiceBtn')}
-                                                            </a>
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -373,74 +379,110 @@
                     </div>
 
                 </div>
+
                 <div id="app-companies"
                     data-bind="visible: currentView() == 'companies'"
                     style="display: none">
 
-                    <form>
-                        <p>
-                            <table class="table table-striped table-condensed">
-                                <thead>
-                                    <tr>
-                                        <th/>
-                                        <th>
-                                            ${i18n.t('app.companyList.nameCol')}
-                                        </th>
-                                        <th>
-                                            ${i18n.t('app.companyList.addrCol', {nr: 1})}
-                                        </th>
-                                        <th>
-                                            ${i18n.t('app.companyList.addrCol', {nr: 2})}
-                                        </th>
-                                        <th>
-                                            ${i18n.t('app.companyList.addrCol', {nr: 3})}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody data-bind="foreach: companyList">
-                                    <tr data-bind="css: { info: _id() == $parent.activeCompanyId() }">
-                                        <td>
-                                            <div class="btn-group btn-group-sm" role="group">
-                                                <a class="btn btn-info" data-bind="attr: { href: '#/page/company_show/' + _id() }">
-                                                    <icon icon="pencil"/>
-                                                </a>
-                                                <button type="button"
-                                                    class="btn btn-info" data-bind="click: $parent.activateCompany, disable: _id() == $parent.activeCompanyId()">
-                                                    <icon icon="check"/>
-                                                </button>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: name"/>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: addr1"/>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: addr2"/>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: addr3"/>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </p>
-                        <div class="btn-group" role="group">
-                            <a href="#/page/company_new" type="button" class="btn btn-success">
-                                <icon icon="plus" extraClass="inline-icon-left-fix"/>
-                                ${i18n.t('app.companyList.newCompanyBtn')}
-                            </a>
+                    <nav class="navbar navbar-default navbar-fixed-bottom">
+                        <div class="container">
+                            <div class="navbar-header">
+                                <navbarCollapseToggleBtn target="#app-companies-bottom-navbar-collapse"/>
+                            </div>
+
+                            <div class="collapse navbar-collapse" id="app-companies-bottom-navbar-collapse">
+                                <form class="navbar-form navbar-left">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-success"
+                                            data-bind="click: Ui.selectRoute.bind(null, '/page/company_new')">
+                                            <icon icon="plus" extraClass="inline-icon-left-fix"/>
+                                            ${i18n.t('app.companyList.newCompanyBtn')}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
+                    </nav>
+
+                    <form>
+                        <table class="table table-striped table-condensed">
+                            <colgroup>
+                                <!-- Operations -->
+                                <col class="col-md-2"/>
+                                <!-- Name -->
+                                <col class="col-md-5"/>
+                                <!-- Addr -->
+                                <col class="col-md-5"/>
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th/>
+                                    <th>
+                                        ${i18n.t('app.companyList.nameCol')}
+                                    </th>
+                                    <th>
+                                        ${i18n.t('app.companyList.addrCol')}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: companyList">
+                                <tr data-bind="css: { info: _id() == $parent.activeCompanyId() }">
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button type="button"
+                                                class="btn btn-info"
+                                                data-bind="click: Ui.selectRoute.bind(null, '/page/company_show/' + _id())">
+                                                <icon icon="pencil"/>
+                                            </button>
+                                            <button type="button"
+                                                class="btn btn-info" data-bind="click: $parent.activateCompany, disable: _id() == $parent.activeCompanyId()">
+                                                <icon icon="check"/>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static" data-bind="text: name"/>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static">
+                                            <span data-bind="if: addr1().length > 0">
+                                                <span data-bind="text: addr1"/><br/>
+                                            </span>
+                                            <span data-bind="if: addr2().length > 0">
+                                                <span data-bind="text: addr2"/><br/>
+                                            </span>
+                                            <span data-bind="text: addr3"/>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </form>
 
                 </div>
+
                 <div id="app-company_new" data-bind="visible: currentView() == 'company_new' || (currentView() != undefined && currentView().search('company_show') == 0)"
                     style="display: none">
+
+                    <nav class="navbar navbar-default navbar-fixed-bottom">
+                        <div class="container">
+                            <div class="navbar-header">
+                                <navbarCollapseToggleBtn target="#app-company_new-bottom-navbar-collapse"/>
+                            </div>
+
+                            <div class="collapse navbar-collapse" id="app-company_new-bottom-navbar-collapse">
+                                <form class="navbar-form navbar-left">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-success"
+                                            data-bind="click: saveCompany">
+                                            <icon icon="save" extraClass="inline-icon-left-fix"/>
+                                            ${i18n.t('app.company.companySaveBtn')}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </nav>
 
                     <div class="panel-group">
                         <div class="panel panel-default">
@@ -833,98 +875,155 @@
                             </div>
                         </div>
                     </div>
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-success"
-                            data-bind="click: saveCompany">
-                            <icon icon="save" extraClass="inline-icon-left-fix"/>
-                            ${i18n.t('app.company.companySaveBtn')}
-                        </button>
-                    </div>
-
                 </div>
+
                 <div id="app-customer"
                     data-bind="visible: currentView() == 'customers'"
                     style="display: none">
 
-                    <form>
-                        <p>
-                            <table class="table table-striped table-condensed">
-                                <thead>
-                                    <tr>
-                                        <th/>
-                                        <th>
-                                            ${i18n.t('app.customerList.cidCol')}
-                                        </th>
-                                        <th>
-                                            ${i18n.t('app.customerList.nameCol')}
-                                        </th>
-                                        <th>
-                                            ${i18n.t('app.customerList.addrCol', {nr: 1})}
-                                        </th>
-                                        <th>
-                                            ${i18n.t('app.customerList.addrCol', {nr: 2})}
-                                        </th>
-                                        <th>
-                                            ${i18n.t('app.customerList.addrCol', {nr: 3})}
-                                        </th>
-                                        <th>
-                                            ${i18n.t('app.customerList.phoneCol', {nr: 1})}
-                                        </th>
-                                        <th>
-                                            ${i18n.t('app.customerList.phoneCol', {nr: 2})}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody data-bind="foreach: customerList">
-                                    <tr>
-                                        <td>
-                                            <div class="btn-group btn-group-sm" role="group">
-                                                <a class="btn btn-info" data-bind="attr: { href: '#/page/customer_show/' + _id() }">
-                                                    <icon icon="pencil"/>
-                                                </a>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static"
-                                                data-bind="text: cid, visible: isValid"/>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static" data-bind="text: name, visible: isValid"/>
-                                            <span data-bind="if: isInactive" class="label label-default label-fix">
-                                                ${i18n.t('app.customerList.inactiveLbl')}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static" data-bind="text: addr1, visible: isValid"/>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static" data-bind="text: addr2, visible: isValid"/>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static" data-bind="text: addr3, visible: isValid"/>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static" data-bind="text: phone1, visible: isValid"/>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static" data-bind="text: phone2, visible: isValid"/>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </p>
-                        <div class="btn-group" role="group">
-                            <a href="#/page/customer_new" type="button"
-                                class="btn btn-success">
-                                <icon icon="plus" extraClass="inline-icon-left-fix"/>
-                                ${i18n.t('app.customerList.newCustomerBtn')}
-                            </a>
+                    <nav class="navbar navbar-default navbar-fixed-bottom">
+                        <div class="container">
+                            <div class="navbar-header">
+                                <navbarCollapseToggleBtn target="#app-customer-bottom-navbar-collapse"/>
+                            </div>
+
+                            <div class="collapse navbar-collapse" id="app-customer-bottom-navbar-collapse">
+                                <form class="navbar-form navbar-left">
+                                    <div class="btn-group" role="group">
+                                        <button type="button"
+                                            class="btn btn-success"
+                                            data-bind="click: Ui.selectRoute.bind(null, '/page/customer_new')">
+                                            <icon icon="plus" extraClass="inline-icon-left-fix"/>
+                                            ${i18n.t('app.customerList.newCustomerBtn')}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
+                    </nav>
+
+                    <form>
+                        <table class="table table-striped table-condensed">
+                            <colgroup>
+                                <!-- Operations -->
+                                <col class="col-md-1"/>
+                                <!-- Nr -->
+                                <col class="col-md-1"/>
+                                <!-- Name -->
+                                <col class="col-md-2"/>
+                                <!-- Addr -->
+                                <col class="col-md-3"/>
+                                <!-- Phone -->
+                                <col class="col-md-2"/>
+                                <!-- Flags -->
+                                <col class="col-md-3"/>
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th/>
+                                    <th>
+                                        ${i18n.t('app.customerList.cidCol')}
+                                        <button type="button"
+                                            class="btn btn-default btn-xs" data-bind="click: doSortToggle('cid')">
+                                            <condIcon cond="customerListSort() !== 'cidAsc'" icon="sort-amount-asc"/>
+                                            <condIcon cond="customerListSort() === 'cidAsc'" icon="sort-amount-desc"/>
+                                        </button>
+                                    </th>
+                                    <th>
+                                        ${i18n.t('app.customerList.nameCol')}
+                                        <button type="button"
+                                            class="btn btn-default btn-xs" data-bind="click: doSortToggle('name')">
+                                            <condIcon cond="customerListSort() !== 'nameAsc'" icon="sort-amount-asc"/>
+                                            <condIcon cond="customerListSort() === 'nameAsc'" icon="sort-amount-desc"/>
+                                        </button>
+                                    </th>
+                                    <th>
+                                        ${i18n.t('app.customerList.addrCol')}
+                                    </th>
+                                    <th>
+                                        ${i18n.t('app.customerList.phoneCol')}
+                                    </th>
+                                    <th/>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: customerList">
+                                <tr data-bind="visible: isValid">
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button type="button" class="btn btn-info"
+                                                data-bind="click: Ui.selectRoute.bind(null, '/page/customer_show/' + _id())">
+                                                <icon icon="pencil"/>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static" data-bind="text: cid"/>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static" data-bind="text: name"/>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static">
+                                            <span data-bind="if: addr1().length > 0">
+                                                <span data-bind="text: addr1"/><br/>
+                                            </span>
+                                            <span data-bind="if: addr2().length > 0">
+                                                <span data-bind="text: addr2"/><br/>
+                                            </span>
+                                            <span data-bind="text: addr3"/>
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static">
+                                            <span data-bind="if: phone1().length > 0">
+                                                <span data-bind="text: phone1"/><br/>
+                                            </span>
+                                            <span data-bind="if: phone2().length > 0">
+                                                <span data-bind="text: phone2"/><br/>
+                                            </span>
+                                            <span data-bind="text: phone3"/>
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <span data-bind="if: isInactive" class="label label-default label-fix">
+                                            ${i18n.t('app.customerList.inactiveLbl')}
+                                        </span>
+                                        <span data-bind="if: noVat" class="label label-default label-fix">
+                                            ${i18n.t('app.customerList.noVatLbl')}
+                                        </span>
+                                        <span data-bind="if: useReverseCharge" class="label label-default label-fix">
+                                            ${i18n.t('app.customerList.useReverseChargeLbl')}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </form>
 
                 </div>
+
                 <div id="app-customer_new" data-bind="visible: currentView() == 'customer_new' || (currentView() != undefined && currentView().search('customer_show') == 0)"
                     style="display: none">
+
+                    <nav class="navbar navbar-default navbar-fixed-bottom">
+                        <div class="container">
+                            <div class="navbar-header">
+                                <navbarCollapseToggleBtn target="#app-customer_new-bottom-navbar-collapse"/>
+                            </div>
+
+                            <div class="collapse navbar-collapse" id="app-customer_new-bottom-navbar-collapse">
+                                <form class="navbar-form navbar-left">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-success"
+                                            data-bind="click: saveCustomer">
+                                            <icon icon="save" extraClass="inline-icon-left-fix"/>
+                                            ${i18n.t('app.customer.saveBtn')}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </nav>
 
                     <div class="form-horizontal">
                         <div class="panel-group">
@@ -1109,17 +1208,56 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-success"
-                                data-bind="click: saveCustomer">
-                                <icon icon="save" extraClass="inline-icon-left-fix"/>
-                                ${i18n.t('app.customer.saveBtn')}
-                            </button>
-                        </div>
                     </div>
 
                 </div>
+
                 <div id="app-invoices" data-bind="visible: currentView() == 'invoices' || currentView() == 'offers'" style="display: none">
+
+                    <nav class="navbar navbar-default navbar-fixed-bottom">
+                      <div class="container">
+                          <div class="navbar-header">
+                              <navbarCollapseToggleBtn target="#app-invoices-bottom-navbar-collapse"/>
+                          </div>
+
+                          <div class="collapse navbar-collapse" id="app-invoices-bottom-navbar-collapse">
+                              <form class="navbar-form navbar-left">
+                                  <div class="btn-group" role="group">
+                                      <html-comment> ko if: docType() == 'invoice' </html-comment>
+                                          <button type="button" class="btn btn-success"
+                                              data-bind="click: Ui.selectRoute.bind(null, '/page/invoice_new')">
+                                              <icon icon="plus" extraClass="inline-icon-left-fix"/>
+                                              ${i18n.t('app.invoiceList.newDocBtn', {context: 'invoice'})}
+                                          </button>
+                                      <html-comment> /ko </html-comment>
+                                      <html-comment> ko if: docType() == 'offer' </html-comment>
+                                          <button type="button" class="btn btn-success"
+                                              data-bind="click: Ui.selectRoute.bind(null, '/page/offer_new')">
+                                              <icon icon="plus" extraClass="inline-icon-left-fix"/>
+                                              ${i18n.t('app.invoiceList.newDocBtn', {context: 'offer'})}
+                                          </button>
+                                      <html-comment> /ko </html-comment>
+                                  </div>
+                                  <html-comment> ko if: numSelectedDocs() >= 1 </html-comment>
+                                      <div class="btn-group left5" role="group">
+                                          <html-comment> ko if: docType() == 'invoice' </html-comment>
+                                              <button type="button" class="btn btn-default"
+                                                      data-bind="click: doSelectedRowsOp.bind(null, 'pay')">
+                                                  <icon icon="check" extraClass="inline-icon-left-fix"/>
+                                                  ${i18n.t('app.invoiceList.setSelectedPaidBtn')}
+                                              </button>
+                                          <html-comment> /ko </html-comment>
+                                          <button type="button" class="btn btn-default"
+                                                  data-bind="click: doSelectedRowsOp.bind(null, 'lock')">
+                                              <icon icon="lock" extraClass="inline-icon-left-fix"/>
+                                              ${i18n.t('app.invoiceList.setSelectedLockedBtn')}
+                                          </button>
+                                      </div>
+                                  <html-comment> /ko </html-comment>
+                              </form>
+                          </div>
+                      </div>
+                    </nav>
 
                     <div class="row" data-bind="visible: isFilterPaneExpanded">
                         <div class="col-md-12">
@@ -1246,199 +1384,167 @@
                       isVisibleVariable="isFilterPaneExpanded"
                       textShow="${i18n.t('app.invoiceList.filterPaneToggleLbl', {context: 'show'})}"
                       textHide="${i18n.t('app.invoiceList.filterPaneToggleLbl', {context: 'hide'})}"
-                      extraClass="top0 bottom0"/>
+                      extraClass="top0"/>
 
                     <form>
-                        <p>
-                            <table class="table table-striped table-condensed">
-                                <colgroup>
-                                    <!-- Operations -->
-                                    <col class="col-md-2"/>
-                                    <!-- Nr -->
-                                    <col class="col-md-1"/>
-                                    <!-- Date -->
-                                    <col class="col-md-1"/>
-                                    <!-- Customer nr -->
-                                    <col class="col-md-1"/>
-                                    <!-- Customer name -->
-                                    <col class="col-md-2"/>
-                                    <!-- Currency -->
-                                    <col class="col-md-1"/>
-                                    <!-- Total excl VAT -->
-                                    <col class="col-md-2"/>
-                                    <!-- Total VAT -->
-                                    <col class="col-md-2"/>
-                                </colgroup>
-                                <thead>
-                                    <tr>
-                                        <th/>
-                                        <th>
-                                            ${i18n.t('app.invoiceList.colNr')}
-                                            <button type="button" class="btn btn-default btn-xs"
-                                                data-bind="click: doSortToggle('docNr')">
-                                                <condIcon cond="invoiceListSort() !== 'docNrAsc'" icon="sort-amount-asc"/>
-                                                <condIcon cond="invoiceListSort() === 'docNrAsc'" icon="sort-amount-desc"/>
-                                            </button>
-                                        </th>
-                                        <th>
-                                            ${i18n.t('app.invoiceList.colDate')}
-                                            <button type="button" class="btn btn-default btn-xs"
-                                                data-bind="click: doSortToggle('date')">
-                                                <condIcon cond="invoiceListSort() !== 'dateAsc'" icon="sort-amount-asc"/>
-                                                <condIcon cond="invoiceListSort() === 'dateAsc'" icon="sort-amount-desc"/>
-                                            </button>
-                                        </th>
-                                        <th>
-                                            ${i18n.t('app.invoiceList.colCustomerNr')}
-                                            <button type="button" class="btn btn-default btn-xs"
-                                                data-bind="click: doSortToggle('cid')">
-                                                <condIcon cond="invoiceListSort() !== 'cidAsc'" icon="sort-amount-asc"/>
-                                                <condIcon cond="invoiceListSort() === 'cidAsc'" icon="sort-amount-desc"/>
-                                            </button>
-                                        </th>
-                                        <th>
-                                            ${i18n.t('app.invoiceList.colCustomerName')}
-                                            <button type="button"
-                                                class="btn btn-default btn-xs" data-bind="click: doSortToggle('customer')">
-                                                <condIcon cond="invoiceListSort() !== 'customerAsc'" icon="sort-amount-asc"/>
-                                                <condIcon cond="invoiceListSort() === 'customerAsc'" icon="sort-amount-desc"/>
-                                            </button>
-                                        </th>
-                                        <th>
-                                            ${i18n.t('app.invoiceList.colCurrency')}
-                                            <button type="button"
-                                                class="btn btn-default btn-xs" data-bind="click: doSortToggle('currency')">
-                                                <condIcon cond="invoiceListSort() !== 'currencyAsc'" icon="sort-amount-asc"/>
-                                                <condIcon cond="invoiceListSort() === 'currencyAsc'" icon="sort-amount-desc"/>
-                                            </button>
-                                        </th>
-                                        <th>
-                                            ${i18n.t('app.invoiceList.colTotalExclVat')}
-                                            <button type="button"
-                                                class="btn btn-default btn-xs" data-bind="click: doSortToggle('totalExclVat')">
-                                                <condIcon cond="invoiceListSort() !== 'totalExclVatAsc'" icon="sort-amount-asc"/>
-                                                <condIcon cond="invoiceListSort() === 'totalExclVatAsc'" icon="sort-amount-desc"/>
-                                            </button>
-                                        </th>
-                                        <th>
-                                            ${i18n.t('app.invoiceList.colTotalVat')}
-                                            <button type="button"
-                                                class="btn btn-default btn-xs" data-bind="click: doSortToggle('totalVat')">
-                                                <condIcon cond="invoiceListSort() !== 'totalVatAsc'" icon="sort-amount-asc"/>
-                                                <condIcon cond="invoiceListSort() === 'totalVatAsc'" icon="sort-amount-desc"/>
-                                            </button>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody data-bind="foreach: docList()">
-                                    <tr data-bind="if: isVisible(),
-                                                   css: { danger: isExpired, success: isPaid, active: $parent.hoveredDocId() == _id() },
-                                                   click: $parent.selectRow,
-                                                   event: { mouseover: $parent.hoverRow }">
-                                        <td>
-                                            <condIconFw cond="isSelected" icon="check-square-o" extraClass="inline-icon-left-fix"/>
-                                            <condIconFw cond="!isSelected()" icon="square-o" extraClass="inline-icon-left-fix"/>
-                                            <div class="btn-group btn-group-sm right3" role="group">
-                                                <a class="btn btn-info" type="button"
-                                                   data-bind="attr: { href: '#/page/' + docType() + '_show/' + _id() },
-                                                              clickBubble: false">
-                                                    <icon icon="pencil"/>
-                                                </a>
-                                                <a class="btn btn-info"
-                                                   data-bind="click: printDoc, clickBubble: false">
-                                                    <icon icon="print"/>
-                                                </a>
-                                            </div>
-                                            <condLockIcon cond="isLocked" tooltip="${i18n.t('app.invoiceList.isLockedIconTooltip')}"/>
-                                            <condIcon cond="isCredit" icon="credit-card" tooltip="${i18n.t('app.invoiceList.isCreditIconTooltip')}"/>
-                                            <condIcon cond="isCanceled" icon="remove" tooltip="${i18n.t('app.invoiceList.isCanceledIconTooltip')}"/>
-                                            <condIcon cond="isExpired" icon="warning" tooltip="${i18n.t('app.invoiceList.isExpiredIconTooltip')}"/>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static">
-                                                <span data-bind="text: docNr"/>
-                                            </p>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static" data-bind="text: date"/>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static" data-bind="text: customer().cid"/>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static" data-bind="text: customer().name"/>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static" data-bind="text: currency"/>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static" data-bind="text: totalExclVatStr"/>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static" data-bind="text: totalVatStr"/>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="5">
-                                            <p class="form-control-static" data-bind="text: numDocsText"></p>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static">
-                                                <html-comment> ko foreach: totalPerCurrencyText </html-comment>
-                                                    <span data-bind="text: currency"></span><br/>
-                                                <html-comment> /ko </html-comment>
-                                            </p>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static">
-                                                <html-comment> ko foreach: totalPerCurrencyText </html-comment>
-                                                    <span data-bind="text: sumExclVatStr"></span><br/>
-                                                <html-comment> /ko </html-comment>
-                                            </p>
-                                        </td>
-                                        <td>
-                                            <p class="form-control-static">
-                                                <html-comment> ko foreach: totalPerCurrencyText </html-comment>
-                                                    <span data-bind="text: sumVatStr"></span><br/>
-                                                <html-comment> /ko </html-comment>
-                                              </p>
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </p>
-                        <div class="btn-group" role="group">
-                            <html-comment> ko if: docType() == 'invoice' </html-comment>
-                                <a href="#/page/invoice_new" type="button" class="btn btn-success">
-                                    <icon icon="plus" extraClass="inline-icon-left-fix"/>
-                                    ${i18n.t('app.invoiceList.newDocBtn', {context: 'invoice'})}
-                                </a>
-                            <html-comment> /ko </html-comment>
-                            <html-comment> ko if: docType() == 'offer' </html-comment>
-                                <a href="#/page/offer_new" type="button" class="btn btn-success">
-                                    <icon icon="plus" extraClass="inline-icon-left-fix"/>
-                                    ${i18n.t('app.invoiceList.newDocBtn', {context: 'offer'})}
-                                </a>
-                            <html-comment> /ko </html-comment>
-                        </div>
-                        <html-comment> ko if: numSelectedDocs() >= 1 </html-comment>
-                            <div class="btn-group left5" role="group">
-                                <html-comment> ko if: docType() == 'invoice' </html-comment>
-                                    <button type="button" class="btn btn-default"
-                                            data-bind="click: doSelectedRowsOp.bind(null, 'pay')">
-                                        <icon icon="check" extraClass="inline-icon-left-fix"/>
-                                        ${i18n.t('app.invoiceList.setSelectedPaidBtn')}
-                                    </button>
-                                <html-comment> /ko </html-comment>
-                                <button type="button" class="btn btn-default"
-                                        data-bind="click: doSelectedRowsOp.bind(null, 'lock')">
-                                    <icon icon="lock" extraClass="inline-icon-left-fix"/>
-                                    ${i18n.t('app.invoiceList.setSelectedLockedBtn')}
-                                </button>
-                            </div>
-                        <html-comment> /ko </html-comment>
+                        <table class="table table-striped table-condensed">
+                            <colgroup>
+                                <!-- Operations -->
+                                <col class="col-md-2"/>
+                                <!-- Nr -->
+                                <col class="col-md-1"/>
+                                <!-- Date -->
+                                <col class="col-md-1"/>
+                                <!-- Customer nr -->
+                                <col class="col-md-1"/>
+                                <!-- Customer name -->
+                                <col class="col-md-2"/>
+                                <!-- Currency -->
+                                <col class="col-md-1"/>
+                                <!-- Total excl VAT -->
+                                <col class="col-md-2"/>
+                                <!-- Total VAT -->
+                                <col class="col-md-2"/>
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th/>
+                                    <th>
+                                        ${i18n.t('app.invoiceList.colNr')}
+                                        <button type="button" class="btn btn-default btn-xs"
+                                            data-bind="click: doSortToggle('docNr')">
+                                            <condIcon cond="invoiceListSort() !== 'docNrAsc'" icon="sort-amount-asc"/>
+                                            <condIcon cond="invoiceListSort() === 'docNrAsc'" icon="sort-amount-desc"/>
+                                        </button>
+                                    </th>
+                                    <th>
+                                        ${i18n.t('app.invoiceList.colDate')}
+                                        <button type="button" class="btn btn-default btn-xs"
+                                            data-bind="click: doSortToggle('date')">
+                                            <condIcon cond="invoiceListSort() !== 'dateAsc'" icon="sort-amount-asc"/>
+                                            <condIcon cond="invoiceListSort() === 'dateAsc'" icon="sort-amount-desc"/>
+                                        </button>
+                                    </th>
+                                    <th>
+                                        ${i18n.t('app.invoiceList.colCustomerNr')}
+                                        <button type="button" class="btn btn-default btn-xs"
+                                            data-bind="click: doSortToggle('cid')">
+                                            <condIcon cond="invoiceListSort() !== 'cidAsc'" icon="sort-amount-asc"/>
+                                            <condIcon cond="invoiceListSort() === 'cidAsc'" icon="sort-amount-desc"/>
+                                        </button>
+                                    </th>
+                                    <th>
+                                        ${i18n.t('app.invoiceList.colCustomerName')}
+                                        <button type="button"
+                                            class="btn btn-default btn-xs" data-bind="click: doSortToggle('customer')">
+                                            <condIcon cond="invoiceListSort() !== 'customerAsc'" icon="sort-amount-asc"/>
+                                            <condIcon cond="invoiceListSort() === 'customerAsc'" icon="sort-amount-desc"/>
+                                        </button>
+                                    </th>
+                                    <th>
+                                        ${i18n.t('app.invoiceList.colCurrency')}
+                                        <button type="button"
+                                            class="btn btn-default btn-xs" data-bind="click: doSortToggle('currency')">
+                                            <condIcon cond="invoiceListSort() !== 'currencyAsc'" icon="sort-amount-asc"/>
+                                            <condIcon cond="invoiceListSort() === 'currencyAsc'" icon="sort-amount-desc"/>
+                                        </button>
+                                    </th>
+                                    <th>
+                                        ${i18n.t('app.invoiceList.colTotalExclVat')}
+                                        <button type="button"
+                                            class="btn btn-default btn-xs" data-bind="click: doSortToggle('totalExclVat')">
+                                            <condIcon cond="invoiceListSort() !== 'totalExclVatAsc'" icon="sort-amount-asc"/>
+                                            <condIcon cond="invoiceListSort() === 'totalExclVatAsc'" icon="sort-amount-desc"/>
+                                        </button>
+                                    </th>
+                                    <th>
+                                        ${i18n.t('app.invoiceList.colTotalVat')}
+                                        <button type="button"
+                                            class="btn btn-default btn-xs" data-bind="click: doSortToggle('totalVat')">
+                                            <condIcon cond="invoiceListSort() !== 'totalVatAsc'" icon="sort-amount-asc"/>
+                                            <condIcon cond="invoiceListSort() === 'totalVatAsc'" icon="sort-amount-desc"/>
+                                        </button>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach: docList()">
+                                <tr data-bind="if: isVisible(),
+                                               css: { danger: isExpired, success: isPaid, active: $parent.hoveredDocId() == _id() },
+                                               click: $parent.selectRow,
+                                               event: { mouseover: $parent.hoverRow }">
+                                    <td>
+                                        <condIconFw cond="isSelected" icon="check-square-o" extraClass="inline-icon-left-fix"/>
+                                        <condIconFw cond="!isSelected()" icon="square-o" extraClass="inline-icon-left-fix"/>
+                                        <div class="btn-group btn-group-sm right3" role="group">
+                                            <a class="btn btn-info" type="button"
+                                               data-bind="attr: { href: '#/page/' + docType() + '_show/' + _id() },
+                                                          clickBubble: false">
+                                                <icon icon="pencil"/>
+                                            </a>
+                                            <a class="btn btn-info"
+                                               data-bind="click: printDoc, clickBubble: false">
+                                                <icon icon="print"/>
+                                            </a>
+                                        </div>
+                                        <condLockIcon cond="isLocked" tooltip="${i18n.t('app.invoiceList.isLockedIconTooltip')}"/>
+                                        <condIcon cond="isCredit" icon="credit-card" tooltip="${i18n.t('app.invoiceList.isCreditIconTooltip')}"/>
+                                        <condIcon cond="isCanceled" icon="remove" tooltip="${i18n.t('app.invoiceList.isCanceledIconTooltip')}"/>
+                                        <condIcon cond="isExpired" icon="warning" tooltip="${i18n.t('app.invoiceList.isExpiredIconTooltip')}"/>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static">
+                                            <span data-bind="text: docNr"/>
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static" data-bind="text: date"/>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static" data-bind="text: customer().cid"/>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static" data-bind="text: customer().name"/>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static" data-bind="text: currency"/>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static" data-bind="text: totalExclVatStr"/>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static" data-bind="text: totalVatStr"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="5">
+                                        <p class="form-control-static" data-bind="text: numDocsText"></p>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static">
+                                            <html-comment> ko foreach: totalPerCurrencyText </html-comment>
+                                                <span data-bind="text: currency"></span><br/>
+                                            <html-comment> /ko </html-comment>
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static">
+                                            <html-comment> ko foreach: totalPerCurrencyText </html-comment>
+                                                <span data-bind="text: sumExclVatStr"></span><br/>
+                                            <html-comment> /ko </html-comment>
+                                        </p>
+                                    </td>
+                                    <td>
+                                        <p class="form-control-static">
+                                            <html-comment> ko foreach: totalPerCurrencyText </html-comment>
+                                                <span data-bind="text: sumVatStr"></span><br/>
+                                            <html-comment> /ko </html-comment>
+                                          </p>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </form>
 
                 </div>
@@ -1466,6 +1572,55 @@
                                 data-bind="value: ${textVariable}"/>
                         </span>
                     </macro>
+
+                    <nav class="navbar navbar-default navbar-fixed-bottom">
+                      <div class="container">
+                          <div class="navbar-header">
+                              <navbarCollapseToggleBtn target="#app-invoice_new-bottom-navbar-collapse"/>
+                          </div>
+
+                          <div class="collapse navbar-collapse" id="app-invoice_new-bottom-navbar-collapse">
+                              <form class="navbar-form navbar-left">
+                                  <div class="btn-group dropup" role="group">
+                                      <button type="button" class="btn btn-success" data-bind="click: doSaveDoc">
+                                          <icon icon="save" extraClass="inline-icon-left-fix"/>
+                                          ${i18n.t('app.invoice.saveDocBtn')}
+                                      </button>
+                                      <button type="button" class="btn btn-info" data-bind="click: doDocPrint, disable: data._id() == undefined">
+                                          <icon icon="print" extraClass="inline-icon-left-fix"/>
+                                          ${i18n.t('app.invoice.printDocBtn')}
+                                      </button>
+                                      <button type="button" class="btn btn-info" data-bind="click: doCopyDoc, disable: data._id() == undefined">
+                                          <icon icon="copy" extraClass="inline-icon-left-fix"/>
+                                          ${i18n.t('app.invoice.copyDocBtn')}
+                                      </button>
+                                      <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                          <span class="caret"/>
+                                      </button>
+                                      <ul class="dropdown-menu">
+                                          <li data-bind="if: isInvoice() && data._id() != undefined">
+                                              <a href="#" data-bind="click: doInvoiceReminderPrint">
+                                                  <icon icon="print" extraClass="inline-icon-left-fix"/>
+                                                  ${i18n.t('app.invoice.printInvoiceReminderBtn')}
+                                              </a>
+                                          </li>
+                                          <li data-bind="if: isOffer() && data._id() != undefined">
+                                              <a href="#" data-bind="click: doCreateInvoiceFromOffer">
+                                                  <icon icon="cogs" extraClass="inline-icon-left-fix"/>
+                                                  ${i18n.t('app.invoice.createInvoiceFromOfferBtn')}
+                                              </a>
+                                          </li>
+                                      </ul>
+                                  </div>
+                                  <label class="checkbox-inline left7">
+                                      <input type="checkbox" data-bind="checked: data.isLocked"/>
+                                      ${i18n.t('app.invoice.optIsLockedLbl')}
+                                  </label>
+                              </form>
+                          </div>
+                      </div>
+                    </nav>
+
                     <div class="row">
                         <!-- top panel -->
                         <div class="col-md-8">
@@ -2320,53 +2475,31 @@
                         </div>
 
                     </div>
-                    <!-- checkbox panel -->
-                    <div class="row">
-                        <!-- buttons panel -->
-                        <div class="col-md-12">
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-success" data-bind="click: doSaveDoc">
-                                    <icon icon="save" extraClass="inline-icon-left-fix"/>
-                                    ${i18n.t('app.invoice.saveDocBtn')}
-                                </button>
-                                <button type="button" class="btn btn-info" data-bind="click: doDocPrint, disable: data._id() == undefined">
-                                    <icon icon="print" extraClass="inline-icon-left-fix"/>
-                                    ${i18n.t('app.invoice.printDocBtn')}
-                                </button>
-                                <button type="button" class="btn btn-info" data-bind="click: doCopyDoc, disable: data._id() == undefined">
-                                    <icon icon="copy" extraClass="inline-icon-left-fix"/>
-                                    ${i18n.t('app.invoice.copyDocBtn')}
-                                </button>
-                                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <span class="caret"/>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li data-bind="if: isInvoice() && data._id() != undefined">
-                                        <a href="#" data-bind="click: doInvoiceReminderPrint">
-                                            <icon icon="print" extraClass="inline-icon-left-fix"/>
-                                            ${i18n.t('app.invoice.printInvoiceReminderBtn')}
-                                        </a>
-                                    </li>
-                                    <li data-bind="if: isOffer() && data._id() != undefined">
-                                        <a href="#" data-bind="click: doCreateInvoiceFromOffer">
-                                            <icon icon="cogs" extraClass="inline-icon-left-fix"/>
-                                            ${i18n.t('app.invoice.createInvoiceFromOfferBtn')}
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <label class="checkbox-inline left7">
-                                <input type="checkbox" data-bind="checked: data.isLocked"/>
-                                ${i18n.t('app.invoice.optIsLockedLbl')}
-                            </label>
-                        </div>
-                    </div>
-                    <!-- buttons panel -->
-
                 </div>
 
                 <div id="app-invoice_item_group_templates" data-bind="visible: currentView() == 'invoice_item_group_templates'"
                     style="display: none">
+
+                    <nav class="navbar navbar-default navbar-fixed-bottom">
+                        <div class="container">
+                            <div class="navbar-header">
+                                <navbarCollapseToggleBtn target="#app-invoice_item_group_templates-bottom-navbar-collapse"/>
+                            </div>
+
+                            <div class="collapse navbar-collapse" id="app-invoice_item_group_templates-bottom-navbar-collapse">
+                                <form class="navbar-form navbar-left">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-success"
+                                            data-bind="click: newGroup">
+
+                                            <icon icon="plus" extraClass="inline-icon-left-fix"/>
+                                            ${i18n.t('app.groupTemplates.newTemplateBtn')}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </nav>
 
                     <form>
                         <p>
@@ -2603,20 +2736,33 @@
                                 <html-comment> /ko </html-comment>
                             </ul>
                         </p>
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-success"
-                                data-bind="click: newGroup">
-
-                                <icon icon="plus" extraClass="inline-icon-left-fix"/>
-                                ${i18n.t('app.groupTemplates.newTemplateBtn')}
-                            </button>
-                        </div>
                     </form>
 
                 </div>
 
                 <div id="app-articles" data-bind="visible: currentView() == 'articles'"
                     style="display: none">
+
+                    <nav class="navbar navbar-default navbar-fixed-bottom">
+                        <div class="container">
+                            <div class="navbar-header">
+                                <navbarCollapseToggleBtn target="#app-articles-bottom-navbar-collapse"/>
+                            </div>
+
+                            <div class="collapse navbar-collapse" id="app-articles-bottom-navbar-collapse">
+                                <form class="navbar-form navbar-left">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-success"
+                                            data-bind="click: newArticle">
+
+                                            <icon icon="plus" extraClass="inline-icon-left-fix"/>
+                                            ${i18n.t('app.articles.newArticleBtn')}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </nav>
 
                     <div class="row" data-bind="visible: isFilterPaneExpanded">
                         <div class="col-md-12">
@@ -2860,14 +3006,6 @@
                                 <html-comment> /ko </html-comment>
                             </ul>
                         </p>
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-success"
-                                data-bind="click: newArticle">
-
-                                <icon icon="plus" extraClass="inline-icon-left-fix"/>
-                                ${i18n.t('app.articles.newArticleBtn')}
-                            </button>
-                        </div>
                     </form>
 
                 </div>
@@ -2875,6 +3013,19 @@
                 <div id="app-settings"
                     data-bind="visible: currentView() == 'settings'"
                     style="display: none">
+
+                    <nav class="navbar navbar-default navbar-fixed-bottom">
+                        <div class="container">
+                            <div class="navbar-header">
+                                <navbarCollapseToggleBtn target="#app-settings-bottom-navbar-collapse"/>
+                            </div>
+
+                            <div class="collapse navbar-collapse" id="app-settings-bottom-navbar-collapse">
+                                <form class="navbar-form navbar-left">
+                                </form>
+                            </div>
+                        </div>
+                    </nav>
 
                     <div class="page-header">
                         <h1>${i18n.t('app.settings.pageHeader')}</h1>
@@ -3061,6 +3212,19 @@
                         data-bind="visible: currentView() == 'debug'"
                         style="display: none">
 
+                        <nav class="navbar navbar-default navbar-fixed-bottom">
+                            <div class="container">
+                                <div class="navbar-header">
+                                    <navbarCollapseToggleBtn target="#app-debug-bottom-navbar-collapse"/>
+                                </div>
+
+                                <div class="collapse navbar-collapse" id="app-debug-bottom-navbar-collapse">
+                                    <form class="navbar-form navbar-left">
+                                    </form>
+                                </div>
+                            </div>
+                        </nav>
+
                         <div class="page-header">
                             <h1>${i18n.t('app.debugAndTest.pageHeader')}</h1>
                         </div>
@@ -3147,6 +3311,27 @@
                     <div id="app-users"
                         data-bind="visible: currentView() == 'users'"
                         style="display: none">
+
+                        <nav class="navbar navbar-default navbar-fixed-bottom">
+                            <div class="container">
+                                <div class="navbar-header">
+                                    <navbarCollapseToggleBtn target="#app-users-bottom-navbar-collapse"/>
+                                </div>
+
+                                <div class="collapse navbar-collapse" id="app-users-bottom-navbar-collapse">
+                                    <form class="navbar-form navbar-left">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-default"
+                                                data-bind="click: refresh">
+
+                                                <icon icon="refresh" extraClass="inline-icon-left-fix"/>
+                                                ${i18n.t('app.userList.refreshBtn')}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </nav>
 
                         <form>
                             <p>
@@ -3300,14 +3485,6 @@
                                     <html-comment> /ko </html-comment>
                                 </ul>
                             </p>
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-default"
-                                    data-bind="click: refresh">
-
-                                    <icon icon="refresh" extraClass="inline-icon-left-fix"/>
-                                    ${i18n.t('app.userList.refreshBtn')}
-                                </button>
-                            </div>
                         </form>
 
                     </div>
@@ -3315,50 +3492,61 @@
                         data-bind="visible: currentView() == 'invites'"
                         style="display: none">
 
-                        <form>
-                            <p>
-                                <table class="table table-striped table-condensed">
-                                    <thead>
-                                        <tr>
-                                            <th>
-                                                ${i18n.t('app.inviteList.emailCol')}
-                                            </th>
-                                            <th>
-                                                ${i18n.t('app.inviteList.licenseCol')}
-                                            </th>
-                                            <th>
-                                                ${i18n.t('app.inviteList.isAdminCol')}
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody data-bind="foreach: inviteList">
-                                        <tr>
-                                            <td>
-                                                <p class="form-control-static"
-                                                    data-bind="text: email"/>
-                                            </td>
-                                            <td>
-                                                <p class="form-control-static"
-                                                    data-bind="text: license"/>
-                                            </td>
-                                            <td>
-                                                <p class="form-control-static">
-                                                    <condCheckIcon cond="isAdmin"/>
-                                                </p>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </p>
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-default"
-                                    data-bind="click: refresh">
+                        <nav class="navbar navbar-default navbar-fixed-bottom">
+                            <div class="container">
+                                <div class="navbar-header">
+                                    <navbarCollapseToggleBtn target="#app-invites-bottom-navbar-collapse"/>
+                                </div>
 
-                                    <icon icon="refresh" extraClass="inline-icon-left-fix"/>
-                                    ${i18n.t('app.inviteList.refreshBtn')}
-                                </button>
+                                <div class="collapse navbar-collapse" id="app-invites-bottom-navbar-collapse">
+                                    <form class="navbar-form navbar-left">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-default"
+                                                data-bind="click: refresh">
+
+                                                <icon icon="refresh" extraClass="inline-icon-left-fix"/>
+                                                ${i18n.t('app.inviteList.refreshBtn')}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
-                        </form>
+                        </nav>
+
+                        <p>
+                            <table class="table table-striped table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            ${i18n.t('app.inviteList.emailCol')}
+                                        </th>
+                                        <th>
+                                            ${i18n.t('app.inviteList.licenseCol')}
+                                        </th>
+                                        <th>
+                                            ${i18n.t('app.inviteList.isAdminCol')}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody data-bind="foreach: inviteList">
+                                    <tr>
+                                        <td>
+                                            <p class="form-control-static"
+                                                data-bind="text: email"/>
+                                        </td>
+                                        <td>
+                                            <p class="form-control-static"
+                                                data-bind="text: license"/>
+                                        </td>
+                                        <td>
+                                            <p class="form-control-static">
+                                                <condCheckIcon cond="isAdmin"/>
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </p>
 
                     </div>
                 </div>

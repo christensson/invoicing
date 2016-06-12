@@ -267,7 +267,7 @@
         },
         "companyList": {
             "nameCol": "Företagsnamn",
-            "addrCol": "Adress {{nr}}",
+            "addrCol": "Adress",
             "newCompanyBtn": "Nytt företag",
             "getNok": "Misslyckades med att hämta företag!"
         },
@@ -311,9 +311,11 @@
         "customerList": {
             "cidCol": "Nr",
             "nameCol": "Namn",
-            "addrCol": "Adress {{nr}}",
-            "phoneCol": "Telefon {{nr}}",
+            "addrCol": "Adress",
+            "phoneCol": "Telefon",
             "inactiveLbl": "Inaktiv",
+            "noVatLbl": "Exkl moms",
+            "useReverseChargeLbl": "Omvänd skattskylldighet",
             "newCustomerBtn": "Ny kund",
             "getNok": "Misslyckades med att hämta kunder!",
             "getNok_noCompany": "Misslyckades med att hämta kunder! Företag ej valt eller ogiltigt."

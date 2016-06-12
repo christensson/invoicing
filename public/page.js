@@ -65,6 +65,10 @@ var UiOp = function() {
       $( itemSelector ).focus();
     }
   };
+
+  self.selectRoute = function(route) {
+    location.hash = route;
+  };
 };
 
 var Ui = new UiOp();
@@ -1339,6 +1343,7 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
 
   // Customer part
   self.customerList = ko.observableArray();
+  self.customerListSort = ko.observable('cidAsc');
 
   cache.on('set:' + Cache.CUSTOMERS(), function(customers, ttl) {
     Log.info("CustomerListViewModel - event - set:" + Cache.CUSTOMERS());
@@ -1387,6 +1392,42 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
       Notify_showMsg('info', t("app.customerList.getNok", {context: "noCompany"}));
       browserNavigateBack();
     }
+  };
+
+  self.doSortToggle = function(field) {
+    if (self.customerListSort() === field + 'Asc') {
+      self.customerListSort(field + 'Desc');
+    } else {
+      self.customerListSort(field + 'Asc');
+    }
+  };
+
+  self.customerListSort.subscribe(function(newVal) {
+    Log.info("CustomerListViewModel - customerListSort.subscribe=" + JSON.stringify(newVal));
+    // Sort according to compare method.
+    self.customerList.sort(self[newVal + 'Compare']);
+  });
+
+  self.cidAscCompare = function(aRow, bRow) {
+    return aRow.cid() - bRow.cid();
+  };
+
+  self.cidDescCompare = function(aRow, bRow) {
+    return self.cidAscCompare(bRow, aRow);
+  };
+
+  self.nameAscCompare = function(aRow, bRow) {
+    if (aRow.name() < bRow.name()) {
+      return -1;
+    } else if (aRow.name() > bRow.name()) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+
+  self.nameDescCompare = function(aRow, bRow) {
+    return self.nameAscCompare(bRow, aRow);
   };
 };
 
@@ -4387,14 +4428,6 @@ var NavViewModel = function() {
   self.activeCompanyName = ko.observable(t('app.navBar.noCompanyName'));
   self.userName = ko.observable(cfg.user.name);
   self.companyList = ko.observableArray();
-
-  self.selectView = function(view) {
-    location.hash = view.name;
-  };
-  
-  self.selectViewRoute = function(route) {
-    location.hash = route;
-  };
 
   self.activeCompany.subscribe(function(c) {
     if (c != undefined) {
