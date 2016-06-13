@@ -445,7 +445,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
     x.box(margin, startY, detailsWidth - 1, endY - startY, {thickness: thickness, fill: "#a8a8a8", fillOpacity: 0});
   };
 
-  var groupHeader = function(x, r, withTitle, invoiceHasVat) {
+  var groupHeader = function(x, r, withTitle, invoiceHasVat, renderGroupBox) {
     // Group header
     var detailsColLbl = [
       r.hasDesc ? r.descColLbl : "",
@@ -463,7 +463,11 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
       x.fontSize(style.details.groupTitle.fontSize);
       var groupTitle = r.title;
       if (r.hasTitleExtraField) {
-        groupTitle = groupTitle + " " + r.titleExtraField;
+        // Only separate title and titleExtraField with space if title exist
+        if (groupTitle && groupTitle !== "") {
+          groupTitle = groupTitle + " ";
+        }
+        groupTitle = groupTitle + r.titleExtraField;
       }
       if (groupTitle && groupTitle !== "") {
         x.print(groupTitle, {fontBold: 1, border: 0, wrap: 1, font: style.details.groupTitle.font});
@@ -471,7 +475,9 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
     }
     if (anyDetailHeader) {
       var groupHeaderTopY = x.getCurrentY();
-      drawGroupHLine(x, x.getCurrentY(), detailsGroupHeaderTopLineThickness);
+      if (renderGroupBox) {
+        drawGroupHLine(x, x.getCurrentY(), detailsGroupHeaderTopLineThickness);
+      }
       x.fontSize(style.details.header.fontSize);
       var printHeader = function(isDummy) {
         x.addY(detailsGroupHeaderTopPadding);
@@ -500,22 +506,30 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
           ", will render at y=" + groupHeaderTopY);
       }
       // Gray box is background...
-      x.box(margin - 1 + detailsBarsLineThickness,
-            groupHeaderTopY + detailsGroupHeaderTopLineThickness,
-            detailsWidth - detailsBarsLineThickness,
-            headerHeight - detailsGroupHeaderTopLineThickness - detailsGroupHeaderBottomLineThickness,
-            {thickness: 0, fill: detailsGroupHeaderFillColor});
+      if (renderGroupBox) {
+        x.box(margin - 1 + detailsBarsLineThickness,
+              groupHeaderTopY + detailsGroupHeaderTopLineThickness,
+              detailsWidth - detailsBarsLineThickness,
+              headerHeight - detailsGroupHeaderTopLineThickness - detailsGroupHeaderBottomLineThickness,
+              {thickness: 0, fill: detailsGroupHeaderFillColor});
+      }
       // Draw header on-top of gray box
       x.setCurrentY(groupHeaderTopY);
-      drawGroupHLine(x, x.getCurrentY(), detailsGroupHeaderTopLineThickness);
+      if (renderGroupBox) {
+        drawGroupHLine(x, x.getCurrentY(), detailsGroupHeaderTopLineThickness);
+      }
       printHeader(false);
 
-      drawGroupDetailBars(x, groupHeaderTopY, x.getCurrentY(), detailsBarsLineThickness);
+      if (renderGroupBox) {
+        drawGroupDetailBars(x, groupHeaderTopY, x.getCurrentY(), detailsBarsLineThickness);
+      }
     }
-    drawGroupHLine(x, x.getCurrentY() - detailsGroupHeaderBottomLineThickness, detailsGroupHeaderBottomLineThickness);
+    if (renderGroupBox) {
+      drawGroupHLine(x, x.getCurrentY() - detailsGroupHeaderBottomLineThickness, detailsGroupHeaderBottomLineThickness);
+    }
   };
 
-  var invoiceDetails = function (x, r, invoiceHasVat) {
+  var invoiceDetails = function (x, r, invoiceHasVat, renderGroupBox) {
     if (r.isValid) {
       x.fontSize(style.details.items.fontSize);
       var styleColData = function(desc, width, align) {
@@ -551,18 +565,23 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
       }
       var oldStrokeColor = x.strokeColor();
       x.strokeColor(detailsSeparatorLineColor);
-      drawGroupHLine(x, x.getCurrentY(), detailsSeparatorLineThickness, true);
+      if (renderGroupBox) {
+        drawGroupHLine(x, x.getCurrentY(), detailsSeparatorLineThickness, true);
+      }
       x.strokeColor(oldStrokeColor);
-      drawGroupDetailBars(x, y1, x.getCurrentY(), detailsBarsLineThickness);
+      if (renderGroupBox) {
+        drawGroupDetailBars(x, y1, x.getCurrentY(), detailsBarsLineThickness);
+      }
     }
   };
 
   var invoiceGroups = function ( x, r ) {
     if (r.isValid) {
       var invoiceHasVat = !invoice.customer.useReverseCharge && !invoice.customer.noVat
-      groupHeader(x, r, true, invoiceHasVat);
+      var renderGroupBox = !r.noGroupBox;
+      groupHeader(x, r, true, invoiceHasVat, renderGroupBox);
       for (var i = 0; i < r.invoiceItems.length; i++) {
-        invoiceDetails(x, r.invoiceItems[i], invoiceHasVat);
+        invoiceDetails(x, r.invoiceItems[i], invoiceHasVat, renderGroupBox);
       }
 
       if (r.hasTotal && r.totalExclVat !== undefined && r.totalExclVat !== null) {
@@ -575,9 +594,13 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
           {data: getStr("groupSumLbl"), width: detailsSummaryCaptionColWidth, align: x.right, fontBold: style.details.groupSummary.bold, font: style.details.groupSummary.caption.font},
           {data: totalExclVatStr, width: detailsSummaryValueColWidth, align: x.right, font: style.details.groupSummary.value.font}
         ], {fontBold: 0, border: debugBorderWidth, wrap: 1, padding: 2} );
-        drawGroupDetailBars(x, groupSummaryTopY, x.getCurrentY(), detailsBarsLineThickness);
+        if (renderGroupBox) {
+          drawGroupDetailBars(x, groupSummaryTopY, x.getCurrentY(), detailsBarsLineThickness);
+        }
       }
-      drawGroupHLine(x, x.getCurrentY(), detailsGroupSummaryBottomLineThickness);
+      if (renderGroupBox) {
+        drawGroupHLine(x, x.getCurrentY(), detailsGroupSummaryBottomLineThickness);
+      }
     }
   };
 

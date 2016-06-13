@@ -2048,6 +2048,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
   self.totalColLbl = ko.observable();
 
   self.hasTitleExtraField = ko.observable();
+  self.noGroupBox = ko.observable();
   self.hasDesc = ko.observable();
   self.hasPrice = ko.observable();
   self.hasCount = ko.observable();
@@ -2085,6 +2086,11 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
 
     self.titleExtraField(data.titleExtraField);
     self.hasTitleExtraField(data.hasTitleExtraField);
+    if (data.noGroupBox) {
+      self.noGroupBox(data.noGroupBox);
+    } else {
+      self.noGroupBox(false);
+    }
 
     self.descColLbl(data.descColLbl);
     self.priceColLbl(data.priceColLbl);
@@ -2127,6 +2133,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
       isTextOnlyDefault: false,
       titleExtraField: "",
       hasTitleExtraField: false,
+      noGroupBox: false,
       descColLbl: t("app.groupTemplates.descCol"),
       priceColLbl: t("app.groupTemplates.priceCol"),
       countColLbl: t("app.groupTemplates.countCol"),
@@ -2281,6 +2288,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
       isTextOnlyDefault : self.isTextOnlyDefault(),
       titleExtraField : self.titleExtraField(),
       hasTitleExtraField : self.hasTitleExtraField(),
+      noGroupBox : self.noGroupBox(),
       descColLbl : self.descColLbl(),
       priceColLbl : self.priceColLbl(),
       countColLbl : self.countColLbl(),
@@ -2717,6 +2725,9 @@ var InvoiceDataViewModel = function() {
       isValid: true,
       isQuickButton: false,
       isTextOnlyDefault: true,
+      titleExtraField: "",
+      hasTitleExtraField: false,
+      noGroupBox: false,
       descColLbl: "",
       priceColLbl: "",
       countColLbl: "",
@@ -3944,6 +3955,9 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
           isValid: true,
           isQuickButton: false,
           isTextOnlyDefault: false,
+          titleExtraField: "",
+          hasTitleExtraField: false,
+          noGroupBox: false,
           descColLbl: "Beskrivning",
           priceColLbl: "Á-pris",
           countColLbl: "Antal",

@@ -1919,6 +1919,12 @@
                                                                         ${i18n.t('app.invoice.groupEditIsTextOnlyDefaultCheckLbl')}
                                                                     </label>
                                                                 </div>
+                                                                <div class="checkbox input-sm bottom0 top0">
+                                                                    <label>
+                                                                        <input type="checkbox" data-bind="checked: noGroupBox"/>
+                                                                        ${i18n.t('app.invoice.groupEditNoGroupBoxCheckLbl')}
+                                                                    </label>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -2709,10 +2715,16 @@
                                                     ${i18n.t('app.groupTemplates.isQuickButtonCheckLbl')}
                                                 </label>
                                             </div>
-                                            <div class="checkbox input-sm top0">
+                                            <div class="checkbox input-sm bottom0 top0">
                                                 <label>
                                                     <input type="checkbox" data-bind="checked: isTextOnlyDefault"/>
                                                     ${i18n.t('app.groupTemplates.isTextOnlyDefaultCheckLbl')}
+                                                </label>
+                                            </div>
+                                            <div class="checkbox input-sm top0">
+                                                <label>
+                                                    <input type="checkbox" data-bind="checked: noGroupBox"/>
+                                                    ${i18n.t('app.groupTemplates.noGroupBoxCheckLbl')}
                                                 </label>
                                             </div>
                                         </div>
