@@ -1590,14 +1590,16 @@
                                           <icon icon="print" extraClass="inline-icon-left-fix"/>
                                           ${i18n.t('app.invoice.printDocBtn')}
                                       </button>
-                                      <button type="button" class="btn btn-info" data-bind="click: doCopyDoc, disable: data._id() == undefined">
-                                          <icon icon="copy" extraClass="inline-icon-left-fix"/>
-                                          ${i18n.t('app.invoice.copyDocBtn')}
-                                      </button>
                                       <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                           <span class="caret"/>
                                       </button>
                                       <ul class="dropdown-menu">
+                                          <li data-bind="if: data._id() != undefined">
+                                              <a href="#" data-bind="click: doCopyDoc">
+                                                  <icon icon="copy" extraClass="inline-icon-left-fix"/>
+                                                  ${i18n.t('app.invoice.copyDocBtn')}
+                                              </a>
+                                          </li>
                                           <li data-bind="if: isInvoice() && data._id() != undefined">
                                               <a href="#" data-bind="click: doInvoiceReminderPrint">
                                                   <icon icon="print" extraClass="inline-icon-left-fix"/>
@@ -1612,9 +1614,13 @@
                                           </li>
                                       </ul>
                                   </div>
-                                  <label class="checkbox-inline left7">
+                                  <label class="checkbox-inline left10">
                                       <input type="checkbox" data-bind="checked: data.isLocked"/>
                                       ${i18n.t('app.invoice.optIsLockedLbl')}
+                                  </label>
+                                  <label class="checkbox-inline" data-bind="if: isInvoice">
+                                      <input type="checkbox" data-bind="checked: data.isPaid"/>
+                                      ${i18n.t('app.invoice.optIsPaidLbl')}
                                   </label>
                               </form>
                           </div>
@@ -2313,16 +2319,10 @@
                                                     ${i18n.t('app.invoice.optIsCreditLbl')}
                                                 </label>
                                             </div>
-                                            <div class="checkbox">
+                                            <div class="checkbox bottom0">
                                                 <label>
                                                     <input type="checkbox" value data-bind="checked: data.isCanceled, disable: data.isLocked"/>
                                                     ${i18n.t('app.invoice.optIsCanceledLbl')}
-                                                </label>
-                                            </div>
-                                            <div class="checkbox bottom0" data-bind="if: isInvoice">
-                                                <label>
-                                                    <input type="checkbox" data-bind="checked: data.isPaid"/>
-                                                    ${i18n.t('app.invoice.optIsPaidLbl')}
                                                 </label>
                                             </div>
                                         </div>
