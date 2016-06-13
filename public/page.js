@@ -4006,13 +4006,22 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   self.syncCustomerIdInput = function() {
     Log.info("InvoiceNewViewModel - syncCustomerIdInput");
     if (self.data.customer() !== undefined) {
+      var customerFound = false;
       var cid = self.data.customer().cid;
       for (var i = 0; i < self.customerList().length; i++) {
         if (cid === self.customerList()[i].data.cid) {
           Log.info("InvoiceNewViewModel - syncCustomerIdInput: cid=" + cid + " found");
           self.selectedCustomer(self.customerList()[i]);
+          customerFound = true;
           break;
         }
+      }
+
+      if (!customerFound) {
+        // Customer might be inactive,
+        // add it it first in mapped customer list and select it
+        self.customerList.unshift(new InvoiceCustomerModel(self.data.customer()));
+        self.selectedCustomer(self.customerList()[0]);
       }
     } else {
       Log.info("InvoiceNewViewModel - syncCustomerIdInput: customer is undefined");        
