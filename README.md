@@ -9,6 +9,7 @@
 * Bootstrap: http://getbootstrap.com (CSS, Glyphicons)
 * Director: https://github.com/flatiron/director (Routing)
 * Locale flag icons: http://www.famfamfam.com/lab/icons/flags/
+* Font Awesome: http://fontawesome.io/icons/
 
 ### Server
 * Express JS: http://expressjs.com/4x/api.html
@@ -37,21 +38,3 @@
 * app.js - Binds server code together, all get/put/post handlers
 * functions.js - Authentication logic
 * mydb.js - Database abstraction
-
-## TODO
-- [x] Add more fields to company that needs to show on invoice: vat reg nr, custom text, ...
-- [x] Feature: Currency rounding for totals ("öresutjämning")
-- [ ] Feature: Currency rounding improvement: optional, more variants since "öresutjämning" doesn't work that good for more valuable currencies...
-- [ ] Feature: Configurable currencies, default selected per customer
-- [x] Translations
-- [ ] Translate invoice
-- [x] Settings: ?
-- [ ] Feature: Invoice detail types
-- [x] Feature: Copy invoice (SHA: 494f491c20950cda86aaefde82a05b5708396572)
-- [x] Feature: More authentication methods (other than local)
-- [x] Fix customer input. Proper form is needed, not just table view.
-- [ ] Fix company input. Currently the logo has to be uploaded in a separate form. The upload should be made using the same save button.
-- [x] Add licenced features, demo invoice
-
-## Bugs
-Use GitHub issue tracker.
