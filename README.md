@@ -29,6 +29,7 @@
 * Main application
   * public/page.js
   * views/app.marko
+  
 
 * Notifications (used both in signin and main application)
   * public/notification.js
@@ -38,3 +39,5 @@
 * app.js - Binds server code together, all get/put/post handlers
 * functions.js - Authentication logic
 * mydb.js - Database abstraction
+* reporter.js - Generates invoice and offer reports
+* log.js - Logging
