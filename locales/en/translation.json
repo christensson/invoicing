@@ -236,6 +236,7 @@
             "logoSelectPlaceholder": "Select logo...",
             "logoUploadBtn": "Upload",
             "logoImgAltText": "Company Logo",
+            "logoScaleLbl": "Logo size in percent relative to the maximum size",
             "logoUploadCompanyNotSavedText": [
                 "It's not possible to select a logo until the company is created.",
                 "First, create the company by clicking save. Then select a logo."],
@@ -247,6 +248,7 @@
             "saveOk_delete": "Company <strong>{{name}}</strong> removed.",
             "saveNok": "Company save failed!",
             "saveNok_noName": "Company name must be specified!",
+            "saveNok_logoScale": "Logo scale of 0-100% only allowed!",
             "uploadLogoOk": "Company logo saved",
             "uploadLogoNok_noId": "Company must be saved first!",
             "uploadLogoNok_noFile": "No logo selected!",

@@ -702,6 +702,7 @@ var CompanyViewModel = function() {
   self.nextIid = ko.observable();
   self.nextOid = ko.observable();
   self.invoiceStyle = ko.observable();
+  self.logoScale = ko.observable();
 
   for (var i = 0; i < defaults.invoiceLngList.length; i++) {
     var lng = defaults.invoiceLngList[i]; 
@@ -761,6 +762,10 @@ var CompanyViewModel = function() {
       data.invoiceStyle = defaults.invoiceReportStyle;
     }
     self.invoiceStyle(data.invoiceStyle);
+    if (data.logoScale === undefined) {
+      data.logoScale = 100; // 100% is default
+    }
+    self.logoScale(data.logoScale);
   };
   
   self.init = function() {
@@ -779,7 +784,8 @@ var CompanyViewModel = function() {
         nextCid : defaults.firstCid,
         nextIid : defaults.firstIid,
         nextOid : defaults.firstOid,
-        invoiceStyle : defaults.invoiceReportStyle
+        invoiceStyle : defaults.invoiceReportStyle,
+        logoScale : 100, // 100% is default
     };
     for (var i = 0; i < defaults.invoiceLngList.length; i++) {
       var lng = defaults.invoiceLngList[i];
@@ -822,6 +828,9 @@ var CompanyViewModel = function() {
     } else if (self.name().length == 0) {
       Notify_showMsg('error', t("app.company.saveNok", {context: "noName"}));
       self.nameError(true);
+      return;
+    } else if ((parseInt(self.logoScale()) == NaN) || self.logoScale() <= 0 || self.logoScale() > 100) {
+      Notify_showMsg('error', t("app.company.saveNok", {context: "logoScale"}));
       return;
     }
     self.nameError(false);
@@ -871,7 +880,8 @@ var CompanyViewModel = function() {
       nextCid : parseInt(self.nextCid()),
       nextIid : parseInt(self.nextIid()),
       nextOid : parseInt(self.nextOid()),
-      invoiceStyle : self.invoiceStyle()
+      invoiceStyle : self.invoiceStyle(),
+      logoScale : self.logoScale(),
     };
     for (var i = 0; i < defaults.invoiceLngList.length; i++) {
       var lng = defaults.invoiceLngList[i];

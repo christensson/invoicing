@@ -342,6 +342,10 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
 
     if (invoice.company.logo !== undefined && invoice.company.logo.path !== undefined) {
       if (fs.existsSync(invoice.company.logo.path)) {
+        if (invoice.company.logoScale) {
+          companyLogoWidth = companyLogoWidth * invoice.company.logoScale / 100;
+          companyLogoHeight = companyLogoHeight * invoice.company.logoScale / 100;
+        }
         x.image(invoice.company.logo.path, {
           x: companyLogoX, y: companyLogoY, align: companyLogoAlign, fit: [companyLogoWidth, companyLogoHeight]});
       } else {
