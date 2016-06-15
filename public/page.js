@@ -2402,6 +2402,10 @@ var InvoiceItemViewModel = function(data, parent) {
     }
   });
 
+  self.toggleIsTextOnly = function() {
+    self.isTextOnly(!self.isTextOnly());
+  };
+
   self.toJSON = function() {
     var res = {
       description : self.description(),

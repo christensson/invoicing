@@ -327,7 +327,7 @@
             "customerDetailsPaneHeader": "Customer details",
             "customerDetailsCustomerNrLbl": "Customer nr:",
             "detailsNewRowBtn": "New row",
-            "detailsIsTextOnlyCheckLbl": "Custom text",
+            "detailsIsTextOnlyCheckLbl" : "Custom text",
             "groupNumInvoiceItemsText": "{{count}} row",
             "groupNumInvoiceItemsText_plural": "{{count}} rows",
             "groupEditNameLbl": "Group name (invoice input)",

@@ -341,7 +341,7 @@
             "customerDetailsPaneHeader": "Kunduppgifter",
             "customerDetailsCustomerNrLbl": "Kundnr:",
             "detailsNewRowBtn": "Ny rad",
-            "detailsIsTextOnlyCheckLbl": "Fritext",
+            "detailsIsTextOnlyCheckLbl" : "Fritext",
             "groupNumInvoiceItemsText": "{{count}} rad",
             "groupNumInvoiceItemsText_plural": "{{count}} rader",
             "groupEditNameLbl": "Gruppnamn (fakturainmatning)",

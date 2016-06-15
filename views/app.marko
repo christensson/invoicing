@@ -1942,8 +1942,8 @@
                                                 </div>
                                                 <table class="table table-striped table-condensed">
                                                     <colgroup>
-                                                        <col class="col-md-2"/>
-                                                        <col class="col-md-3"/>
+                                                        <col class="col-md-1"/>
+                                                        <col class="col-md-4"/>
                                                         <col class="col-md-1"/>
                                                         <col class="col-md-2"/>
                                                         <col class="col-md-1"/>
@@ -2080,16 +2080,28 @@
                                                         <tr>
                                                             <td>
                                                                 <div class="form-inline">
-                                                                    <div class="form-group">
-                                                                        <button class="btn btn-danger btn-sm" data-bind="click: $parent.deleteInvoiceItem, disable: $parents[1].data.isLocked">
+                                                                    <div class="btn-group btn-group-sm">
+                                                                        <button class="btn btn-danger"
+                                                                            data-bind="click: $parent.deleteInvoiceItem,
+                                                                                     disable: $parents[1].data.isLocked">
                                                                             <icon icon="trash"/>
                                                                         </button>
-                                                                        <div class="checkbox input-sm">
-                                                                            <label>
-                                                                                <input type="checkbox" data-bind="checked: isTextOnly, disable: $parents[1].data.isLocked"/>
-                                                                                ${i18n.t('app.invoice.detailsIsTextOnlyCheckLbl')}
-                                                                            </label>
-                                                                        </div>
+                                                                        <button type="button" class="btn btn-default dropdown-toggle"
+                                                                            data-toggle="dropdown"
+                                                                            aria-haspopup="true"
+                                                                            aria-expanded="false" data-bind="disable: $parents[1].data.isLocked">
+                                                                            <span class="caret"/>
+                                                                        </button>
+                                                                        <ul class="dropdown-menu">
+                                                                            <li>
+                                                                                <a href="#" data-bind="click: toggleIsTextOnly">
+                                                                                  <label class="checkbox-inline">
+                                                                                    <input type="checkbox" data-bind="checked: isTextOnly, click: function(){return true}, clickBubble: false, disable: $parents[1].data.isLocked"/>
+                                                                                    ${i18n.t('app.invoice.detailsIsTextOnlyCheckLbl')}
+                                                                                  </label>
+                                                                                </a>
+                                                                            </li> 
+                                                                        </ul>
                                                                     </div>
                                                                 </div>
                                                             </td>
