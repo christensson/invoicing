@@ -1,5 +1,14 @@
-/* Required by navbar-fixed-top */
-body { padding-top: 70px; }
+/* Required by navbar-fixed-top and -bottom */
+body {
+  padding-top: 70px;
+  padding-bottom: 70px;
+}
+
+/* navbar-fixed-bottom hides dropdown menus,
+   fix this by rendering the dropdowns ontop. */
+.dropdown, .dropdown-menu {
+  z-index:1031;
+}
 
 .top0 { margin-top:0px; }
 .top5 { margin-top:5px; }
@@ -145,7 +154,6 @@ body { padding-top: 70px; }
 
 .notification-area-center {
   position: fixed;
-  width: 300px;
   left: 50%;
   margin-left: -150px;
   text-align: center;
@@ -154,7 +162,6 @@ body { padding-top: 70px; }
 
 .notification-area-right {
   position: fixed;
-  width: 30%;
   top: 70px;
   right: 7px;
   text-align: left;

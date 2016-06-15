@@ -701,6 +701,27 @@ app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
   }
 });
 
+app.put(/^\/api\/(invoice|offer)_(lock|pay)$/, ensureAuthenticated, function(req, res) {
+  var okHandler = function(logText, res, result) {
+    log.verbose(logText + ": OK, obj=" + JSON.stringify(result));
+    var resData = {
+      'res' : result
+    };
+    res.status(200).json(resData);
+    res.end();
+  };
+  var uid = req.user._id;
+  var docType = req.params[0];
+  var op = req.params[1];
+
+  log.info("Doc bulk op: user=" + req.user.info.name + ", uid=" + uid +
+      ", docType=" + docType + ", op=" + op +
+      ", data=" + JSON.stringify(req.body, null, 2));
+  mydb.invoiceOrOfferBulkOp(docType, op, req.body.idList)
+    .then(okHandler.bind(null, docType+'_bulkOp:' + op, res))
+    .fail(myFailureHandler.bind(null, res));
+});
+
 app.get("/api/offers/:companyId", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var companyId = req.params.companyId;

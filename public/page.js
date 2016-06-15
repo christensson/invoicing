@@ -65,6 +65,10 @@ var UiOp = function() {
       $( itemSelector ).focus();
     }
   };
+
+  self.selectRoute = function(route) {
+    location.hash = route;
+  };
 };
 
 var Ui = new UiOp();
@@ -125,6 +129,15 @@ var CacheOp = function() {
   self._arrayAddItem = function(arrayCacheKey, item) {
     cache.get(arrayCacheKey, function(items) {
       items.push(item);
+      cache.set(arrayCacheKey, items);
+    });
+  };
+
+  self._arrayUpdateMap = function(arrayCacheKey, cb) {
+    cache.get(arrayCacheKey, function(items) {
+      for (var i = 0; i < items.length; i++) {
+        cb(items[i]);
+      }
       cache.set(arrayCacheKey, items);
     });
   };
@@ -361,6 +374,10 @@ var CacheOp = function() {
 
   self.addInvoice = function(invoice) {
     self._arrayAddItem(self.INVOICES(), invoice);
+  };
+
+  self.updateInvoiceMap = function(cb) {
+    self._arrayUpdateMap(self.INVOICES(), cb);
   };
 
   /*
@@ -685,6 +702,7 @@ var CompanyViewModel = function() {
   self.nextIid = ko.observable();
   self.nextOid = ko.observable();
   self.invoiceStyle = ko.observable();
+  self.logoScale = ko.observable();
 
   for (var i = 0; i < defaults.invoiceLngList.length; i++) {
     var lng = defaults.invoiceLngList[i]; 
@@ -744,6 +762,10 @@ var CompanyViewModel = function() {
       data.invoiceStyle = defaults.invoiceReportStyle;
     }
     self.invoiceStyle(data.invoiceStyle);
+    if (data.logoScale === undefined) {
+      data.logoScale = 100; // 100% is default
+    }
+    self.logoScale(data.logoScale);
   };
   
   self.init = function() {
@@ -762,7 +784,8 @@ var CompanyViewModel = function() {
         nextCid : defaults.firstCid,
         nextIid : defaults.firstIid,
         nextOid : defaults.firstOid,
-        invoiceStyle : defaults.invoiceReportStyle
+        invoiceStyle : defaults.invoiceReportStyle,
+        logoScale : 100, // 100% is default
     };
     for (var i = 0; i < defaults.invoiceLngList.length; i++) {
       var lng = defaults.invoiceLngList[i];
@@ -805,6 +828,9 @@ var CompanyViewModel = function() {
     } else if (self.name().length == 0) {
       Notify_showMsg('error', t("app.company.saveNok", {context: "noName"}));
       self.nameError(true);
+      return;
+    } else if ((parseInt(self.logoScale()) == NaN) || self.logoScale() <= 0 || self.logoScale() > 100) {
+      Notify_showMsg('error', t("app.company.saveNok", {context: "logoScale"}));
       return;
     }
     self.nameError(false);
@@ -854,7 +880,8 @@ var CompanyViewModel = function() {
       nextCid : parseInt(self.nextCid()),
       nextIid : parseInt(self.nextIid()),
       nextOid : parseInt(self.nextOid()),
-      invoiceStyle : self.invoiceStyle()
+      invoiceStyle : self.invoiceStyle(),
+      logoScale : self.logoScale(),
     };
     for (var i = 0; i < defaults.invoiceLngList.length; i++) {
       var lng = defaults.invoiceLngList[i];
@@ -1121,6 +1148,7 @@ var CustomerViewModel = function() {
   self.vatNr = ko.observable();
   self.noVat = ko.observable();
   self.useReverseCharge = ko.observable();
+  self.isInactive = ko.observable();
   self.contact = ko.observable();
   self.isValid = ko.observable();
   self.companyId = ko.observable();
@@ -1148,6 +1176,7 @@ var CustomerViewModel = function() {
     self.vatNr(data.vatNr);
     self.noVat(data.noVat);
     self.useReverseCharge(data.useReverseCharge);
+    self.isInactive(data.isInactive);
     self.contact(data.contact);
     self.isValid(data.isValid);
     self.companyId(data.companyId);
@@ -1178,6 +1207,7 @@ var CustomerViewModel = function() {
       vatNr : "",
       noVat : false,
       useReverseCharge : false,
+      isInactive: false,
       contact : "",
       isValid : true,
       invoiceLng : defaults.invoiceLng,
@@ -1288,6 +1318,7 @@ var CustomerViewModel = function() {
       email : self.email(),
       noVat : self.noVat(),
       useReverseCharge : self.useReverseCharge(),
+      isInactive : self.isInactive(),
       contact : self.contact(),
       isValid : self.isValid(),
       invoiceLng : self.invoiceLng(),
@@ -1322,6 +1353,7 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
 
   // Customer part
   self.customerList = ko.observableArray();
+  self.customerListSort = ko.observable('cidAsc');
 
   cache.on('set:' + Cache.CUSTOMERS(), function(customers, ttl) {
     Log.info("CustomerListViewModel - event - set:" + Cache.CUSTOMERS());
@@ -1370,6 +1402,42 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
       Notify_showMsg('info', t("app.customerList.getNok", {context: "noCompany"}));
       browserNavigateBack();
     }
+  };
+
+  self.doSortToggle = function(field) {
+    if (self.customerListSort() === field + 'Asc') {
+      self.customerListSort(field + 'Desc');
+    } else {
+      self.customerListSort(field + 'Asc');
+    }
+  };
+
+  self.customerListSort.subscribe(function(newVal) {
+    Log.info("CustomerListViewModel - customerListSort.subscribe=" + JSON.stringify(newVal));
+    // Sort according to compare method.
+    self.customerList.sort(self[newVal + 'Compare']);
+  });
+
+  self.cidAscCompare = function(aRow, bRow) {
+    return aRow.cid() - bRow.cid();
+  };
+
+  self.cidDescCompare = function(aRow, bRow) {
+    return self.cidAscCompare(bRow, aRow);
+  };
+
+  self.nameAscCompare = function(aRow, bRow) {
+    if (aRow.name() < bRow.name()) {
+      return -1;
+    } else if (aRow.name() > bRow.name()) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+
+  self.nameDescCompare = function(aRow, bRow) {
+    return self.nameAscCompare(bRow, aRow);
   };
 };
 
@@ -1651,28 +1719,6 @@ var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
     Log.info("Edit toggled for article=" + self.articleId() + ", isEditMode=" +
         newEditMode + " (new)");
     self.isEditMode(newEditMode);
-
-    if (newEditMode) {
-      /*
-      for (var i = 0; i < self.itemGroupTemplateRef().length; i++) {
-
-      }
-      if (self.itemGroupTemplateRef._id != undefined) {
-        // Edit mode enabled, sync select input
-        Log.info("Locating itemGroupTempl with _id=" + self.itemGroupTemplateRef._id +
-          " for article _id" + self._id());
-        for (var i = 0; i < self.groupList().length; i++) {
-          if (self.itemGroupTemplateRef._id == self.groupList()[i]._id) {
-            self.selectedItemGroupTemplate(self.groupList()[i]);
-            Log.info("Found itemGroupTempl with _id=" + self.itemGroupTemplateRef._id);
-            break;
-          }
-        }
-      } else {
-        self.selectedItemGroupTemplate(undefined);
-      }
-      */
-    }
   };
 
   self.updateServer = function() {
@@ -1688,6 +1734,9 @@ var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
     } else if (self.articleId().length == 0) {
       Notify_showMsg('error', t("app.articles.saveNok", {context: "noArticleId"}));
       self.articleIdError(true);
+      return;
+    } else if (self.desc().length == 0) {
+      Notify_showMsg('error', t("app.articles.saveNok", {context: "noDesc"}));
       return;
     }
 
@@ -2009,6 +2058,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
   self.totalColLbl = ko.observable();
 
   self.hasTitleExtraField = ko.observable();
+  self.noGroupBox = ko.observable();
   self.hasDesc = ko.observable();
   self.hasPrice = ko.observable();
   self.hasCount = ko.observable();
@@ -2046,6 +2096,11 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
 
     self.titleExtraField(data.titleExtraField);
     self.hasTitleExtraField(data.hasTitleExtraField);
+    if (data.noGroupBox) {
+      self.noGroupBox(data.noGroupBox);
+    } else {
+      self.noGroupBox(false);
+    }
 
     self.descColLbl(data.descColLbl);
     self.priceColLbl(data.priceColLbl);
@@ -2088,6 +2143,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
       isTextOnlyDefault: false,
       titleExtraField: "",
       hasTitleExtraField: false,
+      noGroupBox: false,
       descColLbl: t("app.groupTemplates.descCol"),
       priceColLbl: t("app.groupTemplates.priceCol"),
       countColLbl: t("app.groupTemplates.countCol"),
@@ -2242,6 +2298,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
       isTextOnlyDefault : self.isTextOnlyDefault(),
       titleExtraField : self.titleExtraField(),
       hasTitleExtraField : self.hasTitleExtraField(),
+      noGroupBox : self.noGroupBox(),
       descColLbl : self.descColLbl(),
       priceColLbl : self.priceColLbl(),
       countColLbl : self.countColLbl(),
@@ -2344,6 +2401,10 @@ var InvoiceItemViewModel = function(data, parent) {
       }
     }
   });
+
+  self.toggleIsTextOnly = function() {
+    self.isTextOnly(!self.isTextOnly());
+  };
 
   self.toJSON = function() {
     var res = {
@@ -2678,6 +2739,9 @@ var InvoiceDataViewModel = function() {
       isValid: true,
       isQuickButton: false,
       isTextOnlyDefault: true,
+      titleExtraField: "",
+      hasTitleExtraField: false,
+      noGroupBox: false,
       descColLbl: "",
       priceColLbl: "",
       countColLbl: "",
@@ -2862,6 +2926,7 @@ var InvoiceListDataViewModel = function(data, filterOpt) {
   var self = this;
 
   self.filterOpt = filterOpt;
+  self.isSelected = ko.observable(false);
 
   self._id = ko.observable(data._id);
   self.docType = ko.observable('invoice'); // Invoice is default for old documents
@@ -2992,6 +3057,10 @@ var InvoiceListDataViewModel = function(data, filterOpt) {
       Log.info("InvoiceListDataViewModel - Invoice has no id.");
     }
   };
+
+  self.toggleSelected = function() {
+    self.isSelected(!self.isSelected());
+  };
 };
 
 var InvoiceListViewModel = function(currentView, activeCompanyId) {
@@ -3008,16 +3077,40 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   inheritCurrencyModel(self, true);
 
   self.isFilterPaneExpanded = ko.observable(defaults.invoiceListFilter.isPaneExpanded);
+  self.hoveredDocId = ko.observable();
+  self.lastSelectedDocId = ko.observable();
 
-  self.numInvoicesText = ko.pureComputed(function() {
+  self.numDocs = ko.pureComputed(function() {
     var count = 0;
     for (var i = 0; i < self.docList()().length; i++) {
-      var invoice = self.docList()()[i];
-      if (invoice.isVisible()) {
+      var doc = self.docList()()[i];
+      if (doc.isVisible()) {
         count++;
       }
     }
-    return t('app.invoiceList.numDocsLbl', {count: count, context: self.docType()});
+    return count;
+  }, self);
+
+  self.selectedDocIdList = ko.pureComputed(function() {
+    var idList = [];
+    for (var i = 0; i < self.docList()().length; i++) {
+      var doc = self.docList()()[i];
+      if (doc.isVisible() && doc.isSelected()) {
+        idList.push(doc._id());
+      }
+    }
+    return idList;
+  }, self);
+
+  self.numSelectedDocs = ko.pureComputed(function() {
+    return self.selectedDocIdList().length;
+  }, self);
+
+  self.numDocsText = ko.pureComputed(function() {
+    var text = t('app.invoiceList.numDocsLbl',
+      {count: self.numDocs(), context: self.docType()}) + " " +
+      t('app.invoiceList.numSelectedDocsLbl', {count: self.numSelectedDocs()});
+    return text;
   }, self);
 
   self.invoiceCurrencyList = ko.pureComputed(function() {
@@ -3205,6 +3298,8 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   };
 
   self.currentView.subscribe(function(newValue) {
+    self.hoveredDocId("");
+    self.lastSelectedDocId("");
     if (newValue == 'invoices') {
       self.docType('invoice');
       Log.info("InvoiceListViewModel - activated - docType=" + self.docType());
@@ -3379,7 +3474,85 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     Log.info("InvoiceListViewModel - isFilterPaneExpanded=" + self.isFilterPaneExpanded()
         + " (new state)");
   };
-  
+
+  self.hoverRow = function(data) {
+    self.hoveredDocId(data._id());
+  };
+
+  self.selectRow = function(data) {
+    data.toggleSelected();
+    if (data.isSelected()) {
+      self.lastSelectedDocId(data._id());
+    } else {
+      self.lastSelectedDocId("");
+    }
+    // Run default handlers
+    return true;
+  };
+
+  self.doSelectedRowsOp = function(op) {
+    // Get selected doc Ids
+    var docIds = self.selectedDocIdList();
+    Log.info("On selected ids=" + JSON.stringify(docIds) + ", op=" + op);
+
+    if (op == 'pay' || op == 'lock') {
+      var reqUrl = "/api/" + self.docType() + "_" + op;
+
+      var reqData = {
+        op: op,
+        docType: self.docType(),
+        idList: docIds,
+      };
+    
+      Notify_showSpinner(true);
+      $.ajax({
+        url : reqUrl,
+        type : "PUT",
+        contentType : "application/json",
+        data : JSON.stringify(reqData),
+        dataType : "json",
+        success : function(data) {
+          Log.info("doSelectedRowsOp: response: " + JSON.stringify(data));
+
+          var doOpOnInvoice = undefined;
+          switch (op) {
+            case 'pay':
+              doOpOnInvoice = function(item) {
+                item.isPaid = true;
+              };
+              break;
+            case 'lock': 
+              doOpOnInvoice = function(item) {
+                item.isLocked = true;
+              };
+              break;
+            default:
+              Log.error("Invalid op, op=" + op);
+              break;
+          }
+
+          if (doOpOnInvoice != undefined &&
+              data.res.ok &&
+              data.res.nModified <= docIds.length &&
+              data.res.n == docIds.length) {
+            Cache.updateInvoiceMap(function(item) {
+              if (docIds.indexOf(item._id) != -1) {
+                doOpOnInvoice(item);
+              }
+            });
+            Notify_showMsg('success',
+              t("app.invoiceList.bulkOpOk", {context: op, count: data.res.nModified}));
+          } else {
+            Log.warn("Update not successfull: requested nr of docs to update is " + docIds.length);
+          }
+          Notify_showSpinner(false);
+        },
+      });
+    } else {
+      Log.error("Invalid op=" + op);
+    }
+  };
+
   self.doSortToggle = function(field) {
     if (self.invoiceListSort() === field + 'Asc') {
       self.invoiceListSort(field + 'Desc');
@@ -3519,9 +3692,6 @@ var InvoiceArticleModel = function(data) {
   self.searchString = function() {
     return self.data.articleId + " " + self.data.desc;
   };
-  self.sortString = function() {
-    return "" + self.data.itemGroupTemplateRef._id + self.data.articleId + self.data.desc;
-  };
 };
 
 var InvoiceNewViewModel = function(currentView, activeCompany) {
@@ -3628,18 +3798,6 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     }
   };
 
-  self.sortMappedArticlesByGroupIdAndDesc = function(a, b) {
-    var aStr = a.sortString().toLowerCase();
-    var bStr = b.sortString().toLowerCase();
-    if (aStr < bStr) {
-      return -1;
-    } else if (aStr > bStr) {
-      return 1;
-    } else {
-      return 0;
-    }
-  };
-
   self.selectedCustomer.subscribe(function(newValue) {
     if (newValue !== undefined && newValue.data !== undefined) {
       Log.info("InvoiceNewViewModel - Customer selected (updates data " + self.selectedCustomerUpdatesData + 
@@ -3652,18 +3810,24 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
 
   cache.on('set:' + Cache.CUSTOMERS(), function(customers, ttl) {
     Log.info("InvoiceNewViewModel - event - set:" + Cache.CUSTOMERS());
-    var mappedCustomers = $.map(customers, function(item) {
-      return new InvoiceCustomerModel(item);
-    });
+    var mappedCustomers = [];
+    for (var i = 0; i < customers.length; i++) {
+      if (!customers[i].isInactive) {
+        mappedCustomers.push(new InvoiceCustomerModel(customers[i]));
+      }
+    }
     mappedCustomers.sort(self.sortMappedCustomersByName);
     self.customerList(mappedCustomers);
   });
 
   cache.on('update:' + Cache.CUSTOMERS(), function(customers, ttl) {
     Log.info("InvoiceNewViewModel - event - update:" + Cache.CUSTOMERS());
-    var mappedCustomers = $.map(customers, function(item) {
-      return new InvoiceCustomerModel(item);
-    });
+    var mappedCustomers = [];
+    for (var i = 0; i < customers.length; i++) {
+      if (!customers[i].isInactive) {
+        mappedCustomers.push(new InvoiceCustomerModel(customers[i]));
+      }
+    }
     mappedCustomers.sort(self.sortMappedCustomersByName);
     self.customerList(mappedCustomers);
   });
@@ -3805,6 +3969,9 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
           isValid: true,
           isQuickButton: false,
           isTextOnlyDefault: false,
+          titleExtraField: "",
+          hasTitleExtraField: false,
+          noGroupBox: false,
           descColLbl: "Beskrivning",
           priceColLbl: "Á-pris",
           countColLbl: "Antal",
@@ -3867,13 +4034,22 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   self.syncCustomerIdInput = function() {
     Log.info("InvoiceNewViewModel - syncCustomerIdInput");
     if (self.data.customer() !== undefined) {
+      var customerFound = false;
       var cid = self.data.customer().cid;
       for (var i = 0; i < self.customerList().length; i++) {
         if (cid === self.customerList()[i].data.cid) {
           Log.info("InvoiceNewViewModel - syncCustomerIdInput: cid=" + cid + " found");
           self.selectedCustomer(self.customerList()[i]);
+          customerFound = true;
           break;
         }
+      }
+
+      if (!customerFound) {
+        // Customer might be inactive,
+        // add it it first in mapped customer list and select it
+        self.customerList.unshift(new InvoiceCustomerModel(self.data.customer()));
+        self.selectedCustomer(self.customerList()[0]);
       }
     } else {
       Log.info("InvoiceNewViewModel - syncCustomerIdInput: customer is undefined");        
@@ -4289,14 +4465,6 @@ var NavViewModel = function() {
   self.activeCompanyName = ko.observable(t('app.navBar.noCompanyName'));
   self.userName = ko.observable(cfg.user.name);
   self.companyList = ko.observableArray();
-
-  self.selectView = function(view) {
-    location.hash = view.name;
-  };
-  
-  self.selectViewRoute = function(route) {
-    location.hash = route;
-  };
 
   self.activeCompany.subscribe(function(c) {
     if (c != undefined) {
