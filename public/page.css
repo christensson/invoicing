@@ -1,7 +1,13 @@
-/* Required by navbar-fixed-top */
+/* Required by navbar-fixed-top and -bottom */
 body {
   padding-top: 70px;
   padding-bottom: 70px;
+}
+
+/* navbar-fixed-bottom hides dropdown menus,
+   fix this by rendering the dropdowns ontop. */
+.dropdown, .dropdown-menu {
+  z-index:1031;
 }
 
 .top0 { margin-top:0px; }
