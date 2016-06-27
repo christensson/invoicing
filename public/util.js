@@ -131,6 +131,10 @@ var dateAddDays = function(date, numDaysToAdd) {
   return new Date(newDateMs);
 };
 
+var getCurrentDate = function() {
+  return new Date().toISOString().split("T")[0];
+}
+
 var range = function(low, high) {
   var list = [];
   for (var i = low; i <= high; i++) {
@@ -145,6 +149,7 @@ var range = function(low, high) {
   formatNumber: formatNumber,
   calcPaymentAdjustment: calcPaymentAdjustment,
   dateAddDays: dateAddDays,
+  getCurrentDate: getCurrentDate,
   range: range,
 };
 

@@ -241,6 +241,7 @@
                 "It's not possible to select a logo until the company is created.",
                 "First, create the company by clicking save. Then select a logo."],
             "companySaveBtn": "Save",
+            "companyPrintInvoicePreviewBtn": "Print invoice preview",
             "getNok": "Failed to get company!",
             "saveTicker": "Saving company",
             "saveOk": "Company <strong>{{name}}</strong> created.",

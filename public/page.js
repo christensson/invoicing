@@ -1074,6 +1074,11 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
     });
   };
 
+  self.printInvoicePreview = function() {
+    // Special id preview renders an empty invoice
+    ReportOps.printDocPreview('invoice', self.data._id());
+  };
+
   self.uploadLogo = function(formElement) {
     var _id = self.data._id();
     var form = document.getElementById('logoUploadForm');
@@ -2009,6 +2014,15 @@ ReportOps.printDoc = function(id, docType) {
   }
 };
 
+ReportOps.printDocPreview = function(docType, companyId) {
+  if (docType == 'invoice' || docType == 'offer') {
+    var reqUrl = "/api/" + docType + "Preview/" + companyId;
+    ReportOps.downloadDoc(reqUrl);
+  } else {
+    Log.info("printDocPreview - failure, unknown docType=" + docType + " for companyId=" + companyId);
+  }
+};
+
 ReportOps.printInvoice = function(id, opts) {
   opts = typeof opts !== 'undefined' ? opts : {};
   // Set default parameters
@@ -2663,7 +2677,7 @@ var InvoiceDataViewModel = function() {
       yourRef : "",
       ourRef : "",
       // Initialize to current date
-      date : new Date().toISOString().split("T")[0],
+      date : Util.getCurrentDate(),
       daysUntilPayment : defaultNumDaysUntilPayment,
       projId : "",
       isLocked : false,
@@ -2773,7 +2787,7 @@ var InvoiceDataViewModel = function() {
 
     self.docType('invoice');
     // Set invoice date to current date
-    self.date(new Date().toISOString().split("T")[0]);
+    self.date(Util.getCurrentDate());
 
     // Add text description refering to offer
     var invoiceLng = self.customerMirror_invoiceLng();

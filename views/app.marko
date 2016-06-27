@@ -478,6 +478,11 @@
                                             <icon icon="save" extraClass="inline-icon-left-fix"/>
                                             ${i18n.t('app.company.companySaveBtn')}
                                         </button>
+                                        <button type="button" class="btn btn-info"
+                                            data-bind="click: printInvoicePreview, disable: data._id() == undefined">
+                                            <icon icon="print" extraClass="inline-icon-left-fix"/>
+                                            ${i18n.t('app.company.companyPrintInvoicePreviewBtn')}
+                                        </button>
                                     </div>
                                 </form>
                             </div>
