@@ -2355,6 +2355,7 @@ var InvoiceItemViewModel = function(data, parent) {
         discount = -discount;
       }
       total = count * price * (1.0 - discount);
+      total = parseFloat(total.toFixed(defaults.invoiceÍtemTotalNumDecRound));
     }
     return total;
   }, self);
@@ -2686,6 +2687,7 @@ var InvoiceDataViewModel = function() {
     if (self.isCredit()) {
       sum = -sum;
     }
+    sum = parseFloat(sum.toFixed(defaults.invoiceÍtemTotalNumDecRound));
     return sum;
   }, this);
   
@@ -2699,15 +2701,57 @@ var InvoiceDataViewModel = function() {
     if (self.isCredit()) {
       sum = -sum;
     }
+    sum = parseFloat(sum.toFixed(defaults.invoiceÍtemTotalNumDecRound));
     return sum;
   }, this);
+
+  self.totalVat = ko.pureComputed(function() {
+    var sum = 0;
+    if (self.hasVat()) {
+      sum = self.totalInclVat() - self.totalExclVat();
+    }
+    return sum;
+  }, this);
+
+  self.totalToPay = ko.pureComputed(function() {
+    return self.totalExclVat() + self.totalVat();
+  }, this);
   
+  self.currencyAdj = ko.pureComputed(function() {
+    var amountToPayAdjNumDec = defaults.invoiceCurrencyAdjNumDec[self.currency()];
+    return Util.calcPaymentAdjustment(
+      self.totalToPay(), {
+        numDec: amountToPayAdjNumDec,
+        verbose: false
+      });
+  }, this);
+
+  self.totalToPayAdj = ko.pureComputed(function() {
+    return self.totalToPay() + self.currencyAdj();
+  }, this);
+
   self.totalExclVatStr = ko.pureComputed(function() {
     return Util.formatCurrency(self.totalExclVat(), {currencyStr: self.currency()});
   }, self);
 
-  self.totalInclVatStr = ko.pureComputed(function() {
-    return Util.formatCurrency(self.totalInclVat(), {currencyStr: self.currency()});
+  self.totalVatStr = ko.pureComputed(function() {
+    return Util.formatCurrency(self.totalVat(), {currencyStr: self.currency()});
+  }, self);
+
+  self.currencyAdjStr = ko.pureComputed(function() {
+    var numDecTrunc = defaults.invoiceCurrencyAdjNumDec[self.currency()] + 1;
+    if (numDecTrunc < defaults.invoiceNumDecTrunc) {
+      numDecTrunc = defaults.invoiceNumDecTrunc;
+    }
+    var fmtOpts = {
+      currencyStr: self.currency(),
+      numDecimalTrunc: numDecTrunc,
+    };
+    return Util.formatCurrency(self.currencyAdj(), {currencyStr: self.currency()});
+  }, self);
+
+  self.totalToPayAdjStr = ko.pureComputed(function() {
+    return Util.formatCurrency(self.totalToPayAdj(), {currencyStr: self.currency()});
   }, self);
 
   self.lastPaymentDate = ko.pureComputed(function() {
@@ -2915,7 +2959,11 @@ var InvoiceDataViewModel = function() {
       projId : self.projId(),
       invoiceItemGroups : groups,
       totalExclVat : self.totalExclVat(),
-      totalInclVat : self.totalInclVat()
+      totalInclVat : self.totalInclVat(),
+      totalVat : self.totalVat(),
+      currencyAdj : self.currencyAdj(),
+      totalToPayAdj: self.totalToPayAdj(),
+      hasVat: self.hasVat(),
     };
 
     return res;

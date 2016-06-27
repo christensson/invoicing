@@ -2292,30 +2292,28 @@
                                             <p class="form-control-static text-right invoice-summary-labels">
                                                 ${i18n.t('app.invoice.totalExclVatLbl')}
                                                 <br/>
-                                                <html-comment>
-                                                    ko if: data.hasVat
-                                                </html-comment>
+                                                <span data-bind="if: data.hasVat">
+                                                    ${i18n.t('app.invoice.totalVatLbl')}
+                                                    <br/>
+                                                </span>
+                                                ${i18n.t('app.invoice.totalCurrencyAdjustmentLbl')}
+                                                <br/>
                                                 <strong>
-                                                    ${i18n.t('app.invoice.totalInclVatLbl')}
+                                                ${i18n.t('app.invoice.totalToPayLbl')}
                                                 </strong>
-                                                <html-comment>
-                                                    /ko
-                                                </html-comment>
                                             </p>
                                         </div>
                                         <div class="col-md-2">
                                             <p class="form-control-static text-right invoice-summary-labels">
                                                 <span data-bind="text: data.totalExclVatStr"/>
                                                 <br/>
-                                                <html-comment>
-                                                    ko if: data.hasVat
-                                                </html-comment>
-                                                <strong>
-                                                    <span data-bind="text: data.totalInclVatStr"/>
-                                                </strong>
-                                                <html-comment>
-                                                    /ko
-                                                </html-comment>
+                                                <span data-bind="if: data.hasVat">
+                                                    <span data-bind="text: data.totalVatStr"/>
+                                                    <br/>
+                                                </span>
+                                                <span data-bind="text: data.currencyAdjStr"/>
+                                                <br/>
+                                                <strong data-bind="text: data.totalToPayAdjStr"/>
                                             </p>
                                         </div>
                                     </div>
