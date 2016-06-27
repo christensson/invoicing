@@ -2747,7 +2747,7 @@ var InvoiceDataViewModel = function() {
       currencyStr: self.currency(),
       numDecimalTrunc: numDecTrunc,
     };
-    return Util.formatCurrency(self.currencyAdj(), {currencyStr: self.currency()});
+    return Util.formatCurrency(self.currencyAdj(), fmtOpts);
   }, self);
 
   self.totalToPayAdjStr = ko.pureComputed(function() {
