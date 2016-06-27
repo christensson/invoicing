@@ -61,6 +61,7 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
   if (invoice.customer.currency) {
     invoiceCurrency = invoice.customer.currency;
   } else if (invoice.currency) {
+    // Support old invoice format
     invoiceCurrency = invoice.currency;
   }
 
