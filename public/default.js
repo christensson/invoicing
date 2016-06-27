@@ -13,6 +13,8 @@ var defaults = {
   defaultCurrency: "SEK",
   currencyList: ["SEK", "EUR", "USD", "GBP"], // First is default
   currencyWildcard: "Wildcard",
+  invoiceNumDecTrunc: 2,
+  invoiceÍtemTotalNumDecRound: 2,
   invoiceCurrencyAdjNumDec: {
     "SEK": 0,
     "EUR": 2,

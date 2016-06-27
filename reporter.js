@@ -626,17 +626,9 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
     var finalsummaryTopY = x.getCurrentY();
 
     var company = invoice.company;
-    var cust = invoice.customer;
-    var totalExclVat = invoice.totalExclVat;
-    var totalVat = invoice.totalInclVat - totalExclVat;
-    totalVat = parseFloat(totalVat.toFixed(2));
-    totalExclVat = parseFloat(totalExclVat.toFixed(2));
-    var noVat = cust.noVat === true || cust.useReverseCharge === true;
-    var useReverseCharge = cust.useReverseCharge === true;
-    var amountToPay = noVat?invoice.totalExclVat:invoice.totalInclVat;
-    var amountToPayAdj = util.calcPaymentAdjustment(
-      amountToPay, {numDec: amountToPayAdjNumDec, verbose: opts.verbosity > 1?true:false});
-    amountToPay = amountToPay + amountToPayAdj;
+
+    var useReverseCharge = invoice.customer.useReverseCharge === true;
+
     x.fontSize(style.summary.fontSize);
     x.newLine();
     x.font(style.summary.font);
@@ -645,24 +637,22 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
              {data: util.formatCurrency(invoice.totalExclVat, fmtCurrencyOpt),
               width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
            ], {fontBold: 0, border:0, width: 0, wrap: 1} );
-    if (!noVat) {
+    if (invoice.hasVat) {
       x.band( [
                {data: getStr("summaryTotalVatLbl"), width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
-               {data: util.formatCurrency(totalVat, fmtCurrencyOpt),
+               {data: util.formatCurrency(invoice.totalVat, fmtCurrencyOpt),
                 width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
              ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     }
-    if (amountToPayAdj !== undefined) {
-      x.band( [
-               {data: getStr("summaryTotalToPayAdjLbl_" + invoiceCurrency), width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
-               {data: util.formatCurrency(amountToPayAdj, fmtCurrencyOptPayAdj),
-                width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
-             ], {fontBold: 0, border:0, width: 0, wrap: 1} );
-    }
+    x.band( [
+             {data: getStr("summaryTotalToPayAdjLbl_" + invoiceCurrency), width: summaryCaptionColWidth, align: x.right, fontBold: style.summary.caption.bold, font: style.summary.caption.font},
+             {data: util.formatCurrency(invoice.currencyAdj, fmtCurrencyOptPayAdj),
+              width: summaryValueColWidth, align: x.right, font: style.summary.value.font}
+           ], {fontBold: 0, border:0, width: 0, wrap: 1} );
     x.addY(summaryAmountToPayTopPadding);
     x.band( [
              {data: getStr("summaryTotalToPayLbl"), width: summaryCaptionColWidth, align: x.right, font: style.summary.caption.font, fontBold: 1},
-             {data: util.formatCurrency(amountToPay, fmtCurrencyOpt),
+             {data: util.formatCurrency(invoice.totalToPayAdj, fmtCurrencyOpt),
               width: summaryValueColWidth, align: x.right, font: style.summary.value.font, fontBold: 1}
              ], {fontBold: 1, border:0, width: 0, wrap: 1} );
     if (invoice.isCanceled) {
@@ -882,7 +872,26 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
   
   // Support old invoices without docNr
   if (invoice.hasOwnProperty('iid') && !invoice.hasOwnProperty('docNr')) {
-      invoice.docNr = invoice.iid;
+    invoice.docNr = invoice.iid;
+  }
+
+  // Support old invoices without precalculated VAT, cash rounding and amount due
+  if (!invoice.hasOwnProperty('totalVat') ||
+      !invoice.hasOwnProperty('totalToPayAdj') ||
+      !invoice.hasOwnProperty('currencyAdj') ||
+      !invoice.hasOwnProperty('hasVat')) {
+    log.info("Detected old invoice format of invoice id=" + invoice._id +
+      " without fields: totalVat, totalToPayAdj, currencyAdj, hasVat");
+    var totalVat = invoice.totalInclVat - invoice.totalExclVat;
+    totalVat = parseFloat(totalVat.toFixed(2));
+    invoice.totalVat = totalVat;
+    invoice.totalExclVat = parseFloat(invoice.totalExclVat.toFixed(2));
+    var noVat = invoice.customer.noVat === true || invoice.customer.useReverseCharge === true;
+    invoice.hasVat = !noVat;
+    var amountToPay = invoice.hasVat?invoice.totalInclVat:invoice.totalExclVat;
+    invoice.currencyAdj = util.calcPaymentAdjustment(
+      amountToPay, {numDec: amountToPayAdjNumDec, verbose: opts.verbosity > 1?true:false});
+    invoice.totalToPayAdj = amountToPay + invoice.currencyAdj;
   }
 
   // companyId makes directory unique
