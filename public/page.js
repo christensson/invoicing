@@ -3010,6 +3010,8 @@ var InvoiceListDataViewModel = function(data, filterOpt) {
   }, self);
   if (data.customer.hasOwnProperty('currency')) {
     self.currency(data.customer.currency);
+  } else if (data.hasOwnProperty('currency')) {
+    self.currency(data.currency);
   }
   self.totalExclVat = ko.observable(data.totalExclVat);
   self.totalInclVat = ko.observable(data.totalInclVat);
