@@ -2,6 +2,7 @@
     var i18n = require("i18next");
     var news = require("../news.json");
     var navbarUseAnnotatedIcons = false;
+    var defaults = require('../public/default.js').get();
 </script>
 <!DOCTYPE html>
 
@@ -472,17 +473,26 @@
 
                             <div class="collapse navbar-collapse" id="app-company_new-bottom-navbar-collapse">
                                 <form class="navbar-form navbar-left">
-                                    <div class="btn-group" role="group">
+                                    <div class="btn-group dropup" role="group">
                                         <button type="button" class="btn btn-success"
                                             data-bind="click: saveCompany">
                                             <icon icon="save" extraClass="inline-icon-left-fix"/>
                                             ${i18n.t('app.company.companySaveBtn')}
                                         </button>
-                                        <button type="button" class="btn btn-info"
-                                            data-bind="click: printInvoicePreview, disable: data._id() == undefined">
+                                        <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                            data-bind="disable: data._id() == undefined">
                                             <icon icon="print" extraClass="inline-icon-left-fix"/>
-                                            ${i18n.t('app.company.companyPrintInvoicePreviewBtn')}
+                                            ${i18n.t('app.company.companyPrintInvoicePreviewBtn')} <span class="caret"></span>
                                         </button>
+                                        <ul class="dropdown-menu" >
+                                            <for (lng in defaults.invoiceLngList)>
+                                                <li>
+                                                    <a href="#" data-bind="click: printInvoicePreview.bind(null, '${lng}')">
+                                                        ${i18n.t('app.company.companyPrintInvoicePreviewBtn', {context: '${lng}'})}
+                                                    </a>
+                                                </li>
+                                            </for>
+                                        </ul>
                                     </div>
                                 </form>
                             </div>

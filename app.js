@@ -846,10 +846,11 @@ app.put("/api/article/:id", ensureAuthenticated, function(req, res) {
   }
 });
 
-app.get(/^\/api\/(invoice|offer)Preview\/([^\/]+)$/, ensureAuthenticated, function(req, res) {
+app.get(/^\/api\/(invoice|offer)Preview\/([^\/]+)\/([^\/]+)$/, ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var docType = req.params[0];
   var companyId = req.params[1];
+  var invoiceLng = req.params[2];
 
   log.info("Invoice report preview: user=" + req.user.info.name + ", uid=" + uid +
       ", docType=" + docType + ", companyId=" + companyId);
@@ -875,7 +876,7 @@ app.get(/^\/api\/(invoice|offer)Preview\/([^\/]+)$/, ensureAuthenticated, functi
         "addr3": "SWEDEN",
         "useReverseCharge": false,
         "currency": defaults.defaultCurrency,
-        "invoiceLng": defaults.defaultLng,
+        "invoiceLng": invoiceLng,
       },
       "yourRef": "",
       "ourRef": "",

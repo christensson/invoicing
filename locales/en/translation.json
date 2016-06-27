@@ -242,6 +242,8 @@
                 "First, create the company by clicking save. Then select a logo."],
             "companySaveBtn": "Save",
             "companyPrintInvoicePreviewBtn": "Print invoice preview",
+            "companyPrintInvoicePreviewBtn_sv": "Print Swedish invoice preview",
+            "companyPrintInvoicePreviewBtn_en": "Print English invoice preview",
             "getNok": "Failed to get company!",
             "saveTicker": "Saving company",
             "saveOk": "Company <strong>{{name}}</strong> created.",
