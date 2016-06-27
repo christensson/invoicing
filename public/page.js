@@ -4043,7 +4043,6 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
         var newGroup = JSON.parse(JSON.stringify(groupToUse));
         newGroup.invoiceItems = doc.invoiceItems;
         doc.invoiceItemGroups = [newGroup];
-
       }
       // Support old invoices with currency specified in invoice and not in customer
       if (doc.hasOwnProperty('currency') && !doc.customer.hasOwnProperty('currency')) {
