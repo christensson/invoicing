@@ -22,6 +22,7 @@ var helmet = require('helmet');
 var expressEnforcesSsl = require('express-enforces-ssl');
 var Q = require('q');
 var defaults = require('./public/default.js').get();
+var util = require('./public/util.js');
 var log = require('./log');
 
 function increaseVerbosity(v, total) {
@@ -845,6 +846,72 @@ app.put("/api/article/:id", ensureAuthenticated, function(req, res) {
   }
 });
 
+app.get(/^\/api\/(invoice|offer)Preview\/([^\/]+)$/, ensureAuthenticated, function(req, res) {
+  var uid = req.user._id;
+  var docType = req.params[0];
+  var companyId = req.params[1];
+
+  log.info("Invoice report preview: user=" + req.user.info.name + ", uid=" + uid +
+      ", docType=" + docType + ", companyId=" + companyId);
+  var debug = false;
+  mydb.getCompany(uid, companyId).then(function(company) {
+    var doc = {
+      _id: "",
+      docNr: "",
+      uid: uid,
+      docType: docType,
+      isLocked : false,
+      isCanceled : false,
+      isPaid : false,
+      isCredit : false,
+      isValid : true,
+      companyId: company._id,
+      company: company,
+      customer: {
+        "cid": "",
+        "name": "Sven Svensson",
+        "addr1": "Storgatan 1",
+        "addr2": "123 45 Stockholm",
+        "addr3": "SWEDEN",
+        "useReverseCharge": false,
+        "currency": defaults.defaultCurrency,
+        "invoiceLng": defaults.defaultLng,
+      },
+      "yourRef": "",
+      "ourRef": "",
+      "date": util.getCurrentDate(),
+      "lastPaymentDate": util.getCurrentDate(),
+      "projId": "",
+      invoiceItemGroups: [
+      ],
+      totalExclVat : 0,
+      totalInclVat : 0,
+      totalVat : 0,
+      currencyAdj : 0,
+      totalToPayAdj: 0,
+      hasVat: true,
+    };
+    reporter.doInvoiceReport(doc, tmpDir,
+      function(reportFilename) {
+        log.verbose("onCompletion: reportFilename=" + reportFilename);
+        res.type('application/pdf');
+        res.download(reportFilename, reportFilename, function(err) {
+          if (err) {
+            log.error("onCompletion: " + err);
+          } else {
+            res.end();
+          }
+        });
+      },
+      {
+      'isReminder': false,
+      'isDemoMode': false,
+      'debug': debug
+      }
+    );
+  }).fail(myFailureHandler.bind(null, res));
+});
+
 app.get("/api/invoiceReport/:id/:isReminder", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var id = req.params.id;
@@ -855,7 +922,7 @@ app.get("/api/invoiceReport/:id/:isReminder", ensureAuthenticated, function(req,
   var isDemoMode = false;
   var debug = false;
   mydb.getSettings(uid).then(function(settings) {
-    if (settings.license === undefined ||
+    if (settings.license == undefined ||
         settings.license === "demo") {
       isDemoMode = true;
     }
@@ -863,7 +930,8 @@ app.get("/api/invoiceReport/:id/:isReminder", ensureAuthenticated, function(req,
         ", isDemoMode=" + isDemoMode);
     return mydb.getInvoiceOrOffer('invoice', uid, id);
   }).then(function(invoice) {
-    reporter.doInvoiceReport(invoice, tmpDir, function(reportFilename) {
+    reporter.doInvoiceReport(invoice, tmpDir,
+      function(reportFilename) {
         log.verbose("onCompletion: reportFilename=" + reportFilename);
         res.type('application/pdf');
         res.download(reportFilename, reportFilename, function(err) {

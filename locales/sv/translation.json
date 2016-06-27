@@ -255,6 +255,7 @@
                 "Skapa företaget genom att spara det. Därefter kan du välja en logotyp."
             ],
             "companySaveBtn": "Spara",
+            "companyPrintInvoicePreviewBtn": "Skriv ut testfaktura",
             "getNok": "Misslyckades att hämta företag!",
             "saveTicker": "Sparar företag",
             "saveOk": "Företag <strong>{{name}}</strong> skapat.",
