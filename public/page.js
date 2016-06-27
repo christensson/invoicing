@@ -2584,6 +2584,7 @@ var InvoiceDataViewModel = function() {
   self.setCustomer = function(data) {
     // Use copy to not update cached version of customer...
     var customerCopy = ko.toJS(data);
+    Log.info("Invoice customer set to: " + JSON.stringify(customerCopy));
     self.customer(customerCopy);
     // Updated mirrored data
     self.updateMirrors(self.customerFieldMirrorPrefix,
@@ -3011,6 +3012,7 @@ var InvoiceListDataViewModel = function(data, filterOpt) {
   if (data.customer.hasOwnProperty('currency')) {
     self.currency(data.customer.currency);
   } else if (data.hasOwnProperty('currency')) {
+    // Support old invoice format
     self.currency(data.currency);
   }
   self.totalExclVat = ko.observable(data.totalExclVat);
@@ -4042,6 +4044,12 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
         newGroup.invoiceItems = doc.invoiceItems;
         doc.invoiceItemGroups = [newGroup];
 
+      }
+      // Support old invoices with currency specified in invoice and not in customer
+      if (doc.hasOwnProperty('currency') && !doc.customer.hasOwnProperty('currency')) {
+        Log.info("Detected doc without currency set in doc customer. id=" + doc._id +
+          ", currency=" + doc.currency);
+        doc.customer.currency = doc.currency;
       }
       self.data.setData(doc);
     };
