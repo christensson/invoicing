@@ -1074,9 +1074,8 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
     });
   };
 
-  self.printInvoicePreview = function() {
-    // Special id preview renders an empty invoice
-    ReportOps.printDocPreview('invoice', self.data._id());
+  self.printInvoicePreview = function(invoiceLng) {
+    ReportOps.printDocPreview('invoice', self.data._id(), invoiceLng);
   };
 
   self.uploadLogo = function(formElement) {
@@ -2014,9 +2013,9 @@ ReportOps.printDoc = function(id, docType) {
   }
 };
 
-ReportOps.printDocPreview = function(docType, companyId) {
+ReportOps.printDocPreview = function(docType, companyId, invoiceLng) {
   if (docType == 'invoice' || docType == 'offer') {
-    var reqUrl = "/api/" + docType + "Preview/" + companyId;
+    var reqUrl = "/api/" + docType + "Preview/" + companyId + "/" + invoiceLng;
     ReportOps.downloadDoc(reqUrl);
   } else {
     Log.info("printDocPreview - failure, unknown docType=" + docType + " for companyId=" + companyId);

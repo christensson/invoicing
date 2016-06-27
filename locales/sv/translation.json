@@ -256,6 +256,8 @@
             ],
             "companySaveBtn": "Spara",
             "companyPrintInvoicePreviewBtn": "Skriv ut testfaktura",
+            "companyPrintInvoicePreviewBtn_sv": "Skriv ut svensk testfaktura",
+            "companyPrintInvoicePreviewBtn_en": "Skriv ut engelsk testfaktura",
             "getNok": "Misslyckades att hämta företag!",
             "saveTicker": "Sparar företag",
             "saveOk": "Företag <strong>{{name}}</strong> skapat.",
