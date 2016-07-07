@@ -716,19 +716,25 @@ module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) 
       hasExtraBand = true;
     }
 
-    var col3 = [{cap: getStr("companyVatNrCaption"), text: c.vatNr}];
-    if (c.orgNr !== undefined && c.orgNr.length > 0) {
+    var col3 = [];
+    if (c.vatNr != undefined && c.vatNr.length > 0) {
+      col3.push({cap: getStr("companyVatNrCaption"), text: c.vatNr});
+    }
+    if (c.orgNr != undefined && c.orgNr.length > 0) {
       col3.push({cap: getStr("companyOrgNrCaption"), text: c.orgNr});
-      hasExtraBand = true;
     }
     col3.push({cap: "", text: cLngFields.vatNrCustomText});
-    // Add dummy to always have at least three items
+    if (col3.length > 2) {
+      hasExtraBand = true;
+    }
+    // Add dummy to always have at least four items
+    col3.push({cap: "", text: ""});
     col3.push({cap: "", text: ""});
 
     var col4 = [{cap: cLngFields.payment1Caption, text: cLngFields.payment1, focus: cLngFields.paymentFocus === "1"},
                 {cap: cLngFields.payment2Caption, text: cLngFields.payment2, focus: cLngFields.paymentFocus === "2"},
                 {cap: cLngFields.payment3Caption, text: cLngFields.payment3, focus: cLngFields.paymentFocus === "3"}];
-    if (cLngFields.payment3 !== undefined && cLngFields.payment3.length > 0) {
+    if (cLngFields.payment3 != undefined && cLngFields.payment3.length > 0) {
       hasExtraBand = true;
     }
 
