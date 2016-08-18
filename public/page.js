@@ -38,6 +38,11 @@ Log.warn = function(msg) {
   console.log("WARN - " + functionName + " - " + msg);
 };
 
+Log.error = function(msg) {
+  var functionName = Log._getCallerInfo();
+  console.log("ERROR - " + functionName + " - " + msg);
+};
+
 var i18nTFunc = undefined;
 
 function t(key, opt) {
@@ -3852,7 +3857,6 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
   };
   
   self.currentView.subscribe(function(newValue) {
-    self.data.init();
     self.selectedCustomer(undefined);
 
     var viewArray = newValue.split("/");
@@ -3884,6 +3888,10 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
           self.syncCustomerIdInput();
           self.selectedCustomerUpdatesData = true;
         });
+      } else {
+        Log.error("InvoiceNewViewModel - illegal op=" + docOp +
+          " and/or arguments args=" + JSON.stringify(viewArray));
+        browserNavigateBack();
       }
     }
   });
