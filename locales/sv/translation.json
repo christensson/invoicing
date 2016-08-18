@@ -463,6 +463,7 @@
             "numSelectedDocsLbl_plural": "({{count}} markerade)",
             "newDocBtn_invoice": "Ny faktura",
             "newDocBtn_offer": "Ny offert",
+            "printSelectedBtn": "Skriv ut markerade",
             "setSelectedPaidBtn": "Sätt markerade betalda",
             "setSelectedLockedBtn": "Lås markerade",
             "bulkOpOk_pay": "{{count}} faktura markerad som betald.",
@@ -471,7 +472,11 @@
             "bulkOpOk_lock_plural": "{{count}} fakturor låsta.",
             "getNok": "Misslyckades med att hämta data!",
             "getNok_noCompany": "Misslyckades med att hämta data! Företag ej valt eller ogiltigt.",
-            "printNok_noId": "Utskriften misslyckades, dokumentet saknar id!"
+            "printNok_noId": "Utskriften misslyckades, dokumentet saknar id!",
+            "printNok_popupBlocked": [
+                "Utskriften misslyckades på grund av att popupfönster blockerades!",
+                "Ändra webläsarens inställningar så att popupfönster från Lätt Fakturering tillåts."
+            ]
         },
         "invoiceReport": {
             "fileName": "faktura-{{docNr}}-kund-{{cid}}.pdf",

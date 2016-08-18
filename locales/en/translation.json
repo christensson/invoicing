@@ -449,6 +449,7 @@
             "numSelectedDocsLbl_plural": "({{count}} selected)",
             "newDocBtn_invoice": "New invoice",
             "newDocBtn_offer": "New offer",
+            "printSelectedBtn": "Print selected",
             "setSelectedPaidBtn": "Set selected paid",
             "setSelectedLockedBtn": "Lock selected",
             "bulkOpOk_pay": "{{count}} invoice marked as paid.",
@@ -457,7 +458,12 @@
             "bulkOpOk_lock_plural": "{{count}} invoices locked.",
             "getNok": "Failed to get data!",
             "getNok_noCompany": "Cannot get data! Company not selected or doesn't exist.",
-            "printNok_noId": "Cannot print document without id!"
+            "printNok_noId": "Cannot print document without id!",
+            "printNok_popupBlocked": [
+                "Popup window blocked, print failed!",
+                "Add an exception in the browser preferences to allow popups from",
+                "Easy Invoicing."
+            ]
         },
         "invoiceReport": {
             "fileName": "invoice-{{docNr}}-customer-{{cid}}.pdf",
