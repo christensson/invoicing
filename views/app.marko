@@ -1266,6 +1266,11 @@
                                   </div>
                                   <html-comment> ko if: numSelectedDocs() >= 1 </html-comment>
                                       <div class="btn-group left5" role="group">
+                                          <button type="button" class="btn btn-default"
+                                                  data-bind="click: doSelectedRowsOp.bind(null, 'print')">
+                                              <icon icon="print" extraClass="inline-icon-left-fix"/>
+                                              ${i18n.t('app.invoiceList.printSelectedBtn')}
+                                          </button>
                                           <html-comment> ko if: docType() == 'invoice' </html-comment>
                                               <button type="button" class="btn btn-default"
                                                       data-bind="click: doSelectedRowsOp.bind(null, 'pay')">

@@ -12,7 +12,7 @@ var convMmToDpi = function(lengthMm) {
   return (lengthMm * 72) / 25.4;
 };
 
-module.exports.doInvoiceReport = function (invoice, tmpDir, onCompletion, opts) {
+module.exports.doInvoiceReport = function(invoice, tmpDir, onCompletion, opts) {
   'use strict';
   opts = typeof opts !== 'undefined' ? opts : {};
   if (!opts.hasOwnProperty('isReminder')) {

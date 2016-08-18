@@ -1057,8 +1057,42 @@ module.exports.getInvoiceOrOffer = function(docType, uid, id) {
       log.warn("getInvoiceOrOffer: No doc type=" + docType + " with id=" + id + " found");
       deferred.reject(new Error("The requested document id=" + id + " could not be found."));
     } else {
-      log.verbose("getInvoice: Doc found docType=" + docType + ": " + JSON.stringify(doc));
+      log.verbose("getInvoiceOrOffer: Doc found docType=" + docType + ": " + JSON.stringify(doc));
       deferred.resolve(doc);
+    }
+  });
+  return deferred.promise;
+};
+
+module.exports.getInvoiceOrOfferList = function(docType, uid, idList) {
+  var ouid = new ObjectID(uid);
+  var oidList = [];
+  idList.forEach(function(id) {
+    oidList.push(new ObjectID(id));
+  });
+  var deferred = Q.defer();
+  var collection = undefined;
+  if (docType == 'invoice' || docType == 'offer') {
+    collection = docType;
+  } else {
+    deferred.reject(new Error("getInvoiceOrOfferList: unsupported docType=" + docType));
+    return deferred.promise;
+  }
+  var query = {
+    '_id': {
+      $in: oidList
+    },
+    'uid': ouid
+  };
+  getAllDocsPromise(collection, query).then(function(docList) {
+    if (docList == undefined || docList.length == 0) {
+      log.warn("getInvoiceOrOfferList: No doc type=" + docType +
+        " with ids=" +JSON.stringify(idList) + " found");
+      deferred.reject(new Error("The requested document ids=" + JSON.stringify(idList) +
+        " could not be found."));
+    } else {
+      log.verbose("getInvoiceOrOfferList: Docs found docType=" + docType + ": " + JSON.stringify(docList));
+      deferred.resolve(docList);
     }
   });
   return deferred.promise;
@@ -1184,7 +1218,7 @@ module.exports.invoiceOrOfferBulkOp = function(docType, op, idList) {
     oidList.push(new ObjectID(id));
   });
   var query = {
-    "_id": {
+    '_id': {
       $in: oidList
     }
   };
