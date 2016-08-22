@@ -1,6 +1,6 @@
 {
   "name": "Invoicing",
-  "version": "0.2.56",
+  "version": "0.3.0",
   "description": "Invoicing made easy",
   "main": "app.js",
   "scripts": {
