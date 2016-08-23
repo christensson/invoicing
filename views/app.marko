@@ -4,91 +4,8 @@
     var navbarUseAnnotatedIcons = false;
     var defaults = require('../public/default.js').get();
 </script>
+
 <!DOCTYPE html>
-
-<macro icon(icon, tooltip, extraClass, isExplicitIcon)>
-    <if ("${isExplicitIcon}" == "true")>
-        <i class="fa ${icon} ${extraClass}" aria-hidden="true" data-placement="top" title="${tooltip}"></i>
-    </if>
-    <else>
-        <i class="fa fa-${icon} ${extraClass}" aria-hidden="true" data-placement="top" title="${tooltip}"></i>
-    </else>
-</macro>
-
-<macro iconFw(icon, tooltip, extraClass, isExplicitIcon)>
-    <icon icon="${icon}" tooltip="${tooltip}" extraClass="fa-fw ${extraClass}" isExplicitIcon="${isExplicitIcon}"/>
-</macro>
-
-<macro iconLg(icon, tooltip, extraClass, isExplicitIcon)>
-    <icon icon="${icon}" tooltip="${tooltip}" extraClass="fa-lg ${extraClass}" isExplicitIcon="${isExplicitIcon}"/>
-</macro>
-
-<macro iconFwLg(icon, tooltip, extraClass, isExplicitIcon)>
-    <iconFw icon="${icon}" tooltip="${tooltip}" extraClass="fa-lg ${extraClass}" isExplicitIcon="${isExplicitIcon}"/>
-</macro>
-
-<macro condIcon(cond, icon, tooltip, extraClass)>
-    <span data-bind="if: ${cond}">
-        <icon icon="${icon}" tooltip="${tooltip}" extraClass="${extraClass}"/>
-    </span>
-</macro>
-
-<macro condIconFw(cond, icon, tooltip, extraClass)>
-    <span data-bind="if: ${cond}">
-        <icon icon="${icon}" tooltip="${tooltip}" extraClass="fa-fw ${extraClass}"/>
-    </span>
-</macro>
-
-<macro condCheckIcon(cond, tooltip, extraClass)>
-    <condIcon cond="${cond}" icon="check" tooltip="${tooltip}" extraClass="${extraClass}"/>
-</macro>
-
-<macro condCheckIconFw(cond, tooltip, extraClass)>
-    <condIconFw cond="${cond}" icon="check" tooltip="${tooltip}" extraClass="${extraClass}"/>
-</macro>
-
-<macro condLockIcon(cond, tooltip, extraClass)>
-    <condIcon cond="${cond}" icon="lock" tooltip="${tooltip}" extraClass="${extraClass}"/>
-</macro>
-
-<macro condLockIconFw(cond, tooltip, extraClass)>
-    <condIconFw cond="${cond}" icon="lock" tooltip="${tooltip}" extraClass="${extraClass}"/>
-</macro>
-
-<macro filterLabelToggle(condVar, text, action)>
-    <button class="btn btn-xs label-fix" data-bind="css: {'btn-default': !${condVar}(), 'btn-success': ${condVar}},
-                                             click: function() { ${condVar}(!${condVar}()); }">
-        <condIcon cond="${condVar}" icon="eye" extraClass="inline-icon-left-fix"/>
-        <condIcon cond="!${condVar}()" icon="eye-slash" extraClass="inline-icon-left-fix"/>
-        ${text}
-    </button>
-</macro>
-
-<macro navbarDropdown(text, icon, isExplicitIcon)>
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-      <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
-      ${text}
-      <span class="caret"></span>
-    </a>
-</macro>
-
-<macro navbarItem(route, text, icon, isExplicitIcon)>
-    <li data-bind="css: { active: '${route}'.split('/').slice(-1)[0] == currentView() }">
-        <a href="#" data-bind="click: Ui.selectRoute.bind(null, '${route}')">
-            <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
-            ${text}
-        </a>
-    </li>
-</macro>
-
-<macro navbarItemServerRoute(route, text, icon, isExplicitIcon)>
-    <li>
-        <a href="${route}">
-            <iconFwLg icon="${icon}" isExplicitIcon="${isExplicitIcon}"/>
-            ${text}
-        </a>
-    </li>
-</macro>
 
 <macro itemTextWithEditMode(textVariable, type, cond, editModeVariable, useTextarea, label)>
     <div data-bind="ifnot: ${editModeVariable}">
@@ -114,38 +31,6 @@
     </div>
 </macro>
 
-<macro pagerShowHide(clickHdlr, isVisibleVariable, textShow, textHide, extraClass)>
-    <nav>
-        <ul class="pager ${extraClass}">
-            <li>
-                <a href="#" data-bind="click: ${clickHdlr}">
-                    <span data-bind="ifnot: ${isVisibleVariable}">
-                        <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
-                        ${textShow}
-                        <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
-                    </span>
-                    <span data-bind="if: ${isVisibleVariable}">
-                        <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
-                        ${textHide}
-                        <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
-                    </span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-</macro>
-
-<macro navbarCollapseToggleBtn(target)>
-    <button type="button" class="navbar-toggle collapsed"
-        data-toggle="collapse" data-target="${target}">
-
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"/>
-        <span class="icon-bar"/>
-        <span class="icon-bar"/>
-    </button>
-</macro>
-
 <html>
     <head>
         <meta charset="utf-8"/>
@@ -161,39 +46,39 @@
         <nav class="navbar navbar-default navbar-fixed-top" id="app-navbar">
             <div class="container">
                 <div class="navbar-header">
-                    <navbarCollapseToggleBtn target="#app-navbar-collapse"/>
+                    <navbar-collapse-toggle-btn target="#app-navbar-collapse"/>
                     <a class="navbar-brand" href="#/page/home">
                         ${i18n.t('app.navBar.title')}
                     </a>
                 </div>
                 <div class="navbar-collapse collapse" id="app-navbar-collapse">
                     <ul class="nav navbar-nav">
-                        <navbarItem route="/page/home" text="${i18n.t('app.navBar.home')}" icon="home"/>
+                        <navbar-item route="/page/home" text="${i18n.t('app.navBar.home')}" icon="home"/>
 
                         <li class="drowdown">
-                            <navbarDropdown text="${i18n.t('app.navBar.customerMenu')}" icon="user"/>
+                            <navbar-dropdown text="${i18n.t('app.navBar.customerMenu')}" icon="user"/>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/customer_new" text="${i18n.t('app.navBar.customerNew')}" icon="user-plus"/>
-                                <navbarItem route="/page/customers" text="${i18n.t('app.navBar.customerList')}" icon="users"/>
+                                <navbar-item route="/page/customer_new" text="${i18n.t('app.navBar.customerNew')}" icon="user-plus"/>
+                                <navbar-item route="/page/customers" text="${i18n.t('app.navBar.customerList')}" icon="users"/>
                             </ul>
                         </li>
 
                         <li class="drowdown">
-                            <navbarDropdown text="${i18n.t('app.navBar.invoiceMenu')}" icon="file-text"/>
+                            <navbar-dropdown text="${i18n.t('app.navBar.invoiceMenu')}" icon="file-text"/>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/invoice_new" text="${i18n.t('app.navBar.invoiceNew')}" icon="file-text"/>
-                                <navbarItem route="/page/invoices" text="${i18n.t('app.navBar.invoiceList')}" icon="list"/>
+                                <navbar-item route="/page/invoice_new" text="${i18n.t('app.navBar.invoiceNew')}" icon="file-text"/>
+                                <navbar-item route="/page/invoices" text="${i18n.t('app.navBar.invoiceList')}" icon="list"/>
                                 <li role="separator" class="divider"/>
-                                <navbarItem route="/page/invoice_item_group_templates" text="${i18n.t('app.navBar.invoiceItemGroupTemplates')}" icon="list-alt"/>
-                                <navbarItem route="/page/articles" text="${i18n.t('app.navBar.articles')}" icon="cubes"/>
+                                <navbar-item route="/page/invoice_item_group_templates" text="${i18n.t('app.navBar.invoiceItemGroupTemplates')}" icon="list-alt"/>
+                                <navbar-item route="/page/articles" text="${i18n.t('app.navBar.articles')}" icon="cubes"/>
                             </ul>
                         </li>
 
                         <li class="drowdown">
-                            <navbarDropdown text="${i18n.t('app.navBar.offerMenu')}" icon="file-text"/>
+                            <navbar-dropdown text="${i18n.t('app.navBar.offerMenu')}" icon="file-text"/>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/offer_new" text="${i18n.t('app.navBar.offerNew')}" icon="file-text"/>
-                                <navbarItem route="/page/offers" text="${i18n.t('app.navBar.offerList')}" icon="list"/>
+                                <navbar-item route="/page/offer_new" text="${i18n.t('app.navBar.offerNew')}" icon="file-text"/>
+                                <navbar-item route="/page/offers" text="${i18n.t('app.navBar.offerList')}" icon="list"/>
                             </ul>
                         </li>
 
@@ -202,7 +87,7 @@
                         <!-- Company menu -->
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                                <iconFwLg icon="briefcase" extraClass="inline-icon-left-fix"/>
+                                <icon fw="true" lg="true" icon="briefcase" extraClass="inline-icon-left-fix"/>
                                 <span data-bind="text: activeCompanyName"/>
                                 <span class="caret"/>
                             </a>
@@ -213,19 +98,19 @@
                                 <li data-bind="css: { active: _id() == $parent.activeCompanyId() }">
                                     <a href="#" data-bind="click: $root.selectCompany">
                                         <span data-bind="text: name"/>
-                                        <condCheckIconFw cond="_id() == $parent.activeCompanyId()" extraClass="inline-icon-right-fix"/>
+                                        <icon icon="check" fw="true" cond="_id() == $parent.activeCompanyId()" extraClass="inline-icon-right-fix"/>
                                     </a>
                                 </li>
                                 <html-comment> /ko </html-comment>
                                 <li role="separator" class="divider"/>
-                                <navbarItem route="/page/companies" text="${i18n.t('app.navBar.companyAdmin')}" icon="briefcase"/>
+                                <navbar-item route="/page/companies" text="${i18n.t('app.navBar.companyAdmin')}" icon="briefcase"/>
                             </ul>
                         </li>
 
                         <!-- User menu -->
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                                <iconFwLg icon="user" extraClass="inline-icon-left-fix"/>
+                                <icon fw="true" lg="true" icon="user" extraClass="inline-icon-left-fix"/>
                                 <span data-bind="text: userName"/>
                                 <span if(data.user.isAdmin === true)
                                     class="label label-primary label-fix">
@@ -234,17 +119,17 @@
                                 <span class="caret"/>
                             </a>
                             <ul class="dropdown-menu" role="menu">
-                                <navbarItem route="/page/settings" text="${i18n.t('app.navBar.settings')}" icon="wrench"/>
+                                <navbar-item route="/page/settings" text="${i18n.t('app.navBar.settings')}" icon="wrench"/>
 
                                 <if(data.user.isAdmin === true)>
                                     <li role="separator" class="divider"/>
-                                    <navbarItem route="/page/debug" text="${i18n.t('app.navBar.debug')}" icon="bug"/>
-                                    <navbarItem route="/page/users" text="${i18n.t('app.navBar.users')}" icon="users"/>
-                                    <navbarItem route="/page/invites" text="${i18n.t('app.navBar.invites')}" icon="gift"/>
+                                    <navbar-item route="/page/debug" text="${i18n.t('app.navBar.debug')}" icon="bug"/>
+                                    <navbar-item route="/page/users" text="${i18n.t('app.navBar.users')}" icon="users"/>
+                                    <navbar-item route="/page/invites" text="${i18n.t('app.navBar.invites')}" icon="gift"/>
                                 </if>
 
                                 <li role="separator" class="divider"/>
-                                <navbarItemServerRoute route="/logout" text="${i18n.t('app.navBar.logout')}" icon="sign-out"/>
+                                <navbar-item-server-route route="/logout" text="${i18n.t('app.navBar.logout')}" icon="sign-out"/>
                             </ul>
                         </li>
                     </ul>
@@ -388,7 +273,7 @@
                     <nav class="navbar navbar-default navbar-fixed-bottom">
                         <div class="container">
                             <div class="navbar-header">
-                                <navbarCollapseToggleBtn target="#app-companies-bottom-navbar-collapse"/>
+                                <navbar-collapse-toggle-btn target="#app-companies-bottom-navbar-collapse"/>
                             </div>
 
                             <div class="collapse navbar-collapse" id="app-companies-bottom-navbar-collapse">
@@ -468,7 +353,7 @@
                     <nav class="navbar navbar-default navbar-fixed-bottom">
                         <div class="container">
                             <div class="navbar-header">
-                                <navbarCollapseToggleBtn target="#app-company_new-bottom-navbar-collapse"/>
+                                <navbar-collapse-toggle-btn target="#app-company_new-bottom-navbar-collapse"/>
                             </div>
 
                             <div class="collapse navbar-collapse" id="app-company_new-bottom-navbar-collapse">
@@ -910,7 +795,7 @@
                     <nav class="navbar navbar-default navbar-fixed-bottom">
                         <div class="container">
                             <div class="navbar-header">
-                                <navbarCollapseToggleBtn target="#app-customer-bottom-navbar-collapse"/>
+                                <navbar-collapse-toggle-btn target="#app-customer-bottom-navbar-collapse"/>
                             </div>
 
                             <div class="collapse navbar-collapse" id="app-customer-bottom-navbar-collapse">
@@ -951,16 +836,16 @@
                                         ${i18n.t('app.customerList.cidCol')}
                                         <button type="button"
                                             class="btn btn-default btn-xs" data-bind="click: doSortToggle('cid')">
-                                            <condIcon cond="customerListSort() !== 'cidAsc'" icon="sort-amount-asc"/>
-                                            <condIcon cond="customerListSort() === 'cidAsc'" icon="sort-amount-desc"/>
+                                            <icon cond="customerListSort() !== 'cidAsc'" icon="sort-amount-asc"/>
+                                            <icon cond="customerListSort() === 'cidAsc'" icon="sort-amount-desc"/>
                                         </button>
                                     </th>
                                     <th>
                                         ${i18n.t('app.customerList.nameCol')}
                                         <button type="button"
                                             class="btn btn-default btn-xs" data-bind="click: doSortToggle('name')">
-                                            <condIcon cond="customerListSort() !== 'nameAsc'" icon="sort-amount-asc"/>
-                                            <condIcon cond="customerListSort() === 'nameAsc'" icon="sort-amount-desc"/>
+                                            <icon cond="customerListSort() !== 'nameAsc'" icon="sort-amount-asc"/>
+                                            <icon cond="customerListSort() === 'nameAsc'" icon="sort-amount-desc"/>
                                         </button>
                                     </th>
                                     <th>
@@ -1034,7 +919,7 @@
                     <nav class="navbar navbar-default navbar-fixed-bottom">
                         <div class="container">
                             <div class="navbar-header">
-                                <navbarCollapseToggleBtn target="#app-customer_new-bottom-navbar-collapse"/>
+                                <navbar-collapse-toggle-btn target="#app-customer_new-bottom-navbar-collapse"/>
                             </div>
 
                             <div class="collapse navbar-collapse" id="app-customer_new-bottom-navbar-collapse">
@@ -1199,7 +1084,7 @@
                             </div>
 
 
-                            <pagerShowHide
+                            <pager-show-hide
                               clickHdlr="toggleIsExtraOptVisible"
                               isVisibleVariable="isExtraOptVisible"
                               textShow="${i18n.t('app.customer.extraOptToggleLbl', {context: 'show'})}"
@@ -1243,7 +1128,7 @@
                     <nav class="navbar navbar-default navbar-fixed-bottom">
                       <div class="container">
                           <div class="navbar-header">
-                              <navbarCollapseToggleBtn target="#app-invoices-bottom-navbar-collapse"/>
+                              <navbar-collapse-toggle-btn target="#app-invoices-bottom-navbar-collapse"/>
                           </div>
 
                           <div class="collapse navbar-collapse" id="app-invoices-bottom-navbar-collapse">
@@ -1384,23 +1269,23 @@
                                             </label>
                                             <div id="invoiceOptFilter" data-bind="if: docType() == 'invoice'">
                                               <div class="col-md-11">
-                                                  <filterLabelToggle condVar="filterOpt.showNotCredit" text="${i18n.t('app.invoiceList.showNotCreditFilterLbl')}"/>
-                                                  <filterLabelToggle condVar="filterOpt.showCredit" text="${i18n.t('app.invoiceList.showCreditFilterLbl')}"/>
+                                                  <filter-label-toggle condVar="filterOpt.showNotCredit" text="${i18n.t('app.invoiceList.showNotCreditFilterLbl')}"/>
+                                                  <filter-label-toggle condVar="filterOpt.showCredit" text="${i18n.t('app.invoiceList.showCreditFilterLbl')}"/>
                                               </div>
                                               <div class="col-md-offset-1 col-md-11">
-                                                  <filterLabelToggle condVar="filterOpt.showPaid" text="${i18n.t('app.invoiceList.showPaidFilterLbl')}"/>
-                                                  <filterLabelToggle condVar="filterOpt.showUnpaid" text="${i18n.t('app.invoiceList.showUnpaidFilterLbl')}"/>
-                                                  <filterLabelToggle condVar="filterOpt.showUnpaidExpired" text="${i18n.t('app.invoiceList.showUnpaidExpiredFilterLbl')}"/>
+                                                  <filter-label-toggle condVar="filterOpt.showPaid" text="${i18n.t('app.invoiceList.showPaidFilterLbl')}"/>
+                                                  <filter-label-toggle condVar="filterOpt.showUnpaid" text="${i18n.t('app.invoiceList.showUnpaidFilterLbl')}"/>
+                                                  <filter-label-toggle condVar="filterOpt.showUnpaidExpired" text="${i18n.t('app.invoiceList.showUnpaidExpiredFilterLbl')}"/>
                                               </div>
                                               <div class="col-md-offset-1 col-md-11">
-                                                  <filterLabelToggle condVar="filterOpt.showNotCanceled" text="${i18n.t('app.invoiceList.showNotCanceledFilterLbl')}"/>
-                                                  <filterLabelToggle condVar="filterOpt.showCanceled" text="${i18n.t('app.invoiceList.showCanceledFilterLbl')}"/>
+                                                  <filter-label-toggle condVar="filterOpt.showNotCanceled" text="${i18n.t('app.invoiceList.showNotCanceledFilterLbl')}"/>
+                                                  <filter-label-toggle condVar="filterOpt.showCanceled" text="${i18n.t('app.invoiceList.showCanceledFilterLbl')}"/>
                                               </div>
                                             </div>
                                             <div id="invoiceOptFilter" data-bind="if: docType() == 'offer'">
                                               <div class="col-md-11">
-                                                  <filterLabelToggle condVar="filterOpt.showNotCanceled" text="${i18n.t('app.invoiceList.showNotCanceledFilterLbl')}"/>
-                                                  <filterLabelToggle condVar="filterOpt.showCanceled" text="${i18n.t('app.invoiceList.showCanceledFilterLbl')}"/>
+                                                  <filter-label-toggle condVar="filterOpt.showNotCanceled" text="${i18n.t('app.invoiceList.showNotCanceledFilterLbl')}"/>
+                                                  <filter-label-toggle condVar="filterOpt.showCanceled" text="${i18n.t('app.invoiceList.showCanceledFilterLbl')}"/>
                                               </div>
                                             </div>
                                         </div>
@@ -1410,7 +1295,7 @@
                         </div>
                     </div>
 
-                    <pagerShowHide
+                    <pager-show-hide
                       clickHdlr="doToggleFilterPaneExpanded"
                       isVisibleVariable="isFilterPaneExpanded"
                       textShow="${i18n.t('app.invoiceList.filterPaneToggleLbl', {context: 'show'})}"
@@ -1444,56 +1329,56 @@
                                         ${i18n.t('app.invoiceList.colNr')}
                                         <button type="button" class="btn btn-default btn-xs"
                                             data-bind="click: doSortToggle('docNr')">
-                                            <condIcon cond="invoiceListSort() !== 'docNrAsc'" icon="sort-amount-asc"/>
-                                            <condIcon cond="invoiceListSort() === 'docNrAsc'" icon="sort-amount-desc"/>
+                                            <icon cond="invoiceListSort() !== 'docNrAsc'" icon="sort-amount-asc"/>
+                                            <icon cond="invoiceListSort() === 'docNrAsc'" icon="sort-amount-desc"/>
                                         </button>
                                     </th>
                                     <th>
                                         ${i18n.t('app.invoiceList.colDate')}
                                         <button type="button" class="btn btn-default btn-xs"
                                             data-bind="click: doSortToggle('date')">
-                                            <condIcon cond="invoiceListSort() !== 'dateAsc'" icon="sort-amount-asc"/>
-                                            <condIcon cond="invoiceListSort() === 'dateAsc'" icon="sort-amount-desc"/>
+                                            <icon cond="invoiceListSort() !== 'dateAsc'" icon="sort-amount-asc"/>
+                                            <icon cond="invoiceListSort() === 'dateAsc'" icon="sort-amount-desc"/>
                                         </button>
                                     </th>
                                     <th>
                                         ${i18n.t('app.invoiceList.colCustomerNr')}
                                         <button type="button" class="btn btn-default btn-xs"
                                             data-bind="click: doSortToggle('cid')">
-                                            <condIcon cond="invoiceListSort() !== 'cidAsc'" icon="sort-amount-asc"/>
-                                            <condIcon cond="invoiceListSort() === 'cidAsc'" icon="sort-amount-desc"/>
+                                            <icon cond="invoiceListSort() !== 'cidAsc'" icon="sort-amount-asc"/>
+                                            <icon cond="invoiceListSort() === 'cidAsc'" icon="sort-amount-desc"/>
                                         </button>
                                     </th>
                                     <th>
                                         ${i18n.t('app.invoiceList.colCustomerName')}
                                         <button type="button"
                                             class="btn btn-default btn-xs" data-bind="click: doSortToggle('customer')">
-                                            <condIcon cond="invoiceListSort() !== 'customerAsc'" icon="sort-amount-asc"/>
-                                            <condIcon cond="invoiceListSort() === 'customerAsc'" icon="sort-amount-desc"/>
+                                            <icon cond="invoiceListSort() !== 'customerAsc'" icon="sort-amount-asc"/>
+                                            <icon cond="invoiceListSort() === 'customerAsc'" icon="sort-amount-desc"/>
                                         </button>
                                     </th>
                                     <th>
                                         ${i18n.t('app.invoiceList.colCurrency')}
                                         <button type="button"
                                             class="btn btn-default btn-xs" data-bind="click: doSortToggle('currency')">
-                                            <condIcon cond="invoiceListSort() !== 'currencyAsc'" icon="sort-amount-asc"/>
-                                            <condIcon cond="invoiceListSort() === 'currencyAsc'" icon="sort-amount-desc"/>
+                                            <icon cond="invoiceListSort() !== 'currencyAsc'" icon="sort-amount-asc"/>
+                                            <icon cond="invoiceListSort() === 'currencyAsc'" icon="sort-amount-desc"/>
                                         </button>
                                     </th>
                                     <th>
                                         ${i18n.t('app.invoiceList.colTotalExclVat')}
                                         <button type="button"
                                             class="btn btn-default btn-xs" data-bind="click: doSortToggle('totalExclVat')">
-                                            <condIcon cond="invoiceListSort() !== 'totalExclVatAsc'" icon="sort-amount-asc"/>
-                                            <condIcon cond="invoiceListSort() === 'totalExclVatAsc'" icon="sort-amount-desc"/>
+                                            <icon cond="invoiceListSort() !== 'totalExclVatAsc'" icon="sort-amount-asc"/>
+                                            <icon cond="invoiceListSort() === 'totalExclVatAsc'" icon="sort-amount-desc"/>
                                         </button>
                                     </th>
                                     <th>
                                         ${i18n.t('app.invoiceList.colTotalVat')}
                                         <button type="button"
                                             class="btn btn-default btn-xs" data-bind="click: doSortToggle('totalVat')">
-                                            <condIcon cond="invoiceListSort() !== 'totalVatAsc'" icon="sort-amount-asc"/>
-                                            <condIcon cond="invoiceListSort() === 'totalVatAsc'" icon="sort-amount-desc"/>
+                                            <icon cond="invoiceListSort() !== 'totalVatAsc'" icon="sort-amount-asc"/>
+                                            <icon cond="invoiceListSort() === 'totalVatAsc'" icon="sort-amount-desc"/>
                                         </button>
                                     </th>
                                 </tr>
@@ -1504,8 +1389,8 @@
                                                click: $parent.selectRow,
                                                event: { mouseover: $parent.hoverRow }">
                                     <td>
-                                        <condIconFw cond="isSelected" icon="check-square-o" extraClass="inline-icon-left-fix"/>
-                                        <condIconFw cond="!isSelected()" icon="square-o" extraClass="inline-icon-left-fix"/>
+                                        <icon fw="true" cond="isSelected" icon="check-square-o" extraClass="inline-icon-left-fix"/>
+                                        <icon fw="true" cond="!isSelected()" icon="square-o" extraClass="inline-icon-left-fix"/>
                                         <div class="btn-group btn-group-sm right3" role="group">
                                             <a class="btn btn-info" type="button"
                                                data-bind="attr: { href: '#/page/' + docType() + '_show/' + _id() },
@@ -1517,10 +1402,10 @@
                                                 <icon icon="print"/>
                                             </a>
                                         </div>
-                                        <condLockIcon cond="isLocked" tooltip="${i18n.t('app.invoiceList.isLockedIconTooltip')}"/>
-                                        <condIcon cond="isCredit" icon="credit-card" tooltip="${i18n.t('app.invoiceList.isCreditIconTooltip')}"/>
-                                        <condIcon cond="isCanceled" icon="remove" tooltip="${i18n.t('app.invoiceList.isCanceledIconTooltip')}"/>
-                                        <condIcon cond="isExpired" icon="warning" tooltip="${i18n.t('app.invoiceList.isExpiredIconTooltip')}"/>
+                                        <icon icon="lock" cond="isLocked" tooltip="${i18n.t('app.invoiceList.isLockedIconTooltip')}"/>
+                                        <icon cond="isCredit" icon="credit-card" tooltip="${i18n.t('app.invoiceList.isCreditIconTooltip')}"/>
+                                        <icon cond="isCanceled" icon="remove" tooltip="${i18n.t('app.invoiceList.isCanceledIconTooltip')}"/>
+                                        <icon cond="isExpired" icon="warning" tooltip="${i18n.t('app.invoiceList.isExpiredIconTooltip')}"/>
                                     </td>
                                     <td>
                                         <p class="form-control-static">
@@ -1607,7 +1492,7 @@
                     <nav class="navbar navbar-default navbar-fixed-bottom">
                       <div class="container">
                           <div class="navbar-header">
-                              <navbarCollapseToggleBtn target="#app-invoice_new-bottom-navbar-collapse"/>
+                              <navbar-collapse-toggle-btn target="#app-invoice_new-bottom-navbar-collapse"/>
                           </div>
 
                           <div class="collapse navbar-collapse" id="app-invoice_new-bottom-navbar-collapse">
@@ -1692,7 +1577,7 @@
                                                 <span data-bind="text: data.docNr"/>
                                             </span>
                                         </span>
-                                        <condLockIcon cond="data.isLocked"/>
+                                        <icon icon="lock" cond="data.isLocked"/>
                                     </h3>
                                 </div>
                                 <div class="panel-body">
@@ -2344,7 +2229,7 @@
                     </div>
                     <!-- invoice items panel -->
 
-                    <pagerShowHide
+                    <pager-show-hide
                       clickHdlr="data.toggleExtraOptionExpanded"
                       isVisibleVariable="data.extraOptionExpanded"
                       textShow="${i18n.t('app.invoice.extraOptToggleLbl', {context: 'show'})}"
@@ -2530,7 +2415,7 @@
                     <nav class="navbar navbar-default navbar-fixed-bottom">
                         <div class="container">
                             <div class="navbar-header">
-                                <navbarCollapseToggleBtn target="#app-invoice_item_group_templates-bottom-navbar-collapse"/>
+                                <navbar-collapse-toggle-btn target="#app-invoice_item_group_templates-bottom-navbar-collapse"/>
                             </div>
 
                             <div class="collapse navbar-collapse" id="app-invoice_item_group_templates-bottom-navbar-collapse">
@@ -2799,7 +2684,7 @@
                     <nav class="navbar navbar-default navbar-fixed-bottom">
                         <div class="container">
                             <div class="navbar-header">
-                                <navbarCollapseToggleBtn target="#app-articles-bottom-navbar-collapse"/>
+                                <navbar-collapse-toggle-btn target="#app-articles-bottom-navbar-collapse"/>
                             </div>
 
                             <div class="collapse navbar-collapse" id="app-articles-bottom-navbar-collapse">
@@ -2852,7 +2737,7 @@
                         </div>
                     </div>
 
-                    <pagerShowHide
+                    <pager-show-hide
                       clickHdlr="doToggleFilterPaneExpanded"
                       isVisibleVariable="isFilterPaneExpanded"
                       textShow="${i18n.t('app.articles.filterPaneToggleLbl', {context: 'show'})}"
@@ -3070,7 +2955,7 @@
                     <nav class="navbar navbar-default navbar-fixed-bottom">
                         <div class="container">
                             <div class="navbar-header">
-                                <navbarCollapseToggleBtn target="#app-settings-bottom-navbar-collapse"/>
+                                <navbar-collapse-toggle-btn target="#app-settings-bottom-navbar-collapse"/>
                             </div>
 
                             <div class="collapse navbar-collapse" id="app-settings-bottom-navbar-collapse">
@@ -3268,7 +3153,7 @@
                         <nav class="navbar navbar-default navbar-fixed-bottom">
                             <div class="container">
                                 <div class="navbar-header">
-                                    <navbarCollapseToggleBtn target="#app-debug-bottom-navbar-collapse"/>
+                                    <navbar-collapse-toggle-btn target="#app-debug-bottom-navbar-collapse"/>
                                 </div>
 
                                 <div class="collapse navbar-collapse" id="app-debug-bottom-navbar-collapse">
@@ -3368,7 +3253,7 @@
                         <nav class="navbar navbar-default navbar-fixed-bottom">
                             <div class="container">
                                 <div class="navbar-header">
-                                    <navbarCollapseToggleBtn target="#app-users-bottom-navbar-collapse"/>
+                                    <navbar-collapse-toggle-btn target="#app-users-bottom-navbar-collapse"/>
                                 </div>
 
                                 <div class="collapse navbar-collapse" id="app-users-bottom-navbar-collapse">
@@ -3471,7 +3356,7 @@
                                                                         ${i18n.t('app.userList.isAdminLbl')}
                                                                     </dt>
                                                                     <dd>
-                                                                        <condCheckIcon cond="info.isAdmin"/>
+                                                                        <icon icon="check" cond="info.isAdmin"/>
                                                                     </dd>
                                                                     <dt>
                                                                         ${i18n.t('app.userList.regDateLbl')}
@@ -3548,7 +3433,7 @@
                         <nav class="navbar navbar-default navbar-fixed-bottom">
                             <div class="container">
                                 <div class="navbar-header">
-                                    <navbarCollapseToggleBtn target="#app-invites-bottom-navbar-collapse"/>
+                                    <navbar-collapse-toggle-btn target="#app-invites-bottom-navbar-collapse"/>
                                 </div>
 
                                 <div class="collapse navbar-collapse" id="app-invites-bottom-navbar-collapse">
@@ -3593,7 +3478,7 @@
                                         </td>
                                         <td>
                                             <p class="form-control-static">
-                                                <condCheckIcon cond="isAdmin"/>
+                                                <icon icon="check" cond="isAdmin"/>
                                             </p>
                                         </td>
                                     </tr>

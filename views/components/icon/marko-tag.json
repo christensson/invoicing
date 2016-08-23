@@ -1,0 +1,9 @@
+{
+  "@icon": "string",
+  "@cond": "expression",
+  "@extraClass": "string",
+  "@tooltip": "string",
+  "@isExplicitIcon": "bool",
+  "@fw": "bool",
+  "@lg": "bool"
+}

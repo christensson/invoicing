@@ -1,0 +1,6 @@
+<button class="btn btn-xs label-fix" data-bind="css: {'btn-default': !${data.condVar}(), 'btn-success': ${data.condVar}},
+                                         click: function() { ${data.condVar}(!${data.condVar}()); }">
+    <icon cond="${data.condVar}" icon="eye" extraClass="inline-icon-left-fix"/>
+    <icon cond="!${data.condVar}()" icon="eye-slash" extraClass="inline-icon-left-fix"/>
+        ${data.text}
+</button>

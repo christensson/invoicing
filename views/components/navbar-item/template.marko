@@ -1,0 +1,6 @@
+<li data-bind="css: { active: '${data.route}'.split('/').slice(-1)[0] == currentView() }">
+    <a href="#" data-bind="click: Ui.selectRoute.bind(null, '${data.route}')">
+        <icon fw="true" lg="true" icon="${data.icon}" isExplicitIcon="${data.isExplicitIcon}"/>
+        ${data.text}
+    </a>
+</li>

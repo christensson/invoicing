@@ -1,0 +1,18 @@
+<nav>
+    <ul class="pager ${data.extraClass}">
+        <li>
+            <a href="#" data-bind="click: ${data.clickHdlr}">
+                <span data-bind="ifnot: ${data.isVisibleVariable}">
+                    <icon icon="chevron-down" extraClass="inline-icon-left-fix"/>
+                    ${data.textShow}
+                    <icon icon="chevron-down" extraClass="inline-icon-right-fix"/>
+                </span>
+                <span data-bind="if: ${data.isVisibleVariable}">
+                    <icon icon="chevron-up" extraClass="inline-icon-left-fix"/>
+                    ${data.textHide}
+                    <icon icon="chevron-up" extraClass="inline-icon-right-fix"/>
+                </span>
+            </a>
+        </li>
+    </ul>
+</nav>

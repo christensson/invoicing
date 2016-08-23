@@ -25,6 +25,9 @@ var defaults = require('./public/default.js').get();
 var util = require('./public/util.js');
 var log = require('./log');
 
+// Install marko hooks for require
+require('marko/node-require').install();
+
 function increaseVerbosity(v, total) {
   return total + 1;
 }
