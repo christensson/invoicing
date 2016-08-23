@@ -37,7 +37,7 @@
     "knockout-jqautocomplete": "^0.4.4",
     "marko": "^3.9.4",
     "method-override": "^2.3.5",
-    "mongodb": "^2.2.7",
+    "mongodb": "^2.2.8",
     "morgan": "^1.7.0",
     "multer": "^1.2.0",
     "passport": "^0.3.2",
