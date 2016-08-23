@@ -667,7 +667,7 @@ module.exports.doInvoiceReport = function(invoice, tmpDir, onCompletion, opts) {
       x.font(style.summary.customText.font);
       x.fontSize(style.summary.customText.fontSize);
       x.newLine();
-      var reverseChargeText = formatTextTemplate(company[invoiceLng].reverseChargeText, cust);
+      var reverseChargeText = formatTextTemplate(company[invoiceLng].reverseChargeText, invoice.customer);
       x.print(reverseChargeText, {fontBold: 0, border: 0, wrap: 1});
     }
     if (docType == 'invoice' && company[invoiceLng].paymentCustomText) {
