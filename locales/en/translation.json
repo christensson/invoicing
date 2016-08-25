@@ -1,8 +1,135 @@
 {
+    "frontpage": {
+        "tickerText": "Loading",
+        "lngBtn_sv": "Svenska",
+        "lngBtn_en": "English",
+        "pageTitle": "Easy Invoicing",
+        "navBar": {
+            "title": "Easy Invoicing",
+            "usernamePlaceholder": "E-mail",
+            "passwordPlaceholder": "Password",
+            "signinBtn": "Sign in",
+            "signupBtn": "New user?"
+        },
+        "page": {
+            "header": "Invoicing shall be <strong>easy</strong>!",
+            "featureSummary": {
+                "text": [{
+                    "html": [
+                        "<strong>Easy Invoicing</strong> is the invoicing solution",
+                        "for you who writes your invoices, but lets someone else",
+                        "do the accounting."
+                    ]}, {
+                    "html": [
+                        "With Easy Invoicing your not locked to using one computer,",
+                        "since the invoicing solution is located in the <em>cloud</em>",
+                        "you can use any computer without any prior installation.",
+                        "You can even use your <em>mobile phone</em> or",
+                        "<em>surf tablet</em>.",
+                        "The connection is encrypted and <em>safe</em>."
+                    ]}, {
+                    "html": [
+                        "You don't need to care about <em>backups</em>, backups are",
+                        "performed every night."
+                    ]}
+                ],
+                "list": [
+                    {"html": "Use a computer, surf tablet or mobile phone"},
+                    {"html": "Cloud solution with servers located in Sweden"},
+                    {"html": "No installation"},
+                    {"html": "Automatic backup"},
+                    {"html": "Reversed charge for construction services"}
+                ]
+            },
+            "feature1": {
+                "header": "Simple invoice input",
+                "text": [{
+                    "html": [
+                        ""
+                    ]}
+                ],
+                "imgAlt": "Invoice input form"
+            },
+            "feature2": {
+                "header": "Good looking and clean invoices and offers",
+                "text": [{
+                    "html": [
+                        "With Easy Invoicing you print your invoices and offers",
+                        "to <em>PDF-format</em>. After that you can send the document",
+                        "using your own e-mail client or print it on paper and send it",
+                        "as a regular mail. You can select wheter to generate the",
+                        "invoices and offers adapted to window envelop C5-H2 or C5-V2."
+                    ]}
+                ],
+                "listPreText": [
+                    "It is easy to adapt the look of your invoices and offers after",
+                    "your own needs."
+                ],
+                "list": [
+                    {"html": "Add your companys logo"},
+                    {"html": "Change headlines and column headers"}
+                ],
+                "imgAlt": "Example invoice",
+                "examplePdfDownloadLinkText": "Click here to download the example invoice as PDF."
+            },
+            "feature3": {
+                "header": "Multiple companies",
+                "text": [{
+                    "html": [
+                        "With Easy Invoicing you can write invoices for",
+                        "<em>multiple different companies</em>. You switch company",
+                        "with just a few clicks from the menu bar."
+                    ]}
+                ],
+                "imgAlt": "Multiple companies"
+            },
+            "featureOthers": {
+                "header": "Additional features",
+                "list1": [
+                    {"html": "Invoices and offers in 2 languages with 4 currencies"},
+                    {"html": "Convert your offer to an invoice with one single click"},
+                    {"html": "Reversed charge for construction services"}
+                ],
+                "list2": [
+                    {"html": "Article registry for faster input"},
+                    {"html": "Copy previous invoices with one single click"},
+                    {"html": "Unique grouping of invoice rows"}
+                ]
+            }
+        },
+        "signup": {
+          "panelTitle": "Register new user",
+          "google": {
+              "header": "Create a new account with authentication using <strong>Google</strong>",
+              "description": [
+                  "Choose this option if you doesn't want to remember yet another",
+                  "password, but instead re-use your Google-account."
+              ],
+              "instructions": [
+                  "Click the button below to create a new account with authentication",
+                  "using Google."
+              ]
+          },
+          "local": {
+              "header": "Create a new <strong>local</strong> account",
+              "description": [
+                  "Choose this option if you doesnät have a Google-account or simply",
+                  "doesn't want to use it for logging into Easy Invoicing."
+              ],
+              "instructions": [
+                  "Fill in the data below and click <em>Register user</em>."
+              ],
+              "usernameLbl": "E-mail",
+              "passwordLbl": "Password",
+              "usernamePlaceholder": "E-mail",
+              "regFullNameLbl": "Full name",
+              "regPasswordLbl": "Password",
+              "registerBtn": "Register user"
+          }
+        }
+    },
     "signin": {
         "tickerText": "Loading",
-        "tickerTextUpload": "Updating data",
-        "tickerTextDownload": "Fetching data",
         "lngBtn_sv": "Svenska",
         "lngBtn_en": "English",
         "pageTitle": "Easy Invoicing - Sign in",
@@ -37,8 +164,6 @@
     "app": {
         "pageTitle": "Easy Invoicing",
         "tickerText": "Loading",
-        "tickerTextUpload": "Updating data",
-        "tickerTextDownload": "Fetching data",
         "navBar": {
             "title": "Easy Invoicing",
             "home": "Overview",

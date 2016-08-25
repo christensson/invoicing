@@ -16,6 +16,7 @@ body {
 .top10 { margin-top:10px; }
 .top15 { margin-top:15px; }
 .top20 { margin-top:20px; }
+.top50 { margin-top:50px; }
 
 .bottom0 { margin-bottom:0px; }
 .bottom5 { margin-bottom:5px; }
@@ -306,4 +307,47 @@ body {
 }
 .ui-helper-hidden-accessible {
   display: none;
+}
+
+.frontpage-feature {
+  vertical-align: middle;
+}
+
+.frontpage-feature hr {
+  margin: 50px 0; /* Space out the Bootstrap <hr> more */
+}
+
+.frontpage-list {
+  vertical-align: middle;
+}
+
+.frontpage-list li {
+  vertical-align: middle;
+  margin-bottom: 7px;
+}
+
+/* MARKETING CONTENT
+-------------------------------------------------- */
+
+/* Center align the text within the three columns below the carousel */
+.marketing .col-lg-4 {
+  margin-bottom: 20px;
+  text-align: center;
+}
+.marketing h2 {
+  font-weight: normal;
+}
+.marketing .col-lg-4 p {
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.top-logo {
+  margin-top: 3px;
+  margin-right: 3px;
+  width: 214px;
+  height:43px;
+  display:block;
+  background:transparent url('img/logo2.png') center top no-repeat;
+  background-size: 214px 43px;
 }

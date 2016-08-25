@@ -1,8 +1,150 @@
 {
+    "frontpage": {
+        "tickerText": "Laddar",
+        "lngBtn_sv": "Svenska",
+        "lngBtn_en": "English",
+        "pageTitle": "Lätt Fakturering",
+        "navBar": {
+            "title": "Lätt Fakturering",
+            "usernamePlaceholder": "E-post",
+            "passwordPlaceholder": "Lösenord",
+            "signinBtn": "Logga in",
+            "signupBtn": "Ny användare?"
+        },
+        "page": {
+            "header": "Det skall vara <strong>lätt</strong> att fakturera!",
+            "featureSummary": {
+                "text": [{
+                    "html": [
+                        "<strong>Lätt Fakturering</strong> är faktureringslösningen",
+                        "för dig som gärna skriver dina fakturor själv men överlåter",
+                        "bokföringen åt någon annan."
+                    ]}, {
+                    "html": [
+                        "Med Lätt Fakturering är du inte låst till att använda en dator,",
+                        "eftersom faktureringslösningen finns i <em>molnet</em>",
+                        "så kan du använda vilken dator som helst utan någon installation.",
+                        "Du kan till och med använda din <em>telefon</em> eller",
+                        "<em>surfplatta</em>.",
+                        "Anslutningen är krypterad och därmed <em>säker</em>."
+                    ]}, {
+                    "html": [
+                        "Du behöver inte heller tänka på att ta <em>backup</em>, det sker",
+                        "automatiskt varje natt."
+                    ]}
+                ],
+                "list": [
+                    {"html": "Använd dator, surfplatta eller mobil"},
+                    {"html": "Molnlösning med server i Sverige"},
+                    {"html": "Ingen installation"},
+                    {"html": "Automatisk backup"},
+                    {"html": "Omvänd skattskylldighet för byggtjänster"}
+                ]
+            },
+            "feature1": {
+                "header": "Enkel fakturainmatning",
+                "text": [{
+                    "html": [
+                        "Detaljerna på fakturan kan <em>grupperas</em> som t.ex",
+                        "arbetstimmar, resor eller något annat med egendefinierade grupper.",
+                        "Varje grupp har sina egna kolumnöverskrifter."
+                    ]}, {
+                    "html": [
+                        "Ett antal inställningar har standardvärden per företag och per kund.",
+                        "Dessa inställningar kan ändras per faktura. Du kan till och",
+                        "med ändra kundens faktureringsadress endast för en",
+                        "specifik faktura."
+                    ]}
+                ],
+                "imgAlt": "Fakturainmatning"
+            },
+            "feature2": {
+                "header": "Snygga och stilrena fakturor och offerter",
+                "text": [{
+                    "html": [
+                        "Med Lätt Fakturering skriver du ut dina fakturor och offerter",
+                        "i <em>PDF-format</em>. Därefter skickar du fakturan från ditt",
+                        "e-post program eller skriver ut den på papper och skickar som",
+                        "ett brev. Du väljer själv om du vill generera fakturor och",
+                        "offerter anpassade till fönsterkuvert C5-H2 eller C5-V2."
+                    ]}, {
+                    "html": [
+                        "Fakturan eller offerten är uppbyggd genom att",
+                        "<em>fakturans rader grupperas</em>. Grupperna definieras av",
+                        "<em>detaljgruppmallar</em> vilka är enkla att anpassa.",
+                        "Du kan även lägga till nya. I exempelfakturan har grupperna",
+                        "\"Detaljer\", \"Arbetstimmar\" och \"Textruta\" använts."
+                    ]}
+                ],
+                "listPreText": [
+                    "Du anpassar enkelt utseendet på dina fakturor och offerter efter",
+                    "eget behov."
+                ],
+                "list": [
+                    {"html": "Lägga till företagets logotyp"},
+                    {"html": "Ändra rubriker och kolumnöverskrifter"}
+                ],
+                "imgAlt": "Exempelfaktura",
+                "examplePdfDownloadLinkText": "Klicka här för att ladda ner exempelfakturan som PDF."
+            },
+            "feature3": {
+                "header": "Flera företag",
+                "text": [{
+                    "html": [
+                        "Med Lätt Fakturering kan du fakturera för",
+                        "<em>flera olika företag</em>. Du byter snabbt och",
+                        "enkelt företag från menyraden."
+                    ]}
+                ],
+                "imgAlt": "Multipla företag"
+            },
+            "featureOthers": {
+                "header": "Ytterligare funktioner",
+                "list1": [
+                    {"html": "Fakturor och offerter på 2 språk med 4 valutor"},
+                    {"html": "Konvertera din offert till en faktura med ett klick"},
+                    {"html": "Omvänd skattskylldighet för byggtjänster"}
+                ],
+                "list2": [
+                    {"html": "Artikelregister för snabbare inmatning"},
+                    {"html": "Kopiera tidigare fakturor med ett klick"},
+                    {"html": "Unik gruppering av fakturarader"}
+                ]
+            }
+        },
+        "signup": {
+          "panelTitle": "Registrera ny användare",
+          "google": {
+              "header": "Skapa nytt konto med inloggning via <strong>Google</strong>",
+              "description": [
+                  "Välj detta alternativ om du inte vill komma ihåg ytterligare ett",
+                  "lösenord, utan vill använda dig utav din google-inloggning."
+              ],
+              "instructions": [
+                  "Tryck på knappen nedan för att skapa ett nytt konto med",
+                  "inloggning via Google."
+              ]
+          },
+          "local": {
+              "header": "Skapa nytt <strong>lokalt</strong> konto",
+              "description": [
+                  "Välj detta alternativ om du inte har ett Google-konto eller om du",
+                  "vill ha en egen inloggning till Lätt Fakturering."
+              ],
+              "instructions": [
+                  "Fyll i uppgifterna nedan och tryck på <em>Registrera användare</em>."
+              ],
+              "usernameLbl": "E-post",
+              "passwordLbl": "Lösenord",
+              "usernamePlaceholder": "E-post",
+              "regFullNameLbl": "Fullständigt namn",
+              "regPasswordLbl": "Lösenord",
+              "registerBtn": "Registrera användare"
+          }
+        }
+    },
     "signin": {
         "tickerText": "Laddar",
-        "tickerTextUpload": "Uppdaterar data",
-        "tickerTextDownload": "Hämtar data",
         "lngBtn_sv": "Svenska",
         "lngBtn_en": "English",
         "pageTitle": "Lätt Fakturering - Logga in",
@@ -37,8 +179,6 @@
     "app": {
         "pageTitle": "Lätt Fakturering",
         "tickerText": "Laddar",
-        "tickerTextUpload": "Uppdaterar data",
-        "tickerTextDownload": "Hämtar data",
         "navBar": {
             "title": "Lätt Fakturering",
             "home": "Översikt",

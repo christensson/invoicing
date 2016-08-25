@@ -2,6 +2,7 @@
 
 var defaults = {
   initialRoute: '/page/home',
+  frontpageInitialRoute: '/page/front',
   defaultLng: "sv",
   enabledLngList: ["sv", "en"],
   uiEnabledLngList: ["sv"],
