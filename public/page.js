@@ -3888,10 +3888,6 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
           self.syncCustomerIdInput();
           self.selectedCustomerUpdatesData = true;
         });
-      } else {
-        Log.error("InvoiceNewViewModel - illegal op=" + docOp +
-          " and/or arguments args=" + JSON.stringify(viewArray));
-        browserNavigateBack();
       }
     }
   });
