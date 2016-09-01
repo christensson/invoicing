@@ -67,231 +67,225 @@ var i18n = require("i18next");
         </nav>
 
         <div id="layout" class="container" role="main">
-            <div>
-                <div>
-                    <div if(data.lngList.length > 1)>
-                        <div class="setlng-bar">
-                            <div class="btn-group" role="group" aria-label="...">
-                                <for(lng in data.lngList)>
-                                    <a href="/signin?setLng=${lng}" role="button"
-                                        class="btn btn-default">
-                                        <span class="icon-lng-${lng}"
-                                            aria-hidden="true"/>
-                                        ${i18n.t('frontpage.lngBtn', {context: (lng)})}
-                                    </a>
-                                </for>
-                            </div>
-                        </div>
+            <div if(data.lngList.length > 1)>
+                <div class="setlng-bar">
+                    <div class="btn-group" role="group" aria-label="...">
+                        <for(lng in data.lngList)>
+                            <a href="/signin?setLng=${lng}" role="button"
+                                class="btn btn-default">
+                                <span class="icon-lng-${lng}"
+                                    aria-hidden="true"/>
+                                ${i18n.t('frontpage.lngBtn', {context: (lng)})}
+                            </a>
+                        </for>
                     </div>
-                    <div>
-                        <div class="row">
-                            <include("./notification.marko")/>
+                </div>
+            </div>
+            <div>
+                <div class="row">
+                    <include("./notification.marko")/>
+                </div>
+
+                <div id="app-frontpage">
+                  <div class="container frontpage-feature">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <h1>$!{i18n.t('frontpage.page.header')}</h1>
+                      </div>
+                    </div>
+
+                    <div class="row top50">
+                      <div class="col-md-7">
+                        <for(item in i18n.t('frontpage.page.featureSummary.text', {returnObjects: true, joinArrays: false}))>
+                          <p class="lead">
+                            $!{item.html.join(' ')}
+                          </p>
+                        </for>
+                      </div>
+                      <div class="col-md-5">
+                        <ul class="list-unstyled frontpage-list">
+                          <for(item in i18n.t('frontpage.page.featureSummary.list', {returnObjects: true, joinArrays: false}))>
+                            <li>
+                              <icon fw="true" icon="check" extraClass="text-success fa-2x"/>
+                              <span class="lead">$!{item.html}</span>
+                            </li>
+                          </for>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <hr class="frontpage-feature"/>
+
+                    <div class="row">
+                      <div class="col-md-7">
+                        <h2>$!{i18n.t('frontpage.page.feature1.header')}</h2>
+                        <for(item in i18n.t('frontpage.page.feature1.text', {returnObjects: true, joinArrays: false}))>
+                          <p class="lead">
+                            $!{item.html.join(' ')}
+                          </p>
+                        </for>
+                      </div>
+                      <div class="col-md-5">
+                        <a href="img/new_invoice_zoom1.png" target="_blank">
+                          <img class="img-responsive" src="img/new_invoice_zoom1.png" alt="${i18n.t('frontpage.page.feature1.imgAlt')}">
+                        </a>
+                      </div>
+                    </div>
+                    
+                    <hr class="frontpage-feature"/>
+                    
+                    <div class="row">
+                      <div class="col-md-5">
+                        <a href="img/invoice_example_1.pdf" target="_blank">
+                          <img class="img-responsive img-thumbnail" src="img/invoice_example_1.png" alt="${i18n.t('frontpage.page.feature2.imgAlt')}">
+                        </a>
+                      </div>
+                      <div class="col-md-7">
+                        <h2>$!{i18n.t('frontpage.page.feature2.header')}</h2>
+                        <for(item in i18n.t('frontpage.page.feature2.text', {returnObjects: true, joinArrays: false}))>
+                          <p class="lead">
+                            $!{item.html.join(' ')}
+                          </p>
+                        </for>
+                        <p class="lead">
+                          $!{i18n.t('frontpage.page.feature2.listPreText')}
+                          <ul class="list-unstyled frontpage-list">
+                            <for(item in i18n.t('frontpage.page.feature2.list', {returnObjects: true, joinArrays: false}))>
+                              <li>
+                                <icon fw="true" icon="check" extraClass="text-success fa-2x"/>
+                                <span class="lead">$!{item.html}</span>
+                              </li>
+                            </for>
+                          </ul>
+                        </p>
+                        <br/>
+                        <a href="img/invoice_example_1.pdf" target="_blank">
+                          ${i18n.t('frontpage.page.feature2.examplePdfDownloadLinkText')}                                  
+                        </a>
+                      </div>
+                    </div>
+
+                    <hr class="frontpage-feature"/>
+                    
+                    <div class="row">
+                      <div class="col-md-7">
+                        <h2>$!{i18n.t('frontpage.page.feature3.header')}</h2>
+                        <for(item in i18n.t('frontpage.page.feature3.text', {returnObjects: true, joinArrays: false}))>
+                          <p class="lead">
+                            $!{item.html.join(' ')}
+                          </p>
+                        </for>
+                      </div>
+                      <div class="col-md-5">
+                        <img class="img-responsive" src="img/multiple_companies_zoom.png" alt="${i18n.t('frontpage.page.feature3.imgAlt')}">
+                      </div>
+                    </div>
+                  </div>
+
+                  <hr class="frontpage-feature"/>
+
+                  <div class="row">
+                    <div class="col-md-12">
+                      <h2>$!{i18n.t('frontpage.page.featureOthers.header')}</h2>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <ul class="list-unstyled frontpage-list">
+                        <for(item in i18n.t('frontpage.page.featureOthers.list1', {returnObjects: true, joinArrays: false}))>
+                          <li>
+                            <icon fw="true" icon="check" extraClass="text-success fa-2x"/>
+                            <span class="lead">$!{item.html}</span>
+                          </li>
+                        </for>
+                      </ul>
+                    </div>
+                    <div class="col-md-6">
+                      <ul class="list-unstyled frontpage-list">
+                        <for(item in i18n.t('frontpage.page.featureOthers.list2', {returnObjects: true, joinArrays: false}))>
+                          <li>
+                            <icon fw="true" icon="check" extraClass="text-success fa-2x"/>
+                            <span class="lead">$!{item.html}</span>
+                          </li>
+                        </for>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <hr class="frontpage-feature"/>
+
+                </div>
+
+                <div id="signup">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">
+                              ${i18n.t('frontpage.signup.panelTitle')}
+                            </h3>
                         </div>
+                        <div class="panel-body">
+                            <h3>
+                              $!{i18n.t('frontpage.signup.google.header')}
+                            </h3>
+                            <p>
+                              $!{i18n.t('frontpage.signup.google.description')}
+                            </p>
+                            <p>
+                              $!{i18n.t('frontpage.signup.google.instructions')}
+                            </p>
+                            <a href="/auth/google" class="button-signin-google" role="button"/>
 
-                        <div id="intro">
-                          <div class="container frontpage-feature">
-                            <div class="row">
-                              <div class="col-md-12">
-                                <h1>$!{i18n.t('frontpage.page.header')}</h1>
-                              </div>
-                            </div>
+                            <hr/>
 
-                            <div class="row top50">
-                              <div class="col-md-7">
-                                <for(item in i18n.t('frontpage.page.featureSummary.text', {returnObjects: true, joinArrays: false}))>
-                                  <p class="lead">
-                                    $!{item.html.join(' ')}
-                                  </p>
-                                </for>
-                              </div>
-                              <div class="col-md-5">
-                                <ul class="list-unstyled frontpage-list">
-                                  <for(item in i18n.t('frontpage.page.featureSummary.list', {returnObjects: true, joinArrays: false}))>
-                                    <li>
-                                      <icon fw="true" icon="check" extraClass="text-success fa-2x"/>
-                                      <span class="lead">$!{item.html}</span>
-                                    </li>
-                                  </for>
-                                </ul>
-                              </div>
-                            </div>
-
-                            <hr class="frontpage-feature"/>
-
-                            <div class="row">
-                              <div class="col-md-7">
-                                <h2>$!{i18n.t('frontpage.page.feature1.header')}</h2>
-                                <for(item in i18n.t('frontpage.page.feature1.text', {returnObjects: true, joinArrays: false}))>
-                                  <p class="lead">
-                                    $!{item.html.join(' ')}
-                                  </p>
-                                </for>
-                              </div>
-                              <div class="col-md-5">
-                                <a href="img/new_invoice_zoom1.png" target="_blank">
-                                  <img class="img-responsive" src="img/new_invoice_zoom1.png" alt="${i18n.t('frontpage.page.feature1.imgAlt')}">
-                                </a>
-                              </div>
-                            </div>
-                            
-                            <hr class="frontpage-feature"/>
-                            
-                            <div class="row">
-                              <div class="col-md-5">
-                                <a href="img/invoice_example_1.pdf" target="_blank">
-                                  <img class="img-responsive img-thumbnail" src="img/invoice_example_1.png" alt="${i18n.t('frontpage.page.feature2.imgAlt')}">
-                                </a>
-                              </div>
-                              <div class="col-md-7">
-                                <h2>$!{i18n.t('frontpage.page.feature2.header')}</h2>
-                                <for(item in i18n.t('frontpage.page.feature2.text', {returnObjects: true, joinArrays: false}))>
-                                  <p class="lead">
-                                    $!{item.html.join(' ')}
-                                  </p>
-                                </for>
-                                <p class="lead">
-                                  $!{i18n.t('frontpage.page.feature2.listPreText')}
-                                  <ul class="list-unstyled frontpage-list">
-                                    <for(item in i18n.t('frontpage.page.feature2.list', {returnObjects: true, joinArrays: false}))>
-                                      <li>
-                                        <icon fw="true" icon="check" extraClass="text-success fa-2x"/>
-                                        <span class="lead">$!{item.html}</span>
-                                      </li>
-                                    </for>
-                                  </ul>
-                                </p>
-                                <br/>
-                                <a href="img/invoice_example_1.pdf" target="_blank">
-                                  ${i18n.t('frontpage.page.feature2.examplePdfDownloadLinkText')}                                  
-                                </a>
-                              </div>
-                            </div>
-
-                            <hr class="frontpage-feature"/>
-                            
-                            <div class="row">
-                              <div class="col-md-7">
-                                <h2>$!{i18n.t('frontpage.page.feature3.header')}</h2>
-                                <for(item in i18n.t('frontpage.page.feature3.text', {returnObjects: true, joinArrays: false}))>
-                                  <p class="lead">
-                                    $!{item.html.join(' ')}
-                                  </p>
-                                </for>
-                              </div>
-                              <div class="col-md-5">
-                                <img class="img-responsive" src="img/multiple_companies_zoom.png" alt="${i18n.t('frontpage.page.feature3.imgAlt')}">
-                              </div>
-                            </div>
-                          </div>
-
-                          <hr class="frontpage-feature"/>
-
-                          <div class="row">
-                            <div class="col-md-12">
-                              <h2>$!{i18n.t('frontpage.page.featureOthers.header')}</h2>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <div class="col-md-6">
-                              <ul class="list-unstyled frontpage-list">
-                                <for(item in i18n.t('frontpage.page.featureOthers.list1', {returnObjects: true, joinArrays: false}))>
-                                  <li>
-                                    <icon fw="true" icon="check" extraClass="text-success fa-2x"/>
-                                    <span class="lead">$!{item.html}</span>
-                                  </li>
-                                </for>
-                              </ul>
-                            </div>
-                            <div class="col-md-6">
-                              <ul class="list-unstyled frontpage-list">
-                                <for(item in i18n.t('frontpage.page.featureOthers.list2', {returnObjects: true, joinArrays: false}))>
-                                  <li>
-                                    <icon fw="true" icon="check" extraClass="text-success fa-2x"/>
-                                    <span class="lead">$!{item.html}</span>
-                                  </li>
-                                </for>
-                              </ul>
-                            </div>
-                          </div>
-
-                          <hr class="frontpage-feature"/>
-
+                            <h3>
+                              $!{i18n.t('frontpage.signup.local.header')}
+                            </h3>
+                            <p>
+                              $!{i18n.t('frontpage.signup.local.description')}
+                            </p>
+                            <p>
+                              $!{i18n.t('frontpage.signup.local.instructions')}
+                            </p>
+                            <form id="local-reg"
+                                action="/local-reg"
+                                method="post">
+                                    <div class="form-group">
+                                        <label for="username"
+                                            class="control-label">
+                                            ${i18n.t('frontpage.signup.local.usernameLbl')}
+                                        </label>
+                                        <input type="email"
+                                            class="form-control"
+                                            name="username" placeholder=i18n.t("frontpage.signup.local.usernamePlaceholder")
+                                            required/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="fullName"
+                                            class="control-label">
+                                            ${i18n.t('frontpage.signup.local.regFullNameLbl')}
+                                        </label>
+                                        <input type="text"
+                                            class="form-control"
+                                            name="fullName" placeholder=i18n.t("frontpage.signup.local.regFullNameLbl")
+                                            required/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="password"
+                                            class="control-label">
+                                            ${i18n.t('frontpage.signup.local.regPasswordLbl')}
+                                        </label>
+                                        <input type="password"
+                                            class="form-control"
+                                            name="password" placeholder=i18n.t("frontpage.signup.local.regPasswordLbl")
+                                            required/>
+                                    </div>
+                                    <button type="submit"
+                                        class="btn btn-primary">
+                                        <icon icon="plus" extraClass="inline-icon-left-fix"/>
+                                        ${i18n.t('frontpage.signup.local.registerBtn')}
+                                    </button>
+                            </form>
                         </div>
-
-                        <div id="signup">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <h3 class="panel-title">
-                                      ${i18n.t('frontpage.signup.panelTitle')}
-                                    </h3>
-                                </div>
-                                <div class="panel-body">
-                                    <h3>
-                                      $!{i18n.t('frontpage.signup.google.header')}
-                                    </h3>
-                                    <p>
-                                      $!{i18n.t('frontpage.signup.google.description')}
-                                    </p>
-                                    <p>
-                                      $!{i18n.t('frontpage.signup.google.instructions')}
-                                    </p>
-                                    <a href="/auth/google" class="button-signin-google" role="button"/>
-
-                                    <hr/>
-
-                                    <h3>
-                                      $!{i18n.t('frontpage.signup.local.header')}
-                                    </h3>
-                                    <p>
-                                      $!{i18n.t('frontpage.signup.local.description')}
-                                    </p>
-                                    <p>
-                                      $!{i18n.t('frontpage.signup.local.instructions')}
-                                    </p>
-                                    <form id="local-reg"
-                                        action="/local-reg"
-                                        method="post">
-                                            <div class="form-group">
-                                                <label for="username"
-                                                    class="control-label">
-                                                    ${i18n.t('frontpage.signup.local.usernameLbl')}
-                                                </label>
-                                                <input type="email"
-                                                    class="form-control"
-                                                    name="username" placeholder=i18n.t("frontpage.signup.local.usernamePlaceholder")
-                                                    required/>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="fullName"
-                                                    class="control-label">
-                                                    ${i18n.t('frontpage.signup.local.regFullNameLbl')}
-                                                </label>
-                                                <input type="text"
-                                                    class="form-control"
-                                                    name="fullName" placeholder=i18n.t("frontpage.signup.local.regFullNameLbl")
-                                                    required/>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="password"
-                                                    class="control-label">
-                                                    ${i18n.t('frontpage.signup.local.regPasswordLbl')}
-                                                </label>
-                                                <input type="password"
-                                                    class="form-control"
-                                                    name="password" placeholder=i18n.t("frontpage.signup.local.regPasswordLbl")
-                                                    required/>
-                                            </div>
-                                            <button type="submit"
-                                                class="btn btn-primary">
-                                                <icon icon="plus" extraClass="inline-icon-left-fix"/>
-                                                ${i18n.t('frontpage.signup.local.registerBtn')}
-                                            </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-
                     </div>
                 </div>
             </div>

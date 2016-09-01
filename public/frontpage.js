@@ -10,24 +10,6 @@ var UiOp = function() {
 
 var Ui = new UiOp();
 
-var SigninViewModel = function(currentView) {
-  var self = this;
-  self.currentView = currentView;
-
-  self.currentView.subscribe(function(newValue) {
-    if (newValue == 'signin') {
-      Log.info("SigninViewModel - activated");
-    }
-  });
-
-  this.isLocalRegVisible = ko.observable(false);
-
-  self.toggleLocalReg = function() {
-    var newState = !self.isLocalRegVisible();
-    self.isLocalRegVisible(newState);
-  };
-};
-
 var NavBarViewModel = function() {
   var self = this;
 
@@ -49,12 +31,8 @@ var NavBarViewModel = function() {
 
 $(function() {
   var navViewModel = new NavBarViewModel();
-  var signinViewModel = new SigninViewModel(navViewModel.currentView);
 
   ko.applyBindings(
     navViewModel,
     document.getElementById("app-navbar"));
-  ko.applyBindings(
-    signinViewModel,
-    document.getElementById("signin"));
 });
