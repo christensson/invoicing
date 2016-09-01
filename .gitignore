@@ -1,5 +1,5 @@
 # Application generated data
-*.pdf
+tmp/*
 views/*.marko.js
 views/*/*.marko.js
 views/*/*/*.marko.js
