@@ -25,6 +25,9 @@ var defaults = require('./public/default.js').get();
 var util = require('./public/util.js');
 var log = require('./log');
 
+// Install marko hooks for require
+require('marko/node-require').install();
+
 function increaseVerbosity(v, total) {
   return total + 1;
 }
@@ -309,7 +312,7 @@ function ensureAuthenticated(req, res, next) {
   }
   log.warn("ensureAuthenticated: Not authenticated!");
   req.flash('notice', req.t("signin.authNokMsg"));
-  res.redirect('/signin');
+  res.redirect('/frontpage');
 }
 
 function myFailureHandler(res, err) {
@@ -1079,7 +1082,7 @@ app.get("/api/log", ensureAuthenticated, function(req, res) {
 // user to homepage, otherwise returns then to signin page
 app.post('/local-reg', passport.authenticate('local-signup', {
   successRedirect : '/',
-  failureRedirect : '/signin',
+  failureRedirect : '/frontpage',
   failureFlash: true
 }));
 
@@ -1087,7 +1090,7 @@ app.post('/local-reg', passport.authenticate('local-signup', {
 // takes user to homepage, otherwise returns then to signin page
 app.post('/login', passport.authenticate('local-signin', {
   successRedirect : '/',
-  failureRedirect : '/signin',
+  failureRedirect : '/frontpage',
   failureFlash: true
 }));
 
@@ -1123,7 +1126,7 @@ app.get('/logout', ensureAuthenticated, function(req, res) {
   log.info("logout: email=" + req.user.info.email + ", name=" + req.user.info.name);
   req.logout();
   req.flash('notice', req.t("signin.logoutOkMsg", {name: name}));
-  res.redirect('/signin');
+  res.redirect('/frontpage');
 });
 
 var appTemplatePath = require.resolve('./views/app.marko');
@@ -1146,8 +1149,8 @@ app.get('/', ensureAuthenticated, function(req, res) {
   }, res);
 });
 
-var signinTemplatePath = require.resolve('./views/signin.marko');
-var signinTemplate = marko.load(signinTemplatePath);
+var signinPlainTemplatePath = require.resolve('./views/signin.marko');
+var signinPlainTemplate = marko.load(signinPlainTemplatePath);
 
 app.get('/signin', function(req, res) {
   var msg =  {
@@ -1155,7 +1158,22 @@ app.get('/signin', function(req, res) {
     "notice": req.flash('notice'),
     "success": req.flash('success'),
   };
-  signinTemplate.render({
+  signinPlainTemplate.render({
+    msg : msg,
+    lngList : defaults.uiEnabledLngList,
+  }, res);
+});
+
+var frontPageTemplatePath = require.resolve('./views/frontpage.marko');
+var frontPageTemplate = marko.load(frontPageTemplatePath);
+
+app.get('/frontpage', function(req, res) {
+  var msg =  {
+    "error": req.flash('error'),
+    "notice": req.flash('notice'),
+    "success": req.flash('success'),
+  };
+  frontPageTemplate.render({
     msg : msg,
     lngList : defaults.uiEnabledLngList,
   }, res);
@@ -1170,7 +1188,7 @@ app.get('/auth/google',
     }));
 
 app.get('/auth/google/callback', 
-    passport.authenticate('google', { failureRedirect: '/signin', failureFlash: true}),
+    passport.authenticate('google', { failureRedirect: '/frontpage', failureFlash: true}),
     function(req, res) {
       var greetingMsg;
       if (req.user.isNew) {

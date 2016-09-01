@@ -1,6 +1,8 @@
 # Application generated data
 *.pdf
 views/*.marko.js
+views/*/*.marko.js
+views/*/*/*.marko.js
 .settings
 uploads/*
 

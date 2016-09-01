@@ -57,7 +57,7 @@ module.exports.doInvoiceReport = function(invoice, tmpDir, onCompletion, opts) {
     invoiceLng = invoice.customer.invoiceLng;
   }
 
-  var invoiceCurrency = defaults.invoiceLng;
+  var invoiceCurrency = defaults.defaultCurrency;
   if (invoice.customer.currency) {
     invoiceCurrency = invoice.customer.currency;
   } else if (invoice.currency) {
