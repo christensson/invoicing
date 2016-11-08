@@ -6,6 +6,7 @@
   "scripts": {
     "test": "mocha --recursive ./test",
     "preversion": "npm test",
+    "postversion": "git checkout release && git merge master",
     "start": "node .",
     "start-dev": "node . --local",
     "init-db": "node ./initdb.js",
