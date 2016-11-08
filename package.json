@@ -9,10 +9,7 @@
     "start": "node .",
     "start-dev": "node . --local",
     "init-db": "node ./initdb.js",
-    "init-db-data": "node ./initdb.js --dev",
-    "step-rev": "./script/step_version.sh -3",
-    "step-minor": "./script/step_version.sh -2",
-    "step-major": "./script/step_version.sh -1"
+    "init-db-data": "node ./initdb.js --dev"
   },
   "author": "Marcus Christensson",
   "license": "BSD-2-Clause",
