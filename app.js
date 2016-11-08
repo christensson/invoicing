@@ -189,115 +189,122 @@ passport.deserializeUser(function(obj, done) {
 });
 
 passport.use(
-    'local-signin',
-    new LocalStrategy(
-        {
-          passReqToCallback : true
-        }, // allows us to pass back the request to the callback
-        function(req, username, password, done) {
-          log.info("signin: user=" + username);
-          funct.localAuth(username, password, true).then(
-              function(user) {
-                if (user) {
-                  log.debug("signin success: user=" + username + ", name=" + user.info.name);
-                  req.flash('success', req.t("signin.loginOkMsg", {name: user.info.name}));
-                  done(null, user);
-                }
-                if (!user) {
-                  log.debug("signin failed: user=" + username);
-                  req.flash('error', req.t("signin.loginNokMsg", {context: "local"}));
-                  done(null, user);
-                }
-              }).fail(function(err) {
-                log.error("signin: body=" + err.body);
-              });
-        }));
+  'local-signin',
+  new LocalStrategy(
+    {
+      passReqToCallback : true
+    }, // allows us to pass back the request to the callback
+    function(req, username, password, done) {
+      log.info("signin: user=" + username);
+      funct.localAuth(username, password, true).then(
+          function(user) {
+            if (user) {
+              log.debug("signin success: user=" + username + ", name=" + user.info.name);
+              req.flash('success', req.t("signin.loginOkMsg", {name: user.info.name}));
+              done(null, user);
+            }
+            if (!user) {
+              log.debug("signin failed: user=" + username);
+              req.flash('error', req.t("signin.loginNokMsg", {context: "local"}));
+              done(null, user);
+            }
+          }).fail(function(err) {
+            log.error("signin: body=" + err.body);
+          });
+    }));
 
 // Use the LocalStrategy within Passport to register/"signup" users.
 passport.use(
-    'local-signup',
-    new LocalStrategy(
-        {
-          passReqToCallback : true
-        }, // allows us to pass back the request to the callback
-        function(req, username, password, done) {
-          log.info("signup: user=" + username);
-          var hash = funct.encryptPassword(password);
-          var userData = {
-            "username-local": username, // username is e-mail for local users!
-            "password": hash,
-            "info" : funct.createUserInfo(req.body.fullName, username)
-          };
-          var errorMessage = undefined;
-          if (password.length < defaults.minPwdLen) {
-            errorMessage = req.t("signin.registerNokMsg", {context: "pwdTooShort", len: defaults.minPwdLen});
-            done(null, false, {message: errorMessage});
-          } else {
-            errorMessage = req.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"});
-            mydb.isEmailInvited(userData.info.email).then(function(inviteInfo) {
-              errorMessage = req.t("signin.registerNokMsg");
-              return funct.findOrCreate("username-local", userData, inviteInfo);
-            }).then(function(result) {
-              if (result.user) {
-                if (result.isNew) {
-                  req.flash('success', req.t("signin.registerOkMsg", {name: result.user.info.name}));
-                  done(null, result.user);
-                } else {
-                  // Failure, registration doesn't expect user to exist.
-                  done(null, false, {message: req.t("signin.registerNokMsg", {name: username, context: "userExists"})});
-                }
-                return done(null, result.user);
-              } else {
-                log.debug("signup: failed user=" + username);
-                done(null, false, {message: errorMessage});
-              }
-            }).fail(function(error) {
-              log.error("signup: msg=" + error.message);
-              done(null, false, {message: errorMessage});
-            });
-          }
-        }));
-
-passport.use(new GoogleStrategy(
+  'local-signup',
+  new LocalStrategy(
     {
-      /* Three things below must be configured at https://console.developers.google.com/
-       * Also the "Google+ API" needs to be enabled.
-       */
-      clientID: googleAuth.web.client_id,
-      clientSecret: googleAuth.web.client_secret,
-      callbackURL: hostname + "/auth/google/callback"
-    },
-    function(accessToken, refreshToken, profile, done) {
-      process.nextTick(function () {
-        log.info("Google-auth: displayName=" + profile.displayName +
-          ", emails[0]=" + profile.emails[0].value);
-        log.verbose("Google-auth: fullProfile=" + JSON.stringify(profile, null, 2));
-        var userData = {
-            "googleId" : profile.id,
-            "info" : funct.createUserInfo(profile.displayName, profile.emails[0].value)
-        };
-        mydb.isEmailInvited(userData.info.email).fail(function(error) {
-          log.info("Google-auth: isEmailInvited failed. msg=" + error.message);
-          done(null, false, {
-            message: i18n.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"})});
-        }).then(function(inviteInfo) {
-          return funct.findOrCreate("googleId", userData, inviteInfo);
+      passReqToCallback : true
+    }, // allows us to pass back the request to the callback
+    function(req, username, password, done) {
+      log.info("signup: user=" + username);
+      var hash = funct.encryptPassword(password);
+      var userData = {
+        "username-local": username, // username is e-mail for local users!
+        "password": hash,
+        "info" : funct.createUserInfo(req.body.fullName, username)
+      };
+      var errorMessage = undefined;
+      if (password.length < defaults.minPwdLen) {
+        errorMessage = req.t("signin.registerNokMsg", {context: "pwdTooShort", len: defaults.minPwdLen});
+        done(null, false, {message: errorMessage});
+      } else {
+        errorMessage = req.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"});
+        mydb.isEmailInvited(userData.info.email).then(function(inviteInfo) {
+          errorMessage = req.t("signin.registerNokMsg");
+          return funct.findOrCreate("username-local", userData, inviteInfo);
         }).then(function(result) {
-          log.debug("Google authentication result=" + JSON.stringify(result));
           if (result.user) {
-            result.user.isNew = result.isNew;
-            log.info("Google-auth: Success! name=" + result.user.info.name + ", email=" + result.user.info.email);
+            if (result.isNew) {
+              req.flash('success', req.t("signin.registerOkMsg", {name: result.user.info.name}));
+              done(null, result.user);
+            } else {
+              // Failure, registration doesn't expect user to exist.
+              done(null, false, {message: req.t("signin.registerNokMsg", {name: username, context: "userExists"})});
+            }
             return done(null, result.user);
           } else {
-            log.info("Google-auth: Failed!");
-            done(null, false);
+            log.debug("signup: failed user=" + username);
+            done(null, false, {message: errorMessage});
           }
         }).fail(function(error) {
-          log.error("Google-auth: msg=" + error.message);
-          done(null, false, {message: error.message});
+          log.error("signup: msg=" + error.message);
+          if (error.message === "Failed to create user, e-mail already registered!") {
+            errorMessage = req.t("signin.registerNokMsg", {name: username, context: "userExists"});
+          }
+          done(null, false, {message: errorMessage});
         });
+      }
+    }));
+
+passport.use(new GoogleStrategy(
+  {
+    /* Three things below must be configured at https://console.developers.google.com/
+     * Also the "Google+ API" needs to be enabled.
+     */
+    clientID: googleAuth.web.client_id,
+    clientSecret: googleAuth.web.client_secret,
+    callbackURL: hostname + "/auth/google/callback"
+  },
+  function(accessToken, refreshToken, profile, done) {
+    process.nextTick(function () {
+      log.info("Google-auth: displayName=" + profile.displayName +
+        ", emails[0]=" + profile.emails[0].value);
+      log.verbose("Google-auth: fullProfile=" + JSON.stringify(profile, null, 2));
+      var userData = {
+          "googleId" : profile.id,
+          "info" : funct.createUserInfo(profile.displayName, profile.emails[0].value)
+      };
+      mydb.isEmailInvited(userData.info.email).fail(function(error) {
+        log.info("Google-auth: isEmailInvited failed. msg=" + error.message);
+        done(null, false, {
+          message: i18n.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"})});
+      }).then(function(inviteInfo) {
+        return funct.findOrCreate("googleId", userData, inviteInfo);
+      }).then(function(result) {
+        log.debug("Google authentication result=" + JSON.stringify(result));
+        if (result.user) {
+          result.user.isNew = result.isNew;
+          log.info("Google-auth: Success! name=" + result.user.info.name + ", email=" + result.user.info.email);
+          return done(null, result.user);
+        } else {
+          log.info("Google-auth: Failed!");
+          done(null, false);
+        }
+      }).fail(function(error) {
+        log.error("Google-auth: msg=" + error.message);
+        if (error.message === "Failed to create user, e-mail already registered!") {
+          done(null, false, {message: i18n.t("signin.registerNokMsg", {name: userData.info.email, context: "userExists"})});
+        } else {
+          done(null, false, {message: error.message});
+        }
       });
-    }
+    });
+  }
 ));
 
 // Simple route middleware to ensure user is authenticated.
@@ -407,7 +414,7 @@ app.put("/api/user", ensureAuthenticated, function(req, res) {
       + ", isLocalUser=" + isLocalUser + ", user=" + JSON.stringify(req.body));
 
   /* Only some fields are allowed to be updated for the user. Copy them...
-   * Note that dot-notation is used for fields in sub-structures 
+   * Note that dot-notation is used for fields in sub-structures
    * since user document is updated using the $set modifier */
   var user = {};
   if (req.body.name) {
@@ -921,7 +928,7 @@ app.get("/api/invoiceReport/:id/:isReminder", ensureAuthenticated, function(req,
   var id = req.params.id;
   var isReminder = (req.params.isReminder==="true")?true:false;
   log.info("Invoice report: user=" + req.user.info.name + ", _id=" + id + ", isReminder=" + isReminder);
-  
+
   // Check license in settings
   var isDemoMode = false;
   var debug = false;
@@ -959,7 +966,7 @@ app.get("/api/offerReport/:id", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var id = req.params.id;
   log.info("Offer report: user=" + req.user.info.name + ", _id=" + id);
-  
+
   // Check license in settings
   var isDemoMode = false;
   var debug = false;
@@ -996,7 +1003,7 @@ app.get("/api/stats/:cid", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var cid = req.params.cid;
   log.info("Statistics: user=" + req.user.info.name + ", cid=" + cid);
-  
+
   mydb.getStats(uid, cid).then(function(stats) {
     log.verbose("Statistics: user=" + req.user.info.name + ", cid=" + cid, ", stats=" + JSON.stringify(stats));
     res.status(200).json(stats);
@@ -1020,7 +1027,7 @@ app.get("/api/userStats/:uid", ensureAuthenticated, function(req, res) {
     res.status(500);
     res.end();
   }
-  
+
 });
 
 app.get("/api/users", ensureAuthenticated, function(req, res) {
@@ -1187,7 +1194,7 @@ app.get('/auth/google',
       ]
     }));
 
-app.get('/auth/google/callback', 
+app.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/frontpage', failureFlash: true}),
     function(req, res) {
       var greetingMsg;

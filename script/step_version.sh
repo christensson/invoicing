@@ -33,7 +33,7 @@ done
 GITROOT=$(git rev-parse --show-toplevel)
 PKG_FILE=$GITROOT/package.json
 
-CURRENT_VERSION=$(grep version $PKG_FILE|cut -d\" -f4)
+CURRENT_VERSION=$(grep \"version\" $PKG_FILE|cut -d\" -f4)
 echo Current version: $CURRENT_VERSION
 
 MAJOR=$(echo $CURRENT_VERSION|cut -d\. -f1)
@@ -59,7 +59,7 @@ echo New version: $NEW_VERSION
 
 ENEW_VERSION=$(echo $NEW_VERSION|sed 's/\./\\\./g')
 ECURRENT_VERSION=$(echo $CURRENT_VERSION|sed 's/\./\\\./g')
-sed -i "s/$ECURRENT_VERSION/$ENEW_VERSION/" $PKG_FILE
+sed -i -e "s/$ECURRENT_VERSION/$ENEW_VERSION/" $PKG_FILE
 echo
 git diff $PKG_FILE
 
