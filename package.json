@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "mocha --recursive ./test",
+    "preversion": "npm test",
     "start": "node .",
     "start-dev": "node . --local",
     "init-db": "node ./initdb.js",
