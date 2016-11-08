@@ -12,7 +12,7 @@
     "init-db-data": "node ./initdb.js --dev"
   },
   "author": "Marcus Christensson",
-  "license": "BSD-2-Clause",
+  "license": "MIT",
   "dependencies": {
     "bcryptjs": "^2.3.0",
     "body-parser": "^1.15.2",
