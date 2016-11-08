@@ -5,7 +5,10 @@
   "main": "app.js",
   "scripts": {
     "test": "mocha --recursive ./test",
-    "start": "node app.js"
+    "start": "node .",
+    "start-dev": "node . --local",
+    "init-db": "node ./initdb.js",
+    "init-db-data": "node ./initdb.js --dev"
   },
   "author": "Marcus Christensson",
   "license": "BSD-2-Clause",
