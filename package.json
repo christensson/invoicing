@@ -1,12 +1,12 @@
 {
   "name": "Invoicing",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Invoicing made easy",
   "main": "app.js",
   "scripts": {
     "test": "mocha --recursive ./test",
     "preversion": "npm test",
-    "postversion": "git checkout release && git merge master",
+    "postversion": "git checkout release && git merge master -m \"Release $npm_package_version\" && git checkout master",
     "start": "node .",
     "start-dev": "node . --local",
     "init-db": "node ./initdb.js",
