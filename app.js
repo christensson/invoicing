@@ -253,6 +253,9 @@ passport.use(
           }
         }).fail(function(error) {
           log.error("signup: msg=" + error.message);
+          if (error.message === "Failed to create user, e-mail already registered!") {
+            errorMessage = req.t("signin.registerNokMsg", {name: username, context: "userExists"});
+          }
           done(null, false, {message: errorMessage});
         });
       }
@@ -294,7 +297,11 @@ passport.use(new GoogleStrategy(
         }
       }).fail(function(error) {
         log.error("Google-auth: msg=" + error.message);
-        done(null, false, {message: error.message});
+        if (error.message === "Failed to create user, e-mail already registered!") {
+          done(null, false, {message: i18n.t("signin.registerNokMsg", {name: userData.info.email, context: "userExists"})});
+        } else {
+          done(null, false, {message: error.message});
+        }
       });
     });
   }
@@ -407,7 +414,7 @@ app.put("/api/user", ensureAuthenticated, function(req, res) {
       + ", isLocalUser=" + isLocalUser + ", user=" + JSON.stringify(req.body));
 
   /* Only some fields are allowed to be updated for the user. Copy them...
-   * Note that dot-notation is used for fields in sub-structures 
+   * Note that dot-notation is used for fields in sub-structures
    * since user document is updated using the $set modifier */
   var user = {};
   if (req.body.name) {
@@ -921,7 +928,7 @@ app.get("/api/invoiceReport/:id/:isReminder", ensureAuthenticated, function(req,
   var id = req.params.id;
   var isReminder = (req.params.isReminder==="true")?true:false;
   log.info("Invoice report: user=" + req.user.info.name + ", _id=" + id + ", isReminder=" + isReminder);
-  
+
   // Check license in settings
   var isDemoMode = false;
   var debug = false;
@@ -959,7 +966,7 @@ app.get("/api/offerReport/:id", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var id = req.params.id;
   log.info("Offer report: user=" + req.user.info.name + ", _id=" + id);
-  
+
   // Check license in settings
   var isDemoMode = false;
   var debug = false;
@@ -996,7 +1003,7 @@ app.get("/api/stats/:cid", ensureAuthenticated, function(req, res) {
   var uid = req.user._id;
   var cid = req.params.cid;
   log.info("Statistics: user=" + req.user.info.name + ", cid=" + cid);
-  
+
   mydb.getStats(uid, cid).then(function(stats) {
     log.verbose("Statistics: user=" + req.user.info.name + ", cid=" + cid, ", stats=" + JSON.stringify(stats));
     res.status(200).json(stats);
@@ -1020,7 +1027,7 @@ app.get("/api/userStats/:uid", ensureAuthenticated, function(req, res) {
     res.status(500);
     res.end();
   }
-  
+
 });
 
 app.get("/api/users", ensureAuthenticated, function(req, res) {
@@ -1187,7 +1194,7 @@ app.get('/auth/google',
       ]
     }));
 
-app.get('/auth/google/callback', 
+app.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/frontpage', failureFlash: true}),
     function(req, res) {
       var greetingMsg;

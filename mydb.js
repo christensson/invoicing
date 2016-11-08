@@ -457,6 +457,10 @@ var indexes = [
     specifier: {"googleId": 1},
   },
   {
+    collection: "users",
+    specifier: {"info.email": 1},
+  },
+  {
     collection: "invite",
     specifier: {"email": 1},
   },

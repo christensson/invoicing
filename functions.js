@@ -70,20 +70,29 @@ exports.findOrCreate = function(idField, userData, inviteInfo) {
       if (inviteInfo.isAdmin) {
         userData.info.isAdmin = true;
       }
-      mydb.addUser(userData).then(function() {
-        // Add success, retrieve user to return it...
-        mydb.initUserContext(query, inviteInfo.license).then(function(newUser) {
-          var result = {
-              "user": newUser,
-              "isNew": true,
-          };
-          deferred.resolve(result);
-        }).fail(function(error) {
-          deferred.reject(error);
-        });
-      }).fail(function() {
-        deferred.reject(new Error("Failed to create non-existing user!"));
-      });
+
+      // Check that e-mail isn't registered before
+      mydb.getUser({"info.email": userData.info.email}).then(function() {
+        deferred.reject(new Error("Failed to create user, e-mail already registered!"));
+      }).fail(function(err) {
+        if (err.message === 'The requested items could not be found.') {
+          return mydb.addUser(userData).then(function() {
+            // Add success, retrieve user to return it...
+            mydb.initUserContext(query, inviteInfo.license).then(function(newUser) {
+              var result = {
+                  "user": newUser,
+                  "isNew": true,
+              };  
+              deferred.resolve(result);
+            }).fail(function(error) {
+              deferred.reject(error);
+            }).done();
+          });
+        } else {
+          log.verbose("findOrCreate: Unexpected error: " + JSON.stringify(err));
+          deferred.reject(new Error(err));
+        }
+      }).done();
     } else {
       log.verbose("findOrCreate: Unexpected error: " + JSON.stringify(err));
       deferred.reject(new Error(err));
