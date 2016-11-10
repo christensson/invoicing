@@ -1,13 +1,13 @@
 var args = require('commander');
-var reporter = require('./reporter.js');
-var mydb = require('./mydb.js');
+var reporter = require('../lib/reporter');
+var mydb = require('../lib/mydb');
 var mongodb = require('mongodb');
 var ObjectID = mongodb.ObjectID;
-var defaults = require('./public/default.js').get();
+var defaults = require('../public/default').get();
 var i18n = require('i18next');
 var i18nFsBackend = require('i18next-node-fs-backend');
 var Q = require('q');
-var log = require('./log');
+var log = require('../lib/log');
 
 function increaseVerbosity(v, total) {
   return total + 1;
@@ -148,9 +148,8 @@ Q().then(function() {
     return getJsonFromFile(args.json);
   } else {
     log.info("Get invoice: " + JSON.stringify(invoiceQuery, null, 2));
-    return mydb.getOneDocPromise('invoice', invoiceQuery);  
+    return mydb.getOneDocPromise('invoice', invoiceQuery);
   }
 }).then(function(invoice) {
   renderInvoice(invoice);
 });
-

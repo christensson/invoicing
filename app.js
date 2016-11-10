@@ -21,9 +21,9 @@ var simLatency = require('express-simulate-latency');
 var helmet = require('helmet');
 var expressEnforcesSsl = require('express-enforces-ssl');
 var Q = require('q');
-var defaults = require('./public/default.js').get();
-var util = require('./public/util.js');
-var log = require('./log');
+var defaults = require('./public/default').get();
+var util = require('./public/util');
+var log = require('./lib/log');
 
 // Install marko hooks for require
 require('marko/node-require').install();
@@ -66,7 +66,7 @@ if (args.sim_latency) {
   smallLag = simLatency({ min: 500, max: 1000 });
 }
 
-var tmpDir = __dirname + "/tmp";
+var tmpDir = path.join(__dirname, "tmp");
 
 var app = express();
 
@@ -166,15 +166,15 @@ app.get('/locales/resources.json', i18nMiddleware.getResourcesHandler(i18n)); //
 
 // App modules
 var hostname = "";
-var mydb = require('./mydb.js');
+var mydb = require('./lib/mydb');
 if (args.local) {
   mydb.setLocalDb();
 } else {
   hostname = require('./deployment.json').host;
 }
 
-var reporter = require('./reporter.js');
-var funct = require('./functions.js');
+var reporter = require('./lib/reporter');
+var funct = require('./lib/functions');
 var googleAuth = require('./google_auth.json');
 
 // Passport session setup.
@@ -1071,7 +1071,7 @@ app.get("/api/log", ensureAuthenticated, function(req, res) {
   log.info("Get log: user=" + userName + ", uid=" + uid, ", isAdmin=" + isAdmin);
   if (isAdmin === true) {
     res.type('text/plain');
-    res.download(defaults.logFile, 'log.txt', function(err) {
+    res.download(path.join(__dirname, defaults.logFile), 'log.txt', function(err) {
       if (err) {
         log.error("Failed to get log: " + err);
       } else {
@@ -1209,13 +1209,13 @@ app.get('/auth/google/callback',
     });
 
 //start listening on port 8080
-var server = require('./server');
+var server = require('./lib/server');
 var serverSettings = {
     port: 8080,
     ssl: {
       active: args.ssl,
-      key: "keys/key.pem",
-      certificate: "keys/cert.pem",
+      key: path.join(__dirname, "keys", "key.pem"),
+      certificate: path.join(__dirname, "keys", "cert.pem")
     }
 };
 
