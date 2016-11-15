@@ -51,7 +51,7 @@ var CacheOp = function() {
   self.INVITES = function() {
     return 'invites';
   };
-    
+
   self.USERS = function() {
     return 'users';
   };
@@ -87,7 +87,7 @@ var CacheOp = function() {
         break;
       };
     };
-    return -1;    
+    return -1;
   };
 
   self._arrayAddItem = function(arrayCacheKey, item) {
@@ -120,7 +120,7 @@ var CacheOp = function() {
       };
     });
   };
-  
+
   self._arrayRemoveItem = function(arrayCacheKey, item) {
     cache.get(arrayCacheKey, function(items) {
       var updateIndex = self._findArrayFieldIndex(items, item, '_id');
@@ -173,7 +173,7 @@ var CacheOp = function() {
   self.invalidateCompanies = function() {
     cache.del(self.COMPANIES());
   };
-  
+
   self.updateCompany = function(company) {
     self._arrayUpdateItem(self.COMPANIES(), company);
   };
@@ -193,9 +193,11 @@ var CacheOp = function() {
 
   self.fetchItemGroupTemplatesPromise = function() {
     var deferred = $.Deferred();
-    return $.getJSON("/api/itemGroupTemplates", function(data) {
+    $.getJSON("/api/itemGroupTemplates", function(data) {
       cache.set(self.ITEM_GROUP_TEMPLATES(), data);
       deferred.resolve(data);
+    }).fail(function(err) {
+      deferred.reject(err);
     });
     return deferred.promise();
   };
@@ -207,7 +209,7 @@ var CacheOp = function() {
   self.invalidateItemGroupTemplates = function() {
     cache.del(self.ITEM_GROUP_TEMPLATES());
   };
-  
+
   self.updateItemGroupTemplate = function(groupTempl) {
     self._arrayUpdateItem(self.ITEM_GROUP_TEMPLATES(), groupTempl);
   };
@@ -225,9 +227,11 @@ var CacheOp = function() {
    */
   self.fetchArticlesPromise = function(companyId) {
     var deferred = $.Deferred();
-    return $.getJSON("/api/articles/" + companyId, function(data) {
+    $.getJSON("/api/articles/" + companyId, function(data) {
       cache.set(self.ARTICLES(), data);
       deferred.resolve(data);
+    }).fail(function(err) {
+      deferred.reject(err);
     });
     return deferred.promise();
   };
@@ -239,7 +243,7 @@ var CacheOp = function() {
   self.invalidateArticles = function() {
     cache.del(self.ARTICLES());
   };
-  
+
   self.updateArticle = function(article) {
     self._arrayUpdateItem(self.ARTICLES(), article);
   };
@@ -266,8 +270,8 @@ var CacheOp = function() {
     $.getJSON("/api/customers/" + companyId).done(function(data) {
       cache.set(self.CUSTOMERS(), data);
       deferred.resolve(data);
-    }).fail(function() {
-      deferred.reject(data);
+    }).fail(function(err) {
+      deferred.reject(err);
     });
     return deferred.promise();
   };
@@ -279,7 +283,7 @@ var CacheOp = function() {
   self.invalidateCustomers = function() {
     cache.del(self.CUSTOMERS());
   };
-  
+
   self.updateCustomer = function(customer) {
     self._arrayUpdateItem(self.CUSTOMERS(), customer);
   };
@@ -296,8 +300,8 @@ var CacheOp = function() {
     $.getJSON("/api/invoices/" + companyId).done(function(data) {
       cache.set(self.INVOICES(), data);
       deferred.resolve(data);
-    }).fail(function() {
-      deferred.reject(data);
+    }).fail(function(err) {
+      deferred.reject(err);
     });
     return deferred.promise();
   };
@@ -314,6 +318,8 @@ var CacheOp = function() {
       } else {
         deferred.reject();
       }
+    }).fail(function(err) {
+      deferred.reject(err);
     });
     return deferred.promise();
   };
@@ -352,8 +358,8 @@ var CacheOp = function() {
     $.getJSON("/api/offers/" + companyId).done(function(data) {
       cache.set(self.OFFERS(), data);
       deferred.resolve(data);
-    }).fail(function() {
-      deferred.reject(data);
+    }).fail(function(err) {
+      deferred.reject(err);
     });
     return deferred.promise();
   };
@@ -370,6 +376,8 @@ var CacheOp = function() {
       } else {
         deferred.reject();
       }
+    }).fail(function(err) {
+      deferred.reject(err);
     });
     return deferred.promise();
   };
@@ -478,7 +486,7 @@ var SettingsDataModel = function() {
   self.setActiveCompanyId = function(id) {
     self.activeCompanyId(id);
   };
-  
+
   self.toJSON = function() {
     var data = {
         _id: self._id(),
@@ -669,7 +677,7 @@ var CompanyViewModel = function() {
   self.logoScale = ko.observable();
 
   for (var i = 0; i < defaults.invoiceLngList.length; i++) {
-    var lng = defaults.invoiceLngList[i]; 
+    var lng = defaults.invoiceLngList[i];
     self[lng] = {};
     for (var j = 0; j < self.lngFields.length; j++) {
       var field = self.lngFields[j].name;
@@ -731,7 +739,7 @@ var CompanyViewModel = function() {
     }
     self.logoScale(data.logoScale);
   };
-  
+
   self.init = function() {
     var data = {
         _id : undefined,
@@ -774,9 +782,9 @@ var CompanyViewModel = function() {
     }
     self.setData(data);
   };
-  
+
   self.init();
-  
+
   self.setDefaultReverseChargeCustomText = function() {
     self.reverseChargeText(t("app.company.defaultReverseChargeCustomText", {'lng': self.customTextFieldsPaneLng()}));
   };
@@ -992,7 +1000,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       self.getCompany(_id);
     }
   });
-  
+
   self.getCompany = function(_id) {
     Cache.getCompany(_id, function(c) {
       if (c !== undefined) {
@@ -1013,7 +1021,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       }
     });
   };
-  
+
   self.saveCompany = function() {
     self.data.updateServer(function(c, isNew) {
       Log.info("CompanyNewViewModel - saveCompany onCompletion: " + JSON.stringify(c) + ", activeId=" + self.activeCompanyId());
@@ -1057,7 +1065,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       var xhr = new XMLHttpRequest();
       xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) // Upload done!
-        {          
+        {
           Log.info("Upload done: status=" + xhr.status + ", res=" + xhr.responseText);
           if (xhr.status == 200) { // Success
             var logoJson = JSON.parse(xhr.responseText);
@@ -1072,7 +1080,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
             Notify_showMsg('error', t("app.company.uploadLogoNok", {context: "serverFailure", "status": xhr.status}));
           }
         }
-      }; 
+      };
       xhr.open('POST', "/api/company_logo/" + _id, true);
       xhr.send(formData);
 
@@ -1122,7 +1130,7 @@ var CustomerViewModel = function() {
   self.companyId = ko.observable();
   self.invoiceLng = ko.observable();
   self.currency = ko.observable();
-  
+
   self.nameError = ko.observable(false);
   self.hasErrorCss = ko.pureComputed(function() {
     // return this.nameError() ? "has-error" : "";
@@ -1183,7 +1191,7 @@ var CustomerViewModel = function() {
     };
     self.setData(data);
   };
-  
+
   self.init();
 
   self.setActiveCompanyId = function(companyId) {
@@ -1422,7 +1430,7 @@ var CustomerNewViewModel = function(currentView, activeCompanyId, companyList) {
 
   inheritInvoiceLngModel(self);
   inheritCurrencyModel(self);
-  
+
   self.currentView.subscribe(function(newValue) {
     self.data.init();
     var viewArray = newValue.split("/");
@@ -1442,7 +1450,7 @@ var CustomerNewViewModel = function(currentView, activeCompanyId, companyList) {
       self.getCustomer(_id);
     }
   });
-  
+
   self.getCustomer = function(_id) {
     Cache.getCustomer(_id, function(c) {
       if (c !== undefined) {
@@ -1468,7 +1476,7 @@ var CustomerNewViewModel = function(currentView, activeCompanyId, companyList) {
     var newState = !self.isExtraOptVisible();
     self.isExtraOptVisible(newState);
   }
-  
+
   self.transferCustomer = function() {
     var destCompanyId = self.transferDestCompany()._id();
     if (destCompanyId == self.activeCompanyId()) {
@@ -1775,7 +1783,7 @@ var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
     self.itemGroupTemplateRef().forEach(function(item) {
       res.itemGroupTemplateRef.push(item);
     });
-    
+
     return res;
   };
 };
@@ -1959,8 +1967,8 @@ ReportOps.downloadDocPromise = function(url, id) {
   Notify_showSpinner(true);
   try {
     var child = window.open(url);
-    if(!child || child.closed || typeof child.closed=='undefined') 
-    { 
+    if(!child || child.closed || typeof child.closed=='undefined')
+    {
       Log.warn("downloadDoc - Failed, popup blocked! url=" + url + ", id=" + id);
       Notify_showSpinner(false);
       Notify_showMsg('error', t("app.invoiceList.printNok", {context: "popupBlocked"}));
@@ -2087,7 +2095,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
       self.isEditMode(false);
     }
   });
-  
+
   self.setData = function(data) {
     self.isEditMode(false);
     self._id(data._id);
@@ -2193,7 +2201,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
       }
       return sum;
     }, this);
-    
+
     self.totalInclVat = ko.pureComputed(function() {
       var sum = 0;
       for ( var i = 0; i < this.invoiceItems().length; i++) {
@@ -2227,7 +2235,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
       Log.info("Added new invoice item to group=" + self.name() +
           ". #items=" + self.invoiceItems().length + " (after)");
     };
-    
+
     self.deleteInvoiceItem = function(item) {
       item.isValid(false);
       self.invoiceItems.destroy(item);
@@ -2375,7 +2383,7 @@ var InvoiceItemViewModel = function(data, parent) {
     }
     return str;
   }, self);
-  
+
   self.descriptionNumRows = ko.pureComputed(function() {
     var numRows = 1;
     if (this.isTextOnly()) {
@@ -2685,7 +2693,7 @@ var InvoiceDataViewModel = function() {
   };
 
   self.init();
-  
+
   self.totalExclVat = ko.pureComputed(function() {
     var sum = 0;
     for ( var i = 0; i < self.invoiceItemGroups().length; i++) {
@@ -2699,7 +2707,7 @@ var InvoiceDataViewModel = function() {
     sum = parseFloat(sum.toFixed(defaults.invoiceÍtemTotalNumDecRound));
     return sum;
   }, this);
-  
+
   self.totalInclVat = ko.pureComputed(function() {
     var sum = 0;
     for ( var i = 0; i < self.invoiceItemGroups().length; i++) {
@@ -2725,7 +2733,7 @@ var InvoiceDataViewModel = function() {
   self.totalToPay = ko.pureComputed(function() {
     return self.totalExclVat() + self.totalVat();
   }, this);
-  
+
   self.currencyAdj = ko.pureComputed(function() {
     var amountToPayAdjNumDec = defaults.invoiceCurrencyAdjNumDec[self.currency()];
     return Util.calcPaymentAdjustment(
@@ -3236,7 +3244,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   self.dateFilterAddYears = function(numYearsToAdd) {
     var year = self.getYear(0);
     var addHigh = (numYearsToAdd > 0)?true:false;
-    
+
     for (var i = 0; i < self.dateFilterYearList().length; i++) {
       var y = self.dateFilterYearList()[i];
       if (addHigh) {
@@ -3583,12 +3591,12 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
                 item.isPaid = true;
               };
               break;
-            case 'lock': 
+            case 'lock':
               doOpOnInvoice = function(item) {
                 item.isLocked = true;
               };
               break;
-            case 'print': 
+            case 'print':
               doOpOnInvoice = function(item) {
               };
               break;
@@ -3632,7 +3640,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     // Sort according to compare method.
     self.docList().sort(self[newVal + 'Compare']);
   });
-  
+
   self.docNrAscCompare = function(aRow, bRow) {
     return aRow.docNr() - bRow.docNr();
   };
@@ -3814,7 +3822,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     Log.info("New group name=" + group.name + ", id=" + group._id);
     self.data.addGroup(group);
   };
-  
+
   self.currentView.subscribe(function(newValue) {
     self.selectedCustomer(undefined);
 
@@ -3865,7 +3873,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
 
   self.selectedCustomer.subscribe(function(newValue) {
     if (newValue !== undefined && newValue.data !== undefined) {
-      Log.info("InvoiceNewViewModel - Customer selected (updates data " + self.selectedCustomerUpdatesData + 
+      Log.info("InvoiceNewViewModel - Customer selected (updates data " + self.selectedCustomerUpdatesData +
         ") - " + JSON.stringify(newValue.data));
       if (self.selectedCustomerUpdatesData) {
         self.data.setCustomer(newValue.data);
@@ -4122,7 +4130,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
         self.selectedCustomer(self.customerList()[0]);
       }
     } else {
-      Log.info("InvoiceNewViewModel - syncCustomerIdInput: customer is undefined");        
+      Log.info("InvoiceNewViewModel - syncCustomerIdInput: customer is undefined");
     }
   };
 
@@ -4197,7 +4205,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
       Log.info("InvoiceNewViewModel - Invoice not saved.");
     }
   };
-  
+
   self.doInvoiceReminderPrint = function() {
     Log.info("InvoiceNewViewModel - Print reminder requested");
     if (self.data._id() !== undefined) {
@@ -4293,7 +4301,7 @@ var UserViewModel = function() {
   self.type = ko.pureComputed(function() {
     var typeStr = "";
     if (self.googleId() !== undefined &&
-        self.googleId() !== null && 
+        self.googleId() !== null &&
         self.googleId() !== "")
     {
       typeStr = "Google";
@@ -4328,7 +4336,7 @@ var UserViewModel = function() {
     }
     return dateStr;
   }, self);
-  
+
   self.isSelf = ko.pureComputed(function() {
     return this._id() === cfg.user._id;
   }, self);
@@ -4363,7 +4371,7 @@ var UserViewModel = function() {
       Log.info("UserViewModel - event - del:" + USER_STATS_KEY());
     });
   };
-  
+
   self.populate = function() {
     // Do nothing if object exists in cache
     if (!cache.get(USER_STATS_KEY())) {
@@ -4378,24 +4386,24 @@ var UserViewModel = function() {
             Log.info("UserViewModel - toggleDetailedInfo - failed");
             Notify_showSpinner(false);
             Notify_showMsg('error', t("app.userList.getNok"));
-          });      
+          });
     } else {
       Log.info("UserViewModel - populate - data is cached!");
       self.isDetailsVisible(true);
     }
   };
-  
+
   self.toggleDetailedInfo = function(user) {
     var newIsDetailsVisible = !self.isDetailsVisible();
     Log.info("UserViewModel - toggleDetailedInfo: visible=" + newIsDetailsVisible + " (new value)");
-    
+
     if (newIsDetailsVisible) {
       self.populate();
     } else {
       self.isDetailsVisible(false);
-    }    
+    }
   };
-  
+
   self.invalidateCache = function() {
     // Hide before cache deletion
     self.isDetailsVisible(false);
@@ -4465,12 +4473,12 @@ var InviteViewModel = function() {
   self.email = ko.observable();
   self.license = ko.observable();
   self.isAdmin = ko.observable();
-  
+
   self.setData = function(data) {
     self.email(data.email);
     self.license(data.license);
     self.isAdmin(data.isAdmin);
-  };  
+  };
 };
 
 var InviteListViewModel = function(currentView) {
@@ -4519,7 +4527,7 @@ var InviteListViewModel = function(currentView) {
       Log.info("InviteListViewModel - populate - data is cached!");
     }
   };
-  
+
   self.refresh = function() {
     Log.info("InviteListViewModel - refresh");
     cache.del(Cache.INVITES());
@@ -4528,7 +4536,7 @@ var InviteListViewModel = function(currentView) {
 
 var NavViewModel = function() {
   var self = this;
-  
+
   self.currentView = ko.observable("");
   self.activeCompanyId = ko.observable();
   self.activeCompany = ko.observable();
@@ -4548,11 +4556,11 @@ var NavViewModel = function() {
       }
     }
   });
-  
+
   self.selectCompany = function(company) {
     Log.info("navigation - selectCompany: " + JSON.stringify(company));
     self.activeCompanyId(company._id());
-    
+
     // Work-around: Navigate to home instead of making sure that all views updates when company is changed
     location.hash = '/page/home';
   };
@@ -4604,7 +4612,7 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
       return self.stats().activeCompany.numInvoices;
     }
   }, self);
-  
+
   self.numOffers = ko.pureComputed(function() {
     if ((self.activeCompanyId() === undefined) || (self.activeCompanyId() === null) ||
         (self.stats() === undefined)) {
@@ -4758,7 +4766,7 @@ var setupKo = function() {
   }).fail(function() {
     Notify_showMsg('error', t("app.settings.getInitialDataNok"));
   });
-  
+
   var companyNewViewModel = new CompanyNewViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId, navViewModel.activeCompany);
   var customerListViewModel = new CustomerListViewModel(
@@ -4842,5 +4850,5 @@ $(function() {
       Log.info("init - setupKo");
       setupKo();
       Log.info("init - setupKo - done");
-  });  
+  });
 });
