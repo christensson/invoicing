@@ -5,6 +5,7 @@ var express = require("express");
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+//var MongoStore = require('connect-mongo')(session);
 var methodOverride = require('method-override');
 var flash = require('connect-flash');
 var passport = require('passport');
@@ -93,6 +94,7 @@ app.use(session({
   name : 'sessionId',
   resave : false,
   saveUninitialized : false,
+  //store: new MongoStore(options),
   cookie: {
     secure: enforceSsl,
     httpOnly: true,
@@ -170,6 +172,7 @@ if (args.local) {
 } else {
   hostname = require('./deployment.json').host;
 }
+mydb.connect();
 
 var reporter = require('./lib/reporter');
 var funct = require('./lib/functions');
