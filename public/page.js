@@ -35,6 +35,14 @@ var UiOp = function() {
   };
 };
 
+var redirectIfUnauthorized = function(err, url) {
+    if (err && err.status === 401) {
+        Notify_showFatalMsg(t("app.unauthorized"), t("app.unauthorizedBtnLbl"), function() {
+            location.replace(url);
+        });
+    }
+}
+
 var Ui = new UiOp();
 
 var CacheOp = function() {
@@ -51,7 +59,7 @@ var CacheOp = function() {
   self.INVITES = function() {
     return 'invites';
   };
-    
+
   self.USERS = function() {
     return 'users';
   };
@@ -87,7 +95,7 @@ var CacheOp = function() {
         break;
       };
     };
-    return -1;    
+    return -1;
   };
 
   self._arrayAddItem = function(arrayCacheKey, item) {
@@ -120,7 +128,7 @@ var CacheOp = function() {
       };
     });
   };
-  
+
   self._arrayRemoveItem = function(arrayCacheKey, item) {
     cache.get(arrayCacheKey, function(items) {
       var updateIndex = self._findArrayFieldIndex(items, item, '_id');
@@ -158,22 +166,69 @@ var CacheOp = function() {
   };
 
   /*
+   * Invites
+   */
+  self.fetchInvitesPromise = function() {
+    var deferred = $.Deferred();
+    $.getJSON("/api/invites").then(function(data) {
+      cache.set(self.INVITES(), data);
+      deferred.resolve(data);
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
+      deferred.reject(err);
+    });
+    return deferred.promise();
+  };
+
+  /*
+   * Users
+   */
+  self.fetchUsersPromise = function() {
+    var deferred = $.Deferred();
+    $.getJSON("/api/users").then(function(data) {
+      cache.set(self.USERS(), data);
+      deferred.resolve(data);
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
+      deferred.reject(err);
+    });
+    return deferred.promise();
+  };
+
+  /*
    * Companies
    */
-  self.fetchCompanies = function() {
-    return $.getJSON("/api/companies", function(data) {
+  self.fetchCompaniesPromise = function() {
+    var deferred = $.Deferred();
+    $.getJSON("/api/companies").then(function(data) {
       cache.set(self.COMPANIES(), data);
+      deferred.resolve(data);
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
+      deferred.reject(err);
     });
+    return deferred.promise();
   };
 
   self.getCompany = function(id, callback) {
     self._arrayGetItem(self.COMPANIES(), '_id', id, callback);
   };
 
+  self.fetchCompanyPromise = function(id) {
+    var deferred = $.Deferred();
+    $.getJSON("/api/company/" + id).then(function(data) {
+      deferred.resolve(data);
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
+      deferred.reject(err);
+    });
+    return deferred.promise();
+  };
+
   self.invalidateCompanies = function() {
     cache.del(self.COMPANIES());
   };
-  
+
   self.updateCompany = function(company) {
     self._arrayUpdateItem(self.COMPANIES(), company);
   };
@@ -185,17 +240,14 @@ var CacheOp = function() {
   /*
    * Item group templates
    */
-  self.fetchItemGroupTemplates = function() {
-    return $.getJSON("/api/itemGroupTemplates", function(data) {
-      cache.set(self.ITEM_GROUP_TEMPLATES(), data);
-    });
-  };
-
   self.fetchItemGroupTemplatesPromise = function() {
     var deferred = $.Deferred();
-    return $.getJSON("/api/itemGroupTemplates", function(data) {
+    $.getJSON("/api/itemGroupTemplates").then(function(data) {
       cache.set(self.ITEM_GROUP_TEMPLATES(), data);
       deferred.resolve(data);
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
+      deferred.reject(err);
     });
     return deferred.promise();
   };
@@ -207,7 +259,7 @@ var CacheOp = function() {
   self.invalidateItemGroupTemplates = function() {
     cache.del(self.ITEM_GROUP_TEMPLATES());
   };
-  
+
   self.updateItemGroupTemplate = function(groupTempl) {
     self._arrayUpdateItem(self.ITEM_GROUP_TEMPLATES(), groupTempl);
   };
@@ -225,9 +277,12 @@ var CacheOp = function() {
    */
   self.fetchArticlesPromise = function(companyId) {
     var deferred = $.Deferred();
-    return $.getJSON("/api/articles/" + companyId, function(data) {
+    $.getJSON("/api/articles/" + companyId).then(function(data) {
       cache.set(self.ARTICLES(), data);
       deferred.resolve(data);
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
+      deferred.reject(err);
     });
     return deferred.promise();
   };
@@ -239,7 +294,7 @@ var CacheOp = function() {
   self.invalidateArticles = function() {
     cache.del(self.ARTICLES());
   };
-  
+
   self.updateArticle = function(article) {
     self._arrayUpdateItem(self.ARTICLES(), article);
   };
@@ -255,19 +310,14 @@ var CacheOp = function() {
   /*
    * Customers
    */
-  self.fetchCustomers = function(companyId) {
-    return $.getJSON("/api/customers/" + companyId, function(data) {
-      cache.set(self.CUSTOMERS(), data);
-    });
-  };
-
   self.fetchCustomersPromise = function(companyId) {
     var deferred = $.Deferred();
-    $.getJSON("/api/customers/" + companyId).done(function(data) {
+    $.getJSON("/api/customers/" + companyId).then(function(data) {
       cache.set(self.CUSTOMERS(), data);
       deferred.resolve(data);
-    }).fail(function() {
-      deferred.reject(data);
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
+      deferred.reject(err);
     });
     return deferred.promise();
   };
@@ -276,10 +326,22 @@ var CacheOp = function() {
     self._arrayGetItem(self.CUSTOMERS(), '_id', id, callback);
   };
 
+  self.fetchCustomerPromise = function(id) {
+    var deferred = $.Deferred();
+    $.getJSON("/api/customer/" + id).then(function(data) {
+      deferred.resolve(data);
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
+      deferred.reject(err);
+    });
+    return deferred.promise();
+  };
+
+
   self.invalidateCustomers = function() {
     cache.del(self.CUSTOMERS());
   };
-  
+
   self.updateCustomer = function(customer) {
     self._arrayUpdateItem(self.CUSTOMERS(), customer);
   };
@@ -293,11 +355,12 @@ var CacheOp = function() {
    */
   self.fetchInvoicesPromise = function(companyId) {
     var deferred = $.Deferred();
-    $.getJSON("/api/invoices/" + companyId).done(function(data) {
+    $.getJSON("/api/invoices/" + companyId).then(function(data) {
       cache.set(self.INVOICES(), data);
       deferred.resolve(data);
-    }).fail(function() {
-      deferred.reject(data);
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
+      deferred.reject(err);
     });
     return deferred.promise();
   };
@@ -320,9 +383,10 @@ var CacheOp = function() {
 
   self.fetchInvoicePromise = function(id) {
     var deferred = $.Deferred();
-    $.getJSON("/api/invoice/" + id).done(function(data) {
+    $.getJSON("/api/invoice/" + id).then(function(data) {
       deferred.resolve(data);
-    }).fail(function(err) {
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
       deferred.reject(err);
     });
     return deferred.promise();
@@ -349,11 +413,12 @@ var CacheOp = function() {
    */
   self.fetchOffersPromise = function(companyId) {
     var deferred = $.Deferred();
-    $.getJSON("/api/offers/" + companyId).done(function(data) {
+    $.getJSON("/api/offers/" + companyId).then(function(data) {
       cache.set(self.OFFERS(), data);
       deferred.resolve(data);
-    }).fail(function() {
-      deferred.reject(data);
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
+      deferred.reject(err);
     });
     return deferred.promise();
   };
@@ -376,9 +441,10 @@ var CacheOp = function() {
 
   self.fetchOfferPromise = function(id) {
     var deferred = $.Deferred();
-    $.getJSON("/api/offer/" + id).done(function(data) {
+    $.getJSON("/api/offer/" + id).then(function(data) {
       deferred.resolve(data);
-    }).fail(function(err) {
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
       deferred.reject(err);
     });
     return deferred.promise();
@@ -478,7 +544,7 @@ var SettingsDataModel = function() {
   self.setActiveCompanyId = function(id) {
     self.activeCompanyId(id);
   };
-  
+
   self.toJSON = function() {
     var data = {
         _id: self._id(),
@@ -532,11 +598,12 @@ var SettingsViewModel = function(currentView, settings, userData, activeCompanyI
       contentType : "application/json",
       data : JSON.stringify(ajaxData),
       dataType : "json"
-    }).done(function(data) {
+    }).then(function(data) {
       Log.info("SettingsViewModel - saveSettings: response: " + JSON.stringify(data));
       Notify_showMsg('success', t("app.settings.saveOk"));
-    }).fail(function() {
+    }, function(jqXhr, textStatus, err) {
       Log.info("SettingsViewModel - saveSettings: failed");
+      redirectIfUnauthorized(jqXhr, "/frontpage");
       Notify_showMsg('error', t("app.settings.saveNok"));
     }).always(function() {
       Notify_showSpinner(false);
@@ -555,12 +622,13 @@ var SettingsViewModel = function(currentView, settings, userData, activeCompanyI
       contentType : "application/json",
       data : JSON.stringify(ajaxData),
       dataType : "json"
-    }).done(function(data) {
+    }).then(function(data) {
       Log.info("SettingsViewModel - updateUser: response: " + JSON.stringify(data));
       Notify_showMsg('success', t("app.settings.saveOk", {context: "user"}));
       self.user.updateNavBarUsername();
-    }).fail(function() {
+    }, function(jqXhr, textStatus, err) {
       Log.info("SettingsViewModel - updateUser: failed");
+      redirectIfUnauthorized(jqXhr, "/frontpage");
       Notify_showMsg('error', t("app.settings.saveNok", {context: "user"}));
     }).always(function() {
       Notify_showSpinner(false);
@@ -585,15 +653,16 @@ var SettingsViewModel = function(currentView, settings, userData, activeCompanyI
         type: "POST",
         url: '/api/user-local-pwd-update',
         data: $("#local-pwd-update").serialize() // serializes the form's elements.
-      }).done(function(data) {
+      }).then(function(data) {
         console.log("SettingsViewModel - updatePassword: Server OK: " + JSON.stringify(data));
         if (data.success) {
           Notify_showMsg('success', t("app.settings.pwdOk"));
         } else {
           Notify_showMsg('error', data.message);
         }
-      }).fail(function(err) {
+      }, function(jqXhr, textStatus, err) {
         console.log("SettingsViewModel - updatePassword: Server error: " + JSON.stringify(err));
+        redirectIfUnauthorized(jqXhr, "/frontpage");
         Notify_showMsg('error', t("app.settings.pwdNok", {context: "serverFailure"}));
       }).always(function() {
         Notify_showSpinner(false);
@@ -669,7 +738,7 @@ var CompanyViewModel = function() {
   self.logoScale = ko.observable();
 
   for (var i = 0; i < defaults.invoiceLngList.length; i++) {
-    var lng = defaults.invoiceLngList[i]; 
+    var lng = defaults.invoiceLngList[i];
     self[lng] = {};
     for (var j = 0; j < self.lngFields.length; j++) {
       var field = self.lngFields[j].name;
@@ -731,7 +800,7 @@ var CompanyViewModel = function() {
     }
     self.logoScale(data.logoScale);
   };
-  
+
   self.init = function() {
     var data = {
         _id : undefined,
@@ -774,9 +843,9 @@ var CompanyViewModel = function() {
     }
     self.setData(data);
   };
-  
+
   self.init();
-  
+
   self.setDefaultReverseChargeCustomText = function() {
     self.reverseChargeText(t("app.company.defaultReverseChargeCustomText", {'lng': self.customTextFieldsPaneLng()}));
   };
@@ -806,23 +875,24 @@ var CompanyViewModel = function() {
       contentType : "application/json",
       data : JSON.stringify(self.toJSON()),
       dataType : "json",
-      success : function(data) {
-        Log.info("updateServer: response: " + JSON.stringify(data));
-        var tContext = "";
-        if (!isNew) {
-          tContext = (data.company.isValid) ? 'update' : 'delete';
-        }
-        Notify_showSpinner(false);
-        Notify_showMsg('success', t("app.company.saveOk",
-            {context: tContext, name: data.company.name}));
-        self.uid(data.company.uid);
-        self._id(data.company._id);
-        self.logo(data.company.logo);
-        self.isValid(data.company.isValid);
-        if (onCompletion !== undefined) {
-          onCompletion(data.company, isNew);
-        }
-      },
+    }).then(function(data) {
+      Log.info("updateServer: response: " + JSON.stringify(data));
+      var tContext = "";
+      if (!isNew) {
+        tContext = (data.company.isValid) ? 'update' : 'delete';
+      }
+      Notify_showSpinner(false);
+      Notify_showMsg('success', t("app.company.saveOk",
+          {context: tContext, name: data.company.name}));
+      self.uid(data.company.uid);
+      self._id(data.company._id);
+      self.logo(data.company.logo);
+      self.isValid(data.company.isValid);
+      if (onCompletion !== undefined) {
+        onCompletion(data.company, isNew);
+      }
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
     });
   };
 
@@ -905,7 +975,7 @@ var CompanyListViewModel = function(currentView, activeCompanyId, activeCompany,
     force = typeof force !== 'undefined' ? force : false;
     if (force || !cache.get(Cache.COMPANIES())) {
       Notify_showSpinner(true);
-      Cache.fetchCompanies().done(function() {
+      Cache.fetchCompaniesPromise().done(function() {
         Notify_showSpinner(false);
       }).fail(function() {
         Log.info("CompanyListViewModel - populate - failed");
@@ -992,28 +1062,26 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       self.getCompany(_id);
     }
   });
-  
+
   self.getCompany = function(_id) {
     Cache.getCompany(_id, function(c) {
       if (c !== undefined) {
         self.data.setData(c);
       } else {
         Notify_showSpinner(true);
-        $.getJSON(
-            "/api/company/" + _id,
-            function(company) {
-              Log.info("Got company id=" + _id + ", data=" + JSON.stringify(company));
-              self.data.setData(company);
-              Notify_showSpinner(false);
-            }).fail(function() {
-              Log.info("CompanyNewViewModel - getCompany - failed");
-              Notify_showSpinner(false);
-              Notify_showMsg('error', t("app.company.getNok"));
-            });
+        Cache.fetchCompanyPromise(_id).then(function(company) {
+          Log.info("Got company id=" + _id + ", data=" + JSON.stringify(company));
+          self.data.setData(company);
+          Notify_showSpinner(false);
+        }).fail(function() {
+          Log.info("CompanyNewViewModel - getCompany - failed");
+          Notify_showSpinner(false);
+          Notify_showMsg('error', t("app.company.getNok"));
+        });
       }
     });
   };
-  
+
   self.saveCompany = function() {
     self.data.updateServer(function(c, isNew) {
       Log.info("CompanyNewViewModel - saveCompany onCompletion: " + JSON.stringify(c) + ", activeId=" + self.activeCompanyId());
@@ -1057,7 +1125,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
       var xhr = new XMLHttpRequest();
       xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) // Upload done!
-        {          
+        {
           Log.info("Upload done: status=" + xhr.status + ", res=" + xhr.responseText);
           if (xhr.status == 200) { // Success
             var logoJson = JSON.parse(xhr.responseText);
@@ -1072,7 +1140,7 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
             Notify_showMsg('error', t("app.company.uploadLogoNok", {context: "serverFailure", "status": xhr.status}));
           }
         }
-      }; 
+      };
       xhr.open('POST', "/api/company_logo/" + _id, true);
       xhr.send(formData);
 
@@ -1122,7 +1190,7 @@ var CustomerViewModel = function() {
   self.companyId = ko.observable();
   self.invoiceLng = ko.observable();
   self.currency = ko.observable();
-  
+
   self.nameError = ko.observable(false);
   self.hasErrorCss = ko.pureComputed(function() {
     // return this.nameError() ? "has-error" : "";
@@ -1183,7 +1251,7 @@ var CustomerViewModel = function() {
     };
     self.setData(data);
   };
-  
+
   self.init();
 
   self.setActiveCompanyId = function(companyId) {
@@ -1211,27 +1279,28 @@ var CustomerViewModel = function() {
       type : "PUT",
       contentType : "application/json",
       data : JSON.stringify(self.toJSON()),
-      dataType : "json",
-      success : function(data) {
-        Log.info("updateServer: response: " + JSON.stringify(data));
-        var tContext = "";
-        if (!isNewCustomer) {
-          tContext = (data.customer.isValid) ? 'update' : 'delete';
-        }
-        Notify_showSpinner(false);
-        Notify_showMsg('success', t("app.customer.saveOk",
-            {context: tContext, cid: ""+data.customer.cid, name: data.customer.name}));
-        self.cid(data.customer.cid);
-        self.uid(data.customer.uid);
-        self._id(data.customer._id);
-        self.isValid(data.customer.isValid);
-        if (isNewCustomer) {
-          cache.del(Cache.CURR_USER_STATS());
-          Cache.addCustomer(data.customer);
-        } else {
-          Cache.updateCustomer(data.customer);
-        }
-      },
+      dataType : "json"
+    }).then(function(data) {
+      Log.info("updateServer: response: " + JSON.stringify(data));
+      var tContext = "";
+      if (!isNewCustomer) {
+        tContext = (data.customer.isValid) ? 'update' : 'delete';
+      }
+      Notify_showSpinner(false);
+      Notify_showMsg('success', t("app.customer.saveOk",
+        {context: tContext, cid: ""+data.customer.cid, name: data.customer.name}));
+      self.cid(data.customer.cid);
+      self.uid(data.customer.uid);
+      self._id(data.customer._id);
+      self.isValid(data.customer.isValid);
+      if (isNewCustomer) {
+        cache.del(Cache.CURR_USER_STATS());
+        Cache.addCustomer(data.customer);
+      } else {
+        Cache.updateCustomer(data.customer);
+      }
+    }, function(jqXhr, testStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
     });
   };
 
@@ -1258,14 +1327,15 @@ var CustomerViewModel = function() {
       type : "PUT",
       contentType : "application/json",
       data : JSON.stringify(newCustJson),
-      dataType : "json",
-      success : function(data) {
-        Log.info("transferToCompany: response: " + JSON.stringify(data));
-        var tContext = "";
-        Notify_showSpinner(false);
-        Notify_showMsg('success', t("app.customer.transferOk",
-            {cid: ""+data.customer.cid}));
-      },
+      dataType : "json"
+    }).then(function(data) {
+      Log.info("transferToCompany: response: " + JSON.stringify(data));
+      var tContext = "";
+      Notify_showSpinner(false);
+      Notify_showMsg('success', t("app.customer.transferOk",
+          {cid: ""+data.customer.cid}));
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
     });
   };
 
@@ -1355,7 +1425,7 @@ var CustomerListViewModel = function(currentView, activeCompanyId) {
       // Do nothing if object exists in cache
       if (force || !cache.get(Cache.CUSTOMERS())) {
         Notify_showSpinner(true);
-        Cache.fetchCustomers(companyId).done(function() {
+        Cache.fetchCustomersPromise(companyId).done(function() {
           Log.info("CustomerListViewModel - populate - success");
           Notify_showSpinner(false);
         }).fail(function() {
@@ -1422,7 +1492,7 @@ var CustomerNewViewModel = function(currentView, activeCompanyId, companyList) {
 
   inheritInvoiceLngModel(self);
   inheritCurrencyModel(self);
-  
+
   self.currentView.subscribe(function(newValue) {
     self.data.init();
     var viewArray = newValue.split("/");
@@ -1442,24 +1512,22 @@ var CustomerNewViewModel = function(currentView, activeCompanyId, companyList) {
       self.getCustomer(_id);
     }
   });
-  
+
   self.getCustomer = function(_id) {
     Cache.getCustomer(_id, function(c) {
       if (c !== undefined) {
         self.data.setData(c);
       } else {
         Notify_showSpinner(true);
-        $.getJSON(
-            "/api/customer/" + _id,
-            function(customer) {
-              Log.info("Got customer id=" + _id + ", data=" + JSON.stringify(customer));
-              self.data.setData(customer);
-              Notify_showSpinner(false);
-            }).fail(function() {
-              Log.info("CustomerNewViewModel - getCustomer - failed");
-              Notify_showSpinner(false);
-              Notify_showMsg('error', t("app.customer.getNok"));
-            });
+        Cache.fetchCustomerPromise(id).then(function(customer) {
+          Log.info("Got customer id=" + _id + ", data=" + JSON.stringify(customer));
+          self.data.setData(customer);
+          Notify_showSpinner(false);
+        }).fail(function() {
+          Log.info("CustomerNewViewModel - getCustomer - failed");
+          Notify_showSpinner(false);
+          Notify_showMsg('error', t("app.customer.getNok"));
+        });
       }
     });
   };
@@ -1468,7 +1536,7 @@ var CustomerNewViewModel = function(currentView, activeCompanyId, companyList) {
     var newState = !self.isExtraOptVisible();
     self.isExtraOptVisible(newState);
   }
-  
+
   self.transferCustomer = function() {
     var destCompanyId = self.transferDestCompany()._id();
     if (destCompanyId == self.activeCompanyId()) {
@@ -1529,7 +1597,7 @@ var InvoiceItemGroupTemplatesViewModel = function(currentView) {
     force = typeof force !== 'undefined' ? force : false;
     if (force || !cache.get(Cache.ITEM_GROUP_TEMPLATES())) {
       Notify_showSpinner(true);
-      Cache.fetchItemGroupTemplates().done(function() {
+      Cache.fetchItemGroupTemplatesPromise().done(function() {
         Notify_showSpinner(false);
       }).fail(function() {
         Log.info("InvoiceItemGroupTemplatesViewModel - populate - failed");
@@ -1716,28 +1784,29 @@ var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
       type : "PUT",
       contentType : "application/json",
       data : JSON.stringify(self.toJSON()),
-      dataType : "json",
-      success : function(data) {
-        Log.info("updateServer: response: " + JSON.stringify(data));
-        var isDelete = !isNew && !data.article.isValid;
-        var tContext = "";
-        if (!isNew) {
-          tContext = isDelete ? 'delete' : 'update';
-        }
-        Notify_showSpinner(false);
-        Notify_showMsg('success', t("app.articles.saveOk",
-            {context: tContext, articleId: data.article.articleId}));
-        self._id(data.article._id);
-        self.uid(data.article.uid);
-        self.isValid(data.article.isValid);
-        if (isNew) {
-          Cache.addArticle(data.article);
-        } else if (isDelete) {
-          Cache.deleteArticle(data.article);
-        } else {
-          Cache.updateArticle(data.article);
-        };
-      },
+      dataType : "json"
+    }).then(function(data) {
+      Log.info("updateServer: response: " + JSON.stringify(data));
+      var isDelete = !isNew && !data.article.isValid;
+      var tContext = "";
+      if (!isNew) {
+        tContext = isDelete ? 'delete' : 'update';
+      }
+      Notify_showSpinner(false);
+      Notify_showMsg('success', t("app.articles.saveOk",
+          {context: tContext, articleId: data.article.articleId}));
+      self._id(data.article._id);
+      self.uid(data.article.uid);
+      self.isValid(data.article.isValid);
+      if (isNew) {
+        Cache.addArticle(data.article);
+      } else if (isDelete) {
+        Cache.deleteArticle(data.article);
+      } else {
+        Cache.updateArticle(data.article);
+      };
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
     });
   };
 
@@ -1775,7 +1844,7 @@ var ArticleViewModel = function(groupList, itemGroupTemplateFilter) {
     self.itemGroupTemplateRef().forEach(function(item) {
       res.itemGroupTemplateRef.push(item);
     });
-    
+
     return res;
   };
 };
@@ -1959,8 +2028,8 @@ ReportOps.downloadDocPromise = function(url, id) {
   Notify_showSpinner(true);
   try {
     var child = window.open(url);
-    if(!child || child.closed || typeof child.closed=='undefined') 
-    { 
+    if(!child || child.closed || typeof child.closed=='undefined')
+    {
       Log.warn("downloadDoc - Failed, popup blocked! url=" + url + ", id=" + id);
       Notify_showSpinner(false);
       Notify_showMsg('error', t("app.invoiceList.printNok", {context: "popupBlocked"}));
@@ -2087,7 +2156,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
       self.isEditMode(false);
     }
   });
-  
+
   self.setData = function(data) {
     self.isEditMode(false);
     self._id(data._id);
@@ -2193,7 +2262,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
       }
       return sum;
     }, this);
-    
+
     self.totalInclVat = ko.pureComputed(function() {
       var sum = 0;
       for ( var i = 0; i < this.invoiceItems().length; i++) {
@@ -2227,7 +2296,7 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
       Log.info("Added new invoice item to group=" + self.name() +
           ". #items=" + self.invoiceItems().length + " (after)");
     };
-    
+
     self.deleteInvoiceItem = function(item) {
       item.isValid(false);
       self.invoiceItems.destroy(item);
@@ -2258,28 +2327,29 @@ var InvoiceItemGroupViewModel = function(mayHaveInvoiceItems, currency, isLocked
       type : "PUT",
       contentType : "application/json",
       data : JSON.stringify(self.toJSON()),
-      dataType : "json",
-      success : function(data) {
-        Log.info("updateServer: response: " + JSON.stringify(data));
-        var tContext = "";
-        var isDelete = !isNew && !data.groupTempl.isValid;
-        if (!isNew) {
-          tContext = isDelete ? 'delete' : 'update';
-        }
-        Notify_showSpinner(false);
-        Notify_showMsg('success', t("app.groupTemplates.saveOk",
-            {context: tContext, name: data.groupTempl.name}));
-        self.uid(data.groupTempl.uid);
-        self._id(data.groupTempl._id);
-        self.isValid(data.groupTempl.isValid);
-        if (isNew) {
-          Cache.addItemGroupTemplate(data.groupTempl);
-        } else if (isDelete) {
-          Cache.deleteItemGroupTemplate(data.groupTempl);
-        } else {
-          Cache.updateItemGroupTemplate(data.groupTempl);
-        };
-      },
+      dataType : "json"
+    }).then(function(data) {
+      Log.info("updateServer: response: " + JSON.stringify(data));
+      var tContext = "";
+      var isDelete = !isNew && !data.groupTempl.isValid;
+      if (!isNew) {
+        tContext = isDelete ? 'delete' : 'update';
+      }
+      Notify_showSpinner(false);
+      Notify_showMsg('success', t("app.groupTemplates.saveOk",
+          {context: tContext, name: data.groupTempl.name}));
+      self.uid(data.groupTempl.uid);
+      self._id(data.groupTempl._id);
+      self.isValid(data.groupTempl.isValid);
+      if (isNew) {
+        Cache.addItemGroupTemplate(data.groupTempl);
+      } else if (isDelete) {
+        Cache.deleteItemGroupTemplate(data.groupTempl);
+      } else {
+        Cache.updateItemGroupTemplate(data.groupTempl);
+      };
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
     });
   };
 
@@ -2375,7 +2445,7 @@ var InvoiceItemViewModel = function(data, parent) {
     }
     return str;
   }, self);
-  
+
   self.descriptionNumRows = ko.pureComputed(function() {
     var numRows = 1;
     if (this.isTextOnly()) {
@@ -2685,7 +2755,7 @@ var InvoiceDataViewModel = function() {
   };
 
   self.init();
-  
+
   self.totalExclVat = ko.pureComputed(function() {
     var sum = 0;
     for ( var i = 0; i < self.invoiceItemGroups().length; i++) {
@@ -2699,7 +2769,7 @@ var InvoiceDataViewModel = function() {
     sum = parseFloat(sum.toFixed(defaults.invoiceÍtemTotalNumDecRound));
     return sum;
   }, this);
-  
+
   self.totalInclVat = ko.pureComputed(function() {
     var sum = 0;
     for ( var i = 0; i < self.invoiceItemGroups().length; i++) {
@@ -2725,7 +2795,7 @@ var InvoiceDataViewModel = function() {
   self.totalToPay = ko.pureComputed(function() {
     return self.totalExclVat() + self.totalVat();
   }, this);
-  
+
   self.currencyAdj = ko.pureComputed(function() {
     var amountToPayAdjNumDec = defaults.invoiceCurrencyAdjNumDec[self.currency()];
     return Util.calcPaymentAdjustment(
@@ -3236,7 +3306,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
   self.dateFilterAddYears = function(numYearsToAdd) {
     var year = self.getYear(0);
     var addHigh = (numYearsToAdd > 0)?true:false;
-    
+
     for (var i = 0; i < self.dateFilterYearList().length; i++) {
       var y = self.dateFilterYearList()[i];
       if (addHigh) {
@@ -3515,8 +3585,8 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
       $.when(docsJob, customersJob).then(function(docsRes, customersRes) {
         Notify_showSpinner(false);
         deferred.resolve();
-      }).fail(function() {
-        Log.info("InvoiceListViewModel - populate - failed");
+      }).fail(function(err) {
+        Log.info("InvoiceListViewModel - populate - failed, err=" + JSON.stringify(err, null, 2));
         Notify_showSpinner(false);
         Notify_showMsg('error', t("app.invoiceList.getNok"));
         deferred.reject();
@@ -3572,47 +3642,48 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
         type : "PUT",
         contentType : "application/json",
         data : JSON.stringify(reqData),
-        dataType : "json",
-        success : function(data) {
-          Log.info("doSelectedRowsOp: response: " + JSON.stringify(data));
+        dataType : "json"
+      }).then(function(data) {
+        Log.info("doSelectedRowsOp: response: " + JSON.stringify(data));
 
-          var doOpOnInvoice = undefined;
-          switch (op) {
-            case 'pay':
-              doOpOnInvoice = function(item) {
-                item.isPaid = true;
-              };
-              break;
-            case 'lock': 
-              doOpOnInvoice = function(item) {
-                item.isLocked = true;
-              };
-              break;
-            case 'print': 
-              doOpOnInvoice = function(item) {
-              };
-              break;
-            default:
-              Log.error("Invalid op, op=" + op);
-              break;
-          }
+        var doOpOnInvoice = undefined;
+        switch (op) {
+          case 'pay':
+            doOpOnInvoice = function(item) {
+              item.isPaid = true;
+            };
+            break;
+          case 'lock':
+            doOpOnInvoice = function(item) {
+              item.isLocked = true;
+            };
+            break;
+          case 'print':
+            doOpOnInvoice = function(item) {
+            };
+            break;
+          default:
+            Log.error("Invalid op, op=" + op);
+            break;
+        }
 
-          if (doOpOnInvoice != undefined &&
-              data.res.ok &&
-              data.res.nModified <= docIds.length &&
-              data.res.n == docIds.length) {
-            Cache.updateInvoiceMap(function(item) {
-              if (docIds.indexOf(item._id) != -1) {
-                doOpOnInvoice(item);
-              }
-            });
-            Notify_showMsg('success',
-              t("app.invoiceList.bulkOpOk", {context: op, count: data.res.nModified}));
-          } else {
-            Log.warn("Update not successfull: requested nr of docs to update is " + docIds.length);
-          }
-          Notify_showSpinner(false);
-        },
+        if (doOpOnInvoice != undefined &&
+            data.res.ok &&
+            data.res.nModified <= docIds.length &&
+            data.res.n == docIds.length) {
+          Cache.updateInvoiceMap(function(item) {
+            if (docIds.indexOf(item._id) != -1) {
+              doOpOnInvoice(item);
+            }
+          });
+          Notify_showMsg('success',
+            t("app.invoiceList.bulkOpOk", {context: op, count: data.res.nModified}));
+        } else {
+          Log.warn("Update not successfull: requested nr of docs to update is " + docIds.length);
+        }
+        Notify_showSpinner(false);
+      }, function(jqXhr, textStatus, err) {
+        redirectIfUnauthorized(jqXhr, "/frontpage");
       });
     } else {
       Log.error("Invalid op=" + op);
@@ -3632,7 +3703,7 @@ var InvoiceListViewModel = function(currentView, activeCompanyId) {
     // Sort according to compare method.
     self.docList().sort(self[newVal + 'Compare']);
   });
-  
+
   self.docNrAscCompare = function(aRow, bRow) {
     return aRow.docNr() - bRow.docNr();
   };
@@ -3814,7 +3885,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
     Log.info("New group name=" + group.name + ", id=" + group._id);
     self.data.addGroup(group);
   };
-  
+
   self.currentView.subscribe(function(newValue) {
     self.selectedCustomer(undefined);
 
@@ -3865,7 +3936,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
 
   self.selectedCustomer.subscribe(function(newValue) {
     if (newValue !== undefined && newValue.data !== undefined) {
-      Log.info("InvoiceNewViewModel - Customer selected (updates data " + self.selectedCustomerUpdatesData + 
+      Log.info("InvoiceNewViewModel - Customer selected (updates data " + self.selectedCustomerUpdatesData +
         ") - " + JSON.stringify(newValue.data));
       if (self.selectedCustomerUpdatesData) {
         self.data.setCustomer(newValue.data);
@@ -4122,7 +4193,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
         self.selectedCustomer(self.customerList()[0]);
       }
     } else {
-      Log.info("InvoiceNewViewModel - syncCustomerIdInput: customer is undefined");        
+      Log.info("InvoiceNewViewModel - syncCustomerIdInput: customer is undefined");
     }
   };
 
@@ -4151,39 +4222,40 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
       type : "PUT",
       contentType : "application/json",
       data : ajaxData,
-      dataType : "json",
-      success : function(data) {
-        Log.info("doSaveDoc: response: " + JSON.stringify(data));
-        var tContext = "";
-        if (!isNewDoc) {
-          tContext = (data.doc.isValid) ? 'update' : 'delete';
-        }
-        Notify_showSpinner(false);
-        Notify_showMsg('success',
-            t(docTypeTransNs + "saveOk",
-                   {context: tContext, docNr: data.doc.docNr}));
-        // Set params set from server
-        self.data._id(data.doc._id);
-        self.data.docNr(data.doc.docNr);
-        self.data.uid(data.doc.uid);
-        self.data.companyId(data.doc.companyId);
-        self.data.company(data.doc.company);
-        self.data.isValid(data.doc.isValid);
-        if (isNewDoc) {
-          cache.del(Cache.CURR_USER_STATS());
-          if (self.isInvoice()) {
-            Cache.addInvoice(data.doc);
-          } else {
-            Cache.addOffer(data.doc);
-          }
+      dataType : "json"
+    }).then(function(data) {
+      Log.info("doSaveDoc: response: " + JSON.stringify(data));
+      var tContext = "";
+      if (!isNewDoc) {
+        tContext = (data.doc.isValid) ? 'update' : 'delete';
+      }
+      Notify_showSpinner(false);
+      Notify_showMsg('success',
+          t(docTypeTransNs + "saveOk",
+                 {context: tContext, docNr: data.doc.docNr}));
+      // Set params set from server
+      self.data._id(data.doc._id);
+      self.data.docNr(data.doc.docNr);
+      self.data.uid(data.doc.uid);
+      self.data.companyId(data.doc.companyId);
+      self.data.company(data.doc.company);
+      self.data.isValid(data.doc.isValid);
+      if (isNewDoc) {
+        cache.del(Cache.CURR_USER_STATS());
+        if (self.isInvoice()) {
+          Cache.addInvoice(data.doc);
         } else {
-          if (self.isInvoice()) {
-            Cache.updateInvoice(data.doc);
-          } else {
-            Cache.updateOffer(data.doc);
-          }
-        };
-      },
+          Cache.addOffer(data.doc);
+        }
+      } else {
+        if (self.isInvoice()) {
+          Cache.updateInvoice(data.doc);
+        } else {
+          Cache.updateOffer(data.doc);
+        }
+      };
+    }, function(jqXhr, textStatus, err) {
+      redirectIfUnauthorized(jqXhr, "/frontpage");
     });
   };
 
@@ -4197,7 +4269,7 @@ var InvoiceNewViewModel = function(currentView, activeCompany) {
       Log.info("InvoiceNewViewModel - Invoice not saved.");
     }
   };
-  
+
   self.doInvoiceReminderPrint = function() {
     Log.info("InvoiceNewViewModel - Print reminder requested");
     if (self.data._id() !== undefined) {
@@ -4293,7 +4365,7 @@ var UserViewModel = function() {
   self.type = ko.pureComputed(function() {
     var typeStr = "";
     if (self.googleId() !== undefined &&
-        self.googleId() !== null && 
+        self.googleId() !== null &&
         self.googleId() !== "")
     {
       typeStr = "Google";
@@ -4328,7 +4400,7 @@ var UserViewModel = function() {
     }
     return dateStr;
   }, self);
-  
+
   self.isSelf = ko.pureComputed(function() {
     return this._id() === cfg.user._id;
   }, self);
@@ -4363,39 +4435,38 @@ var UserViewModel = function() {
       Log.info("UserViewModel - event - del:" + USER_STATS_KEY());
     });
   };
-  
+
   self.populate = function() {
     // Do nothing if object exists in cache
     if (!cache.get(USER_STATS_KEY())) {
       Notify_showSpinner(true);
-      $.getJSON(
-          "/api/userStats/" + self._id(),
-          function(stats) {
-            Log.info("Got stats for uid=" + self._id() + ", stats=" + JSON.stringify(stats));
-            cache.set(USER_STATS_KEY(), stats);
-            Notify_showSpinner(false);
-          }).fail(function() {
-            Log.info("UserViewModel - toggleDetailedInfo - failed");
-            Notify_showSpinner(false);
-            Notify_showMsg('error', t("app.userList.getNok"));
-          });      
+      $.getJSON("/api/userStats/" + self._id()).then(function(stats) {
+        Log.info("Got stats for uid=" + self._id() + ", stats=" + JSON.stringify(stats));
+        cache.set(USER_STATS_KEY(), stats);
+        Notify_showSpinner(false);
+      }, function(jqXhr, textStatus, err) {
+        Log.info("UserViewModel - toggleDetailedInfo - failed");
+        Notify_showSpinner(false);
+        redirectIfUnauthorized(jqXhr, "/frontpage");
+        Notify_showMsg('error', t("app.userList.getNok"));
+      });
     } else {
       Log.info("UserViewModel - populate - data is cached!");
       self.isDetailsVisible(true);
     }
   };
-  
+
   self.toggleDetailedInfo = function(user) {
     var newIsDetailsVisible = !self.isDetailsVisible();
     Log.info("UserViewModel - toggleDetailedInfo: visible=" + newIsDetailsVisible + " (new value)");
-    
+
     if (newIsDetailsVisible) {
       self.populate();
     } else {
       self.isDetailsVisible(false);
-    }    
+    }
   };
-  
+
   self.invalidateCache = function() {
     // Hide before cache deletion
     self.isDetailsVisible(false);
@@ -4436,9 +4507,8 @@ var UserListViewModel = function(currentView) {
     // Do nothing if object exists in cache
     if (!cache.get(Cache.USERS())) {
       Notify_showSpinner(true);
-      $.getJSON("/api/users", function(allData) {
+      Cache.fetchUsersPromise().then(function(allData) {
         Log.info("Got users: " + JSON.stringify(allData));
-        cache.set(Cache.USERS(), allData);
         Notify_showSpinner(false);
       }).fail(function() {
         Log.info("UserListViewModel - populate - failed");
@@ -4465,12 +4535,12 @@ var InviteViewModel = function() {
   self.email = ko.observable();
   self.license = ko.observable();
   self.isAdmin = ko.observable();
-  
+
   self.setData = function(data) {
     self.email(data.email);
     self.license(data.license);
     self.isAdmin(data.isAdmin);
-  };  
+  };
 };
 
 var InviteListViewModel = function(currentView) {
@@ -4506,9 +4576,8 @@ var InviteListViewModel = function(currentView) {
     // Do nothing if object exists in cache
     if (!cache.get(Cache.INVITES())) {
       Notify_showSpinner(true);
-      $.getJSON("/api/invites", function(allData) {
+      Cache.fetchInvitesPromise().then(function(allData) {
         Log.info("Got invites: " + JSON.stringify(allData));
-        cache.set(Cache.INVITES(), allData);
         Notify_showSpinner(false);
       }).fail(function() {
         Log.info("InviteListViewModel - populate - failed");
@@ -4519,7 +4588,7 @@ var InviteListViewModel = function(currentView) {
       Log.info("InviteListViewModel - populate - data is cached!");
     }
   };
-  
+
   self.refresh = function() {
     Log.info("InviteListViewModel - refresh");
     cache.del(Cache.INVITES());
@@ -4528,7 +4597,7 @@ var InviteListViewModel = function(currentView) {
 
 var NavViewModel = function() {
   var self = this;
-  
+
   self.currentView = ko.observable("");
   self.activeCompanyId = ko.observable();
   self.activeCompany = ko.observable();
@@ -4548,11 +4617,11 @@ var NavViewModel = function() {
       }
     }
   });
-  
+
   self.selectCompany = function(company) {
     Log.info("navigation - selectCompany: " + JSON.stringify(company));
     self.activeCompanyId(company._id());
-    
+
     // Work-around: Navigate to home instead of making sure that all views updates when company is changed
     location.hash = '/page/home';
   };
@@ -4604,7 +4673,7 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
       return self.stats().activeCompany.numInvoices;
     }
   }, self);
-  
+
   self.numOffers = ko.pureComputed(function() {
     if ((self.activeCompanyId() === undefined) || (self.activeCompanyId() === null) ||
         (self.stats() === undefined)) {
@@ -4688,19 +4757,18 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
     // Do nothing if object exists in cache
     if (force || !cache.get(Cache.CURR_USER_STATS())) {
       Notify_showSpinner(true);
-      $.getJSON(
-          "/api/stats/" + self.activeCompanyId(),
-          function(stats) {
-            Log.info("Got stats id=" + self.activeCompanyId() + ", stats=" + JSON.stringify(stats));
-            cache.set(Cache.CURR_USER_STATS(), stats);
-            deferred.resolve();
-          }).fail(function() {
-            Log.info("GettingStartedViewModel - populate - failed");
-            Notify_showMsg('error', t("app.gettingStarted.getNok"));
-            deferred.reject();
-          }).always(function() {
-            Notify_showSpinner(false);
-          });
+      $.getJSON("/api/stats/" + self.activeCompanyId()).then(function(stats) {
+        Log.info("Got stats id=" + self.activeCompanyId() + ", stats=" + JSON.stringify(stats));
+        cache.set(Cache.CURR_USER_STATS(), stats);
+        deferred.resolve();
+    }, function(jqXhr, textStatus, err) {
+        Log.info("GettingStartedViewModel - populate - failed");
+        redirectIfUnauthorized(jqXhr, "/frontpage");
+        Notify_showMsg('error', t("app.gettingStarted.getNok"));
+        deferred.reject();
+      }).always(function() {
+        Notify_showSpinner(false);
+      });
     } else {
       Log.info("GettingStartedViewModel - populate - data is cached!");
       deferred.resolve();
@@ -4712,17 +4780,13 @@ var GettingStartedViewModel = function(currentView, activeCompanyId) {
 var getInitialDataPromise = function() {
   var deferred = $.Deferred();
   Notify_showSpinner(true);
-  $.getJSON(
-    "/api/initial",
-    function(data) {
-      deferred.resolve(data);
-    }
-  )
-  .fail(function() {
+  $.getJSON("/api/initial").then(function(data) {
+    deferred.resolve(data);
+  }, function(jqXhr, textStatus, err) {
     Log.info("Failed to get initial data");
+    redirectIfUnauthorized(jqXhr, "/frontpage");
     deferred.reject(data);
-  })
-  .always(function() {
+  }).always(function() {
     Notify_showSpinner(false);
   });
 
@@ -4758,7 +4822,7 @@ var setupKo = function() {
   }).fail(function() {
     Notify_showMsg('error', t("app.settings.getInitialDataNok"));
   });
-  
+
   var companyNewViewModel = new CompanyNewViewModel(navViewModel.currentView,
       navViewModel.activeCompanyId, navViewModel.activeCompany);
   var customerListViewModel = new CustomerListViewModel(
@@ -4842,5 +4906,5 @@ $(function() {
       Log.info("init - setupKo");
       setupKo();
       Log.info("init - setupKo - done");
-  });  
+  });
 });

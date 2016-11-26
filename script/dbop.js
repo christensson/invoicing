@@ -1,9 +1,9 @@
 var args = require('commander');
-var mydb = require('./mydb.js');
+var mydb = require('../lib/mydb');
 var Q = require('q');
 var Converter = require("csvtojson").Converter;
 var converter = new Converter({});
-var log = require('./log');
+var log = require('../lib/log');
 
 function increaseVerbosity(v, total) {
   return total + 1;
@@ -286,7 +286,7 @@ var getAllUserData = function(uid) {
         log.info("No settings found");
       } else {
         log.info("Settings found");
-      }      
+      }
       log.verbose("Settings found: " + JSON.stringify(settings, null, 2));
       return mydb.getAllDocsPromise('company', {'uid': ouid})
     })
@@ -343,7 +343,7 @@ var getAllUserData = function(uid) {
         "articles": articles,
       });
     });
-  
+
   return deferred.promise;
 }
 
@@ -643,7 +643,7 @@ if (args.gendata) {
   var customers = undefined;
   var company = undefined;
   var invoice = undefined;
-  log.info("Going to generate " + numCustomers + " customers and " + 
+  log.info("Going to generate " + numCustomers + " customers and " +
     numInvoices + " invoices with tag " + tag + " to user with uid=" + uid);
   mydb.getOneDocPromise('company', {'uid': ouid, '_id': ocid})
     .fail(function(err) {

@@ -179,6 +179,8 @@
     "app": {
         "pageTitle": "Lätt Fakturering",
         "tickerText": "Laddar",
+        "unauthorized": "Sessionen är för gammal, var god logga in igen.",
+        "unauthorizedBtnLbl": "Fortsätt till inloggningssidan",
         "navBar": {
             "title": "Lätt Fakturering",
             "home": "Översikt",

@@ -1,9 +1,9 @@
 var args = require('commander');
-var mydb = require('./mydb.js');
+var mydb = require('../lib/mydb');
 var mongodb = require('mongodb');
 var ObjectID = mongodb.ObjectID;
 var Q = require('q');
-var log = require('./log');
+var log = require('../lib/log');
 
 function increaseVerbosity(v, total) {
   return total + 1;

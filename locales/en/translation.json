@@ -164,6 +164,8 @@
     "app": {
         "pageTitle": "Easy Invoicing",
         "tickerText": "Loading",
+        "unauthorized": "Session expired, please log in again.",
+        "unauthorizedBtnLbl": "Continue to login page",
         "navBar": {
             "title": "Easy Invoicing",
             "home": "Overview",
@@ -525,7 +527,7 @@
               "groupName": "Offer reference",
               "groupTitle": "Offer reference",
               "offerRefText": "Invoice related to Offer Nr {{offerDocNr}}."
-            }            
+            }
         },
         "invoiceList": {
             "filterPaneToggleLbl_show": "Show filter",

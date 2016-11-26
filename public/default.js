@@ -36,7 +36,7 @@ var defaults = {
     showNotCanceled: true,
     showCanceled: false,
   },
-  logFile: 'log/log.txt'
+  logFile: "log/log.txt" // Relative root
 };
 
 var getDefaults = function() {
@@ -47,4 +47,3 @@ var getDefaults = function() {
 (typeof module !== "undefined" && module !== null ? module : {}).exports = this.Default = {
   get: getDefaults,
 };
-
