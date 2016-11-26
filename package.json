@@ -1,6 +1,6 @@
 {
   "name": "Invoicing",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Invoicing made easy",
   "main": "app.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "start": "node .",
     "start-dev": "node . --local",
     "init-db": "node ./script/initdb.js",
-    "init-db-data": "node ./script/initdb.js --dev"
+    "init-db-data": "node ./script/initdb.js --dev",
     "clean": "rm -rf tmp/*",
     "clean-log": "echo '' > log/log.txt"
   },
