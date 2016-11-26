@@ -5,7 +5,7 @@ var express = require("express");
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 var session = require('express-session');
-//var MongoStore = require('connect-mongo')(session);
+var MongoStore = require('connect-mongo')(session);
 var methodOverride = require('method-override');
 var flash = require('connect-flash');
 var passport = require('passport');
@@ -24,6 +24,7 @@ var Q = require('q');
 var defaults = require('./public/default').get();
 var util = require('./public/util');
 var log = require('./lib/log');
+var mydb = require('./lib/mydb');
 
 // Install marko hooks for require
 require('marko/node-require').install();
@@ -94,11 +95,11 @@ app.use(session({
   name : 'sessionId',
   resave : false,
   saveUninitialized : false,
-  //store: new MongoStore(options),
+  store: new MongoStore({ dbPromise: mydb.getDbPromise() }),
   cookie: {
     secure: enforceSsl,
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 14 * 24 * 60 * 60 * 1000 // 14 days
   }
 }));
 if (enforceSsl) {
@@ -166,7 +167,6 @@ app.get('/locales/resources.json', i18nMiddleware.getResourcesHandler(i18n)); //
 
 // App modules
 var hostname = "";
-var mydb = require('./lib/mydb');
 if (args.local) {
   mydb.setLocalDb();
 } else {
