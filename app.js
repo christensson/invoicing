@@ -4,7 +4,6 @@ var args = require('commander');
 var express = require("express");
 var logger = require('morgan');
 var bodyParser = require('body-parser');
-var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var methodOverride = require('method-override');
 var flash = require('connect-flash');
@@ -84,7 +83,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended : true
 }));
-app.use(cookieParser());
 app.use(methodOverride('X-HTTP-Method-Override'));
 
 app.set('trust proxy', 1) // trust first proxy
@@ -98,7 +96,7 @@ app.use(session({
   cookie: {
     secure: enforceSsl,
     httpOnly: true,
-    maxAge: 4 * 60 * 60 * 1000 // 4 hours
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
 if (enforceSsl) {
@@ -312,14 +310,25 @@ passport.use(new GoogleStrategy(
 // the request is authenticated (typically via a persistent login session),
 // the request will proceed. Otherwise, the user will be redirected to the
 // login page.
-function ensureAuthenticated(req, res, next) {
+    function ensureAuthenticatedRedirect(req, res, next) {
   if (req.isAuthenticated()) {
     log.debug("ensureAuthenticated: Authenticated!");
     return next();
   }
-  log.warn("ensureAuthenticated: Not authenticated!");
+  log.warn("ensureAuthenticatedRedirect: Not authenticated!");
   req.flash('notice', req.t("signin.authNokMsg"));
-  res.redirect('/frontpage');
+  return res.redirect(302, '/frontpage');
+}
+
+function ensureAuthenticatedFail(req, res, next) {
+  if (req.isAuthenticated()) {
+    log.debug("ensureAuthenticatedFail: Authenticated!");
+    return next();
+  }
+  log.warn("ensureAuthenticatedFail: Not authenticated!");
+  res.setHeader("WWW-Authenticate", "None");
+  res.sendStatus(401);
+  return res.end();
 }
 
 function myFailureHandler(res, err) {
@@ -338,7 +347,7 @@ function myFailureHandler(res, err) {
  * - settings
  * - companies
  */
-app.get("/api/initial", ensureAuthenticated, function(req, res) {
+app.get("/api/initial", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   log.info("Get initial data: user=" + req.user.info.name + ", uid=" + uid);
   var settingsJob = mydb.getSettings(uid);
@@ -357,7 +366,7 @@ app.get("/api/initial", ensureAuthenticated, function(req, res) {
   });
 });
 
-app.get("/api/settings", ensureAuthenticated, function(req, res) {
+app.get("/api/settings", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   log.info("Get settings: user=" + req.user.info.name + ", uid=" + uid);
   mydb.getSettings(uid).then(function(doc) {
@@ -366,7 +375,7 @@ app.get("/api/settings", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.put("/api/settings", ensureAuthenticated, function(req, res) {
+app.put("/api/settings", ensureAuthenticatedFail, function(req, res) {
   var okHandler = function(logText, res, settings) {
     log.verbose(logText + ": OK, obj=" + JSON.stringify(settings));
     var resData = {
@@ -392,7 +401,7 @@ app.put("/api/settings", ensureAuthenticated, function(req, res) {
   );
 });
 
-app.put("/api/user", ensureAuthenticated, function(req, res) {
+app.put("/api/user", ensureAuthenticatedFail, function(req, res) {
   var okHandler = function(logText, res, user) {
     user = typeof user !== 'undefined' ? user : false;
     if (user) {
@@ -444,7 +453,7 @@ app.put("/api/user", ensureAuthenticated, function(req, res) {
   }
 });
 
-app.post("/api/user-local-pwd-update", ensureAuthenticated, function(req, res) {
+app.post("/api/user-local-pwd-update", ensureAuthenticatedFail, function(req, res) {
   var okHandler = function(logText, res, data) {
     log.verbose(logText + ": OK, data=" + JSON.stringify(data));
     res.status(200).json(data);
@@ -485,7 +494,7 @@ app.post("/api/user-local-pwd-update", ensureAuthenticated, function(req, res) {
   }
 });
 
-app.get("/api/companies", ensureAuthenticated, function(req, res) {
+app.get("/api/companies", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   log.info("Get companies: user=" + req.user.info.name + ", uid=" + uid);
   mydb.getCompanies(uid).then(function(docs) {
@@ -494,7 +503,7 @@ app.get("/api/companies", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.get("/api/company/:id", ensureAuthenticated,
+app.get("/api/company/:id", ensureAuthenticatedFail,
     function(req, res) {
       var uid = req.user._id;
       var id = req.params.id;
@@ -506,7 +515,7 @@ app.get("/api/company/:id", ensureAuthenticated,
       }).fail(myFailureHandler.bind(null, res));
     });
 
-app.put("/api/company/:id", ensureAuthenticated, function(req, res) {
+app.put("/api/company/:id", ensureAuthenticatedFail, function(req, res) {
   var okHandler = function(logText, res, company) {
     log.verbose(logText + ": OK, obj=" + JSON.stringify(company));
     var resData = {
@@ -537,7 +546,7 @@ app.put("/api/company/:id", ensureAuthenticated, function(req, res) {
   }
 });
 
-app.post("/api/company_logo/:companyId", ensureAuthenticated, upload.single('logo'), function(req, res) {
+app.post("/api/company_logo/:companyId", ensureAuthenticatedFail, upload.single('logo'), function(req, res) {
   var uid = req.user._id;
   var companyId = req.params.companyId;
   log.info("Company logo upload: uid=" + uid + ", companyId=" + companyId +
@@ -563,7 +572,7 @@ app.post("/api/company_logo/:companyId", ensureAuthenticated, upload.single('log
       myFailureHandler.bind(null, res));
 });
 
-app.get("/api/company_logo/:companyId", ensureAuthenticated, function(req, res) {
+app.get("/api/company_logo/:companyId", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   var companyId = req.params.companyId;
   log.info("Company logo get: uid=" + uid + ", companyId=" + companyId);
@@ -598,7 +607,7 @@ app.get("/api/company_logo/:companyId", ensureAuthenticated, function(req, res) 
       myFailureHandler.bind(null, res));
 });
 
-app.get("/api/customers/:companyId", ensureAuthenticated, function(req, res) {
+app.get("/api/customers/:companyId", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   var companyId = req.params.companyId;
   log.info("Get customers: user=" + req.user.info.name + ", uid=" + uid
@@ -609,7 +618,7 @@ app.get("/api/customers/:companyId", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.get("/api/customer/:id", ensureAuthenticated,
+app.get("/api/customer/:id", ensureAuthenticatedFail,
     function(req, res) {
       var uid = req.user._id;
       var id = req.params.id;
@@ -621,7 +630,7 @@ app.get("/api/customer/:id", ensureAuthenticated,
       }).fail(myFailureHandler.bind(null, res));
     });
 
-app.put("/api/customer/:id", ensureAuthenticated, function(req, res) {
+app.put("/api/customer/:id", ensureAuthenticatedFail, function(req, res) {
   var okHandler = function(logText, res, customer) {
     log.verbose(logText + ": OK, obj=" + JSON.stringify(customer));
     var resData = {
@@ -663,7 +672,7 @@ var streamJsonResponse = function(res, stream, onEndCallback) {
   });
 };
 
-app.get("/api/invoices/:companyId", ensureAuthenticated, function(req, res) {
+app.get("/api/invoices/:companyId", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   var companyId = req.params.companyId;
   log.info("Get invoices: user=" + req.user.info.name + ", uid=" + uid
@@ -675,7 +684,7 @@ app.get("/api/invoices/:companyId", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.get("/api/invoice/:id", ensureAuthenticated, function(req, res) {
+app.get("/api/invoice/:id", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   var id = req.params.id;
   log.info("Get invoice: user=" + req.user.info.name + ", uid=" + uid
@@ -686,7 +695,7 @@ app.get("/api/invoice/:id", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
+app.put("/api/invoice/:id", ensureAuthenticatedFail, function(req, res) {
   var okHandler = function(logText, res, doc) {
     log.verbose(logText + ": OK, obj=" + JSON.stringify(doc));
     var resData = {
@@ -712,7 +721,7 @@ app.put("/api/invoice/:id", ensureAuthenticated, function(req, res) {
   }
 });
 
-app.put(/^\/api\/(invoice|offer)_(lock|pay)$/, ensureAuthenticated, function(req, res) {
+app.put(/^\/api\/(invoice|offer)_(lock|pay)$/, ensureAuthenticatedFail, function(req, res) {
   var okHandler = function(logText, res, result) {
     log.verbose(logText + ": OK, obj=" + JSON.stringify(result));
     var resData = {
@@ -733,7 +742,7 @@ app.put(/^\/api\/(invoice|offer)_(lock|pay)$/, ensureAuthenticated, function(req
     .fail(myFailureHandler.bind(null, res));
 });
 
-app.get("/api/offers/:companyId", ensureAuthenticated, function(req, res) {
+app.get("/api/offers/:companyId", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   var companyId = req.params.companyId;
   log.info("Get offers: user=" + req.user.info.name + ", uid=" + uid
@@ -745,7 +754,7 @@ app.get("/api/offers/:companyId", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.get("/api/offer/:id", ensureAuthenticated, function(req, res) {
+app.get("/api/offer/:id", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   var id = req.params.id;
   log.info("Get offer: user=" + req.user.info.name + ", uid=" + uid
@@ -756,7 +765,7 @@ app.get("/api/offer/:id", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.put("/api/offer/:id", ensureAuthenticated, function(req, res) {
+app.put("/api/offer/:id", ensureAuthenticatedFail, function(req, res) {
   var okHandler = function(logText, res, doc) {
     log.verbose(logText + ": OK, obj=" + JSON.stringify(doc));
     var resData = {
@@ -782,7 +791,7 @@ app.put("/api/offer/:id", ensureAuthenticated, function(req, res) {
   }
 });
 
-app.get("/api/itemGroupTemplates", ensureAuthenticated, function(req, res) {
+app.get("/api/itemGroupTemplates", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   log.info("Get invoice item group templates: user=" + req.user.info.name + ", uid=" + uid);
   mydb.getItemGroupTemplates(uid).then(function(docs) {
@@ -791,7 +800,7 @@ app.get("/api/itemGroupTemplates", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.put("/api/itemGroupTemplate/:id", ensureAuthenticated, function(req, res) {
+app.put("/api/itemGroupTemplate/:id", ensureAuthenticatedFail, function(req, res) {
   var okHandler = function(logText, res, groupTempl) {
     log.verbose(logText + ": OK, obj=" + JSON.stringify(groupTempl));
     var resData = {
@@ -817,7 +826,7 @@ app.put("/api/itemGroupTemplate/:id", ensureAuthenticated, function(req, res) {
   }
 });
 
-app.get("/api/articles/:companyId", ensureAuthenticated, function(req, res) {
+app.get("/api/articles/:companyId", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   var companyId = req.params.companyId;
   log.info("Get articles: user=" + req.user.info.name + ", uid=" + uid
@@ -828,7 +837,7 @@ app.get("/api/articles/:companyId", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.put("/api/article/:id", ensureAuthenticated, function(req, res) {
+app.put("/api/article/:id", ensureAuthenticatedFail, function(req, res) {
   var okHandler = function(logText, res, article) {
     log.verbose(logText + ": OK, obj=" + JSON.stringify(article));
     var resData = {
@@ -856,7 +865,7 @@ app.put("/api/article/:id", ensureAuthenticated, function(req, res) {
   }
 });
 
-app.get(/^\/api\/(invoice|offer)Preview\/([^\/]+)\/([^\/]+)$/, ensureAuthenticated, function(req, res) {
+app.get(/^\/api\/(invoice|offer)Preview\/([^\/]+)\/([^\/]+)$/, ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   var docType = req.params[0];
   var companyId = req.params[1];
@@ -923,7 +932,7 @@ app.get(/^\/api\/(invoice|offer)Preview\/([^\/]+)\/([^\/]+)$/, ensureAuthenticat
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.get("/api/invoiceReport/:id/:isReminder", ensureAuthenticated, function(req, res) {
+app.get("/api/invoiceReport/:id/:isReminder", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   var id = req.params.id;
   var isReminder = (req.params.isReminder==="true")?true:false;
@@ -962,7 +971,7 @@ app.get("/api/invoiceReport/:id/:isReminder", ensureAuthenticated, function(req,
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.get("/api/offerReport/:id", ensureAuthenticated, function(req, res) {
+app.get("/api/offerReport/:id", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   var id = req.params.id;
   log.info("Offer report: user=" + req.user.info.name + ", _id=" + id);
@@ -999,7 +1008,7 @@ app.get("/api/offerReport/:id", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.get("/api/stats/:cid", ensureAuthenticated, function(req, res) {
+app.get("/api/stats/:cid", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   var cid = req.params.cid;
   log.info("Statistics: user=" + req.user.info.name + ", cid=" + cid);
@@ -1011,7 +1020,7 @@ app.get("/api/stats/:cid", ensureAuthenticated, function(req, res) {
   }).fail(myFailureHandler.bind(null, res));
 });
 
-app.get("/api/userStats/:uid", ensureAuthenticated, function(req, res) {
+app.get("/api/userStats/:uid", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   var isAdmin = req.user.info.isAdmin;
   var reqForUid = req.params.uid;
@@ -1030,7 +1039,7 @@ app.get("/api/userStats/:uid", ensureAuthenticated, function(req, res) {
 
 });
 
-app.get("/api/users", ensureAuthenticated, function(req, res) {
+app.get("/api/users", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   var isAdmin = req.user.info.isAdmin;
   var userName = req.user.info.name;
@@ -1047,7 +1056,7 @@ app.get("/api/users", ensureAuthenticated, function(req, res) {
   }
 });
 
-app.get("/api/invites", ensureAuthenticated, function(req, res) {
+app.get("/api/invites", ensureAuthenticatedFail, function(req, res) {
   var uid = req.user._id;
   var isAdmin = req.user.info.isAdmin;
   var userName = req.user.info.name;
@@ -1064,7 +1073,7 @@ app.get("/api/invites", ensureAuthenticated, function(req, res) {
   }
 });
 
-app.get("/api/log", ensureAuthenticated, function(req, res) {
+app.get("/api/log", ensureAuthenticatedRedirect, function(req, res) {
   var uid = req.user._id;
   var isAdmin = req.user.info.isAdmin;
   var userName = req.user.info.name;
@@ -1101,7 +1110,7 @@ app.post('/login', passport.authenticate('local-signin', {
   failureFlash: true
 }));
 
-app.get('/loginAs/:uid', ensureAuthenticated, function(req, res) {
+app.get('/loginAs/:uid', ensureAuthenticatedRedirect, function(req, res) {
   var currentUid = req.user._id;
   var isAdmin = req.user.info.isAdmin;
   var userName = req.user.info.name;
@@ -1128,7 +1137,7 @@ app.get('/loginAs/:uid', ensureAuthenticated, function(req, res) {
 
 // logs user out of site, deleting them from the session, and returns to
 // homepage
-app.get('/logout', ensureAuthenticated, function(req, res) {
+app.get('/logout', ensureAuthenticatedRedirect, function(req, res) {
   var name = req.user.info.name;
   log.info("logout: email=" + req.user.info.email + ", name=" + req.user.info.name);
   req.logout();
@@ -1139,7 +1148,7 @@ app.get('/logout', ensureAuthenticated, function(req, res) {
 var appTemplatePath = require.resolve('./views/app.marko');
 var appTemplate = marko.load(appTemplatePath);
 
-app.get('/', ensureAuthenticated, function(req, res) {
+app.get('/', ensureAuthenticatedRedirect, function(req, res) {
   var userInfo = req.user.info;
   // Only local users have a password...
   userInfo.isLocal = req.user.hasOwnProperty('username-local');

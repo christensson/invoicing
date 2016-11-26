@@ -8,6 +8,17 @@ var NotifyViewModel = function() {
     self.spinnerVisible = ko.observable(cfg.showInitialTicker);
     self.spinnerMsg = ko.observable(cfg.tickerText);
     self.spinnerShowCount = cfg.showInitialTicker===true?1:0;
+    self.fatalMsg = ko.observable("");
+    self.fatalVisible = ko.observable(false);
+    self.fatalBtnLbl = ko.observable("");
+
+    self.fatalBtnClick = function() {
+        if (self.fatalBtnClickHandler) {
+            self.fatalBtnClickHandler();
+            self.fatalBtnClickHandler = undefined;
+        }
+        self.fatalVisible(false);
+    };
 
     self.closeAll = function() {
       console.log("Notification: Close all");
@@ -63,6 +74,13 @@ var NotifyViewModel = function() {
                 },
                 hideDelayMs, notification);
         }
+    };
+
+    self.showFatalMsg = function(msg, buttonText, buttonClickHandler) {
+        self.fatalMsg(msg);
+        self.fatalBtnLbl(buttonText);
+        self.fatalBtnClickHandler = buttonClickHandler;
+        self.fatalVisible(true);
     };
 
     self.showServerMsg = function(serverMsg) {
@@ -122,6 +140,10 @@ var notifyViewModel = new NotifyViewModel();
 
 var Notify_showMsg = function(kind, msg, hideDelayMs) {
   notifyViewModel.showMsg(kind, msg, hideDelayMs);
+};
+
+var Notify_showFatalMsg = function(msg, buttonText, buttonClickHandler) {
+  notifyViewModel.showFatalMsg(msg, buttonText, buttonClickHandler);
 };
 
 var Notify_showSpinner = function(show, msg) {
