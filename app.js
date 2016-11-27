@@ -313,7 +313,7 @@ passport.use(new GoogleStrategy(
 // the request is authenticated (typically via a persistent login session),
 // the request will proceed. Otherwise, the user will be redirected to the
 // login page.
-    function ensureAuthenticatedRedirect(req, res, next) {
+function ensureAuthenticatedRedirect(req, res, next) {
   if (req.isAuthenticated()) {
     log.debug("ensureAuthenticated: Authenticated!");
     return next();
