@@ -165,64 +165,44 @@ var CacheOp = function() {
     }
   };
 
-  /*
-   * Invites
-   */
-  self.fetchInvitesPromise = function() {
+  self.fetchJsonPromise = function(path, cacheKey) {
     var deferred = $.Deferred();
-    $.getJSON("/api/invites").then(function(data) {
-      cache.set(self.INVITES(), data);
+    $.getJSON(path).then(function(data) {
+      if (cacheKey !== undefined) {
+        cache.set(cacheKey, data);
+      }
       deferred.resolve(data);
     }, function(jqXhr, textStatus, err) {
       redirectIfUnauthorized(jqXhr, "/frontpage");
       deferred.reject(err);
     });
     return deferred.promise();
-  };
+  }
+
+  /*
+   * Invites
+   */
+  self.fetchInvitesPromise =
+    self.fetchJsonPromise.bind(self, "/api/invites", self.INVITES());
 
   /*
    * Users
    */
-  self.fetchUsersPromise = function() {
-    var deferred = $.Deferred();
-    $.getJSON("/api/users").then(function(data) {
-      cache.set(self.USERS(), data);
-      deferred.resolve(data);
-    }, function(jqXhr, textStatus, err) {
-      redirectIfUnauthorized(jqXhr, "/frontpage");
-      deferred.reject(err);
-    });
-    return deferred.promise();
-  };
+  self.fetchUsersPromise =
+    self.fetchJsonPromise.bind(self, "/api/users", self.USERS());
 
   /*
    * Companies
    */
-  self.fetchCompaniesPromise = function() {
-    var deferred = $.Deferred();
-    $.getJSON("/api/companies").then(function(data) {
-      cache.set(self.COMPANIES(), data);
-      deferred.resolve(data);
-    }, function(jqXhr, textStatus, err) {
-      redirectIfUnauthorized(jqXhr, "/frontpage");
-      deferred.reject(err);
-    });
-    return deferred.promise();
-  };
+  self.fetchCompaniesPromise =
+    self.fetchJsonPromise.bind(self, "/api/companies", self.COMPANIES());
 
   self.getCompany = function(id, callback) {
     self._arrayGetItem(self.COMPANIES(), '_id', id, callback);
   };
 
   self.fetchCompanyPromise = function(id) {
-    var deferred = $.Deferred();
-    $.getJSON("/api/company/" + id).then(function(data) {
-      deferred.resolve(data);
-    }, function(jqXhr, textStatus, err) {
-      redirectIfUnauthorized(jqXhr, "/frontpage");
-      deferred.reject(err);
-    });
-    return deferred.promise();
+    return self.fetchJsonPromise("/api/company/" + id);
   };
 
   self.invalidateCompanies = function() {
@@ -240,17 +220,8 @@ var CacheOp = function() {
   /*
    * Item group templates
    */
-  self.fetchItemGroupTemplatesPromise = function() {
-    var deferred = $.Deferred();
-    $.getJSON("/api/itemGroupTemplates").then(function(data) {
-      cache.set(self.ITEM_GROUP_TEMPLATES(), data);
-      deferred.resolve(data);
-    }, function(jqXhr, textStatus, err) {
-      redirectIfUnauthorized(jqXhr, "/frontpage");
-      deferred.reject(err);
-    });
-    return deferred.promise();
-  };
+  self.fetchItemGroupTemplatesPromise =
+    self.fetchJsonPromise.bind(self, "/api/itemGroupTemplates", self.ITEM_GROUP_TEMPLATES());
 
   self.getItemGroupTemplate = function(id, callback) {
     self._arrayGetItem(self.ITEM_GROUP_TEMPLATES(), '_id', id, callback);
@@ -276,15 +247,7 @@ var CacheOp = function() {
    * Articles
    */
   self.fetchArticlesPromise = function(companyId) {
-    var deferred = $.Deferred();
-    $.getJSON("/api/articles/" + companyId).then(function(data) {
-      cache.set(self.ARTICLES(), data);
-      deferred.resolve(data);
-    }, function(jqXhr, textStatus, err) {
-      redirectIfUnauthorized(jqXhr, "/frontpage");
-      deferred.reject(err);
-    });
-    return deferred.promise();
+    return self.fetchJsonPromise("/api/articles/" + companyId, self.ARTICLES());
   };
 
   self.getArticle = function(id, callback) {
@@ -311,15 +274,7 @@ var CacheOp = function() {
    * Customers
    */
   self.fetchCustomersPromise = function(companyId) {
-    var deferred = $.Deferred();
-    $.getJSON("/api/customers/" + companyId).then(function(data) {
-      cache.set(self.CUSTOMERS(), data);
-      deferred.resolve(data);
-    }, function(jqXhr, textStatus, err) {
-      redirectIfUnauthorized(jqXhr, "/frontpage");
-      deferred.reject(err);
-    });
-    return deferred.promise();
+    return self.fetchJsonPromise("/api/customers/" + companyId, self.CUSTOMERS());
   };
 
   self.getCustomer = function(id, callback) {
@@ -327,14 +282,7 @@ var CacheOp = function() {
   };
 
   self.fetchCustomerPromise = function(id) {
-    var deferred = $.Deferred();
-    $.getJSON("/api/customer/" + id).then(function(data) {
-      deferred.resolve(data);
-    }, function(jqXhr, textStatus, err) {
-      redirectIfUnauthorized(jqXhr, "/frontpage");
-      deferred.reject(err);
-    });
-    return deferred.promise();
+    return self.fetchJsonPromise("/api/customer/" + id);
   };
 
 
@@ -354,15 +302,7 @@ var CacheOp = function() {
    * Invoices
    */
   self.fetchInvoicesPromise = function(companyId) {
-    var deferred = $.Deferred();
-    $.getJSON("/api/invoices/" + companyId).then(function(data) {
-      cache.set(self.INVOICES(), data);
-      deferred.resolve(data);
-    }, function(jqXhr, textStatus, err) {
-      redirectIfUnauthorized(jqXhr, "/frontpage");
-      deferred.reject(err);
-    });
-    return deferred.promise();
+    return self.fetchJsonPromise("/api/invoices/" + companyId, self.INVOICES());
   };
 
   self.getInvoice = function(id, callback) {
@@ -382,14 +322,7 @@ var CacheOp = function() {
   };
 
   self.fetchInvoicePromise = function(id) {
-    var deferred = $.Deferred();
-    $.getJSON("/api/invoice/" + id).then(function(data) {
-      deferred.resolve(data);
-    }, function(jqXhr, textStatus, err) {
-      redirectIfUnauthorized(jqXhr, "/frontpage");
-      deferred.reject(err);
-    });
-    return deferred.promise();
+    return self.fetchJsonPromise("/api/invoice/" + id);
   };
 
   self.invalidateInvoices = function() {
@@ -412,15 +345,7 @@ var CacheOp = function() {
    * Offers
    */
   self.fetchOffersPromise = function(companyId) {
-    var deferred = $.Deferred();
-    $.getJSON("/api/offers/" + companyId).then(function(data) {
-      cache.set(self.OFFERS(), data);
-      deferred.resolve(data);
-    }, function(jqXhr, textStatus, err) {
-      redirectIfUnauthorized(jqXhr, "/frontpage");
-      deferred.reject(err);
-    });
-    return deferred.promise();
+    return self.fetchJsonPromise("/api/offers/" + companyId, self.OFFERS());
   };
 
   self.getOffer = function(id, callback) {
@@ -440,14 +365,7 @@ var CacheOp = function() {
   };
 
   self.fetchOfferPromise = function(id) {
-    var deferred = $.Deferred();
-    $.getJSON("/api/offer/" + id).then(function(data) {
-      deferred.resolve(data);
-    }, function(jqXhr, textStatus, err) {
-      redirectIfUnauthorized(jqXhr, "/frontpage");
-      deferred.reject(err);
-    });
-    return deferred.promise();
+    return self.fetchJsonPromise("/api/offer/" + id);
   };
 
   self.invalidateOffers = function() {
@@ -1132,9 +1050,11 @@ var CompanyNewViewModel = function(currentView, activeCompanyId, activeCompany) 
             Log.info("Saved logo info: " + JSON.stringify(logoJson));
             self.data.setLogo(logoJson.logo);
             Cache.getCompany(self.data._id(), function(c) {
-              c.logo = logoJson.logo;
-              Cache.updateCompany(c);
-              Notify_showMsg('success', t("app.company.uploadLogoOk"));
+              if (c !== undefined) {
+                c.logo = logoJson.logo;
+                Cache.updateCompany(c);
+                Notify_showMsg('success', t("app.company.uploadLogoOk"));
+              }
             });
           } else {
             Notify_showMsg('error', t("app.company.uploadLogoNok", {context: "serverFailure", "status": xhr.status}));
