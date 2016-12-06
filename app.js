@@ -36,6 +36,7 @@ function increaseVerbosity(v, total) {
 args.version('0.0.1')
   .option('--sim_latency', 'Simulate network latency')
   .option('--ssl', 'Start server on https')
+  .option('--enforce_ssl', 'Enforce https')
   .option('--monitor', 'Monitor used resources')
   .option('--local', 'Run on localhost')
   .option('-v, --verbose', 'Be more verbose', increaseVerbosity, 0)
@@ -88,7 +89,7 @@ app.use(bodyParser.urlencoded({
 app.use(methodOverride('X-HTTP-Method-Override'));
 
 app.set('trust proxy', 1) // trust first proxy
-var enforceSsl = args.ssl === true || args.local !== true;
+var enforceSsl = args.ssl === true || args.enforce_ssl === true;
 log.info("enforceSsl=" + enforceSsl);
 app.use(session({
   secret : require('./deployment.json').session.secret,
