@@ -8,7 +8,7 @@
     "preversion": "npm test",
     "postversion": "git checkout release && git merge master -m \"Release $npm_package_version\" && git checkout master",
     "prestart": "mkdir -p tmp && mkdir -p log && npm run clean",
-    "start": "node .",
+    "start": "node . --enforce_ssl",
     "start-dev": "node . --local",
     "init-db": "node ./script/initdb.js",
     "init-db-data": "node ./script/initdb.js --dev",
