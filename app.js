@@ -223,43 +223,47 @@ passport.use(
     }, // allows us to pass back the request to the callback
     function(req, username, password, done) {
       log.info("signup: user=" + username);
-      var hash = funct.encryptPassword(password);
-      var userData = {
-        "username-local": username, // username is e-mail for local users!
-        "password": hash,
-        "info" : funct.createUserInfo(req.body.fullName, username)
-      };
-      var errorMessage = undefined;
-      if (password.length < defaults.minPwdLen) {
-        errorMessage = req.t("signin.registerNokMsg", {context: "pwdTooShort", len: defaults.minPwdLen});
-        done(null, false, {message: errorMessage});
-      } else {
-        errorMessage = req.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"});
-        mydb.isEmailInvited(userData.info.email).then(function(inviteInfo) {
-          errorMessage = req.t("signin.registerNokMsg");
-          return funct.findOrCreate("username-local", userData, inviteInfo);
-        }).then(function(result) {
-          if (result.user) {
-            if (result.isNew) {
-              req.flash('success', req.t("signin.registerOkMsg", {name: result.user.info.name}));
-              done(null, result.user);
-            } else {
-              // Failure, registration doesn't expect user to exist.
-              done(null, false, {message: req.t("signin.registerNokMsg", {name: username, context: "userExists"})});
-            }
-            return done(null, result.user);
-          } else {
-            log.debug("signup: failed user=" + username);
+      funct.encryptPassword(password).then(function(hash) {
+          var userData = {
+            "username-local": username, // username is e-mail for local users!
+            "password": hash,
+            "info" : funct.createUserInfo(req.body.fullName, username)
+          };
+          var errorMessage = undefined;
+          if (password.length < defaults.minPwdLen) {
+            errorMessage = req.t("signin.registerNokMsg", {context: "pwdTooShort", len: defaults.minPwdLen});
             done(null, false, {message: errorMessage});
+          } else {
+            errorMessage = req.t("signin.registerNokMsg", {email: userData.info.email, context: "notInvited"});
+            mydb.isEmailInvited(userData.info.email).then(function(inviteInfo) {
+              errorMessage = req.t("signin.registerNokMsg");
+              return funct.findOrCreate("username-local", userData, inviteInfo);
+            }).then(function(result) {
+              if (result.user) {
+                if (result.isNew) {
+                  req.flash('success', req.t("signin.registerOkMsg", {name: result.user.info.name}));
+                  done(null, result.user);
+                } else {
+                  // Failure, registration doesn't expect user to exist.
+                  done(null, false, {message: req.t("signin.registerNokMsg", {name: username, context: "userExists"})});
+                }
+                return done(null, result.user);
+              } else {
+                log.debug("signup: failed user=" + username);
+                done(null, false, {message: errorMessage});
+              }
+            }).fail(function(error) {
+              log.error("signup: msg=" + error.message);
+              if (error.message === "Failed to create user, e-mail already registered!") {
+                errorMessage = req.t("signin.registerNokMsg", {name: username, context: "userExists"});
+              }
+              done(null, false, {message: errorMessage});
+            });
           }
-        }).fail(function(error) {
-          log.error("signup: msg=" + error.message);
-          if (error.message === "Failed to create user, e-mail already registered!") {
-            errorMessage = req.t("signin.registerNokMsg", {name: username, context: "userExists"});
-          }
-          done(null, false, {message: errorMessage});
-        });
-      }
+      }).fail(function(err) {
+          log.error("signup: failed to hash password, username=" + username + ", err=" + err);
+          done(null, false, {message: "Failed to hash password..."});
+      })
     }));
 
 passport.use(new GoogleStrategy(
@@ -313,7 +317,7 @@ passport.use(new GoogleStrategy(
 // the request is authenticated (typically via a persistent login session),
 // the request will proceed. Otherwise, the user will be redirected to the
 // login page.
-    function ensureAuthenticatedRedirect(req, res, next) {
+function ensureAuthenticatedRedirect(req, res, next) {
   if (req.isAuthenticated()) {
     log.debug("ensureAuthenticated: Authenticated!");
     return next();
@@ -473,13 +477,12 @@ app.post("/api/user-local-pwd-update", ensureAuthenticatedFail, function(req, re
     funct.localAuth(req.user["username-local"], req.body.oldPwd, false).then(function(user) {
       if (user) {
         // Old password OK, update to new
-        var hash = funct.encryptPassword(req.body.newPwd);
-        var user = {password: hash};
-        mydb.updateUser(uid, user).then(
-          okHandler.bind(null, 'updateLocalUserPassword', res, {'success': true})
-        ).fail(
-          myFailureHandler.bind(null, res)
-        );
+        funct.encryptPassword(req.body.newPwd).then(function(hash) {
+            var user = {password: hash};
+            return mydb.updateUser(uid, user);
+        }).then(
+            okHandler.bind(null, 'updateLocalUserPassword', res, {'success': true})
+        ).fail(myFailureHandler.bind(null, res));
       } else {
         log.warn("Old password doesn't match: user=" + req.user.info.name + ", uid=" + uid);
         okHandler('updateLocalUserPassword', res, {
