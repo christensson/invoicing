@@ -5,6 +5,10 @@ views/*/*.marko.js
 views/*/*/*.marko.js
 .settings
 uploads/*
+log/*
+keys/*
+yarn.lock
+script/backups/*
 
 # Stuff not wanted in repo...
 public/img/locale/*.png
